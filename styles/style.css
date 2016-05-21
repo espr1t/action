@@ -1,0 +1,237 @@
+/***********************
+       Page Layout
+************************/
+* {
+    margin: 0;
+}
+html {
+    width: 100%;
+    height: 100%;
+}
+body {
+    width: 100%;
+    height: 100%;
+    font-size: 14px;
+    background: url(/images/background_squares.png);
+}
+
+/***********************
+          Fonts
+************************/
+@font-face {
+    font-family: "Saint Andrews Queen";
+    src: url(/fonts/saint_andrews_queen.ttf);
+}
+
+body, td, th {
+    font-family: "Century Gothic", "Trebuchet MS", "Ubuntu", sans-serif;
+    font-size: 1em;
+    text-align: justify;
+    color: #000000;
+    word-wrap: break-word;
+}
+pre {
+    font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
+    display: inline;
+}
+code {
+    font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
+    display: inline;
+    font-size: 1em;
+    white-space: pre-wrap;
+}
+var {
+    font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
+    color: #000000;
+}
+
+/***********************
+         Links
+************************/
+a, div.link {
+    font-size: inherit;
+    color: #0099FF;
+}
+a:link, div.link:link {
+    text-decoration: none;
+}
+a:visited, div.link:visited {
+    text-decoration: none;
+    color: #0099FF;
+}
+a:hover, div.link:hover {
+    text-decoration: none;
+    color: #00CCFF;
+    cursor: pointer;
+}
+a:active, div.link:active {
+    text-decoration: none;
+    color: #0099FF;
+}
+
+/***********************
+      Positioning
+************************/
+.left {
+    text-align: left;
+}
+.right {
+    text-align: right;
+}
+.top {
+    vertical-align: top;
+}
+.bottom {
+    vertical-align: bottom;
+}
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    left: auto;
+    right: auto;
+    text-align: center;
+}
+.inline {
+    display: inline;
+}
+
+/***********************
+         Styling
+************************/
+.bold {
+    font-weight: bold;
+}
+.italic {
+    font-style: italic;
+}
+
+/***********************
+     Section Headers
+************************/
+h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-bottom: 4px;
+}
+h2 {
+    font-size: 18px;
+    font-weight: 100;
+    color: #999999;
+    margin-top: 0px;
+    margin-bottom: 12px;
+}
+h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 0px;
+}
+h4 {
+    font-size: 16px;
+    font-weight: bold;
+    font-style: italic;
+    color: #333333;
+    margin-top: 16px;
+    margin-bottom: 0px;
+}
+
+/***********************
+         Lists
+************************/
+ol, ul {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+/***********************
+     Content Layout
+************************/
+div.container {
+    width: 700px;
+    min-width: 700px;
+    max-width: 700px;
+    margin: 8px auto 8px auto;
+    padding: 12px 50px 12px 50px;
+    background: #FFFFFF;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    border-radius: 4px;
+}
+div.header {
+    width: 100%;
+    height: 90px;
+    overflow: hidden;
+    background: #0099FF;
+    top: 0;
+}
+div.main {
+    width: 100%;
+    overflow-x: auto;
+    top: 90px;
+    bottom: 30px;
+}
+div.footer {
+    width: 100%;
+    height: 30px;
+    font-size: 0.7em;
+    line-height: 30px;
+    position: absolute;
+    overflow: hidden;
+    text-align: center;
+    color: #EEEEEE;
+    background: #0099FF;
+    bottom: 0;
+}
+div.menu {
+    width: 800px;
+    height: 90px;
+    left: 50%;
+    position: absolute;
+    margin-left: -400px;
+    overflow: hidden;
+}
+table.menu {
+    width: 800px;
+    height: 90px;
+    /*
+    border-spacing: 0;
+    */
+}
+table.menu .button {
+    width: 100px;
+    font-size: 0.88em;
+    text-align: center;
+    /*
+    font-family: "Raleway", "Century Gothic", "Trebuchet MS", "Ubuntu", sans-serif;
+    */
+    vertical-align: middle;
+    color: #FFFFFF;
+}
+
+table.menu .logo {
+    width: 200px;
+    vertical-align: middle;
+}
+
+div.logo {
+    margin-top: 15px;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    font-size: 4em;
+    font-family: "Ruthie", cursive;
+    color: #FFFFFF;
+}
+
+div.loginInfo {
+    height: 20px;
+    line-height: 20px;
+    text-align: right;
+    font-size: 0.8em;
+}
+
+div.user {
+    display: inline;
+    font-weight: bold;
+}
