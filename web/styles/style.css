@@ -11,7 +11,6 @@ html {
 body {
     width: 100%;
     height: 100%;
-    font-size: 14px;
     background: url(/images/background_squares.png);
 }
 
@@ -19,13 +18,13 @@ body {
           Fonts
 ************************/
 @font-face {
-    font-family: "Saint Andrews Queen";
-    src: url(/fonts/saint_andrews_queen.ttf);
+    font-family: "Ruthie";
+    src: url(/fonts/ruthie_regular.ttf);
 }
 
-body, td, th {
+body, td, th, input {
     font-family: "Century Gothic", "Trebuchet MS", "Ubuntu", sans-serif;
-    font-size: 1em;
+    font-size: 0.95em;
     text-align: justify;
     color: #000000;
     word-wrap: break-word;
@@ -37,7 +36,7 @@ pre {
 code {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
     display: inline;
-    font-size: 1em;
+    font-size: 0.9em;
     white-space: pre-wrap;
 }
 var {
@@ -109,26 +108,26 @@ a:active, div.link:active {
      Section Headers
 ************************/
 h1 {
-    font-size: 28px;
+    font-size: 2em;
     font-weight: bold;
-    margin-top: 32px;
+    margin-top: 4px;
     margin-bottom: 4px;
 }
 h2 {
-    font-size: 18px;
-    font-weight: 100;
-    color: #999999;
-    margin-top: 0px;
-    margin-bottom: 12px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333333;
+    margin-top: 12px;
+    margin-bottom: 2px;
 }
 h3 {
-    font-size: 18px;
+    font-size: 1em;
     font-weight: bold;
     margin-top: 24px;
     margin-bottom: 0px;
 }
 h4 {
-    font-size: 16px;
+    font-size: 0.9em;
     font-weight: bold;
     font-style: italic;
     color: #333333;
@@ -147,17 +146,40 @@ ol, ul {
 /***********************
      Content Layout
 ************************/
-div.container {
-    width: 700px;
-    min-width: 700px;
+div.box {
     max-width: 700px;
     margin: 8px auto 8px auto;
-    padding: 12px 50px 12px 50px;
+    padding: 32px 50px 32px 50px;
     background: #FFFFFF;
     border: 1px solid #ccc;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
     border-radius: 4px;
 }
+div.fullsize {
+    width: 700px;
+    min-width: 700px;
+    max-width: 700px;
+}
+div.centered {
+    text-align: center;
+}
+div.login {
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+    height: 80px;
+    min-height: 80px;
+    max-height: 80px;
+    position: absolute;
+    top: 50%;
+    margin-top: -40px;
+    left: 50%;
+    margin-left: -120px;
+    line-height: 2em;
+    font-size: 0.8em;
+    padding: 16px 50px 16px 50px;
+}
+
 div.header {
     width: 100%;
     height: 90px;
@@ -194,19 +216,14 @@ div.menu {
 table.menu {
     width: 800px;
     height: 90px;
-    /*
-    border-spacing: 0;
-    */
+    border-spacing: 0px;
 }
 table.menu .button {
+    padding: 0px;
     width: 100px;
-    font-size: 0.88em;
     text-align: center;
-    /*
-    font-family: "Raleway", "Century Gothic", "Trebuchet MS", "Ubuntu", sans-serif;
-    */
     vertical-align: middle;
-    color: #FFFFFF;
+    font-size: 0.95em;
 }
 
 table.menu .logo {
@@ -219,19 +236,41 @@ div.logo {
     height: 60px;
     line-height: 60px;
     text-align: center;
-    font-size: 4em;
+    font-size: 5em;
     font-family: "Ruthie", cursive;
     color: #FFFFFF;
+    cursor: default;
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
 }
 
-div.loginInfo {
+div.userInfo {
+    width: 780px;
+    padding: 0px 10px 0px 10px;
     height: 20px;
+    margin: 10px auto 0px auto;
     line-height: 20px;
     text-align: right;
-    font-size: 0.8em;
+    font-size: 0.9em;
 }
 
 div.user {
     display: inline;
     font-weight: bold;
+}
+
+div.button {
+    font-size: 0.88em;
+    line-height: 88px;
+    border-top: solid 2px #0099FF; 
+    color: #ECECEC;
+}
+
+div.button:hover {
+    cursor: pointer;
+    color: #FFFFFF;
+    border-top: solid 2px #FFFFFF; 
+    transition: all 0.2s ease 0s;
 }

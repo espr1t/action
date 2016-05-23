@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Do(n)e :: Login</title>
+        <meta charset="utf-8">
+        <meta name="author" content="Alexander Georgiev">
+        <meta name="keywords" content="Програмиране,Информатика,Алгоритми,Структури Данни,Задачи,Programming,Informatics,Algorithms,Data Structures,Problems">
+        <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+        <link rel="icon" href="../favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="../styles/style.css">
+        <style>
+            @font-face {
+                font-family: "Ruthie";
+                src: url(../fonts/ruthie_regular.ttf);
+            }
+            body {background: url(../images/background_squares.png);}
+        </style>
+    </head>
+
+    <body>
+        <!-- Header with menu -->
+        <div class="header" id="head">
+            <div class="menu" id="menu">
+                <table class="menu" id="menuTable">
+                    <tr>
+                        <td class="button"><a href="/home"><div class="button">HOME</div></a></td>
+                        <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
+                        <td class="button"><a href="/contests"><div  class="button">CONTESTS</div></a></td>
+                        <td class="logo">
+                            <div class="logo">
+                                do<div style="font-size: 0.25em; display: inline; top: 0.25em;">(N)</div>e</td>
+                            </div>
+                        <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
+                        <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
+                        <td class="button"><a href="/login"><div class="button">LOGIN</div></a></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Actual content -->
+        <div class="main" id="main">
+            <div class="box centered login">
+                <form class="login" name="login" action="index_submit" method="post" accept-charset="utf-8">
+                    Username: <input name="username" type="text" placeholder="Username" required><br>
+                    Password: <input name="password" type="password" placeholder="Password" required><br>
+                    <input name="submit" type="submit" value="Authenticate"> 
+                </form>
+            </div>
+        </div>
+    
+        <!-- Footer with copyright info -->
+        <div class="footer" id="footer">
+            help | about | create a contest | sponsor a contest | report a problem
+        </div>
+            </body>
+</html>
