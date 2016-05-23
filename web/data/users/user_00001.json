@@ -1,0 +1,17 @@
+{
+    "id": 1,
+    "access": 100,
+    "created": "2016-05-23",
+    "handle": "espr1t",
+    "name": "Александър Георгиев",
+    "email": "froozenone@yahoo.com",
+    "city": "София",
+    "gender": "male",
+    "date_of_birth": "1987-04-12",
+    "avatar": "",
+    "submitted": [],
+    "solved": [],
+    "sources": [],
+    "problems": [],
+    "contests": []
+}

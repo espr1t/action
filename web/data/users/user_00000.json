@@ -1,0 +1,17 @@
+{
+    "id": 0,
+    "access": 0,
+    "created": "2016-05-23",
+    "handle": "anonymous",
+    "name": "Anonymous User",
+    "email": "",
+    "city": "",
+    "gender": "",
+    "date_of_birth": "",
+    "avatar": "",
+    "submitted": [],
+    "solved": [],
+    "sources": [],
+    "problems": [],
+    "contests": []
+}
