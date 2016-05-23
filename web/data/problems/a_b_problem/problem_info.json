@@ -1,0 +1,52 @@
+{
+    "name": "A * B Problem",
+    "folder": "a_b_problem",
+    "time_limit": 0.1,
+    "memory_limit": 0.5,
+    "type": "standard",
+    "difficulty": "trivial";
+    "tags": ["implementation"],
+    "checker": "",
+    "executor": "",
+    "tests": [
+        {
+            "input": {
+                "name": "a_b_problem_01.in",
+                "md5": "7ce317847d1b1f0560f85a5c67ab58c6",
+                "archive": "a_b_problem_01_in_7ce317847d1b1f0560f85a5c67ab58c6.7z"
+            },
+            "output": {
+                "name": "a_b_problem_01.sol",
+                "md5": "bf93ee7cb8304ef5342bdd9db63a673e",
+                "archive": "a_b_problem_01_sol_bf93ee7cb8304ef5342bdd9db63a673e.7z"
+            }
+        },
+        {
+            "input": {
+                "name": "a_b_problem_02.in",
+                "md5": "96e951bf5b7cc8f05a520c75ab8fe781",
+                "archive": "a_b_problem_02_in_96e951bf5b7cc8f05a520c75ab8fe781.7z"
+            },
+            "output": {
+                "name": "a_b_problem_02.sol",
+                "md5": "ce9de2f551e2c9f868fc27005cfe0511",
+                "archive": "a_b_problem_02_sol_ce9de2f551e2c9f868fc27005cfe0511.7z"
+            }
+        },
+        {
+            "input": {
+                "name": "a_b_problem_03.in",
+                "md5": "e102a1600a2e7f77cc7d1805f9e15850",
+                "archive": "a_b_problem_03_in_e102a1600a2e7f77cc7d1805f9e15850.7z"
+            },
+            "output": {
+                "name": "a_b_problem_03.sol",
+                "md5": "c570361bdbae428fd92739aec504e2f6",
+                "archive": "a_b_problem_03_sol_c570361bdbae428fd92739aec504e2f6.7z"
+            }
+        }
+        
+    ],
+    "submissions": [
+    ]
+}
