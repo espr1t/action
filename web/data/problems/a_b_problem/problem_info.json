@@ -1,11 +1,13 @@
 {
     "name": "A * B Problem",
+    "author": "Александър Георгиев",
     "folder": "a_b_problem",
     "time_limit": 0.1,
     "memory_limit": 0.5,
     "type": "standard",
-    "difficulty": "trivial";
+    "difficulty": "trivial",
     "tags": ["implementation"],
+    "source": "informatika.bg training",
     "checker": "",
     "executor": "",
     "tests": [
@@ -48,5 +50,7 @@
         
     ],
     "submissions": [
+    ],
+    "accepted": [
     ]
 }
