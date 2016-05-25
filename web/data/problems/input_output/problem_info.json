@@ -1,0 +1,31 @@
+{
+    "name": "Input/Output",
+    "author": "Александър Георгиев",
+    "folder": "input_output",
+    "time_limit": 0.2,
+    "memory_limit": 16,
+    "type": "standard",
+    "difficulty": "trivial",
+    "tags": ["implementation"],
+    "source": "informatika.bg training",
+    "checker": "",
+    "executor": "",
+    "tests": [
+        {
+            "input": {
+                "name": "InputOutput.in",
+                "md5": "a152e44a78349ed98e26c6c38cd4fe9d",
+                "archive": "inputoutput_in_a152e44a78349ed98e26c6c38cd4fe9d.7z"
+            },
+            "output": {
+                "name": "InputOutput.sol",
+                "md5": "58fc7f1a09c780e40a684591953ad70e",
+                "archive": "inputoutput_sol_58fc7f1a09c780e40a684591953ad70e.7z"
+            }
+        }
+    ],
+    "submissions": [
+    ],
+    "accepted": [
+    ]
+}
