@@ -77,17 +77,18 @@ function createHead($page) {
                         <td class="button"><a href="/contests"><div  class="button">CONTESTS</div></a></td>
                         <td class="logo">
                             <div class="logo">
-                                do<div style="font-size: 0.25em; display: inline; top: 0.25em;">(N)</div>e</td>
+                                act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span>
                             </div>
+                        </td>
                         <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
                         <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
-                        <?php
-                            if ($user->getId() == 0) {
-                                echo '<td class="button"><a href="/login"><div class="button">LOGIN</div></a></td>';
-                            } else {
-                                echo '<td class="button"><a href="/logout"><div class="button">LOGOUT</div></a></td>';
-                            }
-                        ?>
+                        <td class="button"><?php
+                                if ($user->getId() == 0) {
+                                    echo '<a href="/login"><div class="button">LOGIN</div></a>';
+                                } else {
+                                    echo '<a href="/logout"><div class="button">LOGOUT</div></a>';
+                                }
+                            ?></td>
                     </tr>
                 </table>
             </div>

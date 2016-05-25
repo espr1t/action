@@ -4,7 +4,7 @@ require_once('page.php');
 
 class TrainingPage extends Page {
     public function getTitle() {
-        return 'Do(n)e :: Training';
+        return 'O(N)::Training';
     }
     
     public function getContent() {

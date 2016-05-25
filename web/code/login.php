@@ -3,7 +3,7 @@ require_once('page.php');
 
 class LoginPage extends Page {
     public function getTitle() {
-        return 'Do(n)e :: Login';
+        return 'O(N)::Login';
     }
     
     public function getContent() {

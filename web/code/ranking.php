@@ -4,7 +4,7 @@ require_once('page.php');
 
 class RankingPage extends Page {
     public function getTitle() {
-        return 'Do(n)e :: Ranking';
+        return 'O(N)::Ranking';
     }
     
     public function getContent() {

@@ -4,7 +4,7 @@ require_once('page.php');
 
 class ErrorPage extends Page {
     public function getTitle() {
-        return 'Do(n)e :: Error';
+        return 'O(N)::Error';
     }
     
     public function getContent() {

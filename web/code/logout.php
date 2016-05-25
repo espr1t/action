@@ -3,7 +3,7 @@ require_once('page.php');
 
 class LogoutPage extends Page {
     public function getTitle() {
-        return 'Do(n)e :: Logout';
+        return 'O(N)::Logout';
     }
     
     public function getContent() {

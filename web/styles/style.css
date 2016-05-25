@@ -149,11 +149,19 @@ ol, ul {
 div.box {
     max-width: 700px;
     margin: 8px auto 8px auto;
-    padding: 32px 50px 32px 50px;
+    padding: 10px 50px 10px 50px;
     background: #FFFFFF;
     border: 1px solid #ccc;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
     border-radius: 4px;
+}
+div.boxlink:hover {
+    cursor: pointer;
+    background-color: #FAFAFA;
+}
+div.boxlink:active {
+    cursor: pointer;
+    background-color: #FFFFFF;
 }
 div.fullsize {
     width: 700px;
@@ -232,11 +240,11 @@ table.menu .logo {
 }
 
 div.logo {
-    margin-top: 15px;
+    margin-top: 5px;
     height: 60px;
     line-height: 60px;
     text-align: center;
-    font-size: 5em;
+    font-size: 4.2em;
     font-family: "Ruthie", cursive;
     color: #FFFFFF;
     cursor: default;
@@ -273,4 +281,21 @@ div.button:hover {
     color: #FFFFFF;
     border-top: solid 2px #FFFFFF; 
     transition: all 0.2s ease 0s;
+}
+
+div.problemName {
+    height: 40px;
+    width: 450px;
+    display: table-cell;
+    vertical-align: middle;
+    font-size: 1.25em;
+    font-weight: bold;
+}
+div.problemInfo {
+    height: 40px;
+    width: 240px;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: left;
+    font-size: 0.85em;
 }

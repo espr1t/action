@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Do(n)e :: Login</title>
+        <title>O(N)::Problems</title>
         <meta charset="utf-8">
         <meta name="author" content="Alexander Georgiev">
         <meta name="keywords" content="Програмиране,Информатика,Алгоритми,Структури Данни,Задачи,Programming,Informatics,Algorithms,Data Structures,Problems">
@@ -27,10 +27,7 @@
                         <td class="button"><a href="/home"><div class="button">HOME</div></a></td>
                         <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
                         <td class="button"><a href="/contests"><div  class="button">CONTESTS</div></a></td>
-                        <td class="logo">
-                            <div class="logo">
-                                do<div style="font-size: 0.25em; display: inline; top: 0.25em;">(N)</div>e</td>
-                            </div>
+                        <td class="logo"><div class="logo">act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span></div></td>
                         <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
                         <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
                         <td class="button"><a href="/login"><div class="button">LOGIN</div></a></td>
@@ -41,12 +38,33 @@
 
         <!-- Actual content -->
         <div class="main" id="main">
-            <div class="box centered login">
-                <form class="login" name="login" action="index_submit" method="post" accept-charset="utf-8">
-                    Username: <input name="username" type="text" placeholder="Username" required><br>
-                    Password: <input name="password" type="password" placeholder="Password" required><br>
-                    <input name="submit" type="submit" value="Authenticate"> 
-                </form>
+            
+                <div class="userInfo">
+                    user: <div class="user">anonymous</div>
+                </div>
+
+            <div class="box">
+<h1>Problems</h1>
+                 This is the list of all (official) problems.<br>
+                 <div class="right">Order by: <a href="?order=training">training</a> | <a href="?order=difficulty">difficulty</a> | <a href="?order=solutions">solutions</a></div>
+            </div>
+
+            <div class="box boxlink">
+                <div class="problemName">A * B Problem</div>
+                <div class="problemInfo">
+                    Difficulty: <strong>trivial</strong><br>
+                    Solved by: <strong>0 author(s)</strong><br>
+                    Source: <strong>informatika.bg training</strong>
+                </div>
+            </div>
+
+            <div class="box boxlink">
+                <div class="problemName">Input/Output</div>
+                <div class="problemInfo">
+                    Difficulty: <strong>trivial</strong><br>
+                    Solved by: <strong>0 author(s)</strong><br>
+                    Source: <strong>informatika.bg training</strong>
+                </div>
             </div>
         </div>
     

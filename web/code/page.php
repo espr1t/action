@@ -8,7 +8,7 @@ class Page {
     }
 
     public function getTitle() {
-        return 'Do(n)e :: Page';
+        return 'O(N)::Page';
     }
     
     public function getExtraStyles() {
