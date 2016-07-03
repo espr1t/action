@@ -8,9 +8,8 @@ class ErrorPage extends Page {
     }
     
     public function getContent() {
-        $userInfo = userInfo($this->user);
         $content = inBox('Error Page (404).');
-        return $userInfo . $content;
+        return $content;
     }
     
 }

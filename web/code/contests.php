@@ -8,9 +8,8 @@ class ContestsPage extends Page {
     }
     
     public function getContent() {
-        $userInfo = userInfo($this->user);
         $content = inBox('Under construction.');
-        return $userInfo . $content;
+        return $content;
     }
     
 }

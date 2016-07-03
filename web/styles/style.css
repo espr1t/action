@@ -240,11 +240,45 @@ div.smaller {
     font-size: 0.8em;
 }
 
+div.authenticate {
+    position: absolute;
+
+    width: 340px;
+    min-width: 340px;
+    max-width: 340px;
+
+    top: 50%;
+    margin-top: -64px;
+
+    left: 50%;
+    margin-left: -171px;
+}
+
+div.register {
+    position: absolute;
+
+    width: 800px;
+    min-width: 800px;
+    max-width: 800px;
+
+    top: 50%;
+    margin-top: -230px;
+
+    left: 50%;
+    margin-left: -400px;
+}
+
+
 div.login {
     height: 120px;
     min-height: 120px;
     max-height: 120px;
     padding: 10px 50px 10px 50px;
+}
+
+div.register-link {
+    margin-top: -8px;
+    margin-right: 6px;
 }
 
 div.menu {
@@ -255,13 +289,11 @@ div.menu {
     margin-left: -400px;
     overflow: hidden;
 }
-
 table.menu {
     width: 800px;
     height: 90px;
     border-spacing: 0px;
 }
-
 table.menu .button {
     padding: 0px;
     width: 100px;
@@ -397,4 +429,38 @@ table.problem-sample tr td, table.problem-sample tr th {
     padding: 4px 8px;
     page-break-inside: avoid;
     border: 1px solid #666666;
+}
+
+table.register {
+    width: 100%;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+table.register tr td.left {
+    width: 50%;
+    text-align: right;
+    padding-right: 2px;
+}
+
+table.register tr td.right {
+    width: 50%;
+    text-align: left;
+    padding-left: 2px;
+}
+
+input.text {
+    padding: 2px 6px;
+}
+
+input.submit {
+    margin-top: 2px;
+    height: 24px;
+    width: 60px;
+    text-align: center;
+    font-size: 1em;
+    color: #ECECEC;
+    background-color: #0099FF;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }

@@ -8,7 +8,6 @@ class HomePage extends Page {
     }
     
     public function getContent() {
-        $userInfo = userInfo($this->user);
         $text = '<h1>Home</h1>
                  This is a new coding place, part of <a href="http://www.informatika.bg" target="_blank">informatika.bg</a>.
                  
@@ -30,7 +29,7 @@ class HomePage extends Page {
                  Finally, this system is open to all teachers (and students) who want to use it for organizing contests and trainings.
                  Please contact me to give you administrator rights for creating a contest.';
         $content = inBox($text);
-        return $userInfo . $content;
+        return $content;
     }
 }
 

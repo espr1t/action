@@ -33,6 +33,10 @@ switch ($_GET['page']) {
         require_once('logout.php');
         $page = new LogoutPage($user);
         break;
+    case 'register':
+        require_once('register.php');
+        $page = new RegisterPage($user);
+        break;
     default:
         require_once('error.php');
         $page = new ErrorPage($user);
