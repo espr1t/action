@@ -13,9 +13,10 @@ class RegisterPage extends Page {
         }
 
         $content = '
-            <div class="register smaller centered">
+            <div class="register centered">
                 <div class="box">
                     <h2>Create Account</h2>
+                    <div class="separator"></div>
                     <form class="register" name="register" action="register" onsubmit="return validateRegistration()" method="post" accept-charset="utf-8">
                         <table class="register">
                             <tr>
