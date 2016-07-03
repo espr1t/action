@@ -47,7 +47,8 @@ function createHead($page) {
                                       'Programming,Informatics,Algorithms,Data Structures,Problems">
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" type="text/css" href="/styles/style.css">';
+        <link rel="stylesheet" type="text/css" href="/styles/style.css">
+        <link rel="stylesheet" type="text/css" href="/styles/icons/css/font-awesome.css">';
     foreach($page->getExtraStyles() as $style) {
         $meta = $meta . '
         <link rel="stylesheet" type="text/css" href="' . $style . '">';
