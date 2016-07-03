@@ -67,42 +67,47 @@ function createHead($page) {
     </head>
 
     <body>
-        <!-- Header with menu -->
-        <div class="header" id="head">
-            <div class="menu" id="menu">
-                <table class="menu" id="menuTable">
-                    <tr>
-                        <td class="button"><a href="/home"><div class="button">HOME</div></a></td>
-                        <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
-                        <td class="button"><a href="/contests"><div  class="button">CONTESTS</div></a></td>
-                        <td class="logo">
-                            <div class="logo">
-                                act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span>
-                            </div>
-                        </td>
-                        <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
-                        <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
-                        <td class="button"><?php
-                                if ($user->getId() == 0) {
-                                    echo '<a href="/login"><div class="button">LOGIN</div></a>';
-                                } else {
-                                    echo '<a href="/logout"><div class="button">LOGOUT</div></a>';
-                                }
-                            ?></td>
-                    </tr>
-                </table>
+        <div class="wrapper">
+            <!-- Header with menu -->
+            <div class="header" id="head">
+                <div class="menu" id="menu">
+                    <table class="menu" id="menuTable">
+                        <tr>
+                            <td class="button"><a href="/home"><div class="button">HOME</div></a></td>
+                            <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
+                            <td class="button"><a href="/contests"><div  class="button">CONTESTS</div></a></td>
+                            <td class="logo">
+                                <div class="logo noselect">
+                                    act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span>
+                                </div>
+                            </td>
+                            <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
+                            <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
+                            <td class="button"><?php
+                                    if ($user->getId() == 0) {
+                                        echo '<a href="/login"><div class="button">LOGIN</div></a>';
+                                    } else {
+                                        echo '<a href="/logout"><div class="button">LOGOUT</div></a>';
+                                    }
+                                ?></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <!-- Actual content -->
-        <div class="main" id="main">
-            <?php echo $page->getContent(); ?>
+            <!-- Actual content -->
+            <div class="main" id="main">
+                <div class="container">
+                    <?php echo userInfo($user); ?>
+                    <?php echo $page->getContent(); ?>
+                </div>
+            </div>
+
+            <!-- Footer with copyright info -->
+            <div class="footer" id="footer">
+                help | about | create a contest | sponsor a contest | report a problem
+            </div>
+            <?php echo $page->getExtraCode(); ?>
         </div>
-    
-        <!-- Footer with copyright info -->
-        <div class="footer" id="footer">
-            help | about | create a contest | sponsor a contest | report a problem
-        </div>
-        <?php echo $page->getExtraCode(); ?>
     </body>
 </html>
