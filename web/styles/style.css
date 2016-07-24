@@ -409,7 +409,6 @@ div.problem-title {
 div.problem-resources {
     line-height: 10px;
     font-size: 0.9em;
-    font-style: italic;
     text-align: left;
 }
 
@@ -479,6 +478,7 @@ table.register tr td.right {
 
 input.text {
     padding: 2px 6px;
+    margin: 1px 0px 1px 0px;
 }
 
 form.login {

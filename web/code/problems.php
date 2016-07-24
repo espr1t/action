@@ -25,14 +25,15 @@ class ProblemsPage extends Page {
             $solutions = count($info->{'accepted'});
             $source = $info->{'source'};
             
+            $authors = 'човек' . ($solutions == 1 ? '' : 'а');
             $problems = $problems . '
             <div class="box narrow boxlink">
                 <a href="problems/' . $id . '" class="decorated">
                     <div class="problem-name">' . $name . '</div>
                     <div class="problem-info">
-                        Difficulty: <strong>' . $difficulty . '</strong><br>
-                        Solved by: <strong>' . $solutions . ' author(s)</strong><br>
-                        Source: <strong>' . $source . '</strong>
+                        Сложност: <strong>' . $difficulty . '</strong><br>
+                        Решена от: <strong>' . $solutions . ' ' . $authors . '</strong><br>
+                        Източник: <strong>' . $source . '</strong>
                     </div>
                 </a>
             </div>' . newLine();
@@ -41,15 +42,15 @@ class ProblemsPage extends Page {
     }
 
     private function getOrderings() {
-        $order_by_training = '<a href="?order=training">training</a>';
-        $order_by_difficulty = '<a href="?order=difficulty">difficulty</a>';
-        $order_by_solutions = '<a href="?order=solutions">solutions</a>';
-        return '<div class="smaller right">Order by: ' . $order_by_training . ' | ' . $order_by_difficulty . ' | ' . $order_by_solutions . '</div>';
+        $order_by_training = '<a href="?order=training">тренировка</a>';
+        $order_by_difficulty = '<a href="?order=difficulty">сложност</a>';
+        $order_by_solutions = '<a href="?order=solutions">брой решения</a>';
+        return '<div class="smaller right">Подредба по: ' . $order_by_training . ' | ' . $order_by_difficulty . ' | ' . $order_by_solutions . '</div>';
     }
 
     private function getMainPage() {
-        $text = '<h1>Problems</h1>
-                 This is the list of all (official) problems.';
+        $text = '<h1>Задачи</h1>
+                 Тук можете да намерите списък с всички (официални) задачи.';
         $header = inBox($text);
         $orderings = $this->getOrderings();
         $problems = $this->getAllProblems();
