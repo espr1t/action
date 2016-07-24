@@ -114,7 +114,19 @@ function createHead($page) {
 
             <!-- Footer with copyright info -->
             <div class="footer" id="footer">
-                help | <a href="/about" class="white">about</a> | create a contest | sponsor a contest | report a problem
+                <div class="container">
+                    <div class="footer-left">
+                    &nbsp;
+                    </div>
+                    <div class="footer-middle">
+                        help | <a href="/about" class="white">about</a> | report a problem
+                    </div>
+                    <div class="footer-right">
+                        <a class="white" href="https://www.facebook.com/informatika.bg/" target="_blank"><i class="fa fa-facebook fa-fw"></i></a>
+                        <a class="white" href="https://github.com/espr1t/action" target="_blank"><i class="fa fa-github fa-fw"></i></a>
+                        <i class="fa fa-html5 fa-fw"></i>
+                    </div>
+                </div>
             </div>
             <?php echo $page->getExtraCode(); ?>
         </div>
