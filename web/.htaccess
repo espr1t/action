@@ -17,6 +17,7 @@ RewriteRule    ^ranking$              /code/main.php?page=ranking               
 RewriteRule    ^login$                /code/main.php?page=login                           [NC,L,QSA]
 RewriteRule    ^register$             /code/main.php?page=register                        [NC,L,QSA]
 RewriteRule    ^error$                /code/main.php?page=error                           [NC,L,QSA]
+RewriteRule    ^about$                /code/main.php?page=about                           [NC,L,QSA]
 
 #
 # Specific problem

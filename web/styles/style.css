@@ -81,6 +81,15 @@ a.decorated {
     color: #000000;
 }
 
+a.white {
+    color: #EEEEEE;
+}
+
+a.white:hover {
+    color: #FFFFFF;
+    text-decoration: underline;
+}
+
 /***********************
       Positioning
 ************************/

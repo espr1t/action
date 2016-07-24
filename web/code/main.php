@@ -37,6 +37,10 @@ switch ($_GET['page']) {
         require_once('register.php');
         $page = new RegisterPage($user);
         break;
+    case 'about':
+        require_once('about.php');
+        $page = new AboutPage($user);
+        break;
     default:
         require_once('error.php');
         $page = new ErrorPage($user);
@@ -110,7 +114,7 @@ function createHead($page) {
 
             <!-- Footer with copyright info -->
             <div class="footer" id="footer">
-                help | about | create a contest | sponsor a contest | report a problem
+                help | <a href="/about" class="white">about</a> | create a contest | sponsor a contest | report a problem
             </div>
             <?php echo $page->getExtraCode(); ?>
         </div>
