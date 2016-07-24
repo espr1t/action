@@ -2,6 +2,7 @@
 
 $PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems/';
 $PATH_USERS = $_SERVER['DOCUMENT_ROOT'] . '/data/users/';
+$PATH_NEWS = $_SERVER['DOCUMENT_ROOT'] . '/data/news/';
 
 function newLine() {
     return '

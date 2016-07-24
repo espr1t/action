@@ -502,3 +502,17 @@ input.submit {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+div.news-title {
+    margin-top: -6px;
+    font-size: 1.33em;
+    font-weight: bold;
+}
+
+div.news-date {
+    text-align: right;
+    font-size: 0.9em;
+    font-style: italic;
+    color: #333333;
+    margin-bottom: -10px;
+}
