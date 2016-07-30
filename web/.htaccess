@@ -15,6 +15,7 @@ RewriteRule    ^contests$             /code/main.php?page=contests              
 RewriteRule    ^training$             /code/main.php?page=training                        [NC,L,QSA]
 RewriteRule    ^ranking$              /code/main.php?page=ranking                         [NC,L,QSA]
 RewriteRule    ^login$                /code/main.php?page=login                           [NC,L,QSA]
+RewriteRule    ^logout$               /code/main.php?page=logout                          [NC,L,QSA]
 RewriteRule    ^register$             /code/main.php?page=register                        [NC,L,QSA]
 RewriteRule    ^error$                /code/main.php?page=error                           [NC,L,QSA]
 RewriteRule    ^about$                /code/main.php?page=about                           [NC,L,QSA]

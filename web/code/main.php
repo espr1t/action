@@ -1,8 +1,10 @@
 <?php
+session_start();
+
 require_once('common.php');
 require_once('user.php');
 
-$user = new User();
+$user = !isset($_SESSION['username']) ? new User() : User::getUser($_SESSION['username']);
 
 switch ($_GET['page']) {
     case 'home':
@@ -28,10 +30,10 @@ switch ($_GET['page']) {
     case 'login':
         require_once('login.php');
         $page = new LoginPage($user);
+        $page->init();
         break;
     case 'logout':
-        require_once('logout.php');
-        $page = new LogoutPage($user);
+        $user->logOut();
         break;
     case 'register':
         require_once('register.php');
@@ -68,6 +70,13 @@ function createHead($page) {
     return trim($meta) . newLine();
 }
 
+function userInfo($user) {
+    if ($user->getUsername() != "anonymous") {
+        return '<div class="userInfo">logged in as: <div class="user">' . $user->getUsername() . '</div></div>';
+    }
+    return '';
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -93,7 +102,7 @@ function createHead($page) {
                             <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
                             <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
                             <td class="button"><?php
-                                    if ($user->getId() == 0) {
+                                    if ($user->getId() == -1) {
                                         echo '<a href="/login"><div class="button">LOGIN</div></a>';
                                     } else {
                                         echo '<a href="/logout"><div class="button">LOGOUT</div></a>';

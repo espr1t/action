@@ -279,10 +279,10 @@ div.authenticate {
     max-width: 340px;
 
     top: 50%;
-    margin-top: -64px;
+    margin-top: -80px;
 
     left: 50%;
-    margin-left: -171px;
+    margin-left: -170px;
 }
 
 div.register {
@@ -327,7 +327,6 @@ table.menu .button {
     width: 100px;
     text-align: center;
     vertical-align: middle;
-    font-size: 1em;
 }
 
 table.menu .logo {
@@ -340,7 +339,7 @@ div.logo {
     height: 60px;
     line-height: 60px;
     text-align: center;
-    font-size: 4.8em;
+    font-size: 5em;
     font-family: "Ruthie", cursive;
     color: #FFFFFF;
     cursor: default;
@@ -362,9 +361,9 @@ div.user {
 }
 
 div.button {
-    font-size: 0.88em;
+    font-size: 1.15em;
     line-height: 88px;
-    border-top: solid 2px #0099FF; 
+    border-top: solid 2px #0099FF;
     color: #ECECEC;
 }
 
@@ -499,7 +498,7 @@ input.submit {
     font-size: 1em;
     color: #ECECEC;
     background-color: #0099FF;
-    border: 1px solid #ccc;
+    border: 1px solid #FFFFFF;
     border-radius: 4px;
 }
 

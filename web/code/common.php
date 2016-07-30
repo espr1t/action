@@ -1,8 +1,11 @@
 <?php
 
+$COOKIE_NAME = 'action.informatika.bg';
+
 $PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems/';
 $PATH_USERS = $_SERVER['DOCUMENT_ROOT'] . '/data/users/';
 $PATH_NEWS = $_SERVER['DOCUMENT_ROOT'] . '/data/news/';
+
 
 function newLine() {
     return '
@@ -18,15 +21,15 @@ function inBox($content, $extra=array()) {
     ';
 }
 
-function userInfo($user) {
-    if ($user->getUsername() != "anonymous") {
-        return '<div class="userInfo">user: <div class="user">' . $user->getUsername() . '</div></div>';
-    }
-    return '';
+function saltHashPassword($password) {
+    return md5($password . 'informatika.bg');
 }
 
-function hashPassword($password) {
-    return md5('informatika.bg' . $password);
+function getValue($array, $key) {
+    if (!array_key_exists($key, $array)) {
+        die('User info does not contain value for key "'. $key . '"!');
+    }
+    return $array[$key];
 }
 
 ?>

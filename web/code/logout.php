@@ -7,7 +7,7 @@ class LogoutPage extends Page {
     }
     
     public function getContent() {
-        $this->user->logOut();
+        $user->logOut();
         $content = '
             <div class="box centered login">
                 You have successfully logged out!

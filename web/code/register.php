@@ -2,7 +2,22 @@
 require_once('page.php');
 
 class RegisterPage extends Page {
-    private static $cities = array('Sofia', 'Plovdiv', 'Pleven', 'Varna', 'Burgas', 'Shumen', 'Yambol');
+    public function getTitle() {
+        return 'O(N)::Register';
+    }
+
+    public function getExtraScripts() {
+        return array('/scripts/authentication.js', '/scripts/md5.min.js');
+    }
+
+    public function getContent() {
+        if (isset($_POST["username"])) {
+            return $this->registerUser();
+        }
+        return $this->getForm();
+    }
+
+    private static $cities = array('Sofia', 'Plovdiv', 'Pleven', 'Varna', 'Burgas', 'Shumen', 'Yambol', 'Gabrovo', 'Haskovo', 'Vidin', 'Vratsa', 'Sliven');
 
     private function getForm() {
         $index = rand(0, count(self::$cities) - 1);
@@ -17,7 +32,7 @@ class RegisterPage extends Page {
                 <div class="box">
                     <h2>Create Account</h2>
                     <div class="separator"></div>
-                    <form class="register" name="register" action="register" onsubmit="return validateRegistration()" method="post" accept-charset="utf-8">
+                    <form class="register" name="register" action="register" onsubmit="return validateRegistration() && saltHashRegisterPasswords()" method="post" accept-charset="utf-8">
                         <table class="register">
                             <tr>
                                 <td class="left"><b>Username:</b></td>
@@ -175,7 +190,7 @@ class RegisterPage extends Page {
             return 'Could not complete registration: username was empty or invalid.';
         }
         $username = $_POST['username']; unset($_POST['username']);
-        if (User::findUser($username) != -1) {
+        if (User::getUser($username) != null) {
             return 'Could not complete registration: username is already taken.';
         }
 
@@ -200,7 +215,7 @@ class RegisterPage extends Page {
         if (strcmp($password1, $password2) != 0) {
             return 'Could not complete registration: passwords did not match.';
         }
-        $password = hashPassword($password1);
+        $password = saltHashPassword($password1);
 
         // Get optional information
         $email = '';
@@ -263,21 +278,6 @@ class RegisterPage extends Page {
         }
     }
 
-    public function getTitle() {
-        return 'O(N)::Register';
-    }
-
-    public function getExtraScripts() {
-        return array('/scripts/register_form.js', '/scripts/md5.min.js');
-    }
-    
-    public function getContent() {
-        if (isset($_POST["username"])) {
-            return $this->registerUser();
-        }
-        return $this->getForm();
-    }
-    
 }
 
 ?>

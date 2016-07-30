@@ -4,41 +4,63 @@ require_once('common.php');
 class User {
     private static $user_info_re = '/^user_\d{5}\.json$/';
 
-    private $id = 0;
+    private $id = -1;
+    private $access = 0;
+    private $registered = '1970-01-01';
     private $username = 'anonymous';
+    private $password = 'abracadabra';
     private $name = '';
-    private $surname = '';
-    private $password = '';
-    private $town = '';
     private $email = '';
-    private $birthdate = '';
+    private $town = '';
+    private $country = '';
     private $gender = '';
-    
-    public function getId() {
-        return $this->id;
-    }
-    
-    public function getUsername() {
-        return $this->username;
-    }
+    private $birthdate = '';
+    private $avatar = '';
+    private $submissions = array();
+    private $tried = array();
+    private $solved = array();
+    private $contests = array();
     
     public function logOut() {
-        // TODO
+        setcookie($GLOBALS['COOKIE_NAME'], null, -1);
+        session_destroy();
+        header('Location: /home');
+        exit();
     }
 
-    public static function findUser($username) {
+    private static function instanceFromJson($info) {
+        $user = new User;
+        $user->id = getValue($info, 'id');
+        $user->access = getValue($info, 'access');
+        $user->registered = getValue($info, 'registered');
+        $user->username = getValue($info, 'username');
+        $user->password = getValue($info, 'password');
+        $user->name = getValue($info, 'name');
+        $user->email = getValue($info, 'email');
+        $user->town = getValue($info, 'town');
+        $user->country = getValue($info, 'country');
+        $user->gender = getValue($info, 'gender');
+        $user->birthdate = getValue($info, 'birthdate');
+        $user->submissions = getValue($info, 'submissions');
+        $user->tried = getValue($info, 'tried');
+        $user->solved = getValue($info, 'solved');
+        $user->contests = getValue($info, 'contests');
+        return $user;
+    }
+
+    public static function getUser($username) {
         $entries = scandir($GLOBALS['PATH_USERS']);
         foreach ($entries as $entry) {
             if (!preg_match(self::$user_info_re, basename($entry))) {
                 continue;
             }
             $json = file_get_contents($GLOBALS['PATH_USERS'] . $entry);
-            $info = json_decode($json);
-            if ($info->{'username'} == $username) {
-                return  $info->{'id'};
+            $info = json_decode($json, true);
+            if ($info['username'] == $username) {
+                return User::instanceFromJson($info);
             }
        }
-       return -1;
+       return null;
     }
 
     public static function createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender) {
@@ -50,11 +72,11 @@ class User {
                 continue;
             }
             $json = file_get_contents($GLOBALS['PATH_USERS'] . $entry);
-            $info = json_decode($json);
-            if ($info->{'username'} == $username) {
+            $info = json_decode($json, true);
+            if ($info['username'] == $username) {
                 return false;
             }
-            $id = max(array($id, $info->{'id'} + 1));
+            $id = max(array($id, $info['id'] + 1));
        }
 
         $info = array(
@@ -62,13 +84,13 @@ class User {
             'access' => 1,
             'registered' => date('Y-m-d'),
             'username' => $username,
+            'password' => $password,
             'name' => $name . ' ' . $surname,
             'email' => $email,
             'town' => $town,
             'country' => $country,
             'gender' => $gender,
-            'date_of_birth' => $birthdate,
-            'avatar' => '',
+            'birthdate' => $birthdate,
             'submissions' => array(),
             'tried' => array(),
             'solved' => array(),
@@ -82,6 +104,17 @@ class User {
         return true;
    }
 
+    public function getId() {
+        return $this->id;
+    }
+
+    public function getUsername() {
+        return $this->username;
+    }
+
+    public function getPassword() {
+        return $this->password;
+    }
 }
 
 ?>
