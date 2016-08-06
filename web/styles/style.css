@@ -280,7 +280,7 @@ div.authenticate {
     max-width: 340px;
 
     top: 50%;
-    margin-top: -80px;
+    margin-top: -125px;
 
     left: 50%;
     margin-left: -170px;
@@ -294,7 +294,7 @@ div.register {
     max-width: 800px;
 
     top: 50%;
-    margin-top: -230px;
+    margin-top: -275px;
 
     left: 50%;
     margin-left: -400px;
@@ -554,7 +554,7 @@ div.report-form {
     border: 1px solid #ccc;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
     border-radius: 4px;
-    z-index: 100;
+    z-index: 99;
 }
 
 div.report-close {
