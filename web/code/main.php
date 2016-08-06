@@ -6,6 +6,15 @@ require_once('user.php');
 
 $user = !isset($_SESSION['username']) ? new User() : User::getUser($_SESSION['username']);
 
+$actions = '';
+if (isset($_GET['action'])) {
+    if ($_GET['action'] == 'success') {
+        $actions .= '<script>showMessage("INFO", "Successful operation!");</script>';
+    } else if ($_GET['action'] == 'unsuccess') {
+        $actions .= '<script>showMessage("ERROR", "Unsuccessful operation!");</script>';
+    }
+}
+
 switch ($_GET['page']) {
     case 'home':
         require_once('home.php');
@@ -87,6 +96,7 @@ function userInfo($user) {
     </head>
 
     <body>
+        <?php echo $actions ?>
         <div class="wrapper" id="wrapper">
             <!-- Header with menu -->
             <div class="header" id="head">
@@ -95,7 +105,7 @@ function userInfo($user) {
                         <tr>
                             <td class="button"><a href="/home"><div class="button">HOME</div></a></td>
                             <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
-                            <td class="button"><a href="/contests"><div  class="button">CONTESTS</div></a></td>
+                            <td class="button"><a href="/contests"><div class="button">CONTESTS</div></a></td>
                             <td class="logo">
                                 <div class="logo noselect">
                                     act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span>
@@ -118,8 +128,10 @@ function userInfo($user) {
             <!-- Actual content -->
             <div class="main" id="main">
                 <div class="container">
-                    <?php echo userInfo($user); ?>
-                    <?php echo $page->getContent(); ?>
+                    <?php
+                        echo userInfo($user);
+                        echo $page->getContent();
+                    ?>
                 </div>
             </div>
 

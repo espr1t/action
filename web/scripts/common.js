@@ -23,10 +23,47 @@ function ajaxCall(url, data, onready) {
 }
 
 /*
- * Butter bars
+ * Butter bars (pop-up messages)
  */
-function showButterBar(type, message) {
-    alert(type + ': ' + message);
+function showMessage(type, message) {
+    var messageEl = document.createElement('div');
+
+    var id = "i" + Date.now();
+    var className, icon;
+    if (type == 'INFO') {
+        className = 'message message-info';
+        icon = '<i class="fa fa-check fa-fw"></i>';
+    } else {
+        className = 'message message-error';
+        icon = '<i class="fa fa-warning fa-fw"></i>';
+    }
+
+    messageEl.id = id;
+    messageEl.className = className + ' fade-in';
+    messageEl.innerHTML = '' +
+        '<div class="message-content">' +
+        '    <div class="message-icon">' + icon + '</div>' +
+        '    <div class="message-text">' + message + '</div>' +
+        '    <div class="message-close" onclick="hideMessage(\'' + className + '\', \'' + id + '\');"><i class="fa fa-close fa-fw"></i></div>' +
+        '</div>' +
+    '';
+
+    document.body.appendChild(messageEl);
+
+    // Hide the message after several seconds
+    setTimeout(function() {
+        hideMessage(className, id);
+    }, 5000);
+}
+
+function hideMessage(className, id) {
+    var messageEl = document.getElementById(id);
+    if (messageEl) {
+        messageEl.className = className + ' fade-out';
+        setTimeout(function() {
+            document.body.removeChild(messageEl);
+        }, 300);
+    }
 }
 
 /*
@@ -52,11 +89,15 @@ function submitReportForm() {
     };
 
     var onready = function(response) {
-        response = JSON.parse(response);
-        if (response.status == 'OKAY') {
-            showButterBar('INFO', 'Докладваният проблем беше изпратен успешно.');
+        try {
+            response = JSON.parse(response);
+        } catch(ex) {
+            response = "";
+        }
+        if (!response || response.status != 'OKAY') {
+            showMessage('ERROR', 'Съобщението не може да бъде изпратено в момента!');
         } else {
-            showButterBar('ERROR', 'Съобщението не може да бъде изпратено в момента!');
+            showMessage('INFO', 'Докладваният проблем беше изпратен успешно.');
         }
     }
     ajaxCall('code/tools/mail.php', sendData, onready);
@@ -66,7 +107,7 @@ function submitReportForm() {
 function showReportForm(hasAccess) {
     // Check if user is logged in.
     if (!hasAccess) {
-        showButterBar('You must be signed in for this functionality to be available.', 'error');
+        showMessage('ERROR', 'Трябва да се оторизирате за да съобщите за проблем.');
         return;
     }
 
@@ -105,7 +146,11 @@ function hideReportForm() {
     var reportForm = document.getElementById('reportForm');
     reportForm.className = 'report-form fade-out';
     overlay.className = 'report-overlay fade-out-overlay';
-    setTimeout(function() {document.body.removeChild(reportForm)}, 300);
-    setTimeout(function() {document.body.removeChild(overlay)}, 300);
+    setTimeout(function() {
+        document.body.removeChild(reportForm);
+    }, 300);
+    setTimeout(function() {
+        document.body.removeChild(overlay);
+    }, 300);
 }
 

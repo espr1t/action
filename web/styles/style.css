@@ -571,6 +571,55 @@ textarea.report-problem {
     height: 200px;
 }
 
+div.message {
+    position: fixed;
+    width: 500px;
+    height: 2em;
+    top: 110px;
+    left: 50%;
+    margin-left: -250px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    border-radius: 1em;
+    font-size: 1em;
+    z-index: 100;
+    background-color: #0099FF;
+}
+
+div.message-info {
+    background-color: #45b891;
+}
+
+div.message-error {
+    background-color: #d84a38;
+}
+
+div.message-content {
+    margin-top: 0.5em;
+    line-height: 1em;
+    vertical-align: middle;
+    padding: 0 8px 0 16px;
+}
+
+div.message-icon {
+    color: #FFFFFF;
+    display: inline-block;
+}
+
+div.message-text {
+    padding-left: 4px;
+    font-size: 1em;
+    display: inline-block;
+    color: #FFFFFF;
+}
+
+div.message-close {
+    font-size: 1em;
+    display: inline-block;
+    float: right;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
 div.fade-in {
     animation-name: fade-in;
     animation-duration: 0.3s;
