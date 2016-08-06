@@ -24,7 +24,7 @@ class User {
     public function logOut() {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
         session_destroy();
-        header('Location: /home');
+        header('Location: /login?action=success');
         exit();
     }
 
