@@ -6,6 +6,8 @@ $PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems/';
 $PATH_USERS = $_SERVER['DOCUMENT_ROOT'] . '/data/users/';
 $PATH_NEWS = $_SERVER['DOCUMENT_ROOT'] . '/data/news/';
 
+$ACCESS_REPORT_PROBLEM = 1;
+
 
 function newLine() {
     return '

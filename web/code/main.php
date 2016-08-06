@@ -58,14 +58,16 @@ function createHead($page) {
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="stylesheet" type="text/css" href="/styles/style.css">
-        <link rel="stylesheet" type="text/css" href="/styles/icons/css/font-awesome.css">';
+        <link rel="stylesheet" type="text/css" href="/styles/icons/css/font-awesome.css">
+        <script src="/scripts/common.js"></script>
+    ';
     foreach($page->getExtraStyles() as $style) {
         $meta = $meta . '
         <link rel="stylesheet" type="text/css" href="' . $style . '">';
     }
     foreach($page->getExtraScripts() as $script) {
         $meta = $meta . '
-        <script type="text/javascript" src="' . $script .'"></script>';
+        <script src="' . $script .'"></script>';
     }
     return trim($meta) . newLine();
 }
@@ -85,7 +87,7 @@ function userInfo($user) {
     </head>
 
     <body>
-        <div class="wrapper">
+        <div class="wrapper" id="wrapper">
             <!-- Header with menu -->
             <div class="header" id="head">
                 <div class="menu" id="menu">
@@ -128,7 +130,9 @@ function userInfo($user) {
                     &nbsp;
                     </div>
                     <div class="footer-middle">
-                        help | <a href="/about" class="white">about</a> | report a problem
+                        help |
+                        <a href="/about" class="white">about</a> |
+                        <div class="link white" onclick=<?php echo '"showReportForm(' . ($user->getAccess() >= $GLOBALS['ACCESS_REPORT_PROBLEM'] ? 'true' : 'false') . ');"' ?>>report a problem</div>
                     </div>
                     <div class="footer-right">
                         <a class="white" href="https://www.facebook.com/informatika.bg/" target="_blank"><i class="fa fa-facebook fa-fw"></i></a>

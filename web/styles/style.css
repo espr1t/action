@@ -57,6 +57,7 @@ var {
          Links
 ************************/
 a, div.link {
+    display: inline;
     font-size: inherit;
     color: #0099FF;
 }
@@ -81,11 +82,11 @@ a.decorated {
     color: #000000;
 }
 
-a.white {
+a.white, div.white {
     color: #EEEEEE;
 }
 
-a.white:hover {
+a.white:hover, div.white:hover {
     color: #FFFFFF;
     text-decoration: underline;
 }
@@ -488,18 +489,32 @@ form.register {
     margin-top: 1em;
 }
 
-input.submit {
+div.input-wrapper {
+    text-align: center;
+}
+
+input.button {
     margin-top: 8px;
     padding-left: 12px;
     padding-right: 12px;
     height: 28px;
+    left: 50%;
+    margin-left: auto;
     min-width: 60px;
     text-align: center;
     font-size: 1em;
+    line-height: 1em;
     color: #ECECEC;
-    background-color: #0099FF;
     border: 1px solid #FFFFFF;
     border-radius: 4px;
+}
+
+input.button-color-blue {
+    background-color: #0099FF;
+}
+
+input.button-color-red {
+    background-color: #d84a38;
 }
 
 div.news-title {
@@ -514,4 +529,88 @@ div.news-date {
     font-style: italic;
     color: #333333;
     margin-bottom: -10px;
+}
+
+div.report-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+    opacity: 0.8;
+    z-index: 50;
+}
+
+div.report-form {
+    position: fixed;
+    height: 320px;
+    width: 500px;
+    top: 50%;
+    left: 50%;
+    margin: -160px auto 0px -320px;
+    padding: 20px 40px 20px 40px;
+    background: #FFFFFF;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    border-radius: 4px;
+    z-index: 100;
+}
+
+div.report-close {
+    display: inline-block;
+    position: absolute;
+    margin-left: 512px;
+    margin-top: -12px;
+    cursor: pointer;
+}
+
+textarea.report-problem {
+    margin-top: 4px;
+    width: 494px;
+    height: 200px;
+}
+
+div.fade-in {
+    animation-name: fade-in;
+    animation-duration: 0.3s;
+    opacity: 1;
+}
+
+div.fade-out {
+    animation-name: fade-out;
+    animation-duration: 0.3s;
+    opacity: 0;
+}
+
+div.fade-in-overlay {
+    animation-name: fade-in-overlay;
+    animation-duration: 0.3s;
+    opacity: 0.8;
+}
+
+div.fade-out-overlay {
+    animation-name: fade-out-overlay;
+    animation-duration: 0.3s;
+    opacity: 0;
+}
+
+@keyframes fade-in {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fade-out {
+    from {opacity: 1;}
+    to {opacity: 0;}
+}
+
+@keyframes fade-in-overlay {
+    from {opacity: 0;}
+    to {opacity: 0.8;}
+}
+
+@keyframes fade-out-overlay {
+    from {opacity: 0.8;}
+    to {opacity: 0;}
 }

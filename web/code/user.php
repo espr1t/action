@@ -115,6 +115,10 @@ class User {
     public function getPassword() {
         return $this->password;
     }
+
+    public function getAccess() {
+        return $this->access;
+    }
 }
 
 ?>

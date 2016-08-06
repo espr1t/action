@@ -58,7 +58,7 @@ class LoginPage extends Page {
                         <form class="login" name="login" action="login" onsubmit="return saltHashLoginPassword()" method="post" accept-charset="utf-8">
                             <i class="fa fa-user fa-fw"></i><input class="text" name="username" type="text" placeholder="Username" required><br>
                             <i class="fa fa-key fa-fw"></i><input class="text" name="password" type="password" placeholder="Password" required><br>
-                            <input class="submit" name="submit" type="submit" value="Login">
+                            <input type="submit" class="button button-color-blue" value="Login">
                         </form>
                     </div>
                     <div class="register-link right smaller"><a href="register">Create Account</a></div>
