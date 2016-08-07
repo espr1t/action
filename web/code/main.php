@@ -36,6 +36,11 @@ switch ($_GET['page']) {
         require_once('ranking.php');
         $page = new RankingPage($user);
         break;
+    case 'profile':
+        require_once('profile.php');
+        $page = new ProfilePage($user);
+        $page->init();
+        break;
     case 'login':
         require_once('login.php');
         $page = new LoginPage($user);
@@ -83,7 +88,7 @@ function createHead($page) {
 
 function userInfo($user) {
     if ($user->getUsername() != "anonymous") {
-        return '<div class="userInfo">logged in as: <a href="users/' . $user->getUsername() . '"><div class="user">' . $user->getUsername() . '</div></a></div>';
+        return '<div class="userInfo">logged in as: <a href="/users/' . $user->getUsername() . '"><div class="user">' . $user->getUsername() . '</div></a></div>';
     }
     return '';
 }

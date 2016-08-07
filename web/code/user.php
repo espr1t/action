@@ -41,6 +41,7 @@ class User {
         $user->country = getValue($info, 'country');
         $user->gender = getValue($info, 'gender');
         $user->birthdate = getValue($info, 'birthdate');
+        $user->avatar = getValue($info, 'avatar');
         $user->submissions = getValue($info, 'submissions');
         $user->tried = getValue($info, 'tried');
         $user->solved = getValue($info, 'solved');
@@ -91,6 +92,7 @@ class User {
             'country' => $country,
             'gender' => $gender,
             'birthdate' => $birthdate,
+            'avatar' => '',
             'submissions' => array(),
             'tried' => array(),
             'solved' => array(),
@@ -118,6 +120,50 @@ class User {
 
     public function getAccess() {
         return $this->access;
+    }
+
+    public function getName() {
+        return $this->name;
+    }
+
+    public function getTown() {
+        return $this->town;
+    }
+
+    public function getCountry() {
+        return $this->country;
+    }
+
+    public function getBirthdate() {
+        return $this->birthdate;
+    }
+
+    public function getGender() {
+        return $this->gender;
+    }
+
+    public function getRegistered() {
+        return $this->registered;
+    }
+
+    public function getAvatar() {
+        return $this->avatar;
+    }
+
+    public function getSolved() {
+        return $this->solved;
+    }
+
+    public function getTried() {
+        return $this->tried;
+    }
+
+    public function getSubmissions() {
+        return $this->submissions;
+    }
+
+    public function getAchievemetns() {
+        return $this->achievements;
     }
 }
 

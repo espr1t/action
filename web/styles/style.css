@@ -362,6 +362,53 @@ div.user {
     color: #000000;
 }
 
+div.profile-head {
+    position: relative;
+    height: 82px;
+    margin-bottom: 24px;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+div.profile-avatar {
+    position: absolute;
+    left: 0;
+    height: 80px;
+    width: 80px;
+    background: #00CCFF;
+    background-size: 80px 80px;
+    background-repeat: no-repeat;
+    border: 1px solid #FFFFFF;
+    border-radius: 40px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    z-index: 3;
+}
+
+div.profile-line {
+    position: absolute;
+    width: 100%;
+    height: 41px;
+    border-bottom: dotted 1px #CCCCCC;
+    z-index: 2;
+}
+
+div.profile-username {
+    position: absolute;
+    right: 0;
+    border-spacing: 0;
+    border-collapse: collapse;
+    display: inline-block;
+    font-size: 1.8em;
+    line-height: 82px;
+    text-align: right;
+    padding-left: 8px;
+    padding-right: 4px;
+    margin-top: -2px;
+    font-weight: bold;
+    background-color: #FFFFFF;
+    z-index: 3;
+}
+
 div.button {
     font-size: 1.15em;
     line-height: 88px;

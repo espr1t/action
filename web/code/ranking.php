@@ -25,7 +25,7 @@ class RankingPage extends Page {
             }
 
             $place = $place + 1;
-            $username = '<a href="users/' . $info['username'] . '"><div class="user">' . $info['username'] . '</div></a>';
+            $username = '<a href="/users/' . $info['username'] . '"><div class="user">' . $info['username'] . '</div></a>';
             $solved = 1;
             $achievements = 1;
             $score = 42;
