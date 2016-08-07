@@ -2,7 +2,7 @@
 require_once('common.php');
 
 class User {
-    private static $user_info_re = '/^user_\d{5}\.json$/';
+    public static $user_info_re = '/^user_\d{5}\.json$/';
 
     private $id = -1;
     private $access = 0;

@@ -83,7 +83,7 @@ function createHead($page) {
 
 function userInfo($user) {
     if ($user->getUsername() != "anonymous") {
-        return '<div class="userInfo">logged in as: <div class="user">' . $user->getUsername() . '</div></div>';
+        return '<div class="userInfo">logged in as: <a href="users/' . $user->getUsername() . '"><div class="user">' . $user->getUsername() . '</div></a></div>';
     }
     return '';
 }

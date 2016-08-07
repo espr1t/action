@@ -8,8 +8,11 @@ class HomePage extends Page {
     }
     
     public function getContent() {
-        $news = inBox('<h1>Новини</h1>Тук ще бъдат публикувани новини, свързани със системата и състезанията на нея.');
-        $news .= '<br>';
+        $news = inBox('
+            <h1>Новини</h1>
+            <div class="separator"></div>
+            Тук ще бъдат публикувани новини, свързани със системата и състезанията на нея.
+        ');
 
         $fileNames = scandir($GLOBALS['PATH_NEWS']);
         rsort($fileNames);

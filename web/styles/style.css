@@ -131,7 +131,7 @@ a.white:hover, div.white:hover {
      Section Headers
 ************************/
 h1 {
-    font-size: 2em;
+    font-size: 1.8em;
     font-weight: bold;
     margin-bottom: 4px;
 }
@@ -359,6 +359,7 @@ div.userInfo {
 div.user {
     display: inline;
     font-weight: bold;
+    color: #000000;
 }
 
 div.button {
@@ -662,4 +663,25 @@ div.fade-out-overlay {
 @keyframes fade-out-overlay {
     from {opacity: 0.8;}
     to {opacity: 0;}
+}
+
+table.ranking {
+    width: 100%;
+    line-height: 1.5em;
+}
+
+table.ranking th {
+    font-weight: bold;
+    text-align: center;
+    color: #FFFFFF;
+    background-color: #0099FF;
+    line-height: 2em;
+}
+
+table.ranking td {
+    text-align: center;
+}
+
+table.ranking tr.ranking-row-even {
+    background-color: #F9F9F9;
 }

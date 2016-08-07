@@ -9,6 +9,8 @@ class AboutPage extends Page {
     
     public function getContent() {
         $text = '<h1>About</h1>
+                 <div class="separator"></div>
+
                  This is a new coding place, part of <a href="http://www.informatika.bg" target="_blank">informatika.bg</a>.
                  It is created and maintained by <a href="http://espr1t.net/me.html" target="_blank">Alexander Georgiev</a>.
                  
