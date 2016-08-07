@@ -1,0 +1,57 @@
+﻿id,title,description,icon
+1,Registered,Регистриран потребител,registered
+2,Submitted,1 предадено решение,upload
+3,Testing the system,10 предадени решения,cloud-upload
+4,Spammer,100 предадени решения,commenting
+5,Solved,1 решена задача,terminal
+6,Smart is the new sexy,10 решени задачи,code
+7,Bring it on,100 решени задачи,heartbeat
+8,I spotted it first,Reported an issue,bug
+9,Everything's trivial,Решени всички задачи със сложност trivial,leaf
+10,Easy peasy,Решени всички задачи със сложност easy,child
+11,It ain't easy,Решени всички задачи със сложност medium,balance-scale
+12,Working hard,Решени всички задачи със сложност hard,tint
+13,Animal,Решени всички задачи със сложност brutal,paw
+14,I've seen it all,Решени всички задачи,check
+15,Needle in a haystack,Завършена тема "Търсене и итерация",university
+16,Optimised,Завършена тема "Динамично оптимиране",university 
+17,Dracula,Завършена тема "Графи",university
+18,Two plus two,Завършена тема "Математика",university
+19,Picasso,Завършена тема "Геометрия",university
+20,Orinoco,Завършена тема "Потоци",university
+21,Divide et impera,Завършена тема "Разделяй и владей",university
+22,Half of you are useless,Завършена тема "Двоично търсене",university
+23,Charming,Завършена тема "Стрингове и хеширане",university
+24,ORDER BY,Завършена тема "Сортиране",university
+25,Gheed,Завършена тема "Алчни алгоритми",university
+26,NIMoa,Завършена тема "Теория на игрите",university
+27,We meet again,Завършена тема "Срещане в средата",university
+28,Graduated,Завършени всички части от трейнинга,graduation-cap
+29,Search master,Решени всички задачи с таг search,search
+30,DP master,Решени всички задачи с таг dp,database
+31,Graph master,Решени всички задачи с таг graph,map-signs
+32,Math master,Решени всички задачи с таг math,calculator
+33,Geometry master,Решени всички задачи с таг geometry,object-group
+34,Ad-hoc master,Решени всички задачи с таг ad-hoc,lightbulb-o
+35,Flow master,Решени всички задачи с таг flow,ship
+36,D&Q master,Решени всички задачи с таг divconq,flag
+37,BS master,Решени всички задачи с таг binsearch,sort
+38,Hashing master,Решени всички задачи с таг hashing,quote-left
+39,Strings master,Решени всички задачи с таг strings,quote-right
+40,Sorting master,Решени всички задачи с таг sorting,sort-alpha-asc
+41,Greedy master,Решени всички задачи с таг greedy,dollar
+42,SG master,Решени всички задачи с таг sg,magic
+43,MitM master,Решени всички задачи с таг mitm,map-maker
+44,Data structure master,Решени всички задачи с таг datastruct,tree
+45,STL master,Решени всички задачи с таг stl,book
+46,Rockstar,Първи в ранклистата,rocket
+47,Top of the tops,Сред първите 10 в ранклистата,line-chart
+48,First!,Първo решeние на задача,bolt
+49,Early bird,Решена задача между 8:00 и 12:00 сутринта,clock-o
+50,Night owl,Решена задача между 2:00 и 6:00 през нощта,bed
+51,Gamer,Предадена игра,gamepad
+52,Winner,Първо място на игра,trophy
+53,Competitor,Първо състезание,dot-circle-o
+54,Gold,Първо място на състезание,user
+55,Silver,Второ място на състезание,user-plus
+56,Bronze,Трето място на състезание,group
