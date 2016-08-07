@@ -723,10 +723,13 @@ table.ranking th {
     color: #FFFFFF;
     background-color: #0099FF;
     line-height: 2em;
+    border-radius: 2px;
 }
 
 table.ranking td {
     text-align: center;
+    border-radius: 2px;
+    padding: 0 2px;
 }
 
 table.ranking tr.ranking-row-even {

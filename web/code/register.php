@@ -1,5 +1,7 @@
 <?php
 require_once('page.php');
+require_once('home.php');
+require_once('common.php');
 
 class RegisterPage extends Page {
     public function getTitle() {
@@ -11,15 +13,16 @@ class RegisterPage extends Page {
     }
 
     public function getContent() {
-        if (isset($_POST["username"])) {
-            return $this->registerUser();
+        if (isset($_POST['username'])) {
+            $error = $this->registerUser();
+            return $this->getRegisterForm() . showMessage('ERROR', $error);
         }
-        return $this->getForm();
+        return $this->getRegisterForm();
     }
 
     private static $cities = array('Sofia', 'Plovdiv', 'Pleven', 'Varna', 'Burgas', 'Shumen', 'Yambol', 'Gabrovo', 'Haskovo', 'Vidin', 'Vratsa', 'Sliven');
 
-    private function getForm() {
+    private function getRegisterForm() {
         $index = rand(0, count(self::$cities) - 1);
         $expected = md5(self::$cities[$index]);
         $captcha = str_shuffle(self::$cities[$index]);
@@ -135,7 +138,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                         </table>
-                        <input class="submit" name="submit" type="submit" value="Register"> 
+                        <input name="submit" type="submit" class="button button-color-blue" value="Register">
                     </form>
                 </div>
             </div>
@@ -174,46 +177,46 @@ class RegisterPage extends Page {
     private function registerUser() {
         // Check captcha question
         if (!isset($_POST['captcha']) || !isset($_POST['expected'])) {
-            return 'Could not complete registration: captcha was empty or invalid.';
+            return 'Въведената captcha е невалидна!';
         }
         if (md5($_POST['captcha']) != $_POST['expected']) {
-            return 'Could not complete registration: entered captcha was wrong.';
+            return 'Въведената captcha е невалидна!';
         }
         if (!in_array($_POST['captcha'], self::$cities)) {
-            return 'Could not complete registration: entered captcha was wrong.';
+            return 'Въведената captcha е невалидна!';
         }
         unset($_POST['captcha']);
         unset($_POST['expected']);
 
         // Check username
         if (!isset($_POST['username']) || !$this->validateUsername($_POST['username'])) {
-            return 'Could not complete registration: username was empty or invalid.';
+            return 'Въведеното потребителско име е празно или невалидно!';
         }
         $username = $_POST['username']; unset($_POST['username']);
         if (User::getUser($username) != null) {
-            return 'Could not complete registration: username is already taken.';
+            return 'Въведеното потребителското име вече е заето!';
         }
 
         // Check first and last names
         if (!isset($_POST['name']) || !$this->validateName($_POST['name'])) {
-            return 'Could not complete registration: first name was empty or invalid.';
+            return 'Въведеното име не изпълнява изискванията на сайта!';
         }
         $name = $_POST['name']; unset($_POST['name']);
         
         if (!isset($_POST['surname']) || !$this->validateName($_POST['surname'])) {
-            return 'Could not complete registration: last name was empty or invalid.';
+            return 'Въведената фамилия не изпълнява изискванията на сайта!';
         }
         $surname = $_POST['surname']; unset($_POST['surname']);
 
         // Check password
         if (!isset($_POST['password1']) || !isset($_POST['password2'])) {
-            return 'Could not complete registration: password was empty.';
+            return 'Въведената парола е празна!';
         }
         $password1 = $_POST['password1']; unset($_POST['password1']);
         $password2 = $_POST['password2']; unset($_POST['password2']);
 
         if (strcmp($password1, $password2) != 0) {
-            return 'Could not complete registration: passwords did not match.';
+            return 'Въведените пароли не съвпадат!';
         }
         $password = saltHashPassword($password1);
 
@@ -223,7 +226,7 @@ class RegisterPage extends Page {
             if ($this->validateEmail($_POST['email'])) {
                 $email = $_POST['email'];
             } else {
-                return 'Could not complete registration: provided e-mail was invalid.';
+                return 'Въведеният e-mail адрес не изпълнява изискванията на сайта!';
             }
             unset($_POST['email']);
         }
@@ -233,7 +236,7 @@ class RegisterPage extends Page {
             if ($this->validateDate($_POST['birthdate'])) {
                 $birthdate = $_POST['birthdate'];
             } else {
-                return 'Could not complete registration: provided date of birth was invalid.';
+                return 'Въведената дата на раждане не изпълнява изискванията на сайта!';
             }
             unset($_POST['birthdate']);
         }
@@ -243,7 +246,7 @@ class RegisterPage extends Page {
             if ($this->validatePlace($_POST['town'])) {
                 $town = $_POST['town'];
             } else {
-                return 'Could not complete registration: provided town was invalid.';
+                return 'Въведеният град не изпълнява изискванията на сайта!';
             }
             unset($_POST['town']);
         }
@@ -253,7 +256,7 @@ class RegisterPage extends Page {
             if ($this->validatePlace($_POST['country'])) {
                 $country = $_POST['country'];
             } else {
-                return 'Could not complete registration: provided country was invalid.';
+                return 'Въведената държава не изпълнява изискванията на сайта!';
             }
             unset($_POST['country']);
         }
@@ -263,18 +266,24 @@ class RegisterPage extends Page {
             if ($this->validateGender($_POST['gender'])) {
                 $gender = $_POST['gender'];
             } else {
-                return 'Could not complete registration: provided gender was invalid.';
+                return 'Въведеният пол не е валиден!';
             }
             unset($_POST['gender']);
         }
 
         // Actually create the user
         if (User::createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender)) {
-            // TODO: Make pretty (add green success icon)
-            return 'Registered user "' . $username . '" successfully!';
+            $_SESSION['username'] = $username;
+
+            // Set cookie (avoid logging in again until cookie expires)
+            $loginKey = str_shuffle(md5(microtime()));
+            $expireTime = time() + 365 * 86400; // 365 days
+            setcookie($GLOBALS['COOKIE_NAME'], $loginKey, $expireTime);
+
+            header('Location: /home?action=success');
+            exit();
         } else {
-            // TODO: Make pretty (add red error icon)
-            return 'Could not complete registration: writing new user failed. Please contact site admin.';
+            return 'Грешка при записването на новия потребител.';
         }
     }
 

@@ -44,14 +44,15 @@
 43,MitM master,Решени всички задачи с таг mitm,map-maker
 44,Data structure master,Решени всички задачи с таг datastruct,tree
 45,STL master,Решени всички задачи с таг stl,book
-46,Rockstar,Първи в ранклистата,rocket
-47,Top of the tops,Сред първите 10 в ранклистата,line-chart
-48,First!,Първo решeние на задача,bolt
-49,Early bird,Решена задача между 8:00 и 12:00 сутринта,clock-o
-50,Night owl,Решена задача между 2:00 и 6:00 през нощта,bed
-51,Gamer,Предадена игра,gamepad
-52,Winner,Първо място на игра,trophy
-53,Competitor,Първо състезание,dot-circle-o
-54,Gold,Първо място на състезание,user
-55,Silver,Второ място на състезание,user-plus
-56,Bronze,Трето място на състезание,group
+46,Competitor,Първо състезание,dot-circle-o
+47,Gold,Първо място на състезание,user
+48,Silver,Второ място на състезание,user-plus
+49,Bronze,Трето място на състезание,group
+50,Rockstar,Първи в ранклистата,rocket
+51,Among the chosen few,Сред първите 10 в ранклистата,line-chart
+52,I was there first,Първo решeние на задача,bolt
+53,Early bird,Решена задача между 8:00 и 12:00 сутринта,clock-o
+54,Night owl,Решена задача между 2:00 и 6:00 през нощта,bed
+55,Gamer,Предадена игра,gamepad
+56,Winner,Първо място на игра,trophy
+57,Rainbow coder,По една решена задача на всеки език,arrows

@@ -11,46 +11,43 @@ class LoginPage extends Page {
         return array('/scripts/authentication.js', '/scripts/md5.min.js');
     }
 
-    public function init() {
-        // Authorized user, update login key and redirect to home page
-        $user = $this->authorizedUser();
-        if ($user != null) {
-            // Set session (use until browser close)
-            $_SESSION['username'] = $user->getUsername();
-
-            // Set cookie (avoid logging in again until cookie expires)
-            $loginKey = str_shuffle(md5(microtime()));
-            $expireTime = time() + 365 * 86400; // 365 days
-            setcookie($GLOBALS['COOKIE_NAME'], $loginKey, $expireTime);
-
-            header('Location: /home?action=success');
-            exit();
-        }
-    }
-
-    private function authorizedUser() {
-        if (!isset($_POST['username'])) {
-            return null;
-        }
-        if (!isset($_POST['password'])) {
-            return null;
-        }
-
-        $user = User::getUser($_POST['username']);
-        if ($user == null) {
-            return null;
-        }
-        $salthashed = saltHashPassword($_POST['password']);
-        if ($user->getPassword() != $salthashed) {
-            // TODO: Error message "Invalid password!"
-            return null;
-        }
-        return $user;
-    }
-
     public function getContent() {
-        // Not authorised user, show login form
-        $content = '
+        $error = '';
+
+        // Check if user just entered valid credentials
+        if (isset($_POST['username']) && isset($_POST['password'])) {
+            $user = User::getUser($_POST['username']);
+            if ($user == null) {
+                $error = 'Не съществува акаунт с това потребителско име!';
+            } else {
+                $salthashed = saltHashPassword($_POST['password']);
+                if ($user->getPassword() != $salthashed) {
+                    $error = 'Въведената парола е невалидна!';
+                }
+            }
+
+            // Authorized user, update login key and redirect to home page
+            if ($error == '') {
+                // Set session (use until browser close)
+                $_SESSION['username'] = $user->getUsername();
+
+                // Set cookie (avoid logging in again until cookie expires)
+                $loginKey = str_shuffle(md5(microtime()));
+                $expireTime = time() + 365 * 86400; // 365 days
+                setcookie($GLOBALS['COOKIE_NAME'], $loginKey, $expireTime);
+
+                header('Location: /home?action=success');
+                exit();
+
+            }
+        }
+
+        // Not authorised user, show login form (and possibly error message)
+        return $this->getLoginForm() . ($error == '' ? '' : showMessage('ERROR', $error));
+    }
+
+    private function getLoginForm() {
+        return '
                 <div class="authenticate centered">
                     <div class="box login">
                         <h2>Authenticate</h2>
@@ -64,9 +61,8 @@ class LoginPage extends Page {
                     <div class="register-link right smaller"><a href="register">Create Account</a></div>
                 </div>
         ';
-        return $content;
     }
-    
+
 }
 
 ?>

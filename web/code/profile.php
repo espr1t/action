@@ -73,9 +73,9 @@ class ProfilePage extends Page {
         $birthdate = explode('-', $this->profile->getBirthdate());
         if (count($birthdate) == 3) {
             $birthdateString = $this->profile->getGender() == 'female' ? 'Родена на:' : 'Роден на:';
-            $day = $birthdate[2];
+            $day = intval($birthdate[2]);
             $month = $months[intval($birthdate[1]) - 1];
-            $year = $birthdate[0];
+            $year = intval($birthdate[0]);
             $info .= '<b>' . $birthdateString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
         }
 
@@ -83,9 +83,9 @@ class ProfilePage extends Page {
         $registered = explode('-', $this->profile->getRegistered());
         if (count($registered) == 3) {
             $registeredString = $this->profile->getGender() == 'female' ? 'Регистрирана на:' : 'Регистриран на:';
-            $day = $registered[2];
+            $day = intval($registered[2]);
             $month = $months[intval($registered[1]) - 1];
-            $year = $registered[0];
+            $year = intval($registered[0]);
             $info .= '<b>' . $registeredString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
         }
 

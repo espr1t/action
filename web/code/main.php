@@ -5,6 +5,9 @@ require_once('common.php');
 require_once('user.php');
 
 $user = !isset($_SESSION['username']) ? new User() : User::getUser($_SESSION['username']);
+if ($user == null) {
+    $user = new User();
+}
 
 $actions = '';
 if (isset($_GET['action'])) {
@@ -44,7 +47,6 @@ switch ($_GET['page']) {
     case 'login':
         require_once('login.php');
         $page = new LoginPage($user);
-        $page->init();
         break;
     case 'logout':
         $user->logOut();
@@ -61,6 +63,7 @@ switch ($_GET['page']) {
         require_once('error.php');
         $page = new ErrorPage($user);
 }
+$content = $page->getContent();
 
 function createHead($page) {
     $meta = '
@@ -135,7 +138,7 @@ function userInfo($user) {
                 <div class="container">
                     <?php
                         echo userInfo($user);
-                        echo $page->getContent();
+                        echo $content;
                     ?>
                 </div>
             </div>

@@ -14,6 +14,10 @@ function newLine() {
 ';
 }
 
+function showMessage($type, $message) {
+    return '<script>showMessage("' . $type . '", "' . $message . '");</script>';
+}
+
 function inBox($content, $extra=array()) {
     $classes = array_merge(array("box"), $extra);
     return '
