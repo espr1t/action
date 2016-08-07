@@ -57,7 +57,7 @@ class User {
             }
             $json = file_get_contents($GLOBALS['PATH_USERS'] . $entry);
             $info = json_decode($json, true);
-            if ($info['username'] == $username) {
+            if (strcasecmp($info['username'], $username) == 0) {
                 return User::instanceFromJson($info);
             }
        }
