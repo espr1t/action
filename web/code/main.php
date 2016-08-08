@@ -59,6 +59,10 @@ switch ($_GET['page']) {
         require_once('about.php');
         $page = new AboutPage($user);
         break;
+    case 'help':
+        require_once('help.php');
+        $page = new HelpPage($user);
+        break;
     default:
         require_once('error.php');
         $page = new ErrorPage($user);
@@ -150,7 +154,7 @@ function userInfo($user) {
                     &nbsp;
                     </div>
                     <div class="footer-middle">
-                        help |
+                        <a href="/help" class="white">help</a> |
                         <a href="/about" class="white">about</a> |
                         <div class="link white" onclick=<?php echo '"showReportForm(' . ($user->getAccess() >= $GLOBALS['ACCESS_REPORT_PROBLEM'] ? 'true' : 'false') . ');"' ?>>report a problem</div>
                     </div>

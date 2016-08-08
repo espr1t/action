@@ -19,6 +19,7 @@ RewriteRule    ^logout$                     /code/main.php?page=logout          
 RewriteRule    ^register$                   /code/main.php?page=register                        [NC,L,QSA]
 RewriteRule    ^error$                      /code/main.php?page=error                           [NC,L,QSA]
 RewriteRule    ^about$                      /code/main.php?page=about                           [NC,L,QSA]
+RewriteRule    ^help$                       /code/main.php?page=help                            [NC,L,QSA]
 
 # Problem page
 RewriteRule    ^problems/([0-9]+)$          /code/main.php?page=problems&problem=$1             [NC,L,QSA]
