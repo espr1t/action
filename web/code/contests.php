@@ -8,8 +8,13 @@ class ContestsPage extends Page {
     }
     
     public function getContent() {
-        $content = inBox('Under construction.');
-        return $content;
+        $head = inBox('
+            <h1>Състезания</h1>
+            <div class="separator"></div>
+            За момента няма публикувани състезания.
+        ');
+        $content = '';
+        return $head . $content;
     }
     
 }

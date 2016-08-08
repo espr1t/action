@@ -8,8 +8,13 @@ class TrainingPage extends Page {
     }
     
     public function getContent() {
-        $content = inBox('Under construction.');
-        return $content;
+        $head = inBox('
+            <h1>Подготовка</h1>
+            <div class="separator"></div>
+            Тук ще има подготовка, включваща задачи, групирани по теми, в нарастваща сложност.
+        ');
+        $content = '';
+        return $head . $content;
     }
     
 }
