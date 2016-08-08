@@ -50,8 +50,6 @@ class ProblemsPage extends Page {
 
     private function getMainPage() {
         $text = '<h1>Задачи</h1>
-                 <div class="separator"></div>
-
                  Тук можете да намерите списък с всички задачи от тренировката.
         ';
         $header = inBox($text);

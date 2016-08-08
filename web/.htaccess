@@ -11,7 +11,7 @@ RewriteEngine on
 RewriteRule    ^$                           /code/main.php?page=home                            [NC,L]
 RewriteRule    ^home$                       /code/main.php?page=home                            [NC,L,QSA]
 RewriteRule    ^problems$                   /code/main.php?page=problems                        [NC,L,QSA]
-RewriteRule    ^contests$                   /code/main.php?page=contests                        [NC,L,QSA]
+RewriteRule    ^status$                     /code/main.php?page=status                          [NC,L,QSA]
 RewriteRule    ^training$                   /code/main.php?page=training                        [NC,L,QSA]
 RewriteRule    ^ranking$                    /code/main.php?page=ranking                         [NC,L,QSA]
 RewriteRule    ^login$                      /code/main.php?page=login                           [NC,L,QSA]

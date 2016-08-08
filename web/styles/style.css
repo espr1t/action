@@ -133,13 +133,18 @@ a.white:hover, div.white:hover {
 h1 {
     font-size: 1.8em;
     font-weight: bold;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    padding-bottom: 1px;
+    border-bottom: 1px dotted #999999;
 }
 h2 {
     font-size: 1.2em;
     font-weight: bold;
     color: #333333;
-    margin-top: 12px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    padding-bottom: 1px;
+    border-bottom: 1px dotted #999999;
 }
 h3 {
     font-size: 1em;
@@ -425,7 +430,7 @@ div.button:hover {
 
 div.separator {
     width: 100%;
-    border-top: dotted 1px #333333;
+    border-top: dotted 1px #999999;
     margin-top: 4px;
     margin-bottom: 4px;
 }
@@ -569,6 +574,9 @@ div.news-title {
     margin-top: -6px;
     font-size: 1.33em;
     font-weight: bold;
+    padding-bottom: 1px;
+    margin-bottom: 4px;
+    border-bottom: 1px dotted #999999;
 }
 
 div.news-date {

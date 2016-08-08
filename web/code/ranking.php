@@ -54,7 +54,6 @@ class RankingPage extends Page {
         ';
         $content = '
             <h1>Класиране</h1>
-            <div class="separator"></div>
             <br>
         ';
         return inBox($content . $table);

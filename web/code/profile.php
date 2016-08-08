@@ -46,7 +46,6 @@ class ProfilePage extends Page {
         // ====================================================================
         $info .= '
                 <h2>Информация</h2>
-                <div class="separator"></div>
         ';
         $info .= '<b>Име:</b> ' . $this->profile->getName() . '<br>';
 
@@ -100,7 +99,6 @@ class ProfilePage extends Page {
         $submissions = $this->profile->getSubmissions();
         $info .= '
                 <h2>Прогрес</h2>
-                <div class="separator"></div>
                 <b>Брой решени задачи:</b> ' . count($solved) . '<br>
                 <b>Брой пробвани задачи:</b> ' . count($tried) . '<br>
                 <b>Брой изпратени решения:</b> ' . count($submissions) . '<br>
@@ -114,7 +112,6 @@ class ProfilePage extends Page {
         // ====================================================================
         $info .= '
                 <h2>Графики</h2>
-                <div class="separator"></div>
         ';
 
         $info .= '
@@ -130,7 +127,6 @@ class ProfilePage extends Page {
         */
         $info .= '
                 <h2>Постижения</h2>
-                <div class="separator"></div>
                 <div>' . $achievements . '</div>
         ';
 

@@ -10,7 +10,6 @@ class HomePage extends Page {
     public function getContent() {
         $news = inBox('
             <h1>Новини</h1>
-            <div class="separator"></div>
             Тук ще бъдат публикувани новини, свързани със системата и състезанията на нея.
         ');
 
@@ -31,7 +30,6 @@ class HomePage extends Page {
 
             $content = '';
             $content .= '<div class="news-title">' . $title . '</div>';
-            $content .= '<div class="separator"></div>';
             $content .= $body;
             $content .= '<div class="news-date">Публикувано на ' . $date . '</div>';
 
