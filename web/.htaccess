@@ -20,6 +20,7 @@ RewriteRule    ^register$                   /code/main.php?page=register        
 RewriteRule    ^error$                      /code/main.php?page=error                           [NC,L,QSA]
 RewriteRule    ^about$                      /code/main.php?page=about                           [NC,L,QSA]
 RewriteRule    ^help$                       /code/main.php?page=help                            [NC,L,QSA]
+RewriteRule    ^stats$                      /code/main.php?page=stats                           [NC,L,QSA]
 
 # Problem page
 RewriteRule    ^problems/([0-9]+)$          /code/main.php?page=problems&problem=$1             [NC,L,QSA]
