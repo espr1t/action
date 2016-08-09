@@ -14,9 +14,9 @@ class StatusPage extends Page {
         ');
 
         $grader = inBox('
-            <h2>Хардуер</h2>
+            <h2>Грейдър</h2>
             <b>Процесор:</b> Intel i7 @ 4.2GHz<br>
-            <b>Рам:</b> Corsair 16GB @ 1066MHz<br>
+            <b>Рам:</b> Corsair 8GB @ 1066MHz<br>
             <b>Харддиск:</b> Corsair X 250GB SSD<br>
 
             <br>
@@ -49,7 +49,9 @@ class StatusPage extends Page {
             ' . $queueTable . '
         ');
 
-        return $head . $grader . $queue;
+        $time = '<div class="right smaller italic" style="margin-top: -8px; padding-right: 4px;">Текущо време на системата: ' . date('H:i') . '</div>';
+
+        return $head . $grader . $queue . $time;
     }
     
 }

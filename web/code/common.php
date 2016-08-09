@@ -1,5 +1,4 @@
 <?php
-
 $COOKIE_NAME = 'action.informatika.bg';
 
 $PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems/';
@@ -7,6 +6,8 @@ $PATH_USERS = $_SERVER['DOCUMENT_ROOT'] . '/data/users/';
 $PATH_NEWS = $_SERVER['DOCUMENT_ROOT'] . '/data/news/';
 
 $ACCESS_REPORT_PROBLEM = 1;
+
+date_default_timezone_set('Europe/Sofia');
 
 
 function newLine() {
