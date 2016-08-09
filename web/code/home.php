@@ -31,6 +31,7 @@ class HomePage extends Page {
             $content = '';
             $content .= '<div class="news-title">' . $title . '</div>';
             $content .= $body;
+            $content .= '<div class="separator"></div>';
             $content .= '<div class="news-date">Публикувано на ' . $date . '</div>';
 
             $news .= inBox($content);
