@@ -26,17 +26,18 @@ class ProblemsPage extends Page {
             $source = $info->{'source'};
             
             $authors = 'човек' . ($solutions == 1 ? '' : 'а');
-            $problems = $problems . '
-            <div class="box narrow boxlink">
-                <a href="problems/' . $id . '" class="decorated">
-                    <div class="problem-name">' . $name . '</div>
-                    <div class="problem-info">
-                        Сложност: <strong>' . $difficulty . '</strong><br>
-                        Решена от: <strong>' . $solutions . ' ' . $authors . '</strong><br>
-                        Източник: <strong>' . $source . '</strong>
-                    </div>
-                </a>
-            </div>' . newLine();
+            $problems .= '
+                <div class="box narrow boxlink">
+                    <a href="problems/' . $id . '" class="decorated">
+                        <div class="problem-name">' . $name . '</div>
+                        <div class="problem-info">
+                            Сложност: <strong>' . $difficulty . '</strong><br>
+                            Решена от: <strong>' . $solutions . ' ' . $authors . '</strong><br>
+                            Източник: <strong>' . $source . '</strong>
+                        </div>
+                    </a>
+                </div>
+            ';
         }
         return $problems;
     }

@@ -94,7 +94,8 @@ function createHead($page) {
         $meta = $meta . '
         <script src="' . $script .'"></script>';
     }
-    return trim($meta) . newLine();
+    return trim($meta) . '
+    ';
 }
 
 function userInfo($user) {

@@ -140,20 +140,23 @@ function hideSubmitForm() {
 function submitSolution() {
     var source = document.getElementById('source').value;
     var language = detectLanguage(source);
+    var tokens = window.location.href.split('/');
+    var problem = tokens[tokens.length - 1];
     var data = {
-        "source" : source,
-        "language" : language
+        'problem': problem,
+        'source' : source,
+        'language' : language
     };
     var callback = function(response) {
         if (isNaN(response)) {
             showMessage('ERROR', 'Решението не може да бъде изпратено!');
             hideSubmitForm();
         } else {
-            window.location.href = response;
+            window.location.href = window.location.href + '/' + response;
             exit();
         }
     }
-    ajaxCall('/submit', data, callback);
+    ajaxCall('code/tools/submit.php', data, callback);
 }
 
 /*
@@ -172,9 +175,9 @@ function submitReportForm() {
         try {
             response = JSON.parse(response);
         } catch(ex) {
-            response = "";
+            response = '';
         }
-        if (!response || response.status != 'OKAY') {
+        if (!response || response.status != 'OK') {
             showMessage('ERROR', 'Съобщението не може да бъде изпратено в момента!');
         } else {
             showMessage('INFO', 'Докладваният проблем беше изпратен успешно.');

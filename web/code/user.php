@@ -82,7 +82,7 @@ class User {
 
         $info = array(
             'id' => $id,
-            'access' => 1,
+            'access' => $GLOBALS['DEFAULT_USER_ACCESS'],
             'registered' => date('Y-m-d'),
             'username' => $username,
             'password' => $password,
