@@ -486,6 +486,11 @@ div.problem-explanation {
     text-align: center;
 }
 
+div.problem-submit {
+    margin-top: 20px;
+    text-align: center;
+}
+
 table.problem-sample {
     width: 100%;
     border-spacing: 0;
@@ -562,6 +567,11 @@ input.button {
     border-radius: 4px;
 }
 
+input.button-large {
+    width: 240px;
+    height: 42px;
+}
+
 input.button-color-blue {
     background-color: #0099FF;
 }
@@ -587,7 +597,7 @@ div.news-date {
     margin-bottom: -10px;
 }
 
-div.report-overlay {
+div.overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -625,6 +635,37 @@ textarea.report-problem {
     margin-top: 4px;
     width: 494px;
     height: 200px;
+}
+
+div.submit-form {
+    position: fixed;
+    height: 480px;
+    width: 600px;
+    top: 50%;
+    left: 50%;
+    margin: -240px auto 0px -340px;
+    padding: 20px 40px 20px 40px;
+    background: #FFFFFF;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    border-radius: 4px;
+    z-index: 89;
+}
+
+div.submit-close {
+    display: inline-block;
+    position: absolute;
+    margin-left: 612px;
+    margin-top: -12px;
+    cursor: pointer;
+}
+
+textarea.submit-source {
+    font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
+    display: inline;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    padding: 8px;
 }
 
 div.message {

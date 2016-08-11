@@ -74,6 +74,14 @@ class ProblemsPage extends Page {
                 $ml = $info->{'memory_limit'};
                 $statement = file_get_contents($GLOBALS['PATH_PROBLEMS'] . $dir . $this->PROBLEM_STATEMENT);
 
+                $submit = $this->user->getAccess() < 1 ? '' : '
+                        <div class="problem-submit">
+                            <input type="submit" value="Предай решение" onclick="showSubmitForm();" class="button button-color-blue button-large">
+                            <br>
+                            <a href="" style="font-size: 0.8em;">Предишни решения</a>
+                        </div>
+                ';
+
                 $problem = '
                     <div class="box">
                         <div class="problem-title">' . $name . '</div>
@@ -81,7 +89,10 @@ class ProblemsPage extends Page {
                         <div class="problem-source">' . $source . '</div>
                         <div class="separator"></div>
                         <div class="problem-statement">' . $statement . '</div>
-                    </div>' . newLine();
+                        ' . $submit . '
+                    </div>
+                ';
+                break;
             }
         }
         if ($problem === '') {

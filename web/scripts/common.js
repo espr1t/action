@@ -1,7 +1,14 @@
 /*
+ * Detect language mock
+ */
+function detectLanguage(source) {
+    return 'C++';
+}
+
+/*
  * AJAX calls
  */
-function ajaxCall(url, data, onready) {
+function ajaxCall(url, data, callback) {
     var first = true;
     var args = '';
     for (var field in data) {
@@ -14,7 +21,7 @@ function ajaxCall(url, data, onready) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (xhttp.readyState == 4) {
-            onready(xhttp.status == 200 ? xhttp.responseText : 'ERROR');
+            callback(xhttp.status == 200 ? xhttp.responseText : 'ERROR');
         }
     }
     xhttp.open('POST', url, true);
@@ -66,21 +73,94 @@ function hideMessage(className, id) {
     }
 }
 
-/*
- * Report form handling
- */
 var lastOnKeyDownEvent = null;
-
-function identifyEscKeyPressedEvent(event) {
+function identifyEscKeyPressedEvent(event, action) {
     if(event.keyCode == 27) {
-        hideReportForm();
+        action();
         event.stopPropagation();
     }
 }
 
+/*
+ * Submit form handling
+ */
+function showSubmitForm() {
+    // Create an overlay shadowing the rest of the page
+    var overlay = document.createElement('div');
+    overlay.id = 'overlay';
+    overlay.className = 'overlay';
+    document.body.appendChild(overlay);
+
+    // Create the submit form and show it to the user
+    var submitForm = document.createElement('div');
+    submitForm.id = 'submitForm';
+    submitForm.className = 'submit-form';
+    submitForm.innerHTML = '' +
+        '<div class="submit-close" onclick="hideSubmitForm();"><i class="fa fa-close fa-fw"></i></div>' +
+        '<h2>Предай Решение</h2>' +
+        '<div class="center">' +
+        '    <textarea name="source" class="submit-source" cols=80 rows=24 id="source"></textarea>' +
+        '</div>' +
+        '<div class="italic right" style="font-size: 0.8em;">Detected language: ' + '<span id="language">?</span>' + '</div>' +
+        '<div class="center"><input type="submit" value="Изпрати" class="button button-color-red" onclick="submitSolution();"></div>' +
+    '';
+    lastOnKeyDownEvent = document.onkeydown;
+    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideSubmitForm();});}
+
+    document.body.appendChild(submitForm);
+    submitForm.className = 'submit-form fade-in';
+    overlay.className = 'overlay fade-in-overlay';
+
+    // Run language detection every second after an update
+    // TODO: May be too slow, optimize if necessary
+    var sourceEl = document.getElementById('source');
+    var onchange = function() {
+        var langEl = document.getElementById('language');
+        langEl.innerText = detectLanguage(sourceEl.value);
+    }
+    sourceEl.onchange = onchange;
+    sourceEl.onpaste = onchange;
+    sourceEl.onkeypress = onchange;
+}
+
+function hideSubmitForm() {
+    document.onkeydown = lastOnKeyDownEvent;
+    var overlay = document.getElementById('overlay');
+    var submitForm = document.getElementById('submitForm');
+    submitForm.className = 'submit-form fade-out';
+    overlay.className = 'overlay fade-out-overlay';
+    setTimeout(function() {
+        document.body.removeChild(submitForm);
+    }, 300);
+    setTimeout(function() {
+        document.body.removeChild(overlay);
+    }, 300);
+}
+
+function submitSolution() {
+    var source = document.getElementById('source').value;
+    var language = detectLanguage(source);
+    var data = {
+        "source" : source,
+        "language" : language
+    };
+    var callback = function(response) {
+        if (isNaN(response)) {
+            showMessage('ERROR', 'Решението не може да бъде изпратено!');
+            hideSubmitForm();
+        } else {
+            window.location.href = response;
+            exit();
+        }
+    }
+    ajaxCall('/submit', data, callback);
+}
+
+/*
+ * Report form handling
+ */
 function submitReportForm() {
     var pageLink = window.location.href;
-    // TODO: Trace where new lines are lost
     var problem = document.getElementById('reportText').value;
 
     var sendData = {
@@ -88,7 +168,7 @@ function submitReportForm() {
         'problem': problem
     };
 
-    var onready = function(response) {
+    var callback = function(response) {
         try {
             response = JSON.parse(response);
         } catch(ex) {
@@ -100,7 +180,7 @@ function submitReportForm() {
             showMessage('INFO', 'Докладваният проблем беше изпратен успешно.');
         }
     }
-    ajaxCall('code/tools/mail.php', sendData, onready);
+    ajaxCall('code/tools/mail.php', sendData, callback);
     hideReportForm();
 }
 
@@ -113,8 +193,8 @@ function showReportForm(hasAccess) {
 
     // Create an overlay shadowing the rest of the page
     var overlay = document.createElement('div');
-    overlay.id = 'reportOverlay';
-    overlay.className = 'report-overlay';
+    overlay.id = 'overlay';
+    overlay.className = 'overlay';
     document.body.appendChild(overlay);
 
     // Create the report form and show it to the user
@@ -124,7 +204,6 @@ function showReportForm(hasAccess) {
     reportForm.innerHTML = '' +
         '<div class="report-close" onclick="hideReportForm();"><i class="fa fa-close fa-fw"></i></div>' +
         '<h2>Report a problem</h2>' +
-        '<div class="separator"></div>' +
         '<br>' +
         '<div class="italic right" style="font-size: 0.8em;">On page: ' + window.location.href + '</div>' +
         '<textarea name="problem" class="report-problem" id="reportText"></textarea>' +
@@ -133,19 +212,19 @@ function showReportForm(hasAccess) {
         '</div>' +
     '';
     lastOnKeyDownEvent = document.onkeydown;
-    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event);}
+    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideReportForm();});}
 
     document.body.appendChild(reportForm);
     reportForm.className = 'report-form fade-in';
-    overlay.className = 'report-overlay fade-in-overlay';
+    overlay.className = 'overlay fade-in-overlay';
 }
 
 function hideReportForm() {
     document.onkeydown = lastOnKeyDownEvent;
-    var overlay = document.getElementById('reportOverlay');
+    var overlay = document.getElementById('overlay');
     var reportForm = document.getElementById('reportForm');
     reportForm.className = 'report-form fade-out';
-    overlay.className = 'report-overlay fade-out-overlay';
+    overlay.className = 'overlay fade-out-overlay';
     setTimeout(function() {
         document.body.removeChild(reportForm);
     }, 300);
