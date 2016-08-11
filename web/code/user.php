@@ -55,8 +55,8 @@ class User {
             if (!preg_match(self::$user_info_re, basename($entry))) {
                 continue;
             }
-            $json = file_get_contents($GLOBALS['PATH_USERS'] . $entry);
-            $info = json_decode($json, true);
+            $fileName = sprintf("%s/%s", $GLOBALS['PATH_USERS'], $entry);
+            $info = json_decode(file_get_contents($fileName), true);
             if (strcasecmp($info['username'], $username) == 0) {
                 return User::instanceFromJson($info);
             }
@@ -72,9 +72,9 @@ class User {
             if (!preg_match(self::$user_info_re, basename($entry))) {
                 continue;
             }
-            $json = file_get_contents($GLOBALS['PATH_USERS'] . $entry);
-            $info = json_decode($json, true);
-            if ($info['username'] == $username) {
+            $fileName = sprintf("%s/%s", $GLOBALS['PATH_USERS'], $entry);
+            $info = json_decode(file_get_contents($fileName), true);
+            if (strcasecmp($info['username'], $username) == 0) {
                 return false;
             }
             $id = max(array($id, $info['id'] + 1));
@@ -100,8 +100,8 @@ class User {
         );
 
         $fileName = sprintf('%s/user_%05d.json', $GLOBALS['PATH_USERS'], $id);
-        $userFile = fopen($fileName, 'w') or die('Unable to create file ' . $fileName . '!');
-        fwrite($userFile, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $file = fopen($fileName, 'w') or die('Unable to create file ' . $fileName . '!');
+        fwrite($file, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         return true;
    }

@@ -3,8 +3,8 @@ require_once('common.php');
 require_once('page.php');
 
 class ProblemsPage extends Page {
-    private $PROBLEM_INFO = '/problem_info.json';
-    private $PROBLEM_STATEMENT = '/problem_statement.html';
+    private static $PROBLEM_INFO = '/problem_info.json';
+    private static $PROBLEM_STATEMENT = '/problem_statement.html';
     
     public function getTitle() {
         return 'O(N)::Problems';
@@ -17,8 +17,9 @@ class ProblemsPage extends Page {
             if ($dir == '.' || $dir == '..') {
                 continue;
             }
-            $json = file_get_contents($GLOBALS['PATH_PROBLEMS'] . $dir . $this->PROBLEM_INFO);
-            $info = json_decode($json);
+            $fileName = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $dir, ProblemsPage::$PROBLEM_INFO);
+
+            $info = json_decode(file_get_contents($fileName));
             $id = $info->{'id'};
             $name = $info->{'name'};
             $difficulty = $info->{'difficulty'};
@@ -66,14 +67,15 @@ class ProblemsPage extends Page {
             if ($dir == '.' || $dir == '..') {
                 continue;
             }
-            $json = file_get_contents($GLOBALS['PATH_PROBLEMS'] . $dir . $this->PROBLEM_INFO);
-            $info = json_decode($json);
+            $fileName = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $dir, ProblemsPage::$PROBLEM_INFO);
+            $info = json_decode(file_get_contents($fileName));
             if ($info->{'id'} == $id) {
                 $name = $info->{'name'};
                 $source = $info->{'source'};
                 $tl = $info->{'time_limit'};
                 $ml = $info->{'memory_limit'};
-                $statement = file_get_contents($GLOBALS['PATH_PROBLEMS'] . $dir . $this->PROBLEM_STATEMENT);
+                $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $dir, ProblemsPage::$PROBLEM_STATEMENT);
+                $statement = file_get_contents($statementFile);
 
                 $submit = $this->user->getAccess() < 1 ? '' : '
                         <div class="problem-submit">

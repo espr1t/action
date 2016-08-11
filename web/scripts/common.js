@@ -1,5 +1,6 @@
 /*
  * Detect language mock
+ * Possible languages: {C++, Java, Python}
  */
 function detectLanguage(source) {
     return 'C++';
@@ -13,7 +14,7 @@ function ajaxCall(url, data, callback) {
     var args = '';
     for (var field in data) {
         if (data.hasOwnProperty(field)) {
-            args += (first ? '' : '&') + field + '=' + data[field];
+            args += (first ? '' : '&') + field + '=' + encodeURIComponent(data[field]);
             first = false;
         }
     }
@@ -21,7 +22,7 @@ function ajaxCall(url, data, callback) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (xhttp.readyState == 4) {
-            callback(xhttp.status == 200 ? xhttp.responseText : 'ERROR');
+            callback(xhttp.status == 200 ? xhttp.responseText : '{"status" : "ERROR"}');
         }
     }
     xhttp.open('POST', url, true);
@@ -147,16 +148,23 @@ function submitSolution() {
         'source' : source,
         'language' : language
     };
+
     var callback = function(response) {
-        if (isNaN(response)) {
-            showMessage('ERROR', 'Решението не може да бъде изпратено!');
-            hideSubmitForm();
+        try {
+            response = JSON.parse(response);
+        } catch(ex) {
+            response = '';
+        }
+        if (!response || response.status != 'OK') {
+            showMessage('ERROR', 'Решението не може да бъде изпратено в момента!');
         } else {
-            window.location.href = window.location.href + '/' + response;
+            window.location.href = window.location.href + '/' + response.id;
             exit();
         }
     }
-    ajaxCall('code/tools/submit.php', data, callback);
+
+    ajaxCall('/code/tools/submit.php', data, callback);
+    hideSubmitForm();
 }
 
 /*
@@ -166,7 +174,7 @@ function submitReportForm() {
     var pageLink = window.location.href;
     var problem = document.getElementById('reportText').value;
 
-    var sendData = {
+    var data = {
         'link': pageLink,
         'problem': problem
     };
@@ -183,7 +191,8 @@ function submitReportForm() {
             showMessage('INFO', 'Докладваният проблем беше изпратен успешно.');
         }
     }
-    ajaxCall('code/tools/mail.php', sendData, callback);
+
+    ajaxCall('/code/tools/mail.php', data, callback);
     hideReportForm();
 }
 
