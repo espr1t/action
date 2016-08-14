@@ -1,12 +1,4 @@
 /*
- * Detect language mock
- * Possible languages: {C++, Java, Python}
- */
-function detectLanguage(source) {
-    return 'C++';
-}
-
-/*
  * AJAX calls
  */
 function ajaxCall(url, data, callback) {

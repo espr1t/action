@@ -10,6 +10,10 @@ class ProblemsPage extends Page {
         return 'O(N)::Problems';
     }
     
+    public function getExtraScripts() {
+        return array('/scripts/language_detector.js');
+    }
+
     private function getAllProblems() {
         $problems = '';
         $dirs = scandir($GLOBALS['PATH_PROBLEMS']);
