@@ -13,7 +13,7 @@ if ($user == null || $user->getAccess() < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
     ));
 }
 
-if (!passSpamProtection('submit.txt', $user, $SPAM_LIMIT)) {
+if (!passSpamProtection('submit_log.txt', $user, $SPAM_LIMIT)) {
     printAjaxResponse(array(
         'status' => 'SPAM'
     ));

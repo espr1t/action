@@ -13,7 +13,7 @@ if ($user == null || $user->getAccess() < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
     ));
 }
 
-if (!passSpamProtection('mail.txt', $user, $SPAM_LIMIT)) {
+if (!passSpamProtection('mail_log.txt', $user, $SPAM_LIMIT)) {
     printAjaxResponse(array(
         'status' => 'SPAM'
     ));
