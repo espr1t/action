@@ -17,8 +17,8 @@ class RankingPage extends Page {
                 continue;
             }
 
-            $json = file_get_contents($GLOBALS['PATH_USERS'] . $entry);
-            $info = json_decode($json, true);
+            $fileName = sprintf("%s/%s", $GLOBALS['PATH_USERS'], $entry);
+            $info = json_decode(file_get_contents($fileName), true);
 
             if ($info['username'] == 'anonymous') {
                 continue;
@@ -45,7 +45,7 @@ class RankingPage extends Page {
     public function getContent() {
         $ranking = $this->getRanking();
         $table = '
-            <table class="ranking">
+            <table class="default">
                 <tr>
                     <th>#</th><th>Потребител</th><th>Име</th><th>Град</th><th>Задачи</th><th>Постижения</th><th>Точки</th>
                 </tr>

@@ -19,7 +19,8 @@ class HomePage extends Page {
             if ($fileName == '.' || $fileName == '..') {
                 continue;
             }
-            $file = fopen($GLOBALS['PATH_NEWS'] . $fileName, 'r');
+            $filePath = sprintf('%s/%s', $GLOBALS['PATH_NEWS'], $fileName);
+            $file = fopen($filePath, 'r');
             $title = fgets($file);
             $date = fgets($file);
             $body = '';

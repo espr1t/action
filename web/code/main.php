@@ -27,9 +27,9 @@ switch ($_GET['page']) {
         require_once('problems.php');
         $page = new ProblemsPage($user);
         break;
-    case 'status':
-        require_once('status.php');
-        $page = new StatusPage($user);
+    case 'queue':
+        require_once('queue.php');
+        $page = new QueuePage($user);
         break;
     case 'training':
         require_once('training.php');
@@ -122,13 +122,13 @@ function userInfo($user) {
                         <tr>
                             <td class="button"><a href="/home"><div class="button">HOME</div></a></td>
                             <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
-                            <td class="button"><a href="/status"><div class="button">STATUS</div></a></td>
+                            <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
                             <td class="logo">
                                 <div class="logo noselect">
                                     act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span>
                                 </div>
                             </td>
-                            <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
+                            <td class="button"><a href="/queue"><div class="button">QUEUE</div></a></td>
                             <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
                             <td class="button"><?php
                                     if ($user->getId() == -1) {

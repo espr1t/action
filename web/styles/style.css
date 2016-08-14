@@ -628,7 +628,12 @@ div.report-close {
     position: absolute;
     margin-left: 512px;
     margin-top: -12px;
+    color: #555555;
+}
+
+div.report-close:hover {
     cursor: pointer;
+    color: #000000;
 }
 
 textarea.report-problem {
@@ -639,7 +644,7 @@ textarea.report-problem {
 
 div.submit-form {
     position: fixed;
-    height: 480px;
+    height: 470px;
     width: 600px;
     top: 50%;
     left: 50%;
@@ -657,7 +662,12 @@ div.submit-close {
     position: absolute;
     margin-left: 612px;
     margin-top: -12px;
+    color: #555555;
+}
+
+div.submit-close:hover {
     cursor: pointer;
+    color: #000000;
 }
 
 textarea.submit-source {
@@ -761,12 +771,12 @@ div.fade-out-overlay {
     to {opacity: 0;}
 }
 
-table.ranking {
+table.default {
     width: 100%;
     line-height: 1.5em;
 }
 
-table.ranking th {
+table.default th {
     font-weight: bold;
     text-align: center;
     color: #FFFFFF;
@@ -775,12 +785,24 @@ table.ranking th {
     border-radius: 2px;
 }
 
-table.ranking td {
+table.default td {
     text-align: center;
     border-radius: 2px;
     padding: 0 2px;
 }
 
-table.ranking tr.ranking-row-even {
+table.default tr.default-even-row {
     background-color: #F9F9F9;
+}
+
+table.red th {
+    background-color: #DD4337;
+}
+
+table.green th {
+    background-color: #129D5A;
+}
+
+table.green th {
+    background-color: #CCCCCC;
 }

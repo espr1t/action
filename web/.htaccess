@@ -11,7 +11,7 @@ RewriteEngine on
 RewriteRule    ^$                           /code/main.php?page=home                            [NC,L]
 RewriteRule    ^home$                       /code/main.php?page=home                            [NC,L,QSA]
 RewriteRule    ^problems$                   /code/main.php?page=problems                        [NC,L,QSA]
-RewriteRule    ^status$                     /code/main.php?page=status                          [NC,L,QSA]
+RewriteRule    ^queue$                      /code/main.php?page=queue                           [NC,L,QSA]
 RewriteRule    ^training$                   /code/main.php?page=training                        [NC,L,QSA]
 RewriteRule    ^ranking$                    /code/main.php?page=ranking                         [NC,L,QSA]
 RewriteRule    ^login$                      /code/main.php?page=login                           [NC,L,QSA]
@@ -23,7 +23,7 @@ RewriteRule    ^help$                       /code/main.php?page=help            
 RewriteRule    ^stats$                      /code/main.php?page=stats                           [NC,L,QSA]
 
 # Problem page
-RewriteRule    ^problems/([0-9]+)$          /code/main.php?page=problems&problem=$1             [NC,L,QSA]
+RewriteRule    ^problems/(\d+)$             /code/main.php?page=problems&problem=$1             [NC,L,QSA]
 
 # User profile page
 RewriteRule    ^users/(\w[\w.]{1,15})$      /code/main.php?page=profile&user=$1                 [NC,L,QSA]
