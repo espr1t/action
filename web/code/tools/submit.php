@@ -33,26 +33,25 @@ if (!passSpamProtection('submit.txt', $user, $SPAM_LIMIT)) {
         mkdir(sprintf('%s/%02d', $GLOBALS['PATH_SUBMISSIONS'], $bucket));
     }
 
-    $file = fopen('bla.txt', 'w');
-    fwrite($file, $_POST['source']);
-    $extension = $GLOBALS['LANGUAGE_EXTENSIONS'][$_POST['language']];
-    $sourceFile = sprintf('%s/%02d/%09d.%s', $GLOBALS['PATH_SUBMISSIONS'], $bucket, $id, $extension);
-
     // Populate submission info
     $info = array(
         'id' => $id,
         'timestamp' => time(),
         'userId' => $user->getId(),
         'userName' => $user->getUsername(),
-        'problem' => intval($_POST['problem']),
+        'problemId' => intval($_POST['problem']),
         'language' => $_POST['language'],
         'results' => [],
-        'score' => 0.0
+        'message' => ''
     );
 
-    // Create info and source files for this submission
+    // Create the info file for this submission
     $file = fopen($infoFile, 'w') or die('Unable to create file ' . $infoFile . '!');
     fwrite($file, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    // Write also the actual source of the submission
+    $extension = $GLOBALS['LANGUAGE_EXTENSIONS'][$_POST['language']];
+    $sourceFile = sprintf('%s/%02d/%09d.%s', $GLOBALS['PATH_SUBMISSIONS'], $bucket, $id, $extension);
 
     $file = fopen($sourceFile, 'w') or die('Unable to create file ' . $sourceFile . '!');
     fwrite($file, $_POST['source']);
