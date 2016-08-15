@@ -11,23 +11,18 @@ var passwordRe = /^.{1,32}$/;
 var emailRe = /^[A-Za-z0-9_.+*=$^-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 
 
-function saltHashPassword(username, password) {
-    return md5(password + username);
+function saltHashPassword(password) {
+    return md5(password + 'frontendsalt');
 }
 
 function saltHashLoginPassword() {
-    var username = document.forms["login"]["username"].value;
-    var password = document.forms["login"]["password"].value;
-    document.forms["login"]["password"].value = saltHashPassword(username, password);
+    document.forms["login"]["password"].value = saltHashPassword(document.forms["login"]["password"].value);
     return true;
 }
 
 function saltHashRegisterPasswords() {
-    var username = document.forms["register"]["username"].value;
-    var password1 = document.forms["register"]["password1"].value;
-    var password2 = document.forms["register"]["password2"].value;
-    document.forms["register"]["password1"].value = saltHashPassword(username, password1);
-    document.forms["register"]["password2"].value = saltHashPassword(username, password2);
+    document.forms["register"]["password1"].value = saltHashPassword(document.forms["register"]["password1"].value);
+    document.forms["register"]["password2"].value = saltHashPassword(document.forms["register"]["password2"].value);
     return true;
 }
 
