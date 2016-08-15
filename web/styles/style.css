@@ -367,6 +367,12 @@ div.user {
     color: #000000;
 }
 
+div.problem {
+    display: inline;
+    font-weight: bold;
+    color: #000000;
+}
+
 div.profile-head {
     position: relative;
     height: 82px;
@@ -678,6 +684,34 @@ textarea.submit-source {
     padding: 8px;
 }
 
+div.submission-status {
+    position: fixed;
+    height: 480px;
+    width: 600px;
+    top: 50%;
+    left: 50%;
+    margin: -240px auto 0px -340px;
+    padding: 20px 40px 20px 40px;
+    background: #FFFFFF;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    border-radius: 4px;
+    z-index: 89;
+}
+
+div.submission-close {
+    display: inline-block;
+    position: absolute;
+    margin-left: 612px;
+    margin-top: -12px;
+    color: #555555;
+}
+
+div.submission-close:hover {
+    cursor: pointer;
+    color: #000000;
+}
+
 div.message {
     position: fixed;
     width: 500px;
@@ -795,6 +829,10 @@ table.default tr.default-even-row {
     background-color: #F9F9F9;
 }
 
+table.blue th {
+    background-color: #0099FF;
+}
+
 table.red th {
     background-color: #DD4337;
 }
@@ -803,6 +841,10 @@ table.green th {
     background-color: #129D5A;
 }
 
-table.green th {
+table.gray th {
     background-color: #CCCCCC;
+}
+
+span.blue {
+    color: #0099FF;
 }

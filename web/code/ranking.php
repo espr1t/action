@@ -25,7 +25,7 @@ class RankingPage extends Page {
             }
 
             $place = $place + 1;
-            $username = '<a href="/users/' . $info['username'] . '"><div class="user">' . $info['username'] . '</div></a>';
+            $user = getUserLink($info['username']);
             $solved = 1;
             $achievements = 1;
             $score = 42;
@@ -34,7 +34,7 @@ class RankingPage extends Page {
             }
             $row = '
                 <tr ' . ($place % 2 == 0 ? 'class="ranking-row-even"' : '') . '>
-                    <td>' . $place . '</td><td>' . $username . '</td><td>' . $info['name'] . '</td><td>' . $info['town'] . '</td><td>' . $solved . '</td><td>' . $achievements . '</td><td>' . $score . '</td>
+                    <td>' . $place . '</td><td>' . $user . '</td><td>' . $info['name'] . '</td><td>' . $info['town'] . '</td><td>' . $solved . '</td><td>' . $achievements . '</td><td>' . $score . '</td>
                 </tr>
             ';
             $ranking .= $row;

@@ -1,6 +1,7 @@
 <?php
 require_once('../user.php');
 require_once('../common.php');
+require_once('logic.php');
 
 session_start();
 
@@ -34,20 +35,28 @@ if (!passSpamProtection('submit_log.txt', $user, $SPAM_LIMIT)) {
     }
 
     // Populate submission info
+    $problemInfo = Logic::getProblemInfo(intval($_POST['problemId']));
+    $results = array();
+    for ($i = 0; $i < count($problemInfo['tests']); $i = $i + 1) {
+        $results[$i] = $GLOBALS['STATUS_WAITING'];
+    }
+
     $info = array(
         'id' => $id,
         'timestamp' => time(),
         'userId' => $user->getId(),
         'userName' => $user->getUsername(),
-        'problemId' => intval($_POST['problem']),
+        'problemId' => $problemInfo['id'],
+        'problemName' => $problemInfo['name'],
         'language' => $_POST['language'],
-        'results' => [],
+        'results' => $results,
         'message' => ''
     );
 
     // Create the info file for this submission
     $file = fopen($infoFile, 'w') or die('Unable to create file ' . $infoFile . '!');
     fwrite($file, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    fclose($file);
 
     // Write also the actual source of the submission
     $extension = $GLOBALS['LANGUAGE_EXTENSIONS'][$_POST['language']];
@@ -55,6 +64,13 @@ if (!passSpamProtection('submit_log.txt', $user, $SPAM_LIMIT)) {
 
     $file = fopen($sourceFile, 'w') or die('Unable to create file ' . $sourceFile . '!');
     fwrite($file, $_POST['source']);
+    fclose($file);
+
+    // Record the request in the submission queue.
+    $file = fopen($GLOBALS['SUBMIT_QUEUE_FILENAME'], 'a')
+            or die('Unable to append to file ' . $GLOBALS['SUBMIT_QUEUE_FILENAME'] . '!');
+    fprintf($file, "%d\n", $id);
+    fclose($file);
 
     // TODO: Send a request to the grader
 

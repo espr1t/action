@@ -1,6 +1,7 @@
 <?php
 require_once('common.php');
 require_once('page.php');
+require_once('grader/logic.php');
 
 class QueuePage extends Page {
     public function getTitle() {
@@ -42,10 +43,35 @@ class QueuePage extends Page {
             ' . $doneTable . '
         ');
 
+        $queueFile = sprintf('%s/%s', $GLOBALS['PATH_GRADER'], $GLOBALS['SUBMIT_QUEUE_FILENAME']);
+        $submissions = preg_split('/\s+/', file_get_contents($queueFile));
+
         $queueList = '';
-        $queueList .= '<tr><td>1</td><td>ThinkCreative</td><td>Input/Output</td><td>01:55</td><td>91%</td><td>Running</td></tr>';
-        $queueList .= '<tr><td>2</td><td>espr1t</td><td>A * B</td><td>01:56</td><td>42%</td><td>Running</td></tr>';
-        $queueList .= '<tr><td>3</td><td>ThinkCreative</td><td>Input/Output</td><td>01:56</td><td>0%</td><td>Waiting</td></tr>';
+        for ($i = 0; $i < count($submissions); $i = $i + 1) {
+            $id = intval($submissions[$i]);
+            if (!$id) {
+                continue;
+            }
+            $info = Logic::getSubmissionInfo($id);
+            $progress = 0;
+            foreach ($info['results'] as $result) {
+                if ($result != $GLOBALS['STATUS_WAITING'] && $result != $GLOBALS['STATUS_RUNNING']) {
+                    $progress = $progress + 1;
+                }
+            }
+            $progress = sprintf('%d%%', $progress * 100 / count($info['results']));
+
+            $queueList .= '
+                <tr>
+                    <td>' . ($i + 1) . '</td>
+                    <td>' . getUserLink($info['userName']) . '</td>
+                    <td>' . getProblemLink($info['problemId'], $info['problemName']) . '</td>
+                    <td>' . $info['submissionTime'] . '</td>
+                    <td>' . $progress . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$info['status']] . '</td>
+                </tr>
+            ';
+        }
 
         $queueTable = '
             <table class="default">
@@ -66,21 +92,9 @@ class QueuePage extends Page {
             ' . $queueTable . '
         ');
 
-        $grader = inBox('
-            <h2>Грейдър</h2>
-            <b>Процесор:</b> Intel Core i5 :: 4.2GHz<br>
-            <b>Рам:</b> Kingston DDR4 8GB :: 2133MHz<br>
-            <b>Харддиск:</b> Corsair Force SSD :: 240GB<br>
+        $compilers = '<div class="center" style="margin-top: -6px; margin-bottom: 6px;">Информация за ползваните <a href="help#compilation">компилатори</a> и конфигурацията на <a href="help#grader">тестващата машина</a>.</div>';
 
-            <br>
-
-            <h2>Компилация</h2>
-            <b>C++ (GCC 4.9.4):</b> <pre>g++ -O2 -std=c++11 -o &lt;source&gt; &lt;source&gt;.cpp</pre><br>
-            <b>Java (OpenJDK 8):</b> <pre>-Xmx=ML</pre><br>
-            <b>Python (3.5):</b> <pre>python &lt;source&gt;</pre></br>
-        ');
-
-        return $head . $time . $done . $queue . $grader;
+        return $head . $time . $done . $queue . $compilers;
     }
     
 }

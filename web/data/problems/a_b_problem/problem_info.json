@@ -5,9 +5,9 @@
     "folder": "a_b_problem",
     "time_limit": 0.1,
     "memory_limit": 0.5,
-    "type": "standard",
+    "type": "IOI",
     "difficulty": "trivial",
-    "tags": ["implementation"],
+    "tags": ["math"],
     "source": "informatika.bg training",
     "checker": "",
     "executor": "",
@@ -22,7 +22,8 @@
                 "name": "a_b_problem_01.sol",
                 "md5": "bf93ee7cb8304ef5342bdd9db63a673e",
                 "archive": "a_b_problem_01_sol_bf93ee7cb8304ef5342bdd9db63a673e.7z"
-            }
+            },
+            "score": 33
         },
         {
             "input": {
@@ -34,7 +35,8 @@
                 "name": "a_b_problem_02.sol",
                 "md5": "ce9de2f551e2c9f868fc27005cfe0511",
                 "archive": "a_b_problem_02_sol_ce9de2f551e2c9f868fc27005cfe0511.7z"
-            }
+            },
+            "score": 33
         },
         {
             "input": {
@@ -46,9 +48,9 @@
                 "name": "a_b_problem_03.sol",
                 "md5": "c570361bdbae428fd92739aec504e2f6",
                 "archive": "a_b_problem_03_sol_c570361bdbae428fd92739aec504e2f6.7z"
-            }
+            },
+            "score": 34
         }
-        
     ],
     "submissions": [
     ],
