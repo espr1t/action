@@ -162,7 +162,7 @@ function userInfo($user) {
                         <a href="/help" class="white">help</a> |
                         <a href="/about" class="white">about</a> |
                         <a href="/stats" class="white">stats</a> |
-                        <div class="link white" onclick=<?php echo '"showReportForm(' . ($user->getAccess() >= $GLOBALS['ACCESS_REPORT_PROBLEM'] ? 'true' : 'false') . ');"' ?>>report a problem</div>
+                        <div class="link white" onclick=<?php echo '"showReportForm(' . ($user->getAccess() >= $GLOBALS['ACCESS_REPORT_PROBLEM'] ? 'true' : 'false') . ');"' ?>>report a bug</div>
                     </div>
                     <div class="footer-right">
                         <a class="white" href="https://www.facebook.com/informatika.bg/" target="_blank"><i class="fa fa-facebook fa-fw"></i></a>
