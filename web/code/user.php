@@ -28,6 +28,33 @@ class User {
         exit();
     }
 
+    public function updateInfo() {
+        $info = $this->arrayFromInstance();
+        $fileName = sprintf('%s/user_%05d.json', $GLOBALS['PATH_USERS'], $this->id);
+        $file = fopen($fileName, 'w') or die('Unable to create file ' . $fileName . '!');
+        fwrite($file, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
+
+    private function arrayFromInstance() {
+        return array(
+            'id' => $this->id,
+            'access' => $this->access,
+            'registered' => $this->registered,
+            'username' => $this->username,
+            'password' => $this->password,
+            'name' => $this->name,
+            'email' => $this->email,
+            'town' => $this->town,
+            'country' => $this->country,
+            'gender' => $this->gender,
+            'birthdate' => $this->birthdate,
+            'avatar' => $this->avatar,
+            'submissions' => $this->submissions,
+            'tried' => $this->tried,
+            'solved' => $this->solved
+        );
+    }
+
     private static function instanceFromJson($info) {
         $user = new User;
         $user->id = getValue($info, 'id');
@@ -45,7 +72,6 @@ class User {
         $user->submissions = getValue($info, 'submissions');
         $user->tried = getValue($info, 'tried');
         $user->solved = getValue($info, 'solved');
-        $user->contests = getValue($info, 'contests');
         return $user;
     }
 
@@ -95,8 +121,7 @@ class User {
             'avatar' => '',
             'submissions' => array(),
             'tried' => array(),
-            'solved' => array(),
-            'contests' => array()
+            'solved' => array()
         );
 
         $fileName = sprintf('%s/user_%05d.json', $GLOBALS['PATH_USERS'], $id);
@@ -150,20 +175,16 @@ class User {
         return $this->avatar;
     }
 
-    public function getSolved() {
+    public function &getSolved() {
         return $this->solved;
     }
 
-    public function getTried() {
+    public function &getTried() {
         return $this->tried;
     }
 
-    public function getSubmissions() {
+    public function &getSubmissions() {
         return $this->submissions;
-    }
-
-    public function getAchievemetns() {
-        return $this->achievements;
     }
 }
 

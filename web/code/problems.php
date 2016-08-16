@@ -89,16 +89,16 @@ class ProblemsPage extends Page {
 
     private function getSubmission($id, $problemId) {
         if (!is_numeric($id)) {
-            return Common::showMessage('ERROR', 'Не съществува предадено решение с този идентификатор!');
+            return showMessage('ERROR', 'Не съществува предадено решение с този идентификатор!');
         }
 
         $info = Logic::getSubmissionInfo($id);
         if ($info == null) {
-            return Common::showMessage('ERROR', 'Не съществува предадено решение с този идентификатор!');
+            return showMessage('ERROR', 'Не съществува предадено решение с този идентификатор!');
         }
 
         if ($info['userId'] != $this->user->getId()) {
-            return Common::showMessage('ERROR', 'Нямате достъп до това решение!');
+            return showMessage('ERROR', 'Нямате достъп до това решение!');
         }
 
         $color = 'green';

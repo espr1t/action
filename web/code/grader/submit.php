@@ -72,6 +72,13 @@ if (!passSpamProtection('submit_log.txt', $user, $SPAM_LIMIT)) {
     fprintf($file, "%d\n", $id);
     fclose($file);
 
+    // Record the submission in the user history
+    array_push($user->getSubmissions(), $id);
+    if (!in_array($problemInfo['id'], $user->getTried())) {
+        array_push($user->getTried(), $problemInfo['id']);
+    }
+    $user->updateInfo();
+
     // TODO: Send a request to the grader
 
     printAjaxResponse(array(
