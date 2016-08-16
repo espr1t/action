@@ -541,8 +541,15 @@ table.register tr td.right {
 }
 
 input.text {
-    padding: 2px 6px;
+    height: 1.6em;
+    padding: 2px 6px 2px 6px;
     margin: 1px 0px 1px 0px;
+    border: 1px solid #888888;
+    border-radius: 3px;
+}
+
+input.text:focus {
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.24);
 }
 
 form.login {
