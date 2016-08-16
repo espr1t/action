@@ -112,7 +112,7 @@ function userInfo($user) {
         <?php echo createHead($page); ?>
     </head>
 
-    <body>
+    <body onload="<?php echo $page->onLoad() ?>">
         <?php echo $actions ?>
         <div class="wrapper" id="wrapper">
             <!-- Header with menu -->

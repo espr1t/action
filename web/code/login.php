@@ -11,6 +11,10 @@ class LoginPage extends Page {
         return array('/scripts/authentication.js', '/scripts/md5.min.js');
     }
 
+    public function onLoad() {
+        return 'document.forms[\'login\'][\'username\'].focus();';
+    }
+
     public function getContent() {
         $error = '';
 

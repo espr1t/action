@@ -12,6 +12,10 @@ class RegisterPage extends Page {
         return array('/scripts/authentication.js', '/scripts/md5.min.js');
     }
 
+    public function onLoad() {
+        return 'document.forms[\'register\'][\'username\'].focus();';
+    }
+
     public function getContent() {
         if (isset($_POST['username'])) {
             $error = $this->registerUser();

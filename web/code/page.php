@@ -26,6 +26,10 @@ class Page {
     public function getContent() {
         return 'ERROR: Virtual method in base class.';
     }
+
+    public function onLoad() {
+        return '';
+    }
 }
 
 ?>
