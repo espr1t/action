@@ -1,7 +1,7 @@
-var styleValid = "color: #53A93F;";
-var classValid = "fa fa-check-square";
-var styleInvalid = "color: #D84A38;";
-var classInvalid = "fa fa-minus-square";
+var styleValid = 'color: #53A93F;';
+var classValid = 'fa fa-check-square';
+var styleInvalid = 'color: #D84A38;';
+var classInvalid = 'fa fa-minus-square';
 
 var usernameRe = /^\w[\w.]{1,15}$/;
 var nameRe = /^([A-Za-zА-Яа-я]|-){1,32}$/;
@@ -16,13 +16,13 @@ function saltHashPassword(password) {
 }
 
 function saltHashLoginPassword() {
-    document.forms["login"]["password"].value = saltHashPassword(document.forms["login"]["password"].value);
+    document.forms['login']['password'].value = saltHashPassword(document.forms['login']['password'].value);
     return true;
 }
 
 function saltHashRegisterPasswords() {
-    document.forms["register"]["password1"].value = saltHashPassword(document.forms["register"]["password1"].value);
-    document.forms["register"]["password2"].value = saltHashPassword(document.forms["register"]["password2"].value);
+    document.forms['register']['password1'].value = saltHashPassword(document.forms['register']['password1'].value);
+    document.forms['register']['password2'].value = saltHashPassword(document.forms['register']['password2'].value);
     return true;
 }
 
@@ -40,47 +40,47 @@ function setState(validationIcon, valid) {
 
 function validateUsername() {
     // TODO: Check against already registered users.
-    var username = document.forms["register"]["username"].value;
-    var validationIcon = document.getElementById("validationIconUsername");
+    var username = document.forms['register']['username'].value;
+    var validationIcon = document.getElementById('validationIconUsername');
     return setState(validationIcon, usernameRe.test(username));
  }
 
 function validateName(name) {
-    var name = document.forms["register"]["name"].value;
-    var validationIcon = document.getElementById("validationIconName");
+    var name = document.forms['register']['name'].value;
+    var validationIcon = document.getElementById('validationIconName');
     return setState(validationIcon, nameRe.test(name));
  }
 
 function validateSurname() {
-    var surname = document.forms["register"]["surname"].value;
-    var validationIcon = document.getElementById("validationIconSurname");
+    var surname = document.forms['register']['surname'].value;
+    var validationIcon = document.getElementById('validationIconSurname');
     return setState(validationIcon, nameRe.test(surname));
 }
 
 function validatePassword1() {
-    var password1 = document.forms["register"]["password1"].value;
-    var validationIcon = document.getElementById("validationIconPassword1");
+    var password1 = document.forms['register']['password1'].value;
+    var validationIcon = document.getElementById('validationIconPassword1');
     return setState(validationIcon, passwordRe.test(password1));
 }
 
 function validatePassword2() {
-    var password1 = document.forms["register"]["password1"].value;
-    var password2 = document.forms["register"]["password2"].value;
-    var validationIcon = document.getElementById("validationIconPassword2");
+    var password1 = document.forms['register']['password1'].value;
+    var password2 = document.forms['register']['password2'].value;
+    var validationIcon = document.getElementById('validationIconPassword2');
     return setState(validationIcon, password1 == password2);
 }
 
 function validateEmail() {
-    var email = document.forms["register"]["email"].value;
-    var validationIcon = document.getElementById("validationIconEmail");
-    return setState(validationIcon, email == "" || emailRe.test(email));
+    var email = document.forms['register']['email'].value;
+    var validationIcon = document.getElementById('validationIconEmail');
+    return setState(validationIcon, email == '' || emailRe.test(email));
 }
 
 function validateBirthdate() {
-    var birthdate = document.forms["register"]["birthdate"].value;
-    var validationIcon = document.getElementById("validationIconBirthdate");
+    var birthdate = document.forms['register']['birthdate'].value;
+    var validationIcon = document.getElementById('validationIconBirthdate');
     var valid = true;
-    if (birthdate && birthdate != "") {
+    if (birthdate && birthdate != '') {
         valid = dateRe.test(birthdate);
         if (valid) {
             year = parseInt(birthdate.substring(0, 4));
@@ -105,21 +105,21 @@ function validateBirthdate() {
 }
 
 function validateTown() {
-    var town = document.forms["register"]["town"].value;
-    var validationIcon = document.getElementById("validationIconTown");
-    return setState(validationIcon, town == "" || placeRe.test(town));
+    var town = document.forms['register']['town'].value;
+    var validationIcon = document.getElementById('validationIconTown');
+    return setState(validationIcon, town == '' || placeRe.test(town));
 }
 
 function validateCountry() {
-    var country = document.forms["register"]["country"].value;
-    var validationIcon = document.getElementById("validationIconCountry");
-    return setState(validationIcon, country == "" || placeRe.test(country));
+    var country = document.forms['register']['country'].value;
+    var validationIcon = document.getElementById('validationIconCountry');
+    return setState(validationIcon, country == '' || placeRe.test(country));
 }
 
 function validateCaptcha() {
-    var captcha = document.forms["register"]["captcha"].value;
-    var expected = document.forms["register"]["expected"].value;
-    var validationIcon = document.getElementById("validationIconCaptcha");
+    var captcha = document.forms['register']['captcha'].value;
+    var expected = document.forms['register']['expected'].value;
+    var validationIcon = document.getElementById('validationIconCaptcha');
     return setState(validationIcon, md5(captcha) == expected);
 }
 
