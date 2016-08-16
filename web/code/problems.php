@@ -20,7 +20,7 @@ class ProblemsPage extends Page {
             if ($dir == '.' || $dir == '..') {
                 continue;
             }
-            $fileName = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $dir, $GLOBALS['PROBLEM_INFO_FILENAME']);
+            $fileName = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $dir, $GLOBALS['PROBLEM_INFO_FILENAME']);
             $info = json_decode(file_get_contents($fileName), true);
             
             $solutions = count($info['accepted']);

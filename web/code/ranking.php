@@ -11,8 +11,7 @@ class RankingPage extends Page {
         $ranking = '';
 
         $place = 0;
-        $entries = scandir($GLOBALS['PATH_USERS']);
-        foreach ($entries as $entry) {
+        foreach (scandir($GLOBALS['PATH_USERS']) as $entry) {
             if (!preg_match(User::$user_info_re, basename($entry))) {
                 continue;
             }
