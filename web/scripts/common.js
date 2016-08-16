@@ -183,7 +183,7 @@ function submitSolution() {
         if (!response || response.status != 'OK') {
             showMessage('ERROR', 'Решението не може да бъде изпратено в момента!');
         } else {
-            window.location.href = window.location.href + '/' + response.id;
+            window.location.href = window.location.href + '/submissions/' + response.id;
             exit();
         }
     }

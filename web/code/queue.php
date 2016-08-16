@@ -66,7 +66,7 @@ class QueuePage extends Page {
                     <td>' . ($i + 1) . '</td>
                     <td>' . getUserLink($info['userName']) . '</td>
                     <td>' . getProblemLink($info['problemId'], $info['problemName']) . '</td>
-                    <td>' . $info['submissionTime'] . '</td>
+                    <td>' . $info['time'] . '</td>
                     <td>' . $progress . '</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$info['status']] . '</td>
                 </tr>

@@ -48,8 +48,8 @@ class Logic {
             }
         }
 
-        $info['submissionDate'] = date('d. F, Y', $info['timestamp']);
-        $info['submissionTime'] = date('H:i:s', $info['timestamp']);
+        $info['date'] = date('d. F, Y', $info['timestamp']);
+        $info['time'] = date('H:i:s', $info['timestamp']);
         $info['score'] = $score;
         $info['status'] = $status;
 

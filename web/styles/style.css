@@ -832,8 +832,8 @@ table.default td {
     padding: 0 2px;
 }
 
-table.default tr.default-even-row {
-    background-color: #F9F9F9;
+table.default tr:nth-child(odd) {
+    background: #F9F9F9;
 }
 
 table.blue th {

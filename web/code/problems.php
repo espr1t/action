@@ -58,28 +58,23 @@ class ProblemsPage extends Page {
         return $header . $orderings . $problems;
     }
 
-    private function getStatement($id) {
-        $info = Logic::getProblemInfo($id);
-        if ($info == null) {
-            return $this->getMainPage();
-        }
-
-        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $info['folder'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+    private function getStatement($problemInfo) {
+        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problemInfo['folder'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
 
-        $submit = $this->user->getAccess() < 1 ? '' : '
+        $submit = $this->user->getAccess() < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
                 <div class="problem-submit">
                     <input type="submit" value="Предай решение" onclick="showSubmitForm();" class="button button-color-blue button-large">
                     <br>
-                    <a href="" style="font-size: 0.8em;">Предадени решения</a>
+                    <a href="/problems/' . $problemInfo['id'] . '/submissions" style="font-size: 0.8em;">Предадени решения</a>
                 </div>
         ';
 
         return '
             <div class="box">
-                <div class="problem-title" id="problem-title">' . $info['name'] . '</div>
-                <div class="problem-resources">Time Limit: ' . $info['time_limit'] . 's, Memory Limit: ' . $info['memory_limit'] . 'MB</div>
-                <div class="problem-source">' . $info['source'] . '</div>
+                <div class="problem-title" id="problem-title">' . $problemInfo['name'] . '</div>
+                <div class="problem-resources">Time Limit: ' . $problemInfo['time_limit'] . 's, Memory Limit: ' . $problemInfo['memory_limit'] . 'MB</div>
+                <div class="problem-source">' . $problemInfo['source'] . '</div>
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submit . '
@@ -87,24 +82,24 @@ class ProblemsPage extends Page {
         ';
     }
 
-    private function getSubmission($id, $problemId) {
+    private function getSubmission($problemInfo, $id) {
         if (!is_numeric($id)) {
-            return showMessage('ERROR', 'Не съществува предадено решение с този идентификатор!');
+            return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        $info = Logic::getSubmissionInfo($id);
-        if ($info == null) {
-            return showMessage('ERROR', 'Не съществува предадено решение с този идентификатор!');
+        $submissionInfo = Logic::getSubmissionInfo($id);
+        if ($submissionInfo == null) {
+            return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        if ($info['userId'] != $this->user->getId()) {
+        if ($submissionInfo['userId'] != $this->user->getId()) {
             return showMessage('ERROR', 'Нямате достъп до това решение!');
         }
 
         $color = 'green';
-        if ($info['status'] >= $GLOBALS['STATUS_RUNNING']) {
+        if ($submissionInfo['status'] >= $GLOBALS['STATUS_RUNNING']) {
             $color = 'gray';
-        } else if ($info['status'] >= $GLOBALS['STATUS_WRONG_ANSWER']) {
+        } else if ($submissionInfo['status'] >= $GLOBALS['STATUS_WRONG_ANSWER']) {
             $color = 'red';
         }
 
@@ -117,15 +112,15 @@ class ProblemsPage extends Page {
                 </tr>
                 <tr>
                     <td>-</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$info['status']] . '</td>
-                    <td>' . $info['score'] . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submissionInfo['status']] . '</td>
+                    <td>' . $submissionInfo['score'] . '</td>
                 </tr>
             </table>
         ';
 
         $testResults = '';
-        for ($i = 0; $i < count($info['results']); $i = $i + 1) {
-            $result = $info['results'][$i];
+        for ($i = 0; $i < count($submissionInfo['results']); $i = $i + 1) {
+            $result = $submissionInfo['results'][$i];
             $testResults .= '
                 <tr>
                     <td>' . $i . '</td>
@@ -148,31 +143,84 @@ class ProblemsPage extends Page {
 
         return '
             <div id="submissionStatus" class="submission-status fade-in">
-                <div class="submission-close" onclick="hideSubmissionStatus(' . $problemId . ');"><i class="fa fa-close fa-fw"></i></div>
-                <h2><span class="blue">' . $info['problemName'] . '</span> :: Статус на решение</h2>
-                <div class="right smaller">' . $info['submissionDate'] . ' | ' . $info['submissionTime'] . '</div>
+                <div class="submission-close" onclick="hideSubmissionStatus(' . $problemInfo['id'] . ');"><i class="fa fa-close fa-fw"></i></div>
+                <h2><span class="blue">' . $problemInfo['name'] . '</span> :: Статус на решение</h2>
+                <div class="right smaller">' . $submissionInfo['date'] . ' | ' . $submissionInfo['time'] . '</div>
                 <br>
                 ' . $summaryTable . '
                 <br>
                 ' . $detailedTable . '
             </div>
             <script>
-                showSubmissionStatus(' . $problemId . ');
+                showSubmissionStatus(' . $problemInfo['id'] . ');
+            </script>
+        ';
+    }
+
+    private function getAllSubmissions($problemInfo) {
+        $submissionList = '';
+        $counter = 0;
+        foreach ($this->user->getSubmissions() as $submissionId) {
+            $submission = Logic::getSubmissionInfo($submissionId);
+            if ($submission['problemId'] == $problemInfo['id']) {
+                $counter = $counter + 1;
+                $submissionLink = '<a href="/problems/' . $problemInfo['id'] . '/submissions/' . $submissionId . '">' . $submissionId . '</a>';
+                $submissionList .= '
+                    <tr>
+                        <td>' . $counter . '</td>
+                        <td>' . $submission['date'] . '</td>
+                        <td>' . $submission['time'] . '</td>
+                        <td>' . $submissionLink . '</td>
+                        <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submission['status']] . '</td>
+                        <td>' . $submission['score'] . '</td>
+                    </tr>
+                ';
+            }
+        }
+        $submissionTable = '
+            <table class="default">
+                <tr>
+                    <th>#</th>
+                    <th>Дата</th>
+                    <th>Час</th>
+                    <th>Идентификатор</th>
+                    <th>Статус</th>
+                    <th>Точки</th>
+                </tr>
+                ' . $submissionList . '
+            </table>
+        ';
+
+        return '
+            <div id="submissionStatus" class="submission-status fade-in">
+                <div class="submission-close" onclick="hideSubmissionStatus(' . $problemInfo['id'] . ');"><i class="fa fa-close fa-fw"></i></div>
+                <h2><span class="blue">' . $problemInfo['name'] . '</span> :: Ваши решения</h2>
+                ' . $submissionTable . '
+            </div>
+            <script>
+                showSubmissionStatus(' . $problemInfo['id'] . ');
             </script>
         ';
     }
 
     public function getContent() {
-        $content = '';
         if (isset($_GET['problem'])) {
-            $content = $this->getStatement($_GET['problem']);
-            if (isset($_GET['submission'])) {
-                $content .= $this->getSubmission($_GET['submission'], $_GET['problem']);
+            $problemInfo = Logic::getProblemInfo($_GET['problem']);
+            if ($problemInfo == null) {
+                return $this->getMainPage();
             }
-        } else {
-            $content = $this->getMainPage();
+
+            $content = $this->getStatement($problemInfo);
+            if (isset($_GET['submission'])) {
+                if ($_GET['submission'] == 'all') {
+                    $content .= $this->getAllSubmissions($problemInfo);
+                } else {
+                    $content .= $this->getSubmission($problemInfo, $_GET['submission']);
+                }
+            }
+            return $content;
         }
-        return $content;
+        return $this->getMainPage();
     }
 }
 
