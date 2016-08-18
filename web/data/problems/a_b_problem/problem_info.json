@@ -7,8 +7,10 @@
     "memory_limit": 0.5,
     "type": "IOI",
     "difficulty": "trivial",
-    "tags": ["math"],
-    "source": "informatika.bg training",
+    "tags": [
+        "math"
+    ],
+    "origin": "informatika.bg training",
     "checker": "",
     "executor": "",
     "tests": [
@@ -52,8 +54,6 @@
             "score": 34
         }
     ],
-    "submissions": [
-    ],
-    "accepted": [
+    "submits": [
     ]
 }

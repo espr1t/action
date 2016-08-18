@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-require_once('common.php');
-require_once('user.php');
+require_once('logic/common.php');
+require_once('logic/user.php');
 
-$user = !isset($_SESSION['username']) ? new User() : User::getUser($_SESSION['username']);
+$user = !isset($_SESSION['username']) ? new User() : User::get($_SESSION['username']);
 if ($user == null) {
     $user = new User();
 }
@@ -99,8 +99,8 @@ function createHead($page) {
 }
 
 function userInfo($user) {
-    if ($user->getUsername() != "anonymous") {
-        return '<div class="userInfo">logged in as: ' . getUserLink($user->getUsername()) . '</div>';
+    if ($user->username != "anonymous") {
+        return '<div class="userInfo">logged in as: ' . getUserLink($user->username) . '</div>';
     }
     return '';
 }
@@ -131,7 +131,7 @@ function userInfo($user) {
                             <td class="button"><a href="/queue"><div class="button">QUEUE</div></a></td>
                             <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
                             <td class="button"><?php
-                                    if ($user->getId() == -1) {
+                                    if ($user->id == -1) {
                                         echo '<a href="/login"><div class="button">LOGIN</div></a>';
                                     } else {
                                         echo '<a href="/logout"><div class="button">LOGOUT</div></a>';
@@ -162,7 +162,7 @@ function userInfo($user) {
                         <a href="/help" class="white">help</a> |
                         <a href="/about" class="white">about</a> |
                         <a href="/stats" class="white">stats</a> |
-                        <div class="link white" onclick=<?php echo '"showReportForm(' . ($user->getAccess() >= $GLOBALS['ACCESS_REPORT_PROBLEM'] ? 'true' : 'false') . ');"' ?>>report a bug</div>
+                        <div class="link white" onclick=<?php echo '"showReportForm(' . ($user->access >= $GLOBALS['ACCESS_REPORT_PROBLEM'] ? 'true' : 'false') . ');"' ?>>report a bug</div>
                     </div>
                     <div class="footer-right">
                         <a class="white" href="https://www.facebook.com/informatika.bg/" target="_blank"><i class="fa fa-facebook fa-fw"></i></a>

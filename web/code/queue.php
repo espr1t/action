@@ -1,7 +1,7 @@
 <?php
-require_once('common.php');
+require_once('logic/common.php');
+require_once('logic/submit.php');
 require_once('page.php');
-require_once('grader/logic.php');
 
 class QueuePage extends Page {
     public function getTitle() {
@@ -43,7 +43,7 @@ class QueuePage extends Page {
             ' . $doneTable . '
         ');
 
-        $queueFile = sprintf('%s/%s', $GLOBALS['PATH_GRADER'], $GLOBALS['SUBMIT_QUEUE_FILENAME']);
+        $queueFile = sprintf('%s/%s', $GLOBALS['PATH_LOGIC'], $GLOBALS['SUBMIT_QUEUE_FILENAME']);
         $submissions = preg_split('/\s+/', file_get_contents($queueFile));
 
         $queueList = '';
@@ -52,7 +52,7 @@ class QueuePage extends Page {
             if (!$id) {
                 continue;
             }
-            $info = Logic::getSubmissionInfo($id);
+            $info = Submit::getSubmitInfo($id);
             $progress = 0;
             foreach ($info['results'] as $result) {
                 if ($result != $GLOBALS['STATUS_WAITING'] && $result != $GLOBALS['STATUS_RUNNING']) {

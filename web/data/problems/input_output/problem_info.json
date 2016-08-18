@@ -8,7 +8,7 @@
     "type": "standard",
     "difficulty": "trivial",
     "tags": ["implementation"],
-    "source": "informatika.bg training",
+    "origin": "informatika.bg training",
     "checker": "",
     "executor": "",
     "tests": [
@@ -26,8 +26,6 @@
             "score": 100
         }
     ],
-    "submissions": [
-    ],
-    "accepted": [
+    "submits": [
     ]
 }

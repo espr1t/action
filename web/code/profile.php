@@ -1,12 +1,13 @@
 <?php
-require_once('common.php');
+require_once('logic/common.php');
+require_once('logic/submit.php');
 require_once('page.php');
 
 class ProfilePage extends Page {
     private $profile;
     
     public function getTitle() {
-        return 'O(N)::' . $this->profile->getUsername();
+        return 'O(N)::' . $this->profile->username;
     }
 
     public function init() {
@@ -14,7 +15,7 @@ class ProfilePage extends Page {
             header('Location: /error');
             exit();
         }
-        $this->profile = User::getUser($_GET['user']);
+        $this->profile = User::get($_GET['user']);
         if ($this->profile == null) {
             header('Location: /error');
             exit();
@@ -26,95 +27,106 @@ class ProfilePage extends Page {
 
         // Profile heading (avatar + nickname)
         $avatarUrl = '/data/users/avatars/default_avatar.png';
-        if ($this->profile->getAvatar() != '') {
-            $avatarUrl = '/data/users/avatars/' . $this->profile->getAvatar();
+        if ($this->profile->avatar != '') {
+            $avatarUrl = '/data/users/avatars/' . $this->profile->avatar;
         }
 
         $head = '
             <div class="profile-head">
                 <div class="profile-avatar" style="background-image: url(\'' . $avatarUrl . '\'); "></div>
                 <div class="profile-line"></div>
-                <div class="profile-username">' . $this->profile->getUsername() . '</div>
+                <div class="profile-username">' . $this->profile->username . '</div>
             </div>
         ';
 
-        $info = '
+        $content = '
             <div>
         ';
 
         // General information
         // ====================================================================
-        $info .= '
+        $content .= '
                 <h2>Информация</h2>
         ';
-        $info .= '<b>Име:</b> ' . $this->profile->getName() . '<br>';
+        $content .= '<b>Име:</b> ' . $this->profile->name . '<br>';
 
         // Location
-        $location = $this->profile->getTown();
-        if ($this->profile->getCountry() != '') {
+        $location = $this->profile->town;
+        if ($this->profile->country != '') {
             if ($location != '') {
                 $location .= ', ';
             }
-            $location .= $this->profile->getCountry();
+            $location .= $this->profile->country;
         }
         if ($location != '') {
-            $info .= '<b>Град:</b> ' . $location . '<br>';
+            $content .= '<b>Град:</b> ' . $location . '<br>';
         }
 
         // Gender
-        $gender = $this->profile->getGender();
+        $gender = $this->profile->gender;
         $gender = ($gender == 'male' ? 'мъж' : ($gender == 'female' ? 'жена' : ''));
         if ($gender != '') {
-            $info .= '<b>Пол:</b> ' . $gender . '<br>';
+            $content .= '<b>Пол:</b> ' . $gender . '<br>';
         }
 
         // Birthdate
-        $birthdate = explode('-', $this->profile->getBirthdate());
+        $birthdate = explode('-', $this->profile->birthdate);
         if (count($birthdate) == 3) {
-            $birthdateString = $this->profile->getGender() == 'female' ? 'Родена на:' : 'Роден на:';
+            $birthdateString = $this->profile->gender== 'female' ? 'Родена на:' : 'Роден на:';
             $day = intval($birthdate[2]);
             $month = $months[intval($birthdate[1]) - 1];
             $year = intval($birthdate[0]);
-            $info .= '<b>' . $birthdateString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
+            $content .= '<b>' . $birthdateString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
         }
 
         // Registered
-        $registered = explode('-', $this->profile->getRegistered());
+        $registered = explode('-', $this->profile->registered);
         if (count($registered) == 3) {
-            $registeredString = $this->profile->getGender() == 'female' ? 'Регистрирана на:' : 'Регистриран на:';
+            $registeredString = $this->profile->gender == 'female' ? 'Регистрирана на:' : 'Регистриран на:';
             $day = intval($registered[2]);
             $month = $months[intval($registered[1]) - 1];
             $year = intval($registered[0]);
-            $info .= '<b>' . $registeredString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
+            $content .= '<b>' . $registeredString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
         }
 
-        $info .= '
+        $content .= '
             <br>
         ';
 
         // Training progress
         // ====================================================================
-        $solved = $this->profile->getSolved();
-        $tried = $this->profile->getTried();
-        $submissions = $this->profile->getSubmissions();
-        $info .= '
+        $tried = array();
+        $solved = array();
+        $submits = $this->profile->submits;
+        foreach ($submits as $submit) {
+            $submitInfo = Submit::getSubmitInfo($submit);
+            if (!in_array($submitInfo['problemId'], $tried)) {
+                array_push($tried, $submitInfo['problemId']);
+            }
+            if ($submitInfo['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                if (!in_array($submitInfo['problemId'], $solved)) {
+                    array_push($solved, $submitInfo['problemId']);
+                }
+            }
+        }
+        $content .= '
                 <h2>Прогрес</h2>
                 <b>Брой решени задачи:</b> ' . count($solved) . '<br>
                 <b>Брой пробвани задачи:</b> ' . count($tried) . '<br>
-                <b>Брой изпратени решения:</b> ' . count($submissions) . '<br>
+                <b>Брой изпратени решения:</b> ' . count($submits) . '<br>
         ';
 
-        $info .= '
+        $content .= '
             <br>
         ';
 
         // Charts
         // ====================================================================
-        $info .= '
+        $content .= '
                 <h2>Графики</h2>
         ';
 
-        $info .= '
+        $content .= '
             <br>
         ';
 
@@ -125,16 +137,16 @@ class ProfilePage extends Page {
         for ($achievement : $this->profile->getAchievements()) {
         }
         */
-        $info .= '
+        $content .= '
                 <h2>Постижения</h2>
                 <div>' . $achievements . '</div>
         ';
 
-        $info . '
+        $content . '
             </div>
         ';
 
-        return inBox($head . $info);
+        return inBox($head . $content);
     }
 }
 

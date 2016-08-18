@@ -1,7 +1,8 @@
 <?php
-require_once('common.php');
+require_once('logic/common.php');
+require_once('logic/problem.php');
+require_once('logic/submit.php');
 require_once('page.php');
-require_once('grader/logic.php');
 
 class ProblemsPage extends Page {
 
@@ -32,7 +33,7 @@ class ProblemsPage extends Page {
                         <div class="problem-info">
                             Сложност: <strong>' . $info['difficulty'] . '</strong><br>
                             Решена от: <strong>' . $solutions . ' ' . $authors . '</strong><br>
-                            Източник: <strong>' . $info['source'] . '</strong>
+                            Източник: <strong>' . $info['origin'] . '</strong>
                         </div>
                     </a>
                 </div>
@@ -58,23 +59,23 @@ class ProblemsPage extends Page {
         return $header . $orderings . $problems;
     }
 
-    private function getStatement($problemInfo) {
-        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problemInfo['folder'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+    private function getStatement($problem) {
+        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
 
-        $submit = $this->user->getAccess() < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
+        $submit = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
                 <div class="problem-submit">
                     <input type="submit" value="Предай решение" onclick="showSubmitForm();" class="button button-color-blue button-large">
                     <br>
-                    <a href="/problems/' . $problemInfo['id'] . '/submissions" style="font-size: 0.8em;">Предадени решения</a>
+                    <a href="/problems/' . $problem->id . '/submits" style="font-size: 0.8em;">Предадени решения</a>
                 </div>
         ';
 
         return '
             <div class="box">
-                <div class="problem-title" id="problem-title">' . $problemInfo['name'] . '</div>
-                <div class="problem-resources">Time Limit: ' . $problemInfo['time_limit'] . 's, Memory Limit: ' . $problemInfo['memory_limit'] . 'MB</div>
-                <div class="problem-source">' . $problemInfo['source'] . '</div>
+                <div class="problem-title" id="problem-title">' . $problem->name . '</div>
+                <div class="problem-resources">Time Limit: ' . $problem->time_limit . 's, Memory Limit: ' . $problem->memory_limit . 'MB</div>
+                <div class="problem-origin">' . $problem->origin . '</div>
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submit . '
@@ -82,24 +83,24 @@ class ProblemsPage extends Page {
         ';
     }
 
-    private function getSubmission($problemInfo, $id) {
+    private function getSubmitInfoBox($problem, $id) {
         if (!is_numeric($id)) {
             return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        $submissionInfo = Logic::getSubmissionInfo($id);
-        if ($submissionInfo == null) {
+        $submitInfo = Submit::getSubmitInfo($id);
+        if ($submitInfo == null) {
             return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        if ($submissionInfo['userId'] != $this->user->getId()) {
+        if ($submitInfo['userId'] != $this->user->id) {
             return showMessage('ERROR', 'Нямате достъп до това решение!');
         }
 
         $color = 'green';
-        if ($submissionInfo['status'] >= $GLOBALS['STATUS_RUNNING']) {
+        if ($submitInfo['status'] >= $GLOBALS['STATUS_RUNNING']) {
             $color = 'gray';
-        } else if ($submissionInfo['status'] >= $GLOBALS['STATUS_WRONG_ANSWER']) {
+        } else if ($submitInfo['status'] >= $GLOBALS['STATUS_WRONG_ANSWER']) {
             $color = 'red';
         }
 
@@ -112,15 +113,15 @@ class ProblemsPage extends Page {
                 </tr>
                 <tr>
                     <td>-</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submissionInfo['status']] . '</td>
-                    <td>' . $submissionInfo['score'] . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submitInfo['status']] . '</td>
+                    <td>' . $submitInfo['score'] . '</td>
                 </tr>
             </table>
         ';
 
         $testResults = '';
-        for ($i = 0; $i < count($submissionInfo['results']); $i = $i + 1) {
-            $result = $submissionInfo['results'][$i];
+        for ($i = 0; $i < count($submitInfo['results']); $i = $i + 1) {
+            $result = $submitInfo['results'][$i];
             $testResults .= '
                 <tr>
                     <td>' . $i . '</td>
@@ -143,36 +144,36 @@ class ProblemsPage extends Page {
 
         return '
             <div id="submissionStatus" class="submission-status fade-in">
-                <div class="submission-close" onclick="hideSubmissionStatus(' . $problemInfo['id'] . ');"><i class="fa fa-close fa-fw"></i></div>
-                <h2><span class="blue">' . $problemInfo['name'] . '</span> :: Статус на решение</h2>
-                <div class="right smaller">' . $submissionInfo['date'] . ' | ' . $submissionInfo['time'] . '</div>
+                <div class="submission-close" onclick="hideSubmitStatus(' . $problem->id . ');"><i class="fa fa-close fa-fw"></i></div>
+                <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение</h2>
+                <div class="right smaller">' . $submitInfo['date'] . ' | ' . $submitInfo['time'] . '</div>
                 <br>
                 ' . $summaryTable . '
                 <br>
                 ' . $detailedTable . '
             </div>
             <script>
-                showSubmissionStatus(' . $problemInfo['id'] . ');
+                showSubmitStatus(' . $problem->id . ');
             </script>
         ';
     }
 
-    private function getAllSubmissions($problemInfo) {
+    private function getAllSubmitsBox($problem) {
         $submissionList = '';
         $counter = 0;
-        foreach ($this->user->getSubmissions() as $submissionId) {
-            $submission = Logic::getSubmissionInfo($submissionId);
-            if ($submission['problemId'] == $problemInfo['id']) {
+        foreach ($this->user->submits as $submitId) {
+            $submitInfo = Submit::getSubmitInfo($submitId);
+            if ($submitInfo['problemId'] == $problem->id) {
                 $counter = $counter + 1;
-                $submissionLink = '<a href="/problems/' . $problemInfo['id'] . '/submissions/' . $submissionId . '">' . $submissionId . '</a>';
+                $submissionLink = '<a href="/problems/' . $problem->id . '/submits/' . $submitInfo['id'] . '">' . $submitInfo['id'] . '</a>';
                 $submissionList .= '
                     <tr>
                         <td>' . $counter . '</td>
-                        <td>' . $submission['date'] . '</td>
-                        <td>' . $submission['time'] . '</td>
+                        <td>' . $submitInfo['date'] . '</td>
+                        <td>' . $submitInfo['time'] . '</td>
                         <td>' . $submissionLink . '</td>
-                        <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submission['status']] . '</td>
-                        <td>' . $submission['score'] . '</td>
+                        <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submitInfo['status']] . '</td>
+                        <td>' . $submitInfo['score'] . '</td>
                     </tr>
                 ';
             }
@@ -193,29 +194,29 @@ class ProblemsPage extends Page {
 
         return '
             <div id="submissionStatus" class="submission-status fade-in">
-                <div class="submission-close" onclick="hideSubmissionStatus(' . $problemInfo['id'] . ');"><i class="fa fa-close fa-fw"></i></div>
-                <h2><span class="blue">' . $problemInfo['name'] . '</span> :: Ваши решения</h2>
+                <div class="submission-close" onclick="hideSubmitStatus(' . $problem->id . ');"><i class="fa fa-close fa-fw"></i></div>
+                <h2><span class="blue">' . $problem->name . '</span> :: Ваши решения</h2>
                 ' . $submissionTable . '
             </div>
             <script>
-                showSubmissionStatus(' . $problemInfo['id'] . ');
+                showSubmitStatus(' . $problem->id . ');
             </script>
         ';
     }
 
     public function getContent() {
         if (isset($_GET['problem'])) {
-            $problemInfo = Logic::getProblemInfo($_GET['problem']);
-            if ($problemInfo == null) {
+            $problem = Problem::get($_GET['problem']);
+            if ($problem == null) {
                 return $this->getMainPage();
             }
 
-            $content = $this->getStatement($problemInfo);
-            if (isset($_GET['submission'])) {
-                if ($_GET['submission'] == 'all') {
-                    $content .= $this->getAllSubmissions($problemInfo);
+            $content = $this->getStatement($problem);
+            if (isset($_GET['submits'])) {
+                if ($_GET['submits'] == 'all') {
+                    $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    $content .= $this->getSubmission($problemInfo, $_GET['submission']);
+                    $content .= $this->getSubmitInfoBox($problem, $_GET['submits']);
                 }
             }
             return $content;

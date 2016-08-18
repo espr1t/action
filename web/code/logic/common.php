@@ -1,7 +1,12 @@
 <?php
+// Set timezone
 date_default_timezone_set('Europe/Sofia');
 
+// Session and cookie
 $COOKIE_NAME = 'action.informatika.bg';
+
+// Grader
+$GRADER_URL = 'localhost:5000';
 
 // User access
 $DEFAULT_USER_ACCESS = 10;
@@ -13,7 +18,7 @@ $PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems';
 $PATH_USERS = $_SERVER['DOCUMENT_ROOT'] . '/data/users';
 $PATH_NEWS = $_SERVER['DOCUMENT_ROOT'] . '/data/news';
 $PATH_SUBMISSIONS = $_SERVER['DOCUMENT_ROOT'] . '/data/submissions';
-$PATH_GRADER = $_SERVER['DOCUMENT_ROOT'] . '/code/grader';
+$PATH_LOGIC = $_SERVER['DOCUMENT_ROOT'] . '/code/logic';
 
 // Submission status
 $STATUS_WAITING = -1;
@@ -74,7 +79,8 @@ function saltHashPassword($password) {
 
 function getValue($array, $key) {
     if (!array_key_exists($key, $array)) {
-        die('User info does not contain value for key "'. $key . '"!');
+        error_log('User info does not contain value for key "'. $key . '"!');
+        return null;
     }
     return $array[$key];
 }
@@ -100,14 +106,14 @@ function passSpamProtection($fileName, $user, $limit) {
         if (sscanf($logs[$i], "%s %d", $username, $timestamp) == 2) {
             if ($curTime - $timestamp < $GLOBALS['SPAM_INTERVAL']) {
                 fprintf($out, "%s %d\n", $username, $timestamp);
-                if ($user->getUsername() == $username) {
+                if ($user->username == $username) {
                     $spamCount = $spamCount + 1;
                 }
             }
         }
     }
     if ($spamCount < $limit) {
-        fprintf($out, "%s %d\n", $user->getUsername(), $curTime);
+        fprintf($out, "%s %d\n", $user->username, $curTime);
     }
     fclose($out);
     return $spamCount < $limit;

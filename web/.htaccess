@@ -24,8 +24,8 @@ RewriteRule    ^stats$                                  /code/main.php?page=stat
 
 # Problem page
 RewriteRule    ^problems/(\d+)$                         /code/main.php?page=problems&problem=$1                 [NC,L,QSA]
-RewriteRule    ^problems/(\d+)/submissions$             /code/main.php?page=problems&problem=$1&submission=all  [NC,L,QSA]
-RewriteRule    ^problems/(\d+)/submissions/(\d+)$       /code/main.php?page=problems&problem=$1&submission=$2   [NC,L,QSA]
+RewriteRule    ^problems/(\d+)/submits$                 /code/main.php?page=problems&problem=$1&submits=all     [NC,L,QSA]
+RewriteRule    ^problems/(\d+)/submits/(\d+)$           /code/main.php?page=problems&problem=$1&submits=$2      [NC,L,QSA]
 
 # User profile page
 RewriteRule    ^users/(\w[\w.]{1,15})$                  /code/main.php?page=profile&user=$1                     [NC,L,QSA]

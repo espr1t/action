@@ -1,7 +1,6 @@
 <?php
+require_once('logic/common.php');
 require_once('page.php');
-require_once('home.php');
-require_once('common.php');
 
 class RegisterPage extends Page {
     public function getTitle() {
@@ -196,7 +195,7 @@ class RegisterPage extends Page {
             return 'Въведеното потребителско име е празно или невалидно!';
         }
         $username = $_POST['username']; unset($_POST['username']);
-        if (User::getUser($username) != null) {
+        if (User::get($username) != null) {
             return 'Въведеното потребителското име вече е заето!';
         }
 

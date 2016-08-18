@@ -1,5 +1,5 @@
 <?php
-require_once('common.php');
+require_once('logic/common.php');
 require_once('page.php');
 
 class LoginPage extends Page {
@@ -20,12 +20,12 @@ class LoginPage extends Page {
 
         // Check if user just entered valid credentials
         if (isset($_POST['username']) && isset($_POST['password'])) {
-            $user = User::getUser($_POST['username']);
+            $user = User::get($_POST['username']);
             if ($user == null) {
                 $error = 'Не съществува акаунт с това потребителско име!';
             } else {
                 $salthashed = saltHashPassword($_POST['password']);
-                if ($user->getPassword() != $salthashed) {
+                if ($user->password != $salthashed) {
                     $error = 'Въведената парола е невалидна!';
                 }
             }
@@ -33,7 +33,7 @@ class LoginPage extends Page {
             // Authorized user, update login key and redirect to home page
             if ($error == '') {
                 // Set session (use until browser close)
-                $_SESSION['username'] = $user->getUsername();
+                $_SESSION['username'] = $user->username;
 
                 // Set cookie (avoid logging in again until cookie expires)
                 $loginKey = str_shuffle(md5(microtime()));

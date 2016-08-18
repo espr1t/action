@@ -96,16 +96,16 @@ function hideOverlay() {
 /*
  * Submission status
  */
-function showSubmissionStatus(problemId) {
+function showSubmitStatus(problemId) {
     // Create an overlay shadowing the rest of the page
     showOverlay();
 
     // Create the submit form and show it to the user
     lastOnKeyDownEvent = document.onkeydown;
-    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideSubmissionStatus(problemId);});}
+    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideSubmitStatus(problemId);});}
 }
 
-function hideSubmissionStatus(problemId) {
+function hideSubmitStatus(problemId) {
     hideOverlay();
     window.location = '/problems/' + problemId;
 }
@@ -138,8 +138,7 @@ function showSubmitForm() {
     document.body.appendChild(submitForm);
     submitForm.className = 'submit-form fade-in';
 
-    // Run language detection every second after an update
-    // TODO: May be too slow, optimize if necessary
+    // Run language detection after every update
     var sourceEl = document.getElementById('source');
     var onchange = function() {
         setTimeout(function() {
@@ -183,12 +182,12 @@ function submitSolution() {
         if (!response || response.status != 'OK') {
             showMessage('ERROR', 'Решението не може да бъде изпратено в момента!');
         } else {
-            window.location.href = window.location.href + '/submissions/' + response.id;
+            window.location.href = window.location.href + '/submits/' + response.id;
             exit();
         }
     }
 
-    ajaxCall('/code/grader/submit.php', data, callback);
+    ajaxCall('/code/logic/submit.php', data, callback);
     hideSubmitForm();
 }
 
@@ -259,7 +258,7 @@ function submitReportForm() {
         }
     }
 
-    ajaxCall('/code/tools/mail.php', data, callback);
+    ajaxCall('/code/logic/mail.php', data, callback);
     hideReportForm();
 }
 

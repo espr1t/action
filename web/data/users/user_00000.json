@@ -11,7 +11,5 @@
     "gender": "",
     "birthdate": "",
     "avatar": "",
-    "submissions": [],
-    "tried": [],
-    "solved": []
+    "submits": []
 }
