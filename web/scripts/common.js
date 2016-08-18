@@ -23,6 +23,17 @@ function ajaxCall(url, data, callback) {
 }
 
 /*
+ * Key bindings
+ */
+var lastOnKeyDownEvent = null;
+function identifyEscKeyPressedEvent(event, action) {
+    if(event.keyCode == 27) {
+        action();
+        event.stopPropagation();
+    }
+}
+
+/*
  * Butter bars (pop-up messages)
  */
 function showMessage(type, message) {
@@ -48,6 +59,16 @@ function showMessage(type, message) {
         '</div>' +
     '';
 
+    // Make it possible to hide the message with hitting escape
+    lastOnKeyDownEvent = document.onkeydown;
+    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideMessage(className, id);});}
+
+    // If the menu is visible, don't cover it with the message.
+    // Here we calculate the top scroll in such a way, that we show it 20 pixels bellow either the menu or the top of the screen.
+    var scrollTop = (document.documentElement.scrollTop || document.body.scrollTop);
+    var topDistancePixels = Math.max(20, 110 - scrollTop);
+    messageEl.style = 'top: ' + topDistancePixels + 'px;';
+
     document.body.appendChild(messageEl);
 
     // Hide the message after several seconds
@@ -63,14 +84,6 @@ function hideMessage(className, id) {
         setTimeout(function() {
             document.body.removeChild(messageEl);
         }, 300);
-    }
-}
-
-var lastOnKeyDownEvent = null;
-function identifyEscKeyPressedEvent(event, action) {
-    if(event.keyCode == 27) {
-        action();
-        event.stopPropagation();
     }
 }
 
