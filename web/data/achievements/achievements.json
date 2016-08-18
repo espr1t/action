@@ -1,0 +1,344 @@
+[
+  {
+    "id": 1,
+    "title": "Registered",
+    "description": "Регистриран потребител",
+    "icon": "registered"
+  },
+  {
+    "id": 2,
+    "title": "Submitted",
+    "description": "1 предадено решение",
+    "icon": "upload"
+  },
+  {
+    "id": 3,
+    "title": "Testing the system",
+    "description": "10 предадени решения",
+    "icon": "cloud-upload"
+  },
+  {
+    "id": 4,
+    "title": "Spammer",
+    "description": "100 предадени решения",
+    "icon": "commenting"
+  },
+  {
+    "id": 5,
+    "title": "Solved",
+    "description": "1 решена задача",
+    "icon": "terminal"
+  },
+  {
+    "id": 6,
+    "title": "Smart is the new sexy",
+    "description": "10 решени задачи",
+    "icon": "code"
+  },
+  {
+    "id": 7,
+    "title": "Bring it on",
+    "description": "100 решени задачи",
+    "icon": "heartbeat"
+  },
+  {
+    "id": 8,
+    "title": "I spotted it first",
+    "description": "Докладван проблем",
+    "icon": "bug"
+  },
+  {
+    "id": 9,
+    "title": "Everything's trivial",
+    "description": "Решени всички задачи със сложност trivial",
+    "icon": "leaf"
+  },
+  {
+    "id": 10,
+    "title": "Easy peasy",
+    "description": "Решени всички задачи със сложност easy",
+    "icon": "child"
+  },
+  {
+    "id": 11,
+    "title": "It ain't easy",
+    "description": "Решени всички задачи със сложност medium",
+    "icon": "balance-scale"
+  },
+  {
+    "id": 12,
+    "title": "Working hard",
+    "description": "Решени всички задачи със сложност hard",
+    "icon": "tint"
+  },
+  {
+    "id": 13,
+    "title": "Animal",
+    "description": "Решени всички задачи със сложност brutal",
+    "icon": "paw"
+  },
+  {
+    "id": 14,
+    "title": "I've seen it all",
+    "description": "Решени всички задачи",
+    "icon": "check"
+  },
+  {
+    "id": 15,
+    "title": "Needle in a haystack",
+    "description": "Завършена тема \"Търсене и итерация",
+    "icon": "university"
+  },
+  {
+    "id": 16,
+    "title": "Optimised",
+    "description": "Завършена тема \"Динамично оптимиране",
+    "icon": "university"
+  },
+  {
+    "id": 17,
+    "title": "Dracula",
+    "description": "Завършена тема \"Графи",
+    "icon": "university"
+  },
+  {
+    "id": 18,
+    "title": "Two plus two",
+    "description": "Завършена тема \"Математика",
+    "icon": "university"
+  },
+  {
+    "id": 19,
+    "title": "Picasso",
+    "description": "Завършена тема \"Геометрия",
+    "icon": "university"
+  },
+  {
+    "id": 20,
+    "title": "Orinoco",
+    "description": "Завършена тема \"Потоци",
+    "icon": "university"
+  },
+  {
+    "id": 21,
+    "title": "Divide et impera",
+    "description": "Завършена тема \"Разделяй и владей",
+    "icon": "university"
+  },
+  {
+    "id": 22,
+    "title": "Half of you are useless",
+    "description": "Завършена тема \"Двоично търсене",
+    "icon": "university"
+  },
+  {
+    "id": 23,
+    "title": "Charming",
+    "description": "Завършена тема \"Стрингове и хеширане",
+    "icon": "university"
+  },
+  {
+    "id": 24,
+    "title": "ORDER BY",
+    "description": "Завършена тема \"Сортиране",
+    "icon": "university"
+  },
+  {
+    "id": 25,
+    "title": "Gheed",
+    "description": "Завършена тема \"Алчни алгоритми",
+    "icon": "university"
+  },
+  {
+    "id": 26,
+    "title": "NIMoa",
+    "description": "Завършена тема \"Теория на игрите",
+    "icon": "university"
+  },
+  {
+    "id": 27,
+    "title": "We meet again",
+    "description": "Завършена тема \"Срещане в средата",
+    "icon": "university"
+  },
+  {
+    "id": 28,
+    "title": "Graduated",
+    "description": "Завършени всички части от трейнинга",
+    "icon": "graduation-cap"
+  },
+  {
+    "id": 29,
+    "title": "Search master",
+    "description": "Решени всички задачи с таг search",
+    "icon": "search"
+  },
+  {
+    "id": 30,
+    "title": "DP master",
+    "description": "Решени всички задачи с таг dp",
+    "icon": "database"
+  },
+  {
+    "id": 31,
+    "title": "Graph master",
+    "description": "Решени всички задачи с таг graph",
+    "icon": "map-signs"
+  },
+  {
+    "id": 32,
+    "title": "Math master",
+    "description": "Решени всички задачи с таг math",
+    "icon": "calculator"
+  },
+  {
+    "id": 33,
+    "title": "Geometry master",
+    "description": "Решени всички задачи с таг geometry",
+    "icon": "object-group"
+  },
+  {
+    "id": 34,
+    "title": "Ad-hoc master",
+    "description": "Решени всички задачи с таг ad-hoc",
+    "icon": "lightbulb-o"
+  },
+  {
+    "id": 35,
+    "title": "Flow master",
+    "description": "Решени всички задачи с таг flow",
+    "icon": "ship"
+  },
+  {
+    "id": 36,
+    "title": "D&Q master",
+    "description": "Решени всички задачи с таг divconq",
+    "icon": "flag"
+  },
+  {
+    "id": 37,
+    "title": "BS master",
+    "description": "Решени всички задачи с таг binsearch",
+    "icon": "sort"
+  },
+  {
+    "id": 38,
+    "title": "Hashing master",
+    "description": "Решени всички задачи с таг hashing",
+    "icon": "quote-left"
+  },
+  {
+    "id": 39,
+    "title": "Strings master",
+    "description": "Решени всички задачи с таг strings",
+    "icon": "quote-right"
+  },
+  {
+    "id": 40,
+    "title": "Sorting master",
+    "description": "Решени всички задачи с таг sorting",
+    "icon": "sort-alpha-asc"
+  },
+  {
+    "id": 41,
+    "title": "Greedy master",
+    "description": "Решени всички задачи с таг greedy",
+    "icon": "dollar"
+  },
+  {
+    "id": 42,
+    "title": "SG master",
+    "description": "Решени всички задачи с таг sg",
+    "icon": "magic"
+  },
+  {
+    "id": 43,
+    "title": "MitM master",
+    "description": "Решени всички задачи с таг mitm",
+    "icon": "map-maker"
+  },
+  {
+    "id": 44,
+    "title": "Data structure master",
+    "description": "Решени всички задачи с таг datastruct",
+    "icon": "tree"
+  },
+  {
+    "id": 45,
+    "title": "STL master",
+    "description": "Решени всички задачи с таг stl",
+    "icon": "book"
+  },
+  {
+    "id": 46,
+    "title": "Competitor",
+    "description": "Първо състезание",
+    "icon": "dot-circle-o"
+  },
+  {
+    "id": 47,
+    "title": "Gold",
+    "description": "Първо място на състезание",
+    "icon": "user"
+  },
+  {
+    "id": 48,
+    "title": "Silver",
+    "description": "Второ място на състезание",
+    "icon": "user-plus"
+  },
+  {
+    "id": 49,
+    "title": "Bronze",
+    "description": "Трето място на състезание",
+    "icon": "group"
+  },
+  {
+    "id": 50,
+    "title": "Rockstar",
+    "description": "Първи в ранклистата",
+    "icon": "rocket"
+  },
+  {
+    "id": 51,
+    "title": "Among the chosen few",
+    "description": "Сред първите 10 в ранклистата",
+    "icon": "line-chart"
+  },
+  {
+    "id": 52,
+    "title": "I was there first",
+    "description": "Първo решeние на задача",
+    "icon": "bolt"
+  },
+  {
+    "id": 53,
+    "title": "Early bird",
+    "description": "Решена задача между 8:00 и 12:00 сутринта",
+    "icon": "clock-o"
+  },
+  {
+    "id": 54,
+    "title": "Night owl",
+    "description": "Решена задача между 2:00 и 6:00 през нощта",
+    "icon": "bed"
+  },
+  {
+    "id": 55,
+    "title": "Gamer",
+    "description": "Предадена игра",
+    "icon": "gamepad"
+  },
+  {
+    "id": 56,
+    "title": "Winner",
+    "description": "Първо място на игра",
+    "icon": "trophy"
+  },
+  {
+    "id": 57,
+    "title": "Rainbow coder",
+    "description": "По една решена задача на всеки език",
+    "icon": "arrows"
+  }
+]

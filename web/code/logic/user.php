@@ -17,6 +17,7 @@ class User {
     public $birthdate = '';
     public $avatar = '';
     public $submits = array();
+    public $achievements = array();
     
     private function arrayFromInstance() {
         return array(
@@ -32,7 +33,8 @@ class User {
             'gender' => $this->gender,
             'birthdate' => $this->birthdate,
             'avatar' => $this->avatar,
-            'submits' => $this->submits
+            'submits' => $this->submits,
+            'achievements' => $this->achievements
         );
     }
 
@@ -51,6 +53,7 @@ class User {
         $user->birthdate = getValue($info, 'birthdate');
         $user->avatar = getValue($info, 'avatar');
         $user->submits = getValue($info, 'submits');
+        $user->achievements = getValue($info, 'achievements');
         return $user;
     }
 

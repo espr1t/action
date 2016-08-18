@@ -132,11 +132,22 @@ class ProfilePage extends Page {
 
         // Achievements
         // ====================================================================
+        $fileName = sprintf('%s/achievements.json', $GLOBALS['PATH_ACHIEVEMENTS']);
+        $achInfo = json_decode(file_get_contents($fileName), true);
+
         $achievements = '';
-        /*
-        for ($achievement : $this->profile->getAchievements()) {
+        foreach ($this->profile->achievements as $achievement) {
+            for ($i = 0; $i < count($achInfo); $i = $i + 1) {
+                if ($achInfo[$i]['id'] == $achievement) {
+                    $achievements .= '
+                        <div class="achievement" title="' . $achInfo[$i]['description'] . '">
+                            <i class="fa fa-' . $achInfo[$i]['icon'] . ' fa-fw"></i>
+                            <span style="font-weight: bold">' . $achInfo[$i]['title'] . '</span>
+                        </div>
+                    ';
+                }
+            }
         }
-        */
         $content .= '
                 <h2>Постижения</h2>
                 <div>' . $achievements . '</div>

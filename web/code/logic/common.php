@@ -19,6 +19,7 @@ $PATH_USERS = $_SERVER['DOCUMENT_ROOT'] . '/data/users';
 $PATH_NEWS = $_SERVER['DOCUMENT_ROOT'] . '/data/news';
 $PATH_SUBMISSIONS = $_SERVER['DOCUMENT_ROOT'] . '/data/submissions';
 $PATH_LOGIC = $_SERVER['DOCUMENT_ROOT'] . '/code/logic';
+$PATH_ACHIEVEMENTS = $_SERVER['DOCUMENT_ROOT'] . '/data/achievements';
 
 // Submission status
 $STATUS_WAITING = -1;
