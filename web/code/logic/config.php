@@ -13,6 +13,7 @@ $GRADER_URL = 'localhost:5000';
 $DEFAULT_USER_ACCESS = 10;
 
 $ACCESS_ADMIN_PAGES = 100;
+$ACCESS_PUBLISH_NEWS = 50;
 $ACCESS_REPORT_PROBLEM = 2;
 $ACCESS_SUBMIT_SOLUTION = 1;
 
@@ -57,6 +58,8 @@ $PROBLEM_STATEMENT_FILENAME = '/problem_statement.html';
 
 // Spam protection
 $SPAM_INTERVAL = 86400; // Seconds in 24 hours
+$SPAM_LIMIT_EMAIL = 20; // Per 24 hours
+$SPAM_LIMIT_SUBMIT = 100; // Per 24 hours
 
 $LANGUAGE_EXTENSIONS = array(
     'C++' => 'cpp',

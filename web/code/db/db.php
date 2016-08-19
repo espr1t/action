@@ -13,7 +13,7 @@ class DB {
         if ($this->db->connect_error) {
             die('Connection failed: ' . $this->db->connect_error);
         } 
-        output('Connected to database ' . $GLOBALS['DB_DATABASE'] . '.');
+        // echo 'Connected to database ' . $GLOBALS['DB_DATABASE'] . '.<br>';
     }
 
     function __destruct() {
@@ -26,6 +26,10 @@ class DB {
 
     function query($sqlQuery) {
         return $this->db->query($sqlQuery);
+    }
+
+    function escape($string) {
+        return $this->db->escape_string($string);
     }
 }
 

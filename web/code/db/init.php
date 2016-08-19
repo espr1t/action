@@ -33,7 +33,7 @@ if ($db->checkTable('Users')) {
 } else {
     $result = $db->query("
         CREATE TABLE `Users`(
-            `id` INT NOT NULL,
+            `id` INT NOT NULL AUTO_INCREMENT,
             `access` INT NOT NULL,
             `registered` DATE NOT NULL,
             `username` VARCHAR(32) NOT NULL,
@@ -44,7 +44,8 @@ if ($db->checkTable('Users')) {
             `country` VARCHAR(32) NOT NULL,
             `gender` VARCHAR(8) NOT NULL,
             `birthdate` DATE NOT NULL,
-            `avatar` VARCHAR(255) NOT NULL
+            `avatar` VARCHAR(255) NOT NULL,
+            PRIMARY KEY (`id`)
         );
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
@@ -76,7 +77,7 @@ if ($db->query("SELECT 1 FROM `Problems` LIMIT 1;") == true) {
 } else {
     $result = $db->query("
         CREATE TABLE `Problems`(
-            `id` INT NOT NULL,
+            `id` INT NOT NULL AUTO_INCREMENT,
             `name` VARCHAR(32) NOT NULL,
             `author` VARCHAR(64) NOT NULL,
             `folder` VARCHAR(32) NOT NULL,
@@ -113,7 +114,8 @@ if ($db->query("SELECT 1 FROM `Problems` LIMIT 1;") == true) {
                 'datastruct',
                 'stl',
                 'np'
-            ) NOT NULL
+            ) NOT NULL,
+            PRIMARY KEY (`id`)
         );
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
@@ -142,7 +144,7 @@ if ($db->query("SELECT 1 FROM `Tests` LIMIT 1;") == true) {
 } else {
     $result = $db->query("
         CREATE TABLE `Tests`(
-            `id` INT NOT NULL,
+            `id` INT NOT NULL AUTO_INCREMENT,
             `problem` INT NOT NULL,
             `position` INT NOT NULL,
             `inp_file` VARCHAR(32) NOT NULL,
@@ -150,7 +152,8 @@ if ($db->query("SELECT 1 FROM `Tests` LIMIT 1;") == true) {
             `sol_file` VARCHAR(32) NOT NULL,
             `sol_hash` VARCHAR(32) NOT NULL,
             `group` INT NOT NULL,
-            `score` INT NOT NULL
+            `score` INT NOT NULL,
+            PRIMARY KEY (`id`)
         );
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
@@ -178,14 +181,15 @@ if ($db->query("SELECT 1 FROM `Submits` LIMIT 1;") == true) {
 } else {
     $result = $db->query("
         CREATE TABLE `Submits`(
-            `id` INT NOT NULL,
+            `id` INT NOT NULL AUTO_INCREMENT,
             `problem` INT NOT NULL,
             `user` INT NOT NULL,
             `timestamp` DATETIME NOT NULL,
             `language` ENUM('cpp', 'java', 'python', '') NOT NULL,
             `results` TEXT NOT NULL,
             `status` INT NOT NULL,
-            `message` TEXT NOT NULL
+            `message` TEXT NOT NULL,
+            PRIMARY KEY (`id`)
         );
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
@@ -271,10 +275,11 @@ if ($db->query("SELECT 1 FROM `News` LIMIT 1;") == true) {
 } else {
     $result = $db->query("
         CREATE TABLE `News`(
-            `id` INT NOT NULL,
+            `id` INT NOT NULL AUTO_INCREMENT,
             `date` DATE NOT NULL,
             `title` TEXT NOT NULL,
-            `text` TEXT NOT NULL
+            `content` TEXT NOT NULL,
+            PRIMARY KEY (`id`)
         );
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
@@ -299,10 +304,11 @@ if ($db->query("SELECT 1 FROM `Achievements` LIMIT 1;") == true) {
 } else {
     $result = $db->query("
         CREATE TABLE `Achievements`(
-            `id` INT NOT NULL,
+            `id` INT NOT NULL AUTO_INCREMENT,
             `user` INT NOT NULL,
             `which` INT NOT NULL,
-            `date` DATE NOT NULL
+            `date` DATE NOT NULL,
+            PRIMARY KEY (`id`)
         );
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');

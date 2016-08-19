@@ -107,6 +107,86 @@ function hideOverlay() {
 }
 
 /*
+ * Form for adding a news.
+ */
+function showNewsForm() {
+    // Create an overlay shadowing the rest of the page
+    showOverlay();
+
+    var today = new Date();
+    var date = (today.getFullYear()) + '-' +
+               (today.getMonth() + 1 < 10 ? ('0' + (today.getMonth() + 1)) : (today.getMonth() + 1)) + '-' +
+               (today.getDate() < 10 ? '0' + today.getDate() : today.getDate());
+
+
+    // Create the report form and show it to the user
+    var newsForm = document.createElement('div');
+    newsForm.id = 'newsForm';
+    newsForm.className = 'news-form';
+    newsForm.innerHTML = '' +
+        '<div class="news-form-close" onclick="hideNewsForm();"><i class="fa fa-close fa-fw"></i></div>' +
+        '<h2>Публикуване на новина</h2>' +
+        '<div class="left" style="margin-bottom: 2px;">' +
+        '    <input type="text" name="title" class="news-form-title" id="newsTitle" value="Заглавие">' +
+        '</div>' +
+        '<div class="right" style="margin-bottom: 4px;">' +
+        '    <input type="text" name="date" class="news-form-date" id="newsDate" value="' + date + '">' +
+        '</div>' +
+        '<textarea name="content" class="news-form-content" id="newsContent"></textarea>' +
+        '<div class="input-wrapper">' +
+        '    <input type="submit" class="button button-color-red" onclick="return submitNewsForm();">' +
+        '</div>' +
+    '';
+    lastOnKeyDownEvent = document.onkeydown;
+    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideNewsForm();});}
+
+    document.body.appendChild(newsForm);
+    newsForm.className = 'news-form fade-in';
+}
+
+function hideNewsForm() {
+    document.onkeydown = lastOnKeyDownEvent;
+    var newsForm = document.getElementById('newsForm');
+    newsForm.className = 'news-form fade-out';
+    setTimeout(function() {
+        document.body.removeChild(newsForm);
+    }, 300);
+    hideOverlay();
+}
+
+function submitNewsForm() {
+    var pageLink = window.location.href;
+    var date = document.getElementById('newsDate').value;
+    var title = document.getElementById('newsTitle').value;
+    var content = document.getElementById('newsContent').value;
+
+    var data = {
+        'date': date,
+        'title': title,
+        'content': content
+    };
+
+    var callback = function(response) {
+        try {
+            response = JSON.parse(response);
+        } catch(ex) {
+            response = '';
+        }
+        $type = (!response || response.status != 'OK') ? 'ERROR' : 'INFO';
+        $message = (!response || response.message == '') ? '' : response.message;
+        if ($message == '') {
+            $message = ($type == 'ERROR' ? 'Действието не беше изпълнено успешно.' : 'Действието беше изпълнено успешно.');
+        }
+        if ($type == 'INFO') {
+            hideNewsForm();
+        }
+        showMessage($type, $message);
+    }
+
+    ajaxCall('/actions/publish', data, callback);
+}
+
+/*
  * Submission status
  */
 function showSubmitStatus(problemId) {

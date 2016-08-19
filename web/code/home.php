@@ -1,5 +1,5 @@
 <?php
-require_once('logic/config.php');
+require_once('logic/brain.php');
 require_once('common.php');
 require_once('page.php');
 
@@ -11,33 +11,19 @@ class HomePage extends Page {
     public function getContent() {
         $news = inBox('
             <h1>Новини</h1>
-            Тук ще бъдат публикувани новини, свързани със системата и състезанията на нея.
+            Тук ще намерите новини, свързани със системата и състезанията на нея.
         ');
 
-        $fileNames = scandir($GLOBALS['PATH_NEWS']);
-        rsort($fileNames);
-        foreach ($fileNames as $fileName) {
-            if ($fileName == '.' || $fileName == '..') {
-                continue;
-            }
-            $filePath = sprintf('%s/%s', $GLOBALS['PATH_NEWS'], $fileName);
-            $file = fopen($filePath, 'r');
-            $title = fgets($file);
-            $date = fgets($file);
-            $body = '';
-            while (($line = fgets($file)) !== false) {
-                $body .= $line;
-            }
-            fclose($file);
-
-            $content = '';
-            $content .= '<div class="news-title">' . $title . '</div>';
-            $content .= $body;
-            $content .= '<div class="separator"></div>';
-            $content .= '<div class="news-date">Публикувано на ' . $date . '</div>';
-
-            $news .= inBox($content);
+        $brain = new Brain();
+        foreach ($brain->getNews() as $entry) {
+            $news .= inBox('
+                 <div class="news-title">' . $entry['title'] . '</div>
+                 ' . $entry['content'] . '
+                 <div class="separator"></div>
+                 <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
+            ');
         }
+
         return $news;
     }
 }

@@ -719,6 +719,56 @@ div.submission-close:hover {
     color: #000000;
 }
 
+div.news-form {
+    position: fixed;
+    height: 480px;
+    width: 600px;
+    top: 50%;
+    left: 50%;
+    margin: -240px auto 0px -340px;
+    padding: 20px 40px 20px 40px;
+    background: #FFFFFF;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    border-radius: 4px;
+    z-index: 89;
+}
+
+div.news-form-close {
+    display: inline-block;
+    position: absolute;
+    margin-left: 612px;
+    margin-top: -12px;
+    color: #555555;
+}
+
+div.news-form-close:hover {
+    cursor: pointer;
+    color: #000000;
+}
+
+input.news-form-title {
+    width: 100%;
+    height: 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+}
+
+input.news-form-date {
+    width: 100px;
+    height: 20px;
+    text-align: center;
+    font-style: italic;
+    border: none;
+}
+
+textarea.news-form-content {
+    width: 100%;
+    height: 348px;
+}
+
 div.message {
     position: fixed;
     width: 500px;

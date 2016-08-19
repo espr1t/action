@@ -9,8 +9,6 @@ require_once('problem.php');
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 
-    $SPAM_LIMIT = 100; // Submissions per 24 hours
-
     $user = User::get($_SESSION['username']);
     if ($user == null || $user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
         printAjaxResponse(array(
@@ -18,7 +16,7 @@ if (session_status() == PHP_SESSION_NONE) {
         ));
     }
 
-    if (!passSpamProtection('submit_log.txt', $user, $SPAM_LIMIT)) {
+    if (!passSpamProtection('submit_log.txt', $user, $GLOBALS['SPAM_LIMIT_SUBMIT'])) {
         printAjaxResponse(array(
             'status' => 'SPAM'
         ));
