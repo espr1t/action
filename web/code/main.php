@@ -68,6 +68,14 @@ switch ($_GET['page']) {
         require_once('stats.php');
         $page = new StatsPage($user);
         break;
+    case 'error':
+        require_once('error.php');
+        $page = new ErrorPage($user);
+        break;
+    case 'forbidden':
+        require_once('forbidden.php');
+        $page = new ForbiddenPage($user);
+        break;
     default:
         require_once('error.php');
         $page = new ErrorPage($user);
