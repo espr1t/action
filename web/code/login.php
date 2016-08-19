@@ -44,7 +44,6 @@ class LoginPage extends Page {
 
                 header('Location: /home?action=success');
                 exit();
-
             }
         }
 

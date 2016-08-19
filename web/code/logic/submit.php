@@ -1,5 +1,6 @@
 <?php
-require_once('common.php');
+require_once('config.php');
+require_once('widgets.php');
 require_once('user.php');
 require_once('problem.php');
 

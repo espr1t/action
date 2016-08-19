@@ -1,5 +1,6 @@
 <?php
-require_once('common.php');
+require_once('config.php');
+require_once('widgets.php');
 
 class User {
     public static $user_info_re = '/^user_\d{5}\.json$/';
