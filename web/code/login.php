@@ -1,5 +1,7 @@
 <?php
-require_once('logic/common.php');
+require_once('logic/user.php');
+require_once('logic/config.php');
+require_once('common.php');
 require_once('page.php');
 
 class LoginPage extends Page {

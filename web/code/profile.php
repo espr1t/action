@@ -1,6 +1,7 @@
 <?php
-require_once('logic/common.php');
+require_once('logic/config.php');
 require_once('logic/submit.php');
+require_once('common.php');
 require_once('page.php');
 
 class ProfilePage extends Page {
@@ -95,6 +96,9 @@ class ProfilePage extends Page {
 
         // Training progress
         // ====================================================================
+        // TODO:
+
+        /*
         $tried = array();
         $solved = array();
         $submits = $this->profile->submits;
@@ -119,9 +123,13 @@ class ProfilePage extends Page {
         $content .= '
             <br>
         ';
+        */
 
         // Charts
         // ====================================================================
+        // TODO
+
+        /*
         $content .= '
                 <h2>Графики</h2>
         ';
@@ -129,9 +137,13 @@ class ProfilePage extends Page {
         $content .= '
             <br>
         ';
+        */
 
         // Achievements
         // ====================================================================
+        // TODO
+
+        /*
         $fileName = sprintf('%s/achievements.json', $GLOBALS['PATH_ACHIEVEMENTS']);
         $achInfo = json_decode(file_get_contents($fileName), true);
 
@@ -156,6 +168,7 @@ class ProfilePage extends Page {
         $content . '
             </div>
         ';
+        */
 
         return inBox($head . $content);
     }

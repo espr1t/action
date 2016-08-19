@@ -1,5 +1,5 @@
 <?php
-require_once('logic/common.php');
+require_once('common.php');
 require_once('page.php');
 
 class HelpPage extends Page {

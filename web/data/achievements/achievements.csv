@@ -1,4 +1,4 @@
-﻿id,title,description,icon
+id,title,description,icon
 1,Registered,Регистриран потребител,registered
 2,Submitted,1 предадено решение,upload
 3,Testing the system,10 предадени решения,cloud-upload
@@ -6,7 +6,7 @@
 5,Solved,1 решена задача,terminal
 6,Smart is the new sexy,10 решени задачи,code
 7,Bring it on,100 решени задачи,heartbeat
-8,I spotted it first,Reported an issue,bug
+8,I spotted it first,Докладван проблем,bug
 9,Everything's trivial,Решени всички задачи със сложност trivial,leaf
 10,Easy peasy,Решени всички задачи със сложност easy,child
 11,It ain't easy,Решени всички задачи със сложност medium,balance-scale
@@ -48,8 +48,8 @@
 47,Gold,Първо място на състезание,user
 48,Silver,Второ място на състезание,user-plus
 49,Bronze,Трето място на състезание,group
-50,Rockstar,Първи в ранклистата,rocket
-51,Among the chosen few,Сред първите 10 в ранклистата,line-chart
+50,Rockstar,Първи в ранглистата,rocket
+51,Among the chosen few,Сред първите 10 в ранглистата,line-chart
 52,I was there first,Първo решeние на задача,bolt
 53,Early bird,Решена задача между 8:00 и 12:00 сутринта,clock-o
 54,Night owl,Решена задача между 2:00 и 6:00 през нощта,bed

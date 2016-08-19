@@ -1,7 +1,8 @@
 <?php
-require_once('logic/common.php');
+require_once('logic/config.php');
 require_once('logic/problem.php');
 require_once('logic/submit.php');
+require_once('common.php');
 require_once('page.php');
 
 class ProblemsPage extends Page {
@@ -24,7 +25,7 @@ class ProblemsPage extends Page {
             $fileName = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $dir, $GLOBALS['PROBLEM_INFO_FILENAME']);
             $info = json_decode(file_get_contents($fileName), true);
             
-            $solutions = count($info['accepted']);
+            $solutions = 0;
             $authors = 'човек' . ($solutions == 1 ? '' : 'а');
             $problems .= '
                 <div class="box narrow boxlink">

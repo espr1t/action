@@ -1,6 +1,7 @@
 <?php
-require_once('logic/common.php');
+require_once('logic/config.php');
 require_once('logic/submit.php');
+require_once('common.php');
 require_once('page.php');
 
 class QueuePage extends Page {
