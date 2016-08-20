@@ -1,6 +1,5 @@
 <?php
-require_once('logic/config.php');
-require_once('logic/submit.php');
+require_once('logic/brain.php');
 require_once('common.php');
 require_once('page.php');
 
@@ -27,9 +26,9 @@ class ProfilePage extends Page {
         $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни", "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
 
         // Profile heading (avatar + nickname)
-        $avatarUrl = '/data/users/avatars/default_avatar.png';
+        $avatarUrl = '/images/avatars/default_avatar.png';
         if ($this->profile->avatar != '') {
-            $avatarUrl = '/data/users/avatars/' . $this->profile->avatar;
+            $avatarUrl = '/images/avatars/' . $this->profile->avatar;
         }
 
         $head = '
@@ -71,8 +70,8 @@ class ProfilePage extends Page {
         }
 
         // Birthdate
-        $birthdate = explode('-', $this->profile->birthdate);
-        if (count($birthdate) == 3) {
+        if ($this->profile->birthdate != '0000-00-00') {
+            $birthdate = explode('-', $this->profile->birthdate);
             $birthdateString = $this->profile->gender== 'female' ? 'Родена на:' : 'Роден на:';
             $day = intval($birthdate[2]);
             $month = $months[intval($birthdate[1]) - 1];

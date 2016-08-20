@@ -1,4 +1,5 @@
 <?php
+require_once('logic/brain.php');
 require_once('config.php');
 require_once('widgets.php');
 
@@ -17,26 +18,17 @@ class User {
     public $gender = '';
     public $birthdate = '';
     public $avatar = '';
-    public $submits = array();
-    public $achievements = array();
     
-    private function arrayFromInstance() {
-        return array(
-            'id' => $this->id,
-            'access' => $this->access,
-            'registered' => $this->registered,
-            'username' => $this->username,
-            'password' => $this->password,
-            'name' => $this->name,
-            'email' => $this->email,
-            'town' => $this->town,
-            'country' => $this->country,
-            'gender' => $this->gender,
-            'birthdate' => $this->birthdate,
-            'avatar' => $this->avatar,
-            'submits' => $this->submits,
-            'achievements' => $this->achievements
-        );
+    public function logOut() {
+        setcookie($GLOBALS['COOKIE_NAME'], null, -1);
+        session_destroy();
+        header('Location: /login?action=success');
+        exit();
+    }
+
+    private function update() {
+        $brain = new Brain();
+        return $brain->updateUser($this);
     }
 
     private static function instanceFromArray($info) {
@@ -53,90 +45,40 @@ class User {
         $user->gender = getValue($info, 'gender');
         $user->birthdate = getValue($info, 'birthdate');
         $user->avatar = getValue($info, 'avatar');
-        $user->submits = getValue($info, 'submits');
-        $user->achievements = getValue($info, 'achievements');
         return $user;
     }
 
     public static function get($username) {
-        $entries = scandir($GLOBALS['PATH_USERS']);
-        foreach ($entries as $entry) {
-            if (!preg_match(self::$user_info_re, basename($entry))) {
-                continue;
-            }
-            $fileName = sprintf("%s/%s", $GLOBALS['PATH_USERS'], $entry);
-            $info = json_decode(file_get_contents($fileName), true);
-            if (strcasecmp($info['username'], $username) == 0) {
-                return User::instanceFromArray($info);
-            }
-       }
-       return null;
-    }
-
-    private function update() {
-        $info = $this->arrayFromInstance();
-        $fileName = sprintf('%s/user_%05d.json', $GLOBALS['PATH_USERS'], $this->id);
-        $file = fopen($fileName, 'w');
-        if (!$file) {
-            error_log('Unable to open file ' . $fileName . ' for writing!');
-            return false;
+        $brain = new Brain();
+        $result = $brain->getUserByName($username);
+        if (!$result) {
+            return null;
         }
-        if (!fwrite($file, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            error_log('Unable to write to file ' . $fileName . '!');
-            return false;
-        }
-        return true;
-    }
-
-    public function addSubmission($id) {
-        array_push($this->submits, $id);
-        return $this->update();
-    }
-
-    public function logOut() {
-        setcookie($GLOBALS['COOKIE_NAME'], null, -1);
-        session_destroy();
-        header('Location: /login?action=success');
-        exit();
+        return User::instanceFromArray($result);
     }
 
     public static function createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender) {
         // Check if user with the same username already exists.
-        $id = 0;
-        $entries = scandir($GLOBALS['PATH_USERS']);
-        foreach ($entries as $entry) {
-            if (!preg_match(self::$user_info_re, basename($entry))) {
-                continue;
-            }
-            $fileName = sprintf("%s/%s", $GLOBALS['PATH_USERS'], $entry);
-            $info = json_decode(file_get_contents($fileName), true);
-            if (strcasecmp($info['username'], $username) == 0) {
-                return false;
-            }
-            $id = max(array($id, $info['id'] + 1));
-       }
+        $brain = new Brain();
+        $result = $brain->getUserByName($username);
+        if ($result) {
+            return false;
+        }
 
-        $info = array(
-            'id' => $id,
-            'access' => $GLOBALS['DEFAULT_USER_ACCESS'],
-            'registered' => date('Y-m-d'),
-            'username' => $username,
-            'password' => $password,
-            'name' => $name . ' ' . $surname,
-            'email' => $email,
-            'town' => $town,
-            'country' => $country,
-            'gender' => $gender,
-            'birthdate' => $birthdate,
-            'avatar' => '',
-            'submits' => array()
-        );
+        $user = new User();
+        $user->access = $GLOBALS['DEFAULT_USER_ACCESS'];
+        $user->registered = date('Y-m-d');
+        $user->username = $username;
+        $user->password = $password;
+        $user->name = $name . ' ' . $surname;
+        $user->email = $email;
+        $user->town = $town;
+        $user->country = $country;
+        $user->gender = $gender;
+        $user->birthdate = $birthdate;
+        $user->avatar = $avatar;
 
-        $fileName = sprintf('%s/user_%05d.json', $GLOBALS['PATH_USERS'], $id);
-        $file = fopen($fileName, 'w') or die('Unable to create file ' . $fileName . '!');
-        fwrite($file, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-        return true;
+        return $brain->createUser($user);
    }
 }
 

@@ -1,5 +1,5 @@
 <?php
-require_once('logic/config.php');
+require_once('logic/brain.php');
 require_once('common.php');
 require_once('page.php');
 
@@ -11,39 +11,34 @@ class RankingPage extends Page {
     private function getRanking() {
         $ranking = '';
 
+        $brain = new Brain();
+        $usersInfo = $brain->getUsers();
+
         $place = 0;
-        foreach (scandir($GLOBALS['PATH_USERS']) as $entry) {
-            if (!preg_match(User::$user_info_re, basename($entry))) {
-                continue;
-            }
-
-            $fileName = sprintf("%s/%s", $GLOBALS['PATH_USERS'], $entry);
-            $info = json_decode(file_get_contents($fileName), true);
-
-            if ($info['username'] == 'anonymous') {
-                continue;
-            }
-
+        foreach ($usersInfo as $info) {
             $place = $place + 1;
-            $user = getUserLink($info['username']);
-            $solved = 1;
-            $achievements = 1;
-            $score = 42;
+
+            $info['solved'] = count($brain->getSolved($info['id']));
+            $info['achievements'] = count($brain->getAchievements($info['id']));
+            $info['score'] = 42;
+            $info['link'] = getUserLink($info['username']);
             if ($info['town'] == '') {
                 $info['town'] = '-';
             }
+
             $ranking .= '
                 <tr>
                     <td>' . $place . '</td>
-                    <td>' . $user . '</td>
+                    <td>' . $info['link'] . '</td>
                     <td>' . $info['name'] . '</td>
                     <td>' . $info['town'] . '</td>
-                    <td>' . $solved . '</td>
-                    <td>' . $achievements . '</td>
-                    <td>' . $score . '</td>
+                    <td>' . $info['solved'] . '</td>
+                    <td>' . $info['achievements'] . '</td>
+                    <td>' . $info['score'] . '</td>
                 </tr>
             ';
         }
+
         return $ranking;
     }
 

@@ -291,7 +291,7 @@ Table::Achievements
 {
     "id": 1,
     "user": 1,
-    "which": 1,
+    "achievement": 1,
     "date": 2016-07-23
 }
 */
@@ -306,7 +306,7 @@ if ($db->query("SELECT 1 FROM `Achievements` LIMIT 1;") == true) {
         CREATE TABLE `Achievements`(
             `id` INT NOT NULL AUTO_INCREMENT,
             `user` INT NOT NULL,
-            `which` INT NOT NULL,
+            `achievement` INT NOT NULL,
             `date` DATE NOT NULL,
             PRIMARY KEY (`id`)
         );
