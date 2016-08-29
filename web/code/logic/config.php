@@ -48,10 +48,6 @@ $STATUS_DISPLAY_NAME = array(
     $STATUS_ACCEPTED => 'Accepted'
 );
 
-// Submission queue
-$SUBMIT_QUEUE_FILENAME = 'submit_queue.txt';
-$SUBMIT_DONE_FILENAME = 'submit_done.txt';
-
 // Problems
 $PROBLEM_INFO_FILENAME = '/problem_info.json';
 $PROBLEM_STATEMENT_FILENAME = '/problem_statement.html';

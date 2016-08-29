@@ -8,9 +8,6 @@ ErrorDocument 404 /error
 #
 RewriteEngine on
 
-# Data
-RewriteRule    ^init$                                   /code/db/init.php                                       [NC,L,QSA]
-
 # Generic pages
 RewriteRule    ^$                                       /code/main.php?page=home                                [NC,L]
 RewriteRule    ^home$                                   /code/main.php?page=home                                [NC,L,QSA]
@@ -39,4 +36,5 @@ RewriteRule    ^users/(\w[\w.]{1,15})$                  /code/main.php?page=prof
 RewriteRule    ^actions/(\w+)$                          /code/logic/actions.php?action=$1                       [NC,L,QSA]
 
 # Administration pages
+RewriteRule    ^admin/init$                             /code/db/init.php                                       [NC,L,QSA]
 RewriteRule    ^admin/news$                             /code/admin/admin.php?page=news                         [NC,L,QSA]

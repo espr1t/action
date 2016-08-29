@@ -166,7 +166,7 @@ Table::Submits
     "id": 1,
     "problem": 1,
     "user": 1,
-    "timestamp": 1471530937,
+    "time": "2016-08-30 00:24:11",
     "language": java,
     "results": "1,1,-3,0.42,-6",
     "status": -1,
@@ -184,8 +184,9 @@ if ($db->query("SELECT 1 FROM `Submits` LIMIT 1;") == true) {
             `id` INT NOT NULL AUTO_INCREMENT,
             `problem` INT NOT NULL,
             `user` INT NOT NULL,
-            `timestamp` DATETIME NOT NULL,
-            `language` ENUM('cpp', 'java', 'python', '') NOT NULL,
+            `time` DATETIME NOT NULL,
+            `source` TEXT NOT NULL,
+            `language` ENUM('cpp', 'java', 'python') NOT NULL,
             `results` TEXT NOT NULL,
             `status` INT NOT NULL,
             `message` TEXT NOT NULL,
@@ -202,7 +203,7 @@ Table::Pending
     "submit": 421337,
     "user_name": "espr1t",
     "problem_name": "Input/Output",
-    "time": "04:04",
+    "time": "2016-08-30 00:24:11",
     "progress": 0.66,
     "status": -3
 }
@@ -216,9 +217,11 @@ if ($db->query("SELECT 1 FROM `Pending` LIMIT 1;") == true) {
     $result = $db->query("
         CREATE TABLE `Pending`(
             `submit` INT NOT NULL,
+            `user_id` INT NOT NULL,
             `user_name` VARCHAR(32) NOT NULL,
+            `problem_id` INT NOT NULL,
             `problem_name` VARCHAR(32) NOT NULL,
-            `time` TIME NOT NULL,
+            `time` DATETIME NOT NULL,
             `progress` FLOAT NOT NULL,
             `status` INT NOT NULL
         );
@@ -227,29 +230,31 @@ if ($db->query("SELECT 1 FROM `Pending` LIMIT 1;") == true) {
 }
 
 /*
-Table::Done
+Table::Latest
 ===========
 {
     "submit": 421337,
     "user_name": "espr1t",
     "problem_name": "Input/Output",
-    "time": "14:09",
+    "time": "2016-08-29 23:54:33",
     "progress": 1.0,
     "status": -9
 }
 */
 output('');
-output('Creating table Done...');
+output('Creating table Latest...');
 
-if ($db->query("SELECT 1 FROM `Done` LIMIT 1;") == true) {
+if ($db->query("SELECT 1 FROM `Latest` LIMIT 1;") == true) {
     output('  >> already exists.');
 } else {
     $result = $db->query("
-        CREATE TABLE `Done`(
+        CREATE TABLE `Latest`(
             `submit` INT NOT NULL,
+            `user_id` INT NOT NULL,
             `user_name` VARCHAR(32) NOT NULL,
+            `problem_id` INT NOT NULL,
             `problem_name` VARCHAR(32) NOT NULL,
-            `time` TIME NOT NULL,
+            `time` DATETIME NOT NULL,
             `progress` FLOAT NOT NULL,
             `status` INT NOT NULL
         );

@@ -1,6 +1,6 @@
 <?php
-require_once('db/db.php');
-require_once('config.php');
+require_once(__DIR__ . '/../db/db.php');
+require_once(__DIR__ . '/config.php');
 
 class Brain {
     private $db;
@@ -16,20 +16,21 @@ class Brain {
     }
 
     function getResults($sqlResponse) {
+        $results = array();
         while ($row = $sqlResponse->fetch_assoc()) {
-            $results[] = $row;
+            array_push($results, $row);
         }
         $sqlResponse->close();
         return $results;
     }
 
     function getIntResults($sqlResponse) {
-        $asIntegers = array();
+        $results = array();
         while ($row = $sqlResponse->fetch_row()) {
-            array_push($asIntegers, intval($row[0]));
+            array_push($results, intval($row[0]));
         }
         $sqlResponse->close();
-        return $asIntegers;
+        return $results;
     }
 
     function publishNews($date, $title, $content) {
@@ -55,6 +56,49 @@ class Brain {
         ");
         if (!$response) {
             error_log('Could not execute getNews() query properly!');
+            return false;
+        }
+        return $this->getResults($response);
+    }
+
+    function getPending() {
+        $response = $this->db->query("
+            SELECT * FROM `Pending`;
+        ");
+        if (!$response) {
+            error_log('Could not execute getPending() query properly!');
+            return false;
+        }
+        return $this->getResults($response);
+    }
+
+    function addPending($submit) {
+        $response = $this->db->query("
+            INSERT INTO `Pending` (`submit`, `user_id`, `user_name`, `problem_id`, `problem_name`, `time`, `progress`, `status`)
+            VALUES (
+                '" . $submit->id . "',
+                '" . $submit->userId . "',
+                '" . $submit->userName . "',
+                '" . $submit->problemId . "',
+                '" . $submit->problemName . "',
+                '" . $submit->time . "',
+                '" . 0 . "',
+                '" . $submit->status . "'
+            );
+        ");
+        if (!$response) {
+            error_log('Could not add submit ' . $submit->id . ' to pending queue!');
+            return false;
+        }
+        return true;
+    }
+
+    function getLatest() {
+        $response = $this->db->query("
+            SELECT * FROM `Latest`;
+        ");
+        if (!$response) {
+            error_log('Could not execute getLatest() query properly!');
             return false;
         }
         return $this->getResults($response);
@@ -129,7 +173,7 @@ class Brain {
         return true;
     }
 
-    function createUser($user) {
+    function addUser($user) {
         $response = $this->db->query("
             INSERT INTO `Users` (`access`, `registered`, `username`, `password`, `name`, `email`, `town`, `country`, `gender`, `birthdate`, `avatar`)
             VALUES (

@@ -13,7 +13,7 @@ function getProblemLink($problemId, $problemName) {
 }
 
 function userInfo($user) {
-    if ($user->username != "anonymous") {
+    if ($user->username != 'anonymous') {
         return '<div class="userInfo">logged in as: ' . getUserLink($user->username) . '</div>';
     }
     return '';

@@ -1,4 +1,5 @@
 <?php
+require_once('brain.php');
 require_once('config.php');
 require_once('widgets.php');
 require_once('user.php');
@@ -44,7 +45,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
 class Submit {
     public $id = -1;
-    public $timestamp = -1;
+    public $time = '';
     public $source = '';
     public $language = '';
     public $userId = -1;
@@ -52,6 +53,7 @@ class Submit {
     public $problemId = -1;
     public $problemName = '';
     public $results = array();
+    public $status = -1;
     public $message = '';
 
     private $user = null;
@@ -65,7 +67,7 @@ class Submit {
         $this->id = $this->getUniqueId();
 
         // Mark the time of the submission
-        $this->timestamp = time();
+        $this->time = date('Y-m-d H:i:s');
 
         // Populate the remaining submission info
         $this->language = $language;
@@ -78,13 +80,14 @@ class Submit {
         for ($i = 0; $i < count($this->problem->tests); $i = $i + 1) {
             $this->results[$i] = $GLOBALS['STATUS_WAITING'];
         }
+        $this->status = $GLOBALS['STATUS_WAITING'];
         $this->message = '';
     }
 
     private function arrayFromInstance() {
         return array(
             'id' => $this->id,
-            'timestamp' => $this->timestamp,
+            'time' => $this->time,
             'source' => $this->source,
             'language' => $this->language,
             'userId' => $this->userId,
@@ -92,6 +95,7 @@ class Submit {
             'problemId' => $this->problemId,
             'problemName' => $this->problemName,
             'results' => $this->results,
+            'status' => $this->status,
             'message' => $this->message
         );
     }
@@ -141,23 +145,8 @@ class Submit {
         fclose($file);
 
         // Record the request in the submission queue
-        $file = fopen($GLOBALS['SUBMIT_QUEUE_FILENAME'], 'a');
-        if (!$file) {
-            error_log('Unable to append to file ' . $GLOBALS['SUBMIT_QUEUE_FILENAME'] . '!');
-            return false;
-        }
-        fprintf($file, "%d\n", $this->id);
-        fclose($file);
-
-        // Record the submission in the user history
-        if (!$this->user->addSubmission($this->id)) {
-            return false;
-        }
-
-        // Record the submission in the problem history
-        if (!$this->problem->addSubmission($this->id)) {
-            return false;
-        }
+        $brain = new Brain();
+        $brain->addPending($this);
 
         return true;
     }

@@ -1,5 +1,5 @@
 <?php
-require_once('logic/brain.php');
+require_once('brain.php');
 require_once('config.php');
 require_once('widgets.php');
 
@@ -78,7 +78,7 @@ class User {
         $user->birthdate = $birthdate;
         $user->avatar = $avatar;
 
-        return $brain->createUser($user);
+        return $brain->addUser($user);
    }
 }
 
