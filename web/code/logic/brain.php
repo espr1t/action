@@ -61,6 +61,51 @@ class Brain {
         return $this->getResults($response);
     }
 
+    function addSubmit($submit) {
+        $response = $this->db->query("
+            INSERT INTO `Submits` (`time`, `user_id`, `user_name`, `problem_id`, `problem_name`, `source`, `language`, `results`, `status`, `message`)
+            VALUES (
+                '" . $submit->time . "',
+                '" . $submit->userId . "',
+                '" . $submit->userName . "',
+                '" . $submit->problemId . "',
+                '" . $submit->problemName . "',
+                '" . $this->db->escape($submit->source) . "',
+                '" . strtolower($submit->language) . "',
+                '" . implode(',', $submit->results) . "',
+                '" . $submit->status . "',
+                '" . $this->db->escape($submit->message) . "'
+            );
+        ");
+        if (!$response) {
+            error_log('Could not add new submit from user "' . $submit->userName . '"!');
+            return -1;
+        }
+        return $this->db->lastId();
+    }
+
+    function getSubmit($submitId) {
+        $response = $this->db->query("
+            SELECT * FROM `Submits` WHERE id = " . $submitId . " LIMIT 1;
+        ");
+        if (!$response) {
+            error_log('Could not execute getSubmit() query with submitId = ' . $submitId . '!');
+            return false;
+        }
+        return $this->getResult($response);
+    }
+
+    function getUserSubmits($userId, $problemId) {
+        $response = $this->db->query("
+            SELECT * FROM `Submits` WHERE user_id = " . $userId . " AND problem_id = " . $problemId . ";
+        ");
+        if (!$response) {
+            error_log('Could not execute getUserSubmits() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
+            return false;
+        }
+        return $this->getResults($response);
+    }
+
     function getPending() {
         $response = $this->db->query("
             SELECT * FROM `Pending`;
@@ -141,7 +186,7 @@ class Brain {
 
     function getUserByName($username) {
         $response = $this->db->query("
-            SELECT * FROM `Users` WHERE username = '" . $username . "';
+            SELECT * FROM `Users` WHERE username = '" . $username . "' LIMIT 1;
         ");
         if (!$response) {
             error_log('Could not execute getUserByName() query with username = "' . $username . '"!');

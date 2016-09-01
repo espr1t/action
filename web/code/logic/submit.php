@@ -22,21 +22,20 @@ if (session_status() == PHP_SESSION_NONE) {
             'status' => 'SPAM'
         ));
     } else {
-        $submit = new Submit($user->username, $_POST['problemId'], $_POST['language'], $_POST['source']);
+        $submit = Submit::newSubmit($user, $_POST['problemId'], $_POST['language'], $_POST['source']);
 
         // If cannot write the submit info file or update the user/problem or the solution cannot be sent
         // to the grader for judging (the grader machine is down or not accessible)
         if (!$submit->write() || !$submit->send()) {
             printAjaxResponse(array(
-                'id' => -1,
                 'status' => 'ERROR'
             ));
         }
         // Otherwise print success and return the submit ID
         else {
             printAjaxResponse(array(
-                'id' => $submit->id,
-                'status' => 'OK'
+                'status' => 'OK',
+                'id' => $submit->id
             ));
         }
     }
@@ -46,112 +45,59 @@ if (session_status() == PHP_SESSION_NONE) {
 class Submit {
     public $id = -1;
     public $time = '';
-    public $source = '';
-    public $language = '';
     public $userId = -1;
     public $userName = '';
     public $problemId = -1;
     public $problemName = '';
+    public $source = '';
+    public $language = '';
     public $results = array();
+    public $progress = 0;
     public $status = -1;
     public $message = '';
 
-    private $user = null;
-    private $problem = null;
+    function __construct() {
+    }
 
-    function __construct($userName, $problemId, $language, $source) {
-        $this->user = User::get($userName);
-        $this->problem = Problem::get($problemId);
+    public static function newSubmit($user, $problemId, $language, $source) {
+        $submit = new Submit();
 
-        // Create a unique ID for the submission
-        $this->id = $this->getUniqueId();
+        $problem = Problem::get($problemId);
+
+        // The submission doesn't have an ID until it is inserted in the database
+        $submit->id = -1;
 
         // Mark the time of the submission
-        $this->time = date('Y-m-d H:i:s');
+        $submit->time = date('Y-m-d H:i:s');
 
         // Populate the remaining submission info
-        $this->language = $language;
-        $this->source = $source;
-        $this->userId = $this->user->id;
-        $this->userName = $this->user->username;
-        $this->problemId = $this->problem->id;
-        $this->problemName = $this->problem->name;
-        $this->results = array();
-        for ($i = 0; $i < count($this->problem->tests); $i = $i + 1) {
-            $this->results[$i] = $GLOBALS['STATUS_WAITING'];
+        $submit->userId = $user->id;
+        $submit->userName = $user->username;
+        $submit->problemId = $problem->id;
+        $submit->problemName = $problem->name;
+        $submit->source = $source;
+        $submit->language = $language;
+        $submit->results = array();
+        for ($i = 0; $i < count($problem->tests); $i = $i + 1) {
+            $submit->results[$i] = $GLOBALS['STATUS_WAITING'];
         }
-        $this->status = $GLOBALS['STATUS_WAITING'];
-        $this->message = '';
-    }
-
-    private function arrayFromInstance() {
-        return array(
-            'id' => $this->id,
-            'time' => $this->time,
-            'source' => $this->source,
-            'language' => $this->language,
-            'userId' => $this->userId,
-            'userName' => $this->userName,
-            'problemId' => $this->problemId,
-            'problemName' => $this->problemName,
-            'results' => $this->results,
-            'status' => $this->status,
-            'message' => $this->message
-        );
-    }
-
-    private function getUniqueId() {
-        $id = -1;
-        while (true) {
-            $id = rand(100000000, 999999999);
-            if (!file_exists($this->getPath($id, 'json'))) {
-                break;
-            }
-        }
-        return $id;
-    }
-
-    private static function getPath($id, $extension) {
-        return sprintf('%s/%02d/%09d.%s', $GLOBALS['PATH_SUBMISSIONS'], $id / 10000000, $id, $extension);
+        $submit->progress = 0;
+        $submit->status = $GLOBALS['STATUS_WAITING'];
+        $submit->message = '';
+        return $submit;
     }
 
     public function write() {
-        $infoFilePath = $this->getPath($this->id, 'json');
-        // If the bucket directory doesn't already exist, create it
-        if (!file_exists(dirname($infoFilePath))) {
-            if (!mkdir(dirname($infoFilePath), 0777, true)) {
-                error_log('Unable to create directory for file ' . $infoFilePath . '!');
-                return false;
-            }
-        }
+        $brain = new Brain();
+        $this->id = $brain->addSubmit($this);
+        return $this->id >= 0;
+    }
 
-        // Create the info file for this submission
-        $file = fopen($infoFilePath, 'w');
-        if (!$file) {
-            error_log('Unable to create file ' . $infoFilePath . '!');
-            return false;
-        }
-        fwrite($file, json_encode($this->arrayFromInstance(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        fclose($file);
-
-        // Write also the actual source of the submission
-        $sourcePath = $this->getPath($this->id, $GLOBALS['LANGUAGE_EXTENSIONS'][$this->language]);
-        $file = fopen($sourcePath, 'w');
-        if (!$file) {
-            error_log('Unable to create file ' . $sourcePath . '!');
-            return false;
-        }
-        fwrite($file, $this->source);
-        fclose($file);
-
+    public function send() {
         // Record the request in the submission queue
         $brain = new Brain();
         $brain->addPending($this);
 
-        return true;
-    }
-
-    public function send() {
         $url = $GLOBALS['GRADER_URL'] . '/grade';
         $data = array(
             'id' => $this->id,
@@ -189,43 +135,36 @@ class Submit {
         return true;
     }
 
-    public static function getSubmitInfo($id) {
-        $infoFilePath = Submit::getPath($id, 'json');
-        if (!file_exists($infoFilePath)) {
-            return null;
+    private static function instanceFromArray($info) {
+        $submit = new Submit();
+        $submit->id = $info['id'];
+        $submit->time = $info['time'];
+        $submit->userId = $info['user_id'];
+        $submit->userName = $info['user_name'];
+        $submit->problemId = $info['problem_id'];
+        $submit->problemName = $info['problem_name'];
+        $submit->source = $info['source'];
+        $submit->language = $info['language'];
+        $submit->results = explode(',', $info['results']);
+        $submit->status = $info['status'];
+        $submit->message = $info['message'];
+        return $submit;
+    }
+
+    public static function getSubmit($submitId) {
+        $brain = new Brain();
+        $submitMap = $brain->getSubmit($submitId);
+        return Submit::instanceFromArray($submitMap);
+    }
+
+    public static function getUserSubmits($userId, $problemId) {
+        $brain = new Brain();
+        $submitMaps = $brain->getUserSubmits($userId, $problemId);
+        $submits = array();
+        foreach ($submitMaps as $submitMap) {
+            array_push($submits, Submit::instanceFromArray($submitMap));
         }
-        $info = json_decode(file_get_contents($infoFilePath), true);
-
-        $problem = Problem::get($info['problemId']);
-        if ($problem == null) {
-            return null;
-        }
-
-        $score = 0;
-        $status = $GLOBALS['STATUS_ACCEPTED'];
-
-        for ($i = 0; $i < count($info['results']); $i = $i + 1) {
-            $result = $info['results'][$i];
-
-            // The grader assigns 0/1 value for each test of IOI- and ACM-style problems and [0, 1] real fraction of the score
-            // for games and relative problems. In both cases, multiplying the score of the test by this value is correct.
-            if ($result >= 0) {
-                $info['results'][$i] = $result * $problem->tests[$i]['score'];
-                $score += $info['results'][$i];
-            }
-            // Negative scores indicate exceptional cases and are considered a zero for the test
-            else {
-                // The possible statuses are ordered by priority - assign the status of the problem to be the highest one
-                $status = $result > $status ? $result : $status;
-            }
-        }
-
-        $info['date'] = date('d. F, Y', $info['timestamp']);
-        $info['time'] = date('H:i:s', $info['timestamp']);
-        $info['score'] = $score;
-        $info['status'] = $status;
-
-        return $info;
+        return $submits;
     }
 
 }

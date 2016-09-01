@@ -90,6 +90,35 @@ class Problem {
         return $this->update();
     }
 
+    public function scoreSubmit($submit) {
+        $info = array();
+
+        $info['score'] = 0;
+        $info['status'] = $GLOBALS['STATUS_ACCEPTED'];
+
+        $info['results'] = array();
+        for ($i = 0; $i < count($submit->results); $i = $i + 1) {
+            $result = $submit->results[$i];
+
+            // Non-negative results indicate actually graded tests
+            if ($result >= 0) {
+                // The grader assigns 0/1 value for each test of IOI- and ACM-style problems and [0, 1] real fraction of the score
+                // for games and relative problems. In both cases, multiplying the score of the test by this value is correct.
+                $info['results'][$i] = $result * $this->tests[$i]['score'];
+                $info['score'] += $info['results'][$i];
+            }
+            // Negative results indicate exceptional cases
+            else {
+                // Exceptional cases are considered a zero for the test
+                $info['results'][$i] = 0;
+                // The possible statuses are ordered by priority - assign the status of the problem to be the highest one
+                $info['status'] = $result > $info['status'] ? $result : $info['status'];
+            }
+        }
+
+        return $info;
+    }
+
 }
 
 ?>

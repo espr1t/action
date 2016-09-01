@@ -28,6 +28,10 @@ class DB {
         return $this->db->query($sqlQuery);
     }
 
+    function lastId() {
+        return $this->db->insert_id;
+    }
+
     function escape($string) {
         return $this->db->escape_string($string);
     }

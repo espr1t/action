@@ -84,25 +84,32 @@ class ProblemsPage extends Page {
         ';
     }
 
-    private function getSubmitInfoBox($problem, $id) {
-        if (!is_numeric($id)) {
+    private function getSubmitInfoBox($problem, $submitId) {
+        if (!is_numeric($submitId)) {
             return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        $submitInfo = Submit::getSubmitInfo($id);
-        if ($submitInfo == null) {
+        $submit = Submit::getSubmit($submitId);
+        if ($submit == null) {
             return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        if ($submitInfo['userId'] != $this->user->id) {
+        if ($submit->userId != $this->user->id) {
             return showMessage('ERROR', 'Нямате достъп до това решение!');
         }
 
-        $color = 'green';
-        if ($submitInfo['status'] >= $GLOBALS['STATUS_RUNNING']) {
-            $color = 'gray';
-        } else if ($submitInfo['status'] >= $GLOBALS['STATUS_WRONG_ANSWER']) {
+        if ($submit->problemId != $problem->id) {
+            return showMessage('ERROR', 'Решението не е по поисканата задача!');
+        }
+
+        $scoredSubmit = $problem->scoreSubmit($submit);
+
+        $color = 'gray';
+        if ($scoredSubmit['status'] <= $GLOBALS['STATUS_INTERNAL_ERROR']) {
             $color = 'red';
+        }
+        if ($scoredSubmit['status'] <= $GLOBALS['STATUS_ACCEPTED']) {
+            $color = 'green';
         }
 
         $summaryTable = '
@@ -114,15 +121,15 @@ class ProblemsPage extends Page {
                 </tr>
                 <tr>
                     <td>-</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submitInfo['status']] . '</td>
-                    <td>' . $submitInfo['score'] . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$scoredSubmit['status']] . '</td>
+                    <td>' . $scoredSubmit['score'] . '</td>
                 </tr>
             </table>
         ';
 
         $testResults = '';
-        for ($i = 0; $i < count($submitInfo['results']); $i = $i + 1) {
-            $result = $submitInfo['results'][$i];
+        for ($i = 0; $i < count($scoredSubmit['results']); $i = $i + 1) {
+            $result = $scoredSubmit['results'][$i];
             $testResults .= '
                 <tr>
                     <td>' . $i . '</td>
@@ -147,7 +154,7 @@ class ProblemsPage extends Page {
             <div id="submissionStatus" class="submission-status fade-in">
                 <div class="submission-close" onclick="hideSubmitStatus(' . $problem->id . ');"><i class="fa fa-close fa-fw"></i></div>
                 <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение</h2>
-                <div class="right smaller">' . $submitInfo['date'] . ' | ' . $submitInfo['time'] . '</div>
+                <div class="right smaller">' . explode(' ', $submit->time)[0] . ' | ' . explode(' ', $submit->time)[1] . '</div>
                 <br>
                 ' . $summaryTable . '
                 <br>
@@ -160,26 +167,25 @@ class ProblemsPage extends Page {
     }
 
     private function getAllSubmitsBox($problem) {
-        $submissionList = '';
-        $counter = 0;
-        foreach ($this->user->submits as $submitId) {
-            $submitInfo = Submit::getSubmitInfo($submitId);
-            if ($submitInfo['problemId'] == $problem->id) {
-                $counter = $counter + 1;
-                $submissionLink = '<a href="/problems/' . $problem->id . '/submits/' . $submitInfo['id'] . '">' . $submitInfo['id'] . '</a>';
-                $submissionList .= '
-                    <tr>
-                        <td>' . $counter . '</td>
-                        <td>' . $submitInfo['date'] . '</td>
-                        <td>' . $submitInfo['time'] . '</td>
-                        <td>' . $submissionLink . '</td>
-                        <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submitInfo['status']] . '</td>
-                        <td>' . $submitInfo['score'] . '</td>
-                    </tr>
-                ';
-            }
+        $submits = Submit::getUserSubmits($this->user->id, $problem->id);
+
+        $submitList = '';
+        for ($i = 0; $i < count($submits); $i = $i + 1) {
+            $submit = $submits[$i];
+            $scoredSubmit = $problem->scoreSubmit($submit);
+            $submitLink = '<a href="/problems/' . $problem->id . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
+            $submitList .= '
+                <tr>
+                    <td>' . ($i + 1) . '</td>
+                    <td>' . explode(' ', $submit->time)[0] . '</td>
+                    <td>' . explode(' ', $submit->time)[1] . '</td>
+                    <td>' . $submitLink . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$scoredSubmit['status']] . '</td>
+                    <td>' . $scoredSubmit['score'] . '</td>
+                </tr>
+            ';
         }
-        $submissionTable = '
+        $submitTable = '
             <table class="default">
                 <tr>
                     <th>#</th>
@@ -189,7 +195,7 @@ class ProblemsPage extends Page {
                     <th>Статус</th>
                     <th>Точки</th>
                 </tr>
-                ' . $submissionList . '
+                ' . $submitList . '
             </table>
         ';
 
@@ -197,7 +203,7 @@ class ProblemsPage extends Page {
             <div id="submissionStatus" class="submission-status fade-in">
                 <div class="submission-close" onclick="hideSubmitStatus(' . $problem->id . ');"><i class="fa fa-close fa-fw"></i></div>
                 <h2><span class="blue">' . $problem->name . '</span> :: Ваши решения</h2>
-                ' . $submissionTable . '
+                ' . $submitTable . '
             </div>
             <script>
                 showSubmitStatus(' . $problem->id . ');
@@ -214,10 +220,10 @@ class ProblemsPage extends Page {
 
             $content = $this->getStatement($problem);
             if (isset($_GET['submits'])) {
-                if ($_GET['submits'] == 'all') {
+                if (!isset($_GET['id'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    $content .= $this->getSubmitInfoBox($problem, $_GET['submits']);
+                    $content .= $this->getSubmitInfoBox($problem, $_GET['id']);
                 }
             }
             return $content;
