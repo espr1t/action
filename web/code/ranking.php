@@ -20,7 +20,6 @@ class RankingPage extends Page {
 
             $info['solved'] = count($brain->getSolved($info['id']));
             $info['achievements'] = count($brain->getAchievements($info['id']));
-            $info['score'] = 42;
             $info['link'] = getUserLink($info['username']);
             if ($info['town'] == '') {
                 $info['town'] = '-';
@@ -34,7 +33,6 @@ class RankingPage extends Page {
                     <td>' . $info['town'] . '</td>
                     <td>' . $info['solved'] . '</td>
                     <td>' . $info['achievements'] . '</td>
-                    <td>' . $info['score'] . '</td>
                 </tr>
             ';
         }
@@ -51,9 +49,8 @@ class RankingPage extends Page {
                     <th>Потребител</th>
                     <th>Име</th>
                     <th>Град</th>
-                    <th>Задачи</th>
-                    <th>Постижения</th>
-                    <th>Точки</th>
+                    <th style="width: 100px;">Задачи</th>
+                    <th style="width: 100px;">Постижения</th>
                 </tr>
                 ' . $ranking . '
             </table>

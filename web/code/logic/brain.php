@@ -162,8 +162,8 @@ class Brain {
 
     function getSolved($userId) {
         $response = $this->db->query("
-            SELECT DISTINCT `problem` FROM `Submits`
-            WHERE `user` = " . $userId . " AND `status` = " . $GLOBALS['STATUS_ACCEPTED'] . ";
+            SELECT DISTINCT `problem_id` FROM `Submits`
+            WHERE `user_id` = " . $userId . " AND `status` = " . $GLOBALS['STATUS_ACCEPTED'] . ";
         ");
         if (!$response) {
             error_log('Could not execute getSolved() query for user with id ' . $userId . '!');
