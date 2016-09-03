@@ -9,6 +9,7 @@ class Brain {
         $this->db = new DB();
     }
 
+    // mysqli result converters
     function getResult($sqlResponse) {
         $result = $sqlResponse->fetch_assoc();
         $sqlResponse->close();
@@ -33,43 +34,59 @@ class Brain {
         return $results;
     }
 
-    function publishNews($date, $title, $content) {
+    // News
+    function addNews($date, $title, $content) {
         $response = $this->db->query("
-            INSERT INTO `News`(`date`, `title`, `content`)
+            INSERT INTO `News`(date, title, content)
             VALUES (
                 '" . $this->db->escape($date) . "',
                 '" . $this->db->escape($title) . "',
                 '" . $this->db->escape($content) . "'
-            );
+            )
         ");
 
         if (!$response) {
             error_log('Could not publish news with title "' . $title . '"!');
-            return false;
+            return null;
         }
-        return true;
+        return $this->db->lastId();
     }
 
     function getNews() {
         $response = $this->db->query("
-            SELECT * FROM `News` ORDER BY date DESC LIMIT 20;
+            SELECT * FROM `News`
+            ORDER BY date DESC
+            LIMIT 20
         ");
         if (!$response) {
             error_log('Could not execute getNews() query properly!');
-            return false;
+            return null;
         }
         return $this->getResults($response);
     }
 
-    function getAllProblems() {
+    // Problems
+    function updateProblem($problem) {
         $response = $this->db->query("
-            SELECT * FROM `Problems` ORDER BY id;
+            UPDATE `Problems` SET
+                name = `" . $problem->name . "`,
+                author = `" . $problem->author . "`,
+                folder = `" . $problem->folder . "`,
+                timeLimit = `" . $problem->timeLimit . "`,
+                memoryLimit = `" . $problem->memoryLimit . "`,
+                type = `" . $problem->type . "`,
+                difficulty = `" . $problem->difficulty . "`,
+                tags = `" . implode(',', $probme->tags) . "`,
+                origin = `" . $problem->origin . "`,
+                checker = `" . $problem->checker . "`,
+                executor = `" . $problem->executor . "`
+            WHERE `id` = " . $problem->id . "
         ");
         if (!$response) {
-            error_log('Could not execute getAllProblems() query properly!');
-            return false;
+            error_log('Could not update info for problem "' . $problem->name . '"!');
+            return null;
         }
-        return $this->getResults($response);
+        return true;
     }
 
     function getProblem($problemId) {
@@ -78,47 +95,24 @@ class Brain {
         ");
         if (!$response) {
             error_log('Could not execute getProblem() query properly!');
-            return false;
+            return null;
         }
         return $this->getResults($response);
     }
 
-    function updateProblem($problem) {
+    function getAllProblems() {
         $response = $this->db->query("
-            UPDATE `Problems` SET
-                `name`=`" . $problem->name . "`,
-                `author`=`" . $problem->author . "`,
-                `folder`=`" . $problem->folder . "`,
-                `time_limit`=`" . $problem->time_limit . "`,
-                `memory_limit`=`" . $problem->memory_limit . "`,
-                `type`=`" . $problem->type . "`,
-                `difficulty`=`" . $problem->difficulty . "`,
-                `tags`=`" . implode(',', $probme->tags) . "`,
-                `origin`=`" . $problem->origin . "`,
-                `checker`=`" . $problem->checker . "`,
-                `executor`=`" . $problem->executor . "`
-            WHERE `id` = " . $problem->id . ";
+            SELECT * FROM `Problems`
+            ORDER BY id
         ");
         if (!$response) {
-            error_log('Could not update info for problem "' . $problem->name . '"!');
-            return false;
+            error_log('Could not execute getAllProblems() query properly!');
+            return null;
         }
-        return true;
+        return $this->getResults($response);
     }
 
-    function getProblemSubmits($problemId, $status) {
-        $response = $this->db->query("
-            SELECT id FROM `Submits`
-            WHERE problem_id = " . $problemId . " AND status = " . $status . "
-            GROUP BY user_id;
-        ");
-        if (!$response) {
-            error_log('Could not execute getProblemSubmits() query properly!');
-            return false;
-        }
-        return $this->getIntResults($response);
-    }
-
+    // Tests
     function getProblemTests($problemId) {
         $response = $this->db->query("
             SELECT * FROM `Tests`
@@ -127,14 +121,15 @@ class Brain {
         ");
         if (!$response) {
             error_log('Could not execute getProblemTests() query properly!');
-            return false;
+            return null;
         }
         return $this->getResults($response);
     }
 
+    // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (`time`, `user_id`, `user_name`, `problem_id`, `problem_name`, `source`, `language`, `results`, `status`, `message`)
+            INSERT INTO `Submits` (time, userId, userName, problemId, problemName, source, language, results, status, message)
             VALUES (
                 '" . $submit->time . "',
                 '" . $submit->userId . "',
@@ -146,51 +141,80 @@ class Brain {
                 '" . implode(',', $submit->results) . "',
                 '" . $submit->status . "',
                 '" . $this->db->escape($submit->message) . "'
-            );
+            )
         ");
         if (!$response) {
             error_log('Could not add new submit from user "' . $submit->userName . '"!');
-            return -1;
+            return null;
         }
         return $this->db->lastId();
     }
 
     function getSubmit($submitId) {
         $response = $this->db->query("
-            SELECT * FROM `Submits` WHERE id = " . $submitId . " LIMIT 1;
+            SELECT * FROM `Submits`
+            WHERE id = " . $submitId . "
+            LIMIT 1
         ");
         if (!$response) {
             error_log('Could not execute getSubmit() query with submitId = ' . $submitId . '!');
-            return false;
+            return null;
         }
         return $this->getResult($response);
     }
 
+    function getProblemSubmits($problemId, $status) {
+        $response = $this->db->query("
+            SELECT id FROM `Submits`
+            WHERE problemId = " . $problemId . " AND status = " . $status . "
+            GROUP BY userId
+        ");
+        if (!$response) {
+            error_log('Could not execute getProblemSubmits() query properly!');
+            return null;
+        }
+        return $this->getIntResults($response);
+    }
+
     function getUserSubmits($userId, $problemId) {
         $response = $this->db->query("
-            SELECT * FROM `Submits` WHERE user_id = " . $userId . " AND problem_id = " . $problemId . ";
+            SELECT * FROM `Submits`
+            WHERE userId = " . $userId . " AND problemId = " . $problemId . "
         ");
         if (!$response) {
             error_log('Could not execute getUserSubmits() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
-            return false;
+            return null;
         }
         return $this->getResults($response);
     }
 
+    function getSolved($userId) {
+        $response = $this->db->query("
+            SELECT DISTINCT problemId FROM `Submits`
+            WHERE userId = " . $userId . " AND status = " . $GLOBALS['STATUS_ACCEPTED'] . "
+        ");
+        if (!$response) {
+            error_log('Could not execute getSolved() query for user with id ' . $userId . '!');
+            return null;
+        }
+        return $this->getIntResults($response);
+    }
+
+    // Pending
     function getPending() {
         $response = $this->db->query("
             SELECT * FROM `Pending`;
         ");
         if (!$response) {
             error_log('Could not execute getPending() query properly!');
-            return false;
+            return null;
         }
         return $this->getResults($response);
     }
 
     function addPending($submit) {
         $response = $this->db->query("
-            INSERT INTO `Pending` (`submit`, `user_id`, `user_name`, `problem_id`, `problem_name`, `time`, `progress`, `status`)
+            INSERT INTO `Pending`(submit, userId, userName, problemId, problemName, time, progress, status)
             VALUES (
                 '" . $submit->id . "',
                 '" . $submit->userId . "',
@@ -200,98 +224,31 @@ class Brain {
                 '" . $submit->time . "',
                 '" . 0 . "',
                 '" . $submit->status . "'
-            );
+            )
         ");
         if (!$response) {
             error_log('Could not add submit ' . $submit->id . ' to pending queue!');
-            return false;
+            return null;
         }
-        return true;
+        return $this->db->lastId();
     }
 
+    // Latest
     function getLatest() {
         $response = $this->db->query("
-            SELECT * FROM `Latest`;
+            SELECT * FROM `Latest`
         ");
         if (!$response) {
             error_log('Could not execute getLatest() query properly!');
-            return false;
+            return null;
         }
         return $this->getResults($response);
     }
 
-    function getUsers() {
-        $response = $this->db->query("
-            SELECT * FROM `Users`;
-        ");
-        if (!$response) {
-            error_log('Could not execute getUsers() query properly!');
-            return false;
-        }
-        return $this->getResults($response);
-    }
-
-    function getSolved($userId) {
-        $response = $this->db->query("
-            SELECT DISTINCT `problem_id` FROM `Submits`
-            WHERE `user_id` = " . $userId . " AND `status` = " . $GLOBALS['STATUS_ACCEPTED'] . ";
-        ");
-        if (!$response) {
-            error_log('Could not execute getSolved() query for user with id ' . $userId . '!');
-            return false;
-        }
-        return $this->getIntResults($response);
-    }
-
-    function getAchievements($userId) {
-        $response = $this->db->query("
-            SELECT DISTINCT `achievement` FROM `Achievements`
-            WHERE `user` = " . $userId . ";
-        ");
-        if (!$response) {
-            error_log('Could not execute getAchievements() query for user with id ' . $userId . '!');
-            return false;
-        }
-        return $this->getIntResults($response);
-    }
-
-    function getUserByName($username) {
-        $response = $this->db->query("
-            SELECT * FROM `Users` WHERE username = '" . $username . "' LIMIT 1;
-        ");
-        if (!$response) {
-            error_log('Could not execute getUserByName() query with username = "' . $username . '"!');
-            return false;
-        }
-        return $this->getResult($response);
-    }
-
-    function updateUser($user) {
-        $response = $this->db->query("
-            UPDATE `Users` SET
-                `access`=`" . $user->access . "`,
-                `registered`=`" . $user->registered . "`,
-                `username`=`" . $user->username . "`,
-                `password`=`" . $user->password . "`,
-                `name`=`" . $user->name . "`,
-                `email`=`" . $user->email . "`,
-                `town`=`" . $user->town . "`,
-                `country`=`" . $user->country . "`,
-                `gender`=`" . $user->gender . "`,
-                `birthdate`=`" . $user->birthdate . "`,
-                `avatar`=`" . $this->db->escape($user->avatar) . "`
-            WHERE `id` = " . $user->id . ";
-        ");
-        if (!$response) {
-            error_log('Could not update info for user "' . $user->username . '"!');
-            return false;
-        }
-        return true;
-    }
-
+    // Users
     function addUser($user) {
         $response = $this->db->query("
-            INSERT INTO `Users` (`access`, `registered`, `username`, `password`, `name`, `email`, `town`, `country`, `gender`, `birthdate`, `avatar`)
+            INSERT INTO `Users`(access, registered, username, password, name, email, town, country, gender, birthdate, avatar)
             VALUES (
                 '" . $user->access . "',
                 '" . $user->registered . "',
@@ -304,44 +261,109 @@ class Brain {
                 '" . $user->gender . "',
                 '" . $user->birthdate . "',
                 '" . $this->db->escape($user->avatar) . "'
-            );
+            )
         ");
         if (!$response) {
             error_log('Could not create user "' . $user->username . '"!');
-            return false;
+            return null;
+        }
+        return $this->db->lastId();
+    }
+
+    function updateUser($user) {
+        $response = $this->db->query("
+            UPDATE `Users` SET
+                access = `" . $user->access . "`,
+                registered = `" . $user->registered . "`,
+                username = `" . $user->username . "`,
+                password = `" . $user->password . "`,
+                name = `" . $user->name . "`,
+                email = `" . $user->email . "`,
+                town = `" . $user->town . "`,
+                country = `" . $user->country . "`,
+                gender = `" . $user->gender . "`,
+                birthdate = `" . $user->birthdate . "`,
+                avatar = `" . $this->db->escape($user->avatar) . "`
+            WHERE id = " . $user->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update info for user "' . $user->username . '"!');
+            return null;
         }
         return true;
     }
 
+    function getUsers() {
+        $response = $this->db->query("
+            SELECT * FROM `Users`
+        ");
+        if (!$response) {
+            error_log('Could not execute getUsers() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function getUserByName($username) {
+        $response = $this->db->query("
+            SELECT * FROM `Users`
+            WHERE username = '" . $username . "'
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getUserByName() query with username = "' . $username . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    // Achievements
+    function getAchievements($userId) {
+        $response = $this->db->query("
+            SELECT DISTINCT achievement FROM `Achievements`
+            WHERE user = " . $userId . "
+        ");
+        if (!$response) {
+            error_log('Could not execute getAchievements() query for user with id ' . $userId . '!');
+            return null;
+        }
+        return $this->getIntResults($response);
+    }
+
+    // Spam counters
     function refreshSpamCounters($minTime) {
         $response = $this->db->query("
-            DELETE FROM `Spam` WHERE time < " . $minTime . "
+            DELETE FROM `Spam`
+            WHERE time < " . $minTime . "
         ");
         if (!$response) {
             error_log('Could not refresh spam counters with minTime = ' . $minTime . '!');
-            return false;
+            return null;
         }
         return true;
     }
 
     function getSpamCounter($user, $type) {
         $response = $this->db->query("
-            SELECT time FROM `Spam` WHERE user = " . $user->id . " AND type = " . $type . "
+            SELECT time FROM `Spam`
+            WHERE user = " . $user->id . " AND type = " . $type . "
         ");
         if (!$response) {
             error_log('Could not get spam counter of type = ' . $type . ' for user ' . $user->name . '!');
-            return false;
+            return null;
         }
         return count($this->getResults($response));
     }
 
     function incrementSpamCounter($user, $type, $time) {
         $response = $this->db->query("
-            INSERT INTO `Spam` (type, user, time) VALUES (" . $type . ", " . $user->id . ", " . $time . ")
+            INSERT INTO `Spam`(type, user, time)
+            VALUES (
+                " . $type . ", " . $user->id . ", " . $time . ")
         ");
         if (!$response) {
             error_log('Could not increment spam counter of type = ' . $type . ' for user ' . $user->name . '!');
-            return false;
+            return null;
         }
         return true;
     }

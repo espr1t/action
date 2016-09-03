@@ -12,7 +12,7 @@ if ($user->access < $GLOBALS['ACCESS_PUBLISH_NEWS']) {
 require_once('brain.php');
 
 $brain = new Brain();
-$result = $brain->publishNews($_POST['date'], $_POST['title'], $_POST['content']);
+$result = $brain->addNews($_POST['date'], $_POST['title'], $_POST['content']);
 
 if ($result) {
     printAjaxResponse(array(

@@ -20,8 +20,8 @@ class DB {
         $this->db->close();
     }
 
-    function checkTable($tableName) {
-        return $this->db->query("SELECT 1 FROM `" . $tableName . "` LIMIT 1;") == true;
+    function tableExists($tableName) {
+        return $this->db->query("SELECT 1 FROM `" . $tableName . "` LIMIT 1") == true;
     }
 
     function query($sqlQuery) {

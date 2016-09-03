@@ -7,8 +7,8 @@ class Problem {
     public $name = '';
     public $author = '';
     public $folder = '';
-    public $time_limit = -1;
-    public $memory_limit = -1;
+    public $timeLimit = -1;
+    public $memoryLimit = -1;
     public $type = '';
     public $difficulty = '';
     public $tags = array();
@@ -22,8 +22,8 @@ class Problem {
             'name' => $this->name,
             'author' => $this->author,
             'folder' => $this->folder,
-            'time_limit' => $this->time_limit,
-            'memory_limit' => $this->memory_limit,
+            'timeLimit' => $this->timeLimit,
+            'memoryLimit' => $this->memoryLimit,
             'type' => $this->type,
             'difficulty' => $this->difficulty,
             'tags' => $this->tags,
@@ -39,8 +39,8 @@ class Problem {
         $problem->name = getValue($info, 'name');
         $problem->author = getValue($info, 'author');
         $problem->folder = getValue($info, 'folder');
-        $problem->time_limit = getValue($info, 'time_limit');
-        $problem->memory_limit = getValue($info, 'memory_limit');
+        $problem->timeLimit = getValue($info, 'timeLimit');
+        $problem->memoryLimit = getValue($info, 'memoryLimit');
         $problem->type = getValue($info, 'type');
         $problem->difficulty = getValue($info, 'difficulty');
         $problem->tags = getValue($info, 'tags');

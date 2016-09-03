@@ -107,8 +107,8 @@ class Submit {
             'language' => $this->language,
             'checker' => 'none',
             'path' => 'localhost/data/problems/a_b_problem',
-            'time_limit' => 0.5,
-            'memory_limit' => 64,
+            'timeLimit' => 0.5,
+            'memoryLimit' => 64,
             'tests' => array(
                 array(
                     'test_id' => 1,
@@ -141,10 +141,10 @@ class Submit {
         $submit = new Submit();
         $submit->id = $info['id'];
         $submit->time = $info['time'];
-        $submit->userId = $info['user_id'];
-        $submit->userName = $info['user_name'];
-        $submit->problemId = $info['problem_id'];
-        $submit->problemName = $info['problem_name'];
+        $submit->userId = $info['userId'];
+        $submit->userName = $info['userName'];
+        $submit->problemId = $info['problemId'];
+        $submit->problemName = $info['problemName'];
         $submit->source = $info['source'];
         $submit->language = $info['language'];
         $submit->results = explode(',', $info['results']);

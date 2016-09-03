@@ -95,7 +95,7 @@ class ProblemsPage extends Page {
         return '
             <div class="box">
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
-                <div class="problem-resources">Time Limit: ' . $problem->time_limit . 's, Memory Limit: ' . $problem->memory_limit . 'MB</div>
+                <div class="problem-resources">Time Limit: ' . $problem->timeLimit . 's, Memory Limit: ' . $problem->memoryLimit . 'MB</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
