@@ -64,12 +64,26 @@ class ProblemsPage extends Page {
         $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
 
-        $submit = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
-                <div class="problem-submit">
-                    <input type="submit" value="Предай решение" onclick="showSubmitForm();" class="button button-color-blue button-large">
-                    <br>
-                    <a href="/problems/' . $problem->id . '/submits" style="font-size: 0.8em;">Предадени решения</a>
-                </div>
+        $submitFormContent = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Предаване на Решение</h2>
+            <div class="center">
+                <textarea name="source" class="submit-source" cols=80 rows=24 id="source"></textarea>
+            </div>
+            <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
+            <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm();" class="button button-color-red"></div>
+        ';
+
+        $submitButtons = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
+            <script>
+                function showForm() {
+                    showSubmitForm(`' . $submitFormContent . '`);
+                }
+            </script>
+            <div class="problem-submit">
+                <input type="submit" value="Предай решение" onclick="showForm();" class="button button-color-blue button-large">
+                <br>
+                <a href="/problems/' . $problem->id . '/submits" style="font-size: 0.8em;">Предадени решения</a>
+            </div>
         ';
 
         return '
@@ -79,7 +93,7 @@ class ProblemsPage extends Page {
                 <div class="problem-origin">' . $problem->origin . '</div>
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
-                ' . $submit . '
+                ' . $submitButtons . '
             </div>
         ';
     }
@@ -150,18 +164,20 @@ class ProblemsPage extends Page {
             </table>
         ';
 
+        $content = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение</h2>
+            <div class="right smaller">' . explode(' ', $submit->time)[0] . ' | ' . explode(' ', $submit->time)[1] . '</div>
+            <br>
+            ' . $summaryTable . '
+            <br>
+            ' . $detailedTable . '
+        ';
+
+        $redirect = '/problems/' . $problem->id . '/submits';
+
         return '
-            <div id="submissionStatus" class="submission-status fade-in">
-                <div class="submission-close" onclick="hideSubmitStatus(' . $problem->id . ');"><i class="fa fa-close fa-fw"></i></div>
-                <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение</h2>
-                <div class="right smaller">' . explode(' ', $submit->time)[0] . ' | ' . explode(' ', $submit->time)[1] . '</div>
-                <br>
-                ' . $summaryTable . '
-                <br>
-                ' . $detailedTable . '
-            </div>
             <script>
-                showSubmitStatus(' . $problem->id . ');
+                showActionForm(`' . $content . '`, \'' . $redirect . '\');
             </script>
         ';
     }
@@ -185,7 +201,9 @@ class ProblemsPage extends Page {
                 </tr>
             ';
         }
-        $submitTable = '
+
+        $content = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Ваши решения</h2>
             <table class="default">
                 <tr>
                     <th>#</th>
@@ -199,14 +217,11 @@ class ProblemsPage extends Page {
             </table>
         ';
 
+        $redirect = '/problems/' . $problem->id;
+
         return '
-            <div id="submissionStatus" class="submission-status fade-in">
-                <div class="submission-close" onclick="hideSubmitStatus(' . $problem->id . ');"><i class="fa fa-close fa-fw"></i></div>
-                <h2><span class="blue">' . $problem->name . '</span> :: Ваши решения</h2>
-                ' . $submitTable . '
-            </div>
             <script>
-                showSubmitStatus(' . $problem->id . ');
+                showActionForm(`' . $content . '`, \'' . $redirect . '\');
             </script>
         ';
     }

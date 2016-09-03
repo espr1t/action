@@ -441,6 +441,23 @@ div.separator {
     margin-bottom: 4px;
 }
 
+div.news-title {
+    margin-top: -6px;
+    font-size: 1.33em;
+    font-weight: bold;
+    padding-bottom: 1px;
+    margin-bottom: 4px;
+    border-bottom: 1px dotted #999999;
+}
+
+div.news-date {
+    text-align: right;
+    font-size: 0.9em;
+    font-style: italic;
+    color: #333333;
+    margin-bottom: -10px;
+}
+
 div.problem-name {
     height: 40px;
     width: 450px;
@@ -593,23 +610,6 @@ input.button-color-red {
     background-color: #d84a38;
 }
 
-div.news-title {
-    margin-top: -6px;
-    font-size: 1.33em;
-    font-weight: bold;
-    padding-bottom: 1px;
-    margin-bottom: 4px;
-    border-bottom: 1px dotted #999999;
-}
-
-div.news-date {
-    text-align: right;
-    font-size: 0.9em;
-    font-style: italic;
-    color: #333333;
-    margin-bottom: -10px;
-}
-
 div.overlay {
     position: fixed;
     top: 0;
@@ -621,130 +621,46 @@ div.overlay {
     z-index: 50;
 }
 
-div.report-form {
+div.action-form {
     position: fixed;
-    height: 320px;
-    width: 500px;
+    width: 600px;
     top: 50%;
     left: 50%;
-    margin: -160px auto 0px -320px;
-    padding: 20px 40px 20px 40px;
+    margin: 0 auto 0 -340px;
+    padding: 20px 40px 16px 40px;
     background: #FFFFFF;
     border: 1px solid #ccc;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
     border-radius: 4px;
-    z-index: 99;
+    z-index: 89;
 }
 
-div.report-close {
+div.action-form-close {
     display: inline-block;
     position: absolute;
-    margin-left: 512px;
+    margin-left: 612px;
     margin-top: -12px;
     color: #555555;
 }
 
-div.report-close:hover {
+div.action-form-close:hover {
     cursor: pointer;
     color: #000000;
 }
 
 textarea.report-problem {
     margin-top: 4px;
-    width: 494px;
-    height: 200px;
-}
-
-div.submit-form {
-    position: fixed;
-    height: 470px;
-    width: 600px;
-    top: 50%;
-    left: 50%;
-    margin: -240px auto 0px -340px;
-    padding: 20px 40px 20px 40px;
-    background: #FFFFFF;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
-    border-radius: 4px;
-    z-index: 89;
-}
-
-div.submit-close {
-    display: inline-block;
-    position: absolute;
-    margin-left: 612px;
-    margin-top: -12px;
-    color: #555555;
-}
-
-div.submit-close:hover {
-    cursor: pointer;
-    color: #000000;
+    width: 100%;
+    height: 240px;
 }
 
 textarea.submit-source {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
-    display: inline;
+    width: 98%;
+    height: 360px;
     font-size: 0.9em;
     white-space: pre-wrap;
-    padding: 8px;
-}
-
-div.submission-status {
-    position: fixed;
-    height: 480px;
-    width: 600px;
-    top: 50%;
-    left: 50%;
-    margin: -240px auto 0px -340px;
-    padding: 20px 40px 20px 40px;
-    background: #FFFFFF;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
-    border-radius: 4px;
-    z-index: 89;
-}
-
-div.submission-close {
-    display: inline-block;
-    position: absolute;
-    margin-left: 612px;
-    margin-top: -12px;
-    color: #555555;
-}
-
-div.submission-close:hover {
-    cursor: pointer;
-    color: #000000;
-}
-
-div.news-form {
-    position: fixed;
-    height: 480px;
-    width: 600px;
-    top: 50%;
-    left: 50%;
-    margin: -240px auto 0px -340px;
-    padding: 20px 40px 20px 40px;
-    background: #FFFFFF;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
-    border-radius: 4px;
-    z-index: 89;
-}
-
-div.news-form-close {
-    display: inline-block;
-    position: absolute;
-    margin-left: 612px;
-    margin-top: -12px;
-    color: #555555;
-}
-
-div.news-form-close:hover {
-    cursor: pointer;
-    color: #000000;
+    padding: 1%;
 }
 
 input.news-form-title {

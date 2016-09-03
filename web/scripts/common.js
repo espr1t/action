@@ -28,8 +28,8 @@ function ajaxCall(url, data, callback) {
 var lastOnKeyDownEvent = null;
 function identifyEscKeyPressedEvent(event, action) {
     if(event.keyCode == 27) {
-        action();
         event.stopPropagation();
+        action();
     }
 }
 
@@ -74,7 +74,7 @@ function showMessage(type, message) {
     // Hide the message after several seconds
     setTimeout(function() {
         hideMessage(className, id);
-    }, 5000);
+    }, 3000);
 }
 
 function hideMessage(className, id) {
@@ -107,55 +107,78 @@ function hideOverlay() {
 }
 
 /*
- * Form for adding a news.
+ * Form actions (show/hide/submit)
  */
-function showNewsForm() {
+function showActionForm(content, redirect) {
     // Create an overlay shadowing the rest of the page
     showOverlay();
 
-    var today = new Date();
-    var date = (today.getFullYear()) + '-' +
-               (today.getMonth() + 1 < 10 ? ('0' + (today.getMonth() + 1)) : (today.getMonth() + 1)) + '-' +
-               (today.getDate() < 10 ? '0' + today.getDate() : today.getDate());
+    // Create the form box
+    var form = document.createElement('div');
+    // TODO: Test if removing the initial className changes anything
+    form.className = 'action-form';
+    form.innerHTML = '' +
+        '<div class="action-form-close" onclick="hideActionForm(\'' + redirect + '\');"><i class="fa fa-close fa-fw"></i></div>' +
+        content
+    ;
 
-
-    // Create the report form and show it to the user
-    var newsForm = document.createElement('div');
-    newsForm.id = 'newsForm';
-    newsForm.className = 'news-form';
-    newsForm.innerHTML = '' +
-        '<div class="news-form-close" onclick="hideNewsForm();"><i class="fa fa-close fa-fw"></i></div>' +
-        '<h2>Публикуване на новина</h2>' +
-        '<div class="left" style="margin-bottom: 2px;">' +
-        '    <input type="text" name="title" class="news-form-title" id="newsTitle" value="Заглавие">' +
-        '</div>' +
-        '<div class="right" style="margin-bottom: 4px;">' +
-        '    <input type="text" name="date" class="news-form-date" id="newsDate" value="' + date + '">' +
-        '</div>' +
-        '<textarea name="content" class="news-form-content" id="newsContent"></textarea>' +
-        '<div class="input-wrapper">' +
-        '    <input type="submit" class="button button-color-red" onclick="return submitNewsForm();">' +
-        '</div>' +
-    '';
+    // Bind escape button for closing it
     lastOnKeyDownEvent = document.onkeydown;
-    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideNewsForm();});}
+    document.onkeydown = function(event) {
+        identifyEscKeyPressedEvent(event, function() {hideActionForm(redirect);});
+    }
 
-    document.body.appendChild(newsForm);
-    newsForm.className = 'news-form fade-in';
+    // Add it to the DOM using a fade-in animation
+    document.body.appendChild(form);
+    form.className = 'action-form fade-in';
+
+    // Center it vertically
+    form.style.marginTop = -(form.clientHeight / 2) - 20 + 'px';
 }
 
-function hideNewsForm() {
+function hideActionForm(redirect) {
     document.onkeydown = lastOnKeyDownEvent;
-    var newsForm = document.getElementById('newsForm');
-    newsForm.className = 'news-form fade-out';
+    var form = document.getElementsByClassName('action-form')[0];
+
+    // Hide the form box using a fade-out animation
+    form.className = 'action-form fade-out';
     setTimeout(function() {
-        document.body.removeChild(newsForm);
+        document.body.removeChild(form);
     }, 300);
     hideOverlay();
+
+    // Redirect to another page if requested
+    if (redirect) {
+        window.location.href = redirect;
+    }
+}
+
+function submitActionForm(response, successMessage, errorMessage) {
+    try {
+        response = JSON.parse(response);
+    } catch(ex) {
+        response = '';
+    }
+    $type = (!response || response.status != 'OK') ? 'ERROR' : 'INFO';
+    $message = (!response || response.message == '') ? '' : response.message;
+    if ($message == '') {
+        $message = ($type == 'ERROR' ? errorMessage : successMessage);
+    }
+    if ($type == 'INFO') {
+        hideActionForm();
+    }
+    showMessage($type, $message);
+    return response;
+}
+
+/*
+ * Publish News
+ */
+function showNewsForm(content) {
+    showActionForm(content);
 }
 
 function submitNewsForm() {
-    var pageLink = window.location.href;
     var date = document.getElementById('newsDate').value;
     var title = document.getElementById('newsTitle').value;
     var content = document.getElementById('newsContent').value;
@@ -167,95 +190,28 @@ function submitNewsForm() {
     };
 
     var callback = function(response) {
-        try {
-            response = JSON.parse(response);
-        } catch(ex) {
-            response = '';
-        }
-        $type = (!response || response.status != 'OK') ? 'ERROR' : 'INFO';
-        $message = (!response || response.message == '') ? '' : response.message;
-        if ($message == '') {
-            $message = ($type == 'ERROR' ? 'Действието не беше изпълнено успешно.' : 'Действието беше изпълнено успешно.');
-        }
-        if ($type == 'INFO') {
-            hideNewsForm();
-        }
-        showMessage($type, $message);
+        submitActionForm(response, 'Новината беше публикувана успешно.', 'Новината не беше публикувана успешно.');
     }
-
     ajaxCall('/actions/publish', data, callback);
-}
-
-/*
- * Submission status
- */
-function showSubmitStatus(problemId) {
-    // Create an overlay shadowing the rest of the page
-    showOverlay();
-
-    // Create the submit form and show it to the user
-    lastOnKeyDownEvent = document.onkeydown;
-    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideSubmitStatus(problemId);});}
-}
-
-function hideSubmitStatus(problemId) {
-    hideOverlay();
-    window.location = '/problems/' + problemId;
 }
 
 /*
  * Submit form handling
  */
-function showSubmitForm() {
-    // Create an overlay shadowing the rest of the page
-    showOverlay();
-
-    // Create the submit form and show it to the user
-    var problemName = document.getElementById('problem-title').textContent;
-
-    var submitForm = document.createElement('div');
-    submitForm.id = 'submitForm';
-    submitForm.className = 'submit-form';
-    submitForm.innerHTML = '' +
-        '<div class="submit-close" onclick="hideSubmitForm();"><i class="fa fa-close fa-fw"></i></div>' +
-        '<h2><span class="blue">' + problemName + '</span> :: Предаване на Решение</h2>' +
-        '<div class="center">' +
-        '    <textarea name="source" class="submit-source" cols=80 rows=24 id="source"></textarea>' +
-        '</div>' +
-        '<div class="italic right" style="font-size: 0.8em;">Detected language: ' + '<span id="language">?</span>' + '</div>' +
-        '<div class="center"><input type="submit" value="Изпрати" class="button button-color-red" onclick="submitSolution();"></div>' +
-    '';
-    lastOnKeyDownEvent = document.onkeydown;
-    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideSubmitForm();});}
-
-    document.body.appendChild(submitForm);
-    submitForm.className = 'submit-form fade-in';
+function showSubmitForm(content) {
+    showActionForm(content);
 
     // Run language detection after every update
     var sourceEl = document.getElementById('source');
-    var onchange = function() {
+    sourceEl.onchange = sourceEl.onpaste = sourceEl.onkeydown = function() {
         setTimeout(function() {
             var langEl = document.getElementById('language');
             langEl.innerText = detectLanguage(sourceEl.value);
         }, 50);
     }
-    sourceEl.onchange = onchange;
-    sourceEl.onpaste = onchange;
-    sourceEl.onkeypress = onchange;
 }
 
-function hideSubmitForm() {
-    document.onkeydown = lastOnKeyDownEvent;
-    var submitForm = document.getElementById('submitForm');
-    submitForm.className = 'submit-form fade-out';
-    setTimeout(function() {
-        document.body.removeChild(submitForm);
-    }, 300);
-
-    hideOverlay();
-}
-
-function submitSolution() {
+function submitSubmitForm() {
     var source = document.getElementById('source').value;
     var language = detectLanguage(source);
     var tokens = window.location.href.split('/');
@@ -267,66 +223,20 @@ function submitSolution() {
     };
 
     var callback = function(response) {
-        try {
-            response = JSON.parse(response);
-        } catch(ex) {
-            response = '';
-        }
-        if (!response || response.status != 'OK') {
-            showMessage('ERROR', 'Решението не може да бъде изпратено в момента!');
-        } else {
+        response = submitActionForm(response, '', 'Решението не може да бъде изпратено в момента!');
+        if ('id' in response) {
             window.location.href = window.location.href + '/submits/' + response.id;
             exit();
         }
     }
-
     ajaxCall('/code/logic/submit.php', data, callback);
-    hideSubmitForm();
 }
 
 /*
  * Report form handling
  */
-function showReportForm(hasAccess) {
-    // Check if user is logged in.
-    if (!hasAccess) {
-        showMessage('ERROR', 'Трябва да се оторизирате за да съобщите за проблем.');
-        return;
-    }
-
-    // Create an overlay shadowing the rest of the page
-    showOverlay();
-
-    // Create the report form and show it to the user
-    var reportForm = document.createElement('div');
-    reportForm.id = 'reportForm';
-    reportForm.className = 'report-form';
-    reportForm.innerHTML = '' +
-        '<div class="report-close" onclick="hideReportForm();"><i class="fa fa-close fa-fw"></i></div>' +
-        '<h2>Report a problem</h2>' +
-        '<br>' +
-        '<div class="italic right" style="font-size: 0.8em;">On page: ' + window.location.href + '</div>' +
-        '<textarea name="problem" class="report-problem" id="reportText"></textarea>' +
-        '<div class="input-wrapper">' +
-        '    <input type="submit" class="button button-color-red" onclick="return submitReportForm();">' +
-        '</div>' +
-    '';
-    lastOnKeyDownEvent = document.onkeydown;
-    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideReportForm();});}
-
-    document.body.appendChild(reportForm);
-    reportForm.className = 'report-form fade-in';
-}
-
-function hideReportForm() {
-    document.onkeydown = lastOnKeyDownEvent;
-    var reportForm = document.getElementById('reportForm');
-    reportForm.className = 'report-form fade-out';
-    setTimeout(function() {
-        document.body.removeChild(reportForm);
-    }, 300);
-
-    hideOverlay();
+function showReportForm(content) {
+    showActionForm(content);
 }
 
 function submitReportForm() {
@@ -339,19 +249,8 @@ function submitReportForm() {
     };
 
     var callback = function(response) {
-        try {
-            response = JSON.parse(response);
-        } catch(ex) {
-            response = '';
-        }
-        if (!response || response.status != 'OK') {
-            showMessage('ERROR', 'Съобщението не може да бъде изпратено в момента!');
-        } else {
-            showMessage('INFO', 'Докладваният проблем беше изпратен успешно.');
-        }
+        submitActionForm(response, 'Докладваният проблем беше изпратен успешно.', 'Съобщението не може да бъде изпратено в момента!');
     }
-
     ajaxCall('/code/logic/mail.php', data, callback);
-    hideReportForm();
 }
 
