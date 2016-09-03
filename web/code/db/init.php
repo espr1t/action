@@ -125,7 +125,6 @@ if ($db->query("SELECT 1 FROM `Problems` LIMIT 1;") == true) {
 Table::Tests
 ============
 {
-    "id": 1,
     "problem": 1,
     "position": 3,
     "inp_file": "InputOutput.in",
@@ -144,7 +143,6 @@ if ($db->query("SELECT 1 FROM `Tests` LIMIT 1;") == true) {
 } else {
     $result = $db->query("
         CREATE TABLE `Tests`(
-            `id` INT NOT NULL AUTO_INCREMENT,
             `problem` INT NOT NULL,
             `position` INT NOT NULL,
             `inp_file` VARCHAR(32) NOT NULL,
@@ -153,7 +151,7 @@ if ($db->query("SELECT 1 FROM `Tests` LIMIT 1;") == true) {
             `sol_hash` VARCHAR(32) NOT NULL,
             `group` INT NOT NULL,
             `score` INT NOT NULL,
-            PRIMARY KEY (`id`)
+            CONSTRAINT TestID PRIMARY KEY (`problem`, `position`)
         );
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');

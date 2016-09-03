@@ -61,6 +61,77 @@ class Brain {
         return $this->getResults($response);
     }
 
+    function getAllProblems() {
+        $response = $this->db->query("
+            SELECT * FROM `Problems` ORDER BY id;
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllProblems() query properly!');
+            return false;
+        }
+        return $this->getResults($response);
+    }
+
+    function getProblem($problemId) {
+        $response = $this->db->query("
+            SELECT * FROM `Problems` where id = " . $problemId . "
+        ");
+        if (!$response) {
+            error_log('Could not execute getProblem() query properly!');
+            return false;
+        }
+        return $this->getResults($response);
+    }
+
+    function updateProblem($problem) {
+        $response = $this->db->query("
+            UPDATE `Problems` SET
+                `name`=`" . $problem->name . "`,
+                `author`=`" . $problem->author . "`,
+                `folder`=`" . $problem->folder . "`,
+                `time_limit`=`" . $problem->time_limit . "`,
+                `memory_limit`=`" . $problem->memory_limit . "`,
+                `type`=`" . $problem->type . "`,
+                `difficulty`=`" . $problem->difficulty . "`,
+                `tags`=`" . implode(',', $probme->tags) . "`,
+                `origin`=`" . $problem->origin . "`,
+                `checker`=`" . $problem->checker . "`,
+                `executor`=`" . $problem->executor . "`
+            WHERE `id` = " . $problem->id . ";
+        ");
+        if (!$response) {
+            error_log('Could not update info for problem "' . $problem->name . '"!');
+            return false;
+        }
+        return true;
+    }
+
+    function getProblemSubmits($problemId, $status) {
+        $response = $this->db->query("
+            SELECT id FROM `Submits`
+            WHERE problem_id = " . $problemId . " AND status = " . $status . "
+            GROUP BY user_id;
+        ");
+        if (!$response) {
+            error_log('Could not execute getProblemSubmits() query properly!');
+            return false;
+        }
+        return $this->getIntResults($response);
+    }
+
+    function getProblemTests($problemId) {
+        $response = $this->db->query("
+            SELECT * FROM `Tests`
+            WHERE problem = " . $problemId . "
+            ORDER BY position
+        ");
+        if (!$response) {
+            error_log('Could not execute getProblemTests() query properly!');
+            return false;
+        }
+        return $this->getResults($response);
+    }
+
     function addSubmit($submit) {
         $response = $this->db->query("
             INSERT INTO `Submits` (`time`, `user_id`, `user_name`, `problem_id`, `problem_name`, `source`, `language`, `results`, `status`, `message`)

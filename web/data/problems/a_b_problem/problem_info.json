@@ -5,14 +5,10 @@
     "folder": "a_b_problem",
     "time_limit": 0.1,
     "memory_limit": 0.5,
-    "type": "IOI",
-    "difficulty": "trivial",
-    "tags": [
-        "math"
-    ],
-    "origin": "informatika.bg training",
+    "type": "ioi",
     "checker": "",
     "executor": "",
-    "tests": null,
-    "submits": null
+    "difficulty": "trivial",
+    "tags": ["math"],
+    "origin": "informatika.bg training"
 }

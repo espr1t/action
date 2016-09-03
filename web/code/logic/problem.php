@@ -15,8 +15,6 @@ class Problem {
     public $origin = '';
     public $checker = '';
     public $executor = '';
-    public $tests = array();
-    public $submits = array();
 
     private function arrayFromInstance() {
         return array(
@@ -31,9 +29,7 @@ class Problem {
             'tags' => $this->tags,
             'origin' => $this->origin,
             'checker' => $this->checker,
-            'executor' => $this->executor,
-            'tests' => $this->tests,
-            'submits' => $this->submits
+            'executor' => $this->executor
         );
     }
 
@@ -51,22 +47,15 @@ class Problem {
         $problem->origin = getValue($info, 'origin');
         $problem->checker = getValue($info, 'checker');
         $problem->executor = getValue($info, 'executor');
-        $problem->tests = getValue($info, 'tests');
-        $problem->submits = getValue($info, 'submits');
         return $problem;
     }
 
     public static function get($id) {
-        $entries = scandir($GLOBALS['PATH_PROBLEMS']);
-        foreach ($entries as $folder) {
-            if ($folder == '.' || $folder == '..') {
-                continue;
-            }
-            $fileName = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $folder, $GLOBALS['PROBLEM_INFO_FILENAME']);
-            $info = json_decode(file_get_contents($fileName), true);
-            if ($info['id'] == $id) {
-                return Problem::instanceFromArray($info);
-            }
+        $brain = new Brain();
+        try {
+            return Problem::instanceFromArray($brain->getProblem($id));
+        } catch(Exception $ex) {
+            error_log('Could not get problem ' . $id . '. Exception: ' . $ex->getMessage());
         }
         return null;
     }
@@ -82,21 +71,26 @@ class Problem {
             error_log('Unable to write to file ' . $fileName . '!');
             return false;
         }
+        $brain = new Brain();
+        $brain->updateProblem($this);
         return true;
     }
 
-    public function addSubmission($id) {
-        array_push($this->submits, $id);
-        return $this->update();
-    }
-
     public function scoreSubmit($submit) {
-        $info = array();
+        $brain = new Brain();
+        $tests = $brain->getProblemTests($submit->problemId);
 
-        $info['score'] = 0;
-        $info['status'] = $GLOBALS['STATUS_ACCEPTED'];
+        if (count($submit->results) != count($tests)) {
+            error_log('Number of tests of problem ' . $submit->problemId . ' differs from results in submission ' . $submit->id . '!');
+            echo 'Number of tests of problem ' . $submit->problemId . ' differs from results in submission ' . $submit->id . '!';
+        }
 
-        $info['results'] = array();
+        $scoredSubmit = array();
+
+        $scoredSubmit['score'] = 0;
+        $scoredSubmit['status'] = $GLOBALS['STATUS_ACCEPTED'];
+
+        $scoredSubmit['results'] = array();
         for ($i = 0; $i < count($submit->results); $i = $i + 1) {
             $result = $submit->results[$i];
 
@@ -104,19 +98,19 @@ class Problem {
             if ($result >= 0) {
                 // The grader assigns 0/1 value for each test of IOI- and ACM-style problems and [0, 1] real fraction of the score
                 // for games and relative problems. In both cases, multiplying the score of the test by this value is correct.
-                $info['results'][$i] = $result * $this->tests[$i]['score'];
-                $info['score'] += $info['results'][$i];
+                $scoredSubmit['results'][$i] = $result * $this->tests[$i]['score'];
+                $scoredSubmit['score'] += $scoredSubmit['results'][$i];
             }
             // Negative results indicate exceptional cases
             else {
                 // Exceptional cases are considered a zero for the test
-                $info['results'][$i] = 0;
+                $scoredSubmit['results'][$i] = 0;
                 // The possible statuses are ordered by priority - assign the status of the problem to be the highest one
-                $info['status'] = $result > $info['status'] ? $result : $info['status'];
+                $scoredSubmit['status'] = Math.max([$scoredSubmit['status'], $result]);
             }
         }
 
-        return $info;
+        return $scoredSubmit;
     }
 
 }

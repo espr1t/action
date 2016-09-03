@@ -6,9 +6,9 @@
     "time_limit": 0.2,
     "memory_limit": 16,
     "type": "standard",
-    "difficulty": "trivial",
-    "origin": "informatika.bg training",
     "checker": "",
     "executor": "",
-    "tags": ["implementation"]
+    "difficulty": "trivial",
+    "tags": ["implementation"],
+    "origin": "informatika.bg training"
 }

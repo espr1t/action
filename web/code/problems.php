@@ -1,4 +1,5 @@
 <?php
+require_once('logic/brain.php');
 require_once('logic/config.php');
 require_once('logic/problem.php');
 require_once('logic/submit.php');
@@ -16,25 +17,30 @@ class ProblemsPage extends Page {
     }
 
     private function getAllProblems() {
+        $brain = new Brain();
+        $problemsInfo = $brain->getAllProblems();
+
+        $problemsInfo[0]['id'] = 0;
+        $problemsInfo[0]['name'] = 'A * B Problem';
+        $problemsInfo[0]['difficulty'] = 'trivial';
+        $problemsInfo[0]['origin'] = 'popular';
+        $problemsInfo[1]['id'] = 1;
+        $problemsInfo[1]['name'] = 'Input/Output';
+        $problemsInfo[1]['difficulty'] = 'easy';
+        $problemsInfo[1]['origin'] = 'informatika.bg training';
+
         $problems = '';
-        $dirs = scandir($GLOBALS['PATH_PROBLEMS']);
-        foreach ($dirs as $dir) {
-            if ($dir == '.' || $dir == '..') {
-                continue;
-            }
-            $fileName = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $dir, $GLOBALS['PROBLEM_INFO_FILENAME']);
-            $info = json_decode(file_get_contents($fileName), true);
-            
-            $solutions = 0;
-            $authors = 'човек' . ($solutions == 1 ? '' : 'а');
+        foreach ($problemsInfo as $problemInfo) {
+            $problemSolutions = $brain->getProblemSubmits($problemInfo['id'], $GLOBALS['STATUS_ACCEPTED']);
+            $solutions = count($problemSolutions);
             $problems .= '
                 <div class="box narrow boxlink">
-                    <a href="problems/' . $info['id'] . '" class="decorated">
-                        <div class="problem-name">' . $info['name'] . '</div>
+                    <a href="problems/' . $problemInfo['id'] . '" class="decorated">
+                        <div class="problem-name">' . $problemInfo['name'] . '</div>
                         <div class="problem-info">
-                            Сложност: <strong>' . $info['difficulty'] . '</strong><br>
-                            Решена от: <strong>' . $solutions . ' ' . $authors . '</strong><br>
-                            Източник: <strong>' . $info['origin'] . '</strong>
+                            Сложност: <strong>' . $problemInfo['difficulty'] . '</strong><br>
+                            Решена от: <strong>' . $solutions . ' човек' . ($solutions == 1 ? '' : 'а') . '</strong><br>
+                            Източник: <strong>' . $problemInfo['origin'] . '</strong>
                         </div>
                     </a>
                 </div>
