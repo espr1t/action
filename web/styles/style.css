@@ -341,9 +341,8 @@ table.menu .logo {
 }
 
 div.logo {
-    margin-top: 5px;
-    height: 60px;
-    line-height: 60px;
+    height: 80px;
+    line-height: 80px;
     text-align: center;
     font-size: 5em;
     font-family: "Ruthie", cursive;
