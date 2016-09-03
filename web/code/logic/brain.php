@@ -313,6 +313,39 @@ class Brain {
         return true;
     }
 
+    function refreshSpamCounters($minTime) {
+        $response = $this->db->query("
+            DELETE FROM `Spam` WHERE time < " . $minTime . "
+        ");
+        if (!$response) {
+            error_log('Could not refresh spam counters with minTime = ' . $minTime . '!');
+            return false;
+        }
+        return true;
+    }
+
+    function getSpamCounter($user, $type) {
+        $response = $this->db->query("
+            SELECT time FROM `Spam` WHERE user = " . $user->id . " AND type = " . $type . "
+        ");
+        if (!$response) {
+            error_log('Could not get spam counter of type = ' . $type . ' for user ' . $user->name . '!');
+            return false;
+        }
+        return count($this->getResults($response));
+    }
+
+    function incrementSpamCounter($user, $type, $time) {
+        $response = $this->db->query("
+            INSERT INTO `Spam` (type, user, time) VALUES (" . $type . ", " . $user->id . ", " . $time . ")
+        ");
+        if (!$response) {
+            error_log('Could not increment spam counter of type = ' . $type . ' for user ' . $user->name . '!');
+            return false;
+        }
+        return true;
+    }
+
 }
 
 ?>

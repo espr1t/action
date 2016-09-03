@@ -325,4 +325,30 @@ if ($db->query("SELECT 1 FROM `Achievements` LIMIT 1;") == true) {
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
 
+/*
+Table::Spam
+===================
+{
+    "type": 0,
+    "user": 2,
+    "time": 1472937844
+}
+*/
+
+output('');
+output('Creating table Spam...');
+
+if ($db->query("SELECT 1 FROM `Spam` LIMIT 1;") == true) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Spam`(
+            `type` INT NOT NULL,
+            `user` INT NOT NULL,
+            `time` INT NOT NULL
+        );
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
 ?>
