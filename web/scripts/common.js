@@ -25,11 +25,11 @@ function ajaxCall(url, data, callback) {
 /*
  * Key bindings
  */
-var lastOnKeyDownEvent = null;
+var keyDownEventStack = [];
 function identifyEscKeyPressedEvent(event, action) {
-    if(event.keyCode == 27) {
-        event.stopPropagation();
+    if (event.keyCode == 27) {
         action();
+        event.stopPropagation();
     }
 }
 
@@ -60,8 +60,10 @@ function showMessage(type, message) {
     '';
 
     // Make it possible to hide the message with hitting escape
-    lastOnKeyDownEvent = document.onkeydown;
-    document.onkeydown = function(event) {identifyEscKeyPressedEvent(event, function() {hideMessage(className, id);});}
+    keyDownEventStack.push(document.onkeydown);
+    document.onkeydown = function(event) {
+        identifyEscKeyPressedEvent(event, function() {hideMessage(className, id);});
+    }
 
     // If the menu is visible, don't cover it with the message.
     // Here we calculate the top scroll in such a way, that we show it 20 pixels bellow either the menu or the top of the screen.
@@ -80,6 +82,7 @@ function showMessage(type, message) {
 function hideMessage(className, id) {
     var messageEl = document.getElementById(id);
     if (messageEl) {
+        document.onkeydown = keyDownEventStack.pop();
         messageEl.className = className + ' fade-out';
         setTimeout(function() {
             document.body.removeChild(messageEl);
@@ -123,7 +126,7 @@ function showActionForm(content, redirect) {
     ;
 
     // Bind escape button for closing it
-    lastOnKeyDownEvent = document.onkeydown;
+    keyDownEventStack.push(document.onkeydown);
     document.onkeydown = function(event) {
         identifyEscKeyPressedEvent(event, function() {hideActionForm(redirect);});
     }
@@ -137,7 +140,7 @@ function showActionForm(content, redirect) {
 }
 
 function hideActionForm(redirect) {
-    document.onkeydown = lastOnKeyDownEvent;
+    document.onkeydown = keyDownEventStack.pop();
     var form = document.getElementsByClassName('action-form')[0];
 
     // Hide the form box using a fade-out animation
@@ -148,7 +151,7 @@ function hideActionForm(redirect) {
     hideOverlay();
 
     // Redirect to another page if requested
-    if (redirect) {
+    if (redirect && redirect != 'undefined') {
         window.location.href = redirect;
     }
 }
@@ -229,7 +232,7 @@ function submitSubmitForm() {
             exit();
         }
     }
-    ajaxCall('/code/logic/submit.php', data, callback);
+    ajaxCall('/actions/submit', data, callback);
 }
 
 /*
@@ -249,8 +252,9 @@ function submitReportForm() {
     };
 
     var callback = function(response) {
+        alert(response);
         submitActionForm(response, 'Докладваният проблем беше изпратен успешно.', 'Съобщението не може да бъде изпратено в момента!');
     }
-    ajaxCall('/code/logic/mail.php', data, callback);
+    ajaxCall('/actions/mail', data, callback);
 }
 
