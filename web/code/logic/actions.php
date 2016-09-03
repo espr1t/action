@@ -21,6 +21,9 @@ switch ($_GET['action']) {
     case 'publish':
         require_once('publish.php');
         break;
+    case 'submit':
+        require_once('submit.php');
+        break;
     default:
         printAjaxResponse(array(
             'status' => 'WARNING',

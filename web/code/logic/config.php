@@ -54,8 +54,10 @@ $PROBLEM_STATEMENT_FILENAME = '/problem_statement.html';
 
 // Spam protection
 $SPAM_INTERVAL = 86400; // Seconds in 24 hours
-$SPAM_LIMIT_EMAIL = 20; // Per 24 hours
-$SPAM_LIMIT_SUBMIT = 100; // Per 24 hours
+$SPAM_EMAIL_LIMIT = 20; // Per 24 hours
+$SPAM_EMAIL_ID = 0;
+$SPAM_SUBMIT_LIMIT = 100; // Per 24 hours
+$SPAM_SUBMIT_ID = 1;
 
 $LANGUAGE_EXTENSIONS = array(
     'C++' => 'cpp',

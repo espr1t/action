@@ -10,7 +10,7 @@ if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
 }
 
 // User has sent too many messages in the last day
-if (!passSpamProtection('mail_log.txt', $user, $SPAM_LIMIT_EMAIL)) {
+if (!passSpamProtection($user, $GLOBALS['SPAM_EMAIL_ID'], $GLOBALS['SPAM_EMAIL_LIMIT'])) {
     printAjaxResponse(array(
         'status' => 'ERROR',
         'message' => 'Надвишили сте максималния брой съобщения за деня.'

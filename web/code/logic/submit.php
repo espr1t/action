@@ -5,39 +5,37 @@ require_once('widgets.php');
 require_once('user.php');
 require_once('problem.php');
 
-
 // In case an actual submit, not only using the class
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-
-    $user = User::get($_SESSION['username']);
-    if ($user == null || $user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
+if (isset($_GET['action']) && $_GET['action'] == 'submit') {
+    if ($user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
         printAjaxResponse(array(
             'status' => 'UNAUTHORIZED'
         ));
     }
 
-    if (!passSpamProtection('submit_log.txt', $user, $GLOBALS['SPAM_LIMIT_SUBMIT'])) {
+    if (!passSpamProtection($user, $GLOBALS['SPAM_SUBMIT_ID'], $GLOBALS['SPAM_SUBMIT_LIMIT'])) {
         printAjaxResponse(array(
             'status' => 'SPAM'
         ));
-    } else {
-        $submit = Submit::newSubmit($user, $_POST['problemId'], $_POST['language'], $_POST['source']);
+        exit();
+    }
 
-        // If cannot write the submit info file or update the user/problem or the solution cannot be sent
-        // to the grader for judging (the grader machine is down or not accessible)
-        if (!$submit->write() || !$submit->send()) {
-            printAjaxResponse(array(
-                'status' => 'ERROR'
-            ));
-        }
-        // Otherwise print success and return the submit ID
-        else {
-            printAjaxResponse(array(
-                'status' => 'OK',
-                'id' => $submit->id
-            ));
-        }
+    // User has rights to submit and has not exceeded the limit for the day
+    $submit = Submit::newSubmit($user, $_POST['problemId'], $_POST['language'], $_POST['source']);
+
+    // If cannot write the submit info file or update the user/problem or the solution cannot be sent
+    // to the grader for judging (the grader machine is down or not accessible)
+    if (!$submit->write() || !$submit->send()) {
+        printAjaxResponse(array(
+            'status' => 'ERROR'
+        ));
+    }
+    // Otherwise print success and return the submit ID
+    else {
+        printAjaxResponse(array(
+            'status' => 'OK',
+            'id' => $submit->id
+        ));
     }
     exit();
 }
@@ -56,7 +54,10 @@ class Submit {
     public $status = -1;
     public $message = '';
 
+    private $brain = null;
+
     function __construct() {
+        $this->brain = new Brain();
     }
 
     public static function newSubmit($user, $problemId, $language, $source) {
@@ -78,7 +79,8 @@ class Submit {
         $submit->source = $source;
         $submit->language = $language;
         $submit->results = array();
-        for ($i = 0; $i < count($problem->tests); $i = $i + 1) {
+        $numTests = count($submit->brain->getProblemTests($problem->id));
+        for ($i = 0; $i < $numTests; $i = $i + 1) {
             $submit->results[$i] = $GLOBALS['STATUS_WAITING'];
         }
         $submit->progress = 0;
