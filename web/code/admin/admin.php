@@ -5,7 +5,7 @@ require_once('../logic/config.php');
 require_once('../logic/user.php');
 require_once('../common.php');
 
-$user = !isset($_SESSION['username']) ? new User() : User::get($_SESSION['username']);
+$user = !isset($_SESSION['userId']) ? new User() : User::get($_SESSION['userId']);
 if ($user == null || $user->access < $GLOBALS['ACCESS_ADMIN_PAGES']) {
     header('Location: /forbidden');
     exit();
@@ -30,7 +30,6 @@ switch ($_GET['page']) {
         $page = new ErrorPage($user);
 }
 $content = $page->getContent();
-
 
 require('../page.html');
 ?>

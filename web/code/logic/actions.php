@@ -5,7 +5,7 @@ require_once('user.php');
 
 session_start();
 
-$user = User::get($_SESSION['username']);
+$user = User::get($_SESSION['userId']);
 if ($user == null) {
     printAjaxResponse(array(
         'status' => 'ERROR',

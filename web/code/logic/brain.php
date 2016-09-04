@@ -304,14 +304,27 @@ class Brain {
         return $this->getResults($response);
     }
 
-    function getUserByName($username) {
+    function getUser($userId) {
+        $response = $this->db->query("
+            SELECT * FROM `Users`
+            WHERE id = '" . $userId . "'
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getUser() query with id = "' . $userId . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getUserByUsername($username) {
         $response = $this->db->query("
             SELECT * FROM `Users`
             WHERE username = '" . $username . "'
             LIMIT 1
         ");
         if (!$response) {
-            error_log('Could not execute getUserByName() query with username = "' . $username . '"!');
+            error_log('Could not execute getUserByUsername() query with username = "' . $username . '"!');
             return null;
         }
         return $this->getResult($response);

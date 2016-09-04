@@ -10,6 +10,7 @@ $COOKIE_NAME = 'action.informatika.bg';
 $GRADER_URL = 'localhost:5000';
 
 // User access
+$ADMIN_USER_ACCESS = 100;
 $DEFAULT_USER_ACCESS = 10;
 
 $ACCESS_ADMIN_PAGES = 100;

@@ -35,7 +35,7 @@ class LoginPage extends Page {
             // Authorized user, update login key and redirect to home page
             if ($error == '') {
                 // Set session (use until browser close)
-                $_SESSION['username'] = $user->username;
+                $_SESSION['userId'] = $user->id;
 
                 // Set cookie (avoid logging in again until cookie expires)
                 $loginKey = str_shuffle(md5(microtime()));

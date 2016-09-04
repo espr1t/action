@@ -48,9 +48,13 @@ class User {
         return $user;
     }
 
-    public static function get($username) {
+    public static function get($userId) {
         $brain = new Brain();
-        $result = $brain->getUserByName($username);
+        if (is_numeric($userId)) {
+            $result = $brain->getUser($userId);
+        } else {
+            $result = $brain->getUserByUsername($userId);
+        }
         if (!$result) {
             return null;
         }
@@ -59,9 +63,7 @@ class User {
 
     public static function createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender) {
         // Check if user with the same username already exists.
-        $brain = new Brain();
-        $result = $brain->getUserByName($username);
-        if ($result) {
+        if (User::get($username) != null) {
             return false;
         }
 
@@ -78,7 +80,19 @@ class User {
         $user->birthdate = $birthdate;
         $user->avatar = $avatar;
 
-        return $brain->addUser($user);
+        $brain = new Brain();
+        $user->id = $brain->addUser($user);
+        if (!$user->id) {
+            return null;
+        }
+
+        // Grant admin rights to the first user
+        if ($user->id == 1) {
+            $user->access = $GLOBALS['ADMIN_USER_ACCESS'];
+            $user->update();
+        }
+
+        return $user;
    }
 }
 

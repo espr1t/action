@@ -275,8 +275,9 @@ class RegisterPage extends Page {
         }
 
         // Actually create the user
-        if (User::createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender)) {
-            $_SESSION['username'] = $username;
+        $user = User::createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender);
+        if ($user != null) {
+            $_SESSION['userId'] = $user->id;
 
             // Set cookie (avoid logging in again until cookie expires)
             $loginKey = str_shuffle(md5(microtime()));
