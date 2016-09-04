@@ -326,7 +326,7 @@
   {
     "id": 55,
     "title": "Gamer",
-    "description": "Предадена игра",
+    "description": "Предадено решение на игра",
     "icon": "gamepad"
   },
   {
@@ -340,5 +340,17 @@
     "title": "Rainbow coder",
     "description": "По една решена задача на всеки език",
     "icon": "arrows"
+  },
+  {
+    "id": 58,
+    "title": "Getting older",
+    "description": "Регистриран преди повече от година",
+    "icon": "child"
+  },
+  {
+    "id": 59,
+    "title": "Happy birthday!",
+    "description": "Действие на сайта на рождения си ден",
+    "icon": "birthday-cake"
   }
 ]
