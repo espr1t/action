@@ -20,15 +20,6 @@ class ProblemsPage extends Page {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
 
-        $problemsInfo[0]['id'] = 0;
-        $problemsInfo[0]['name'] = 'A * B Problem';
-        $problemsInfo[0]['difficulty'] = 'trivial';
-        $problemsInfo[0]['origin'] = 'popular';
-        $problemsInfo[1]['id'] = 1;
-        $problemsInfo[1]['name'] = 'Input/Output';
-        $problemsInfo[1]['difficulty'] = 'easy';
-        $problemsInfo[1]['origin'] = 'informatika.bg training';
-
         $problems = '';
         foreach ($problemsInfo as $problemInfo) {
             $problemSolutions = $brain->getProblemSubmits($problemInfo['id'], $GLOBALS['STATUS_ACCEPTED']);

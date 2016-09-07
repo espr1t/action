@@ -132,11 +132,14 @@ function showActionForm(content, redirect) {
     }
 
     // Add it to the DOM using a fade-in animation
-    document.body.appendChild(form);
+    document.getElementById('main').appendChild(form);
+//    document.body.appendChild(form);
     form.className = 'action-form fade-in';
 
     // Center it vertically
-    form.style.marginTop = -(form.clientHeight / 2) - 20 + 'px';
+    var screenHeight = window.innerHeight || document.documentElement.clientHeight;
+    var offset = Math.min(form.clientHeight / 2 + 20, screenHeight / 2 - 160);
+    form.style.marginTop = -offset + 'px';
 }
 
 function hideActionForm(redirect) {
@@ -146,7 +149,7 @@ function hideActionForm(redirect) {
     // Hide the form box using a fade-out animation
     form.className = 'action-form fade-out';
     setTimeout(function() {
-        document.body.removeChild(form);
+        document.getElementById('main').removeChild(form);
     }, 300);
     hideOverlay();
 
@@ -252,7 +255,6 @@ function submitReportForm() {
     };
 
     var callback = function(response) {
-        alert(response);
         submitActionForm(response, 'Докладваният проблем беше изпратен успешно.', 'Съобщението не може да бъде изпратено в момента!');
     }
     ajaxCall('/actions/mail', data, callback);

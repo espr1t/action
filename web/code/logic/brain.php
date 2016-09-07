@@ -91,13 +91,15 @@ class Brain {
 
     function getProblem($problemId) {
         $response = $this->db->query("
-            SELECT * FROM `Problems` where id = " . $problemId . "
+            SELECT * FROM `Problems`
+            WHERE id = " . $problemId . "
+            LIMIT 1
         ");
         if (!$response) {
             error_log('Could not execute getProblem() query properly!');
             return null;
         }
-        return $this->getResults($response);
+        return $this->getResult($response);
     }
 
     function getAllProblems() {

@@ -1,14 +1,15 @@
 {
-    "id": 0,
+    "id": 1,
     "name": "A * B Problem",
     "author": "Александър Георгиев",
     "folder": "a_b_problem",
     "timeLimit": 0.1,
     "memoryLimit": 0.5,
     "type": "ioi",
+    "difficulty": "trivial",
+    "origin": "informatika.bg training",
     "checker": "",
     "executor": "",
-    "difficulty": "trivial",
     "tags": ["math"],
-    "origin": "informatika.bg training"
+    "addedBy": "espr1t"
 }

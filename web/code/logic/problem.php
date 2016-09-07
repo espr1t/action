@@ -15,6 +15,11 @@ class Problem {
     public $origin = '';
     public $checker = '';
     public $executor = '';
+    public $addedBy = '';
+
+    public function __construct() {
+        $addedBy = $GLOBALS['user']->username;
+    }
 
     private function arrayFromInstance() {
         return array(
@@ -29,7 +34,8 @@ class Problem {
             'tags' => $this->tags,
             'origin' => $this->origin,
             'checker' => $this->checker,
-            'executor' => $this->executor
+            'executor' => $this->executor,
+            'addedBy' => $this->addedBy
         );
     }
 
@@ -47,6 +53,7 @@ class Problem {
         $problem->origin = getValue($info, 'origin');
         $problem->checker = getValue($info, 'checker');
         $problem->executor = getValue($info, 'executor');
+        $problem->addedBy = getValue($info, 'addedBy');
         return $problem;
     }
 

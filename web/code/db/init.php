@@ -66,7 +66,8 @@ Table::Problems
     "origin": "informatika.bg training",
     "checker": "",
     "executor": "",
-    "tags": ["implementation"]
+    "tags": ["implementation"],
+    "addedBy": "espr1t"
 }
 */
 output('');
@@ -98,7 +99,7 @@ if ($db->tableExists('Problems')) {
                 'ad-hoc',
                 'flow',
                 'divconq',
-                'binsearch',
+                'bsearch',
                 'hashing',
                 'strings',
                 'sorting',
@@ -109,6 +110,7 @@ if ($db->tableExists('Problems')) {
                 'stl',
                 'np'
             ) NOT NULL,
+            addedBy VARCHAR(32) NOT NULL,
             PRIMARY KEY (id)
         )
     ");

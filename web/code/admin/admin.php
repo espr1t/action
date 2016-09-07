@@ -25,6 +25,10 @@ switch ($_GET['page']) {
         require_once('news.php');
         $page = new AdminNewsPage($user);
         break;
+    case 'problems':
+        require_once('problems.php');
+        $page = new AdminProblemsPage($user);
+        break;
     default:
         require_once('../error.php');
         $page = new ErrorPage($user);

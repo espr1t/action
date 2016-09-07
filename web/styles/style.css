@@ -467,7 +467,7 @@ div.problem-name {
 }
 
 div.problem-info {
-    height: 40px;
+    height: 32px;
     width: 240px;
     display: table-cell;
     vertical-align: middle;
@@ -504,8 +504,9 @@ div.problem-io {
 }
 
 div.problem-explanation {
-    font-size: 0.7em;
+    font-size: 0.8em;
     text-align: center;
+    font-style: italic;
 }
 
 div.problem-submit {
@@ -519,7 +520,7 @@ table.problem-sample {
     border-collapse: collapse;
     white-space: pre-wrap;
     margin-top: 1em;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.1em;
 }
 
 table.problem-sample tr th {
@@ -581,7 +582,6 @@ div.input-wrapper {
 }
 
 input.button {
-    margin-top: 8px;
     padding-left: 12px;
     padding-right: 12px;
     height: 28px;
@@ -621,11 +621,12 @@ div.overlay {
 }
 
 div.action-form {
-    position: fixed;
+    position: absolute;
+    overflow-y: auto;
     width: 600px;
     top: 50%;
     left: 50%;
-    margin: 0 auto 0 -340px;
+    margin: 20px auto 20px -340px;
     padding: 20px 40px 16px 40px;
     background: #FFFFFF;
     border: 1px solid #ccc;
@@ -801,10 +802,6 @@ table.default tr:nth-child(odd) {
     background: #F9F9F9;
 }
 
-table.blue th {
-    background-color: #0099FF;
-}
-
 table.red th {
     background-color: #DD4337;
 }
@@ -813,12 +810,28 @@ table.green th {
     background-color: #129D5A;
 }
 
+table.blue th {
+    background-color: #0099FF;
+}
+
 table.gray th {
     background-color: #CCCCCC;
 }
 
-span.blue {
+.red {
+    color: #DD4337;
+}
+
+.green {
+    color: #129D5A;
+}
+
+.blue {
     color: #0099FF;
+}
+
+.gray {
+    color: #CCCCCC;
 }
 
 div.achievement {
@@ -835,4 +848,55 @@ div.achievement {
     background-color: #0099FF;
     border-radius: 12px 2px 2px 12px;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.24);
+}
+
+div.edit-problem-section-title {
+    color: #0099FF;
+    margin-top: 12px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+div.edit-problem-section {
+    width: 100%;
+    padding: 8px 0px;
+    background-color: #FCFCFC;
+    border: 1px dashed #999999;
+}
+
+div.edit-problem-section-field {
+    text-align: left;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+input.edit-problem-text-field {
+    text-align: center;
+    font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
+
+    border: none;
+    border-bottom: 1px dotted #CCCCCC;
+}
+
+textarea.edit-problem-statement {
+    width: 100%;
+}
+
+textarea.edit-problem-sample {
+    width: 98%;
+}
+
+select {
+    font-family: inherit;
+}
+
+fieldset {
+    border: 1px solid #999999;
+}
+
+label.checkbox-label input[type="checkbox"] {
+    position: relative;
+    vertical-align: middle;
+    bottom: 1px;
 }
