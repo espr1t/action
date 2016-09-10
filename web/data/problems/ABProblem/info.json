@@ -2,7 +2,7 @@
     "id": 1,
     "name": "A * B Problem",
     "author": "Александър Георгиев",
-    "folder": "a_b_problem",
+    "folder": "ABProblem",
     "timeLimit": 0.1,
     "memoryLimit": 0.5,
     "type": "ioi",

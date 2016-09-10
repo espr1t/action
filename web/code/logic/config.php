@@ -50,8 +50,8 @@ $STATUS_DISPLAY_NAME = array(
 );
 
 // Problems
-$PROBLEM_INFO_FILENAME = '/problem_info.json';
-$PROBLEM_STATEMENT_FILENAME = '/problem_statement.html';
+$PROBLEM_INFO_FILENAME = '/info.json';
+$PROBLEM_STATEMENT_FILENAME = '/statement.html';
 
 // Spam protection
 $SPAM_INTERVAL = 86400; // Seconds in 24 hours

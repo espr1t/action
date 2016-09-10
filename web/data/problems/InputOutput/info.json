@@ -2,7 +2,7 @@
     "id": 2,
     "name": "Input/Output",
     "author": "Александър Георгиев",
-    "folder": "input_output",
+    "folder": "InputOutput",
     "timeLimit": 0.2,
     "memoryLimit": 16,
     "type": "acm",
