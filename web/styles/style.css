@@ -599,6 +599,7 @@ input.button {
 input.button-large {
     width: 240px;
     height: 42px;
+    font-weight: bold;
 }
 
 input.button-color-blue {
@@ -899,4 +900,10 @@ label.checkbox-label input[type="checkbox"] {
     position: relative;
     vertical-align: middle;
     bottom: 1px;
+}
+
+div.edit-problem-test-hash {
+    font-size: 0.8em;
+    margin-top: -8px;
+    color: #0099FF;
 }

@@ -9,6 +9,7 @@ function readFile(row, key, file) {
     var fileReader = new FileReader();
     fileReader.addEventListener('load', function() {
         row[key] = fileReader.result;
+
         row['status']++;
         if (row['status'] == 2) {
             row.cells[3].innerHTML = '<i class="fa fa-upload"></i>';
@@ -23,6 +24,17 @@ function uploadTest(row) {
     setTimeout(function() {
         row.cells[3].innerHTML = '<i class="fa fa-check green"></i>';
     }, 1000);
+    // TODO: Add the md5 of the file to the table once uploaded.
+    var result = {
+        'inputHash': '0bf75d3a2e7420260475364e547db250',
+        'outputHash': 'e934f7ab1999febc67c63ef7d1be5f62'
+    };
+
+    row.cells[0].innerHTML =
+            row['input'] + '<div class="edit-problem-test-hash">' + result['inputHash'] + '</div>';
+    row.cells[1].innerHTML =
+            row['output'] + '<div class="edit-problem-test-hash">' + result['outputHash'] + '</div>';
+
     // Remove the event listener. A bit ugly, since the function is created with .bind()
     row.replaceChild(row.cells[3].cloneNode(true), row.cells[3]);
 }
@@ -41,7 +53,7 @@ function updateTests() {
 
         var input = row.insertCell(-1); input.innerHTML = row['input'];
         var output = row.insertCell(-1); output.innerHTML = row['output'];
-        var score = row.insertCell(-1); score.innerHTML = row['score'];
+        var score = row.insertCell(-1); score.innerHTML = row['score']; score.contentEditable = true;
         var status = row.insertCell(-1); status.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
         status.addEventListener('click', uploadTest.bind(this, row));
 
@@ -74,5 +86,5 @@ function toggleStatementHTML() {
 }
 
 function submitEditProblemForm() {
-    // TODO: Implement
+    // TODO: implement
 }

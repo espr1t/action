@@ -41,9 +41,9 @@ class AdminProblemsPage extends Page {
         for ($i = 0; $i < count($tests); $i = $i + 1) {
             $initTestsRows .= '
                 <tr>
-                    <td>' . $tests[$i]['inpFile'] . '</td>
-                    <td>' . $tests[$i]['solFile'] . '</td>
-                    <td>' . $tests[$i]['score'] . '</td>
+                    <td>' . $tests[$i]['inpFile'] . '<div class="edit-problem-test-hash">' . $tests[$i]['inpHash'] . '</div></td>
+                    <td>' . $tests[$i]['solFile'] . '<div class="edit-problem-test-hash">' . $tests[$i]['solHash'] . '</div></td>
+                    <td contenteditable="true">' . $tests[$i]['score'] . '</td>
                     <td><i class="fa fa-check green"></i></td>
                 </tr>
             ';
