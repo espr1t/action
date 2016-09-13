@@ -26,6 +26,7 @@ function passSpamProtection($user, $type, $limit) {
 
 function printAjaxResponse($response) {
     echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit(0);
 }
 
 ?>

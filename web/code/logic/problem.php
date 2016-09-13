@@ -11,6 +11,7 @@ class Problem {
     public $memoryLimit = -1;
     public $type = '';
     public $difficulty = '';
+    public $statement = '';
     public $tags = array();
     public $origin = '';
     public $checker = '';
@@ -27,6 +28,9 @@ class Problem {
         $this->difficulty = 'medium';
         $this->origin = 'Problem Origin';
         $this->addedBy = $GLOBALS['user']->username;
+
+        $emptyStatementPath = sprintf("%s/%s", $GLOBALS['PATH_PROBLEMS'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+        $this->statement = file_get_contents($emptyStatementPath);
     }
 
     private function arrayFromInstance() {
@@ -57,6 +61,7 @@ class Problem {
         $problem->memoryLimit = getValue($info, 'memoryLimit');
         $problem->type = getValue($info, 'type');
         $problem->difficulty = getValue($info, 'difficulty');
+        $problem->statement = getValue($info, 'statement');
         $problem->tags = getValue($info, 'tags');
         $problem->origin = getValue($info, 'origin');
         $problem->checker = getValue($info, 'checker');
@@ -75,20 +80,62 @@ class Problem {
         return null;
     }
 
-    private function update() {
-        $fileName = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_INFO_FILENAME']);
-        $file = fopen($fileName, 'w');
-        if (!$file) {
-            error_log('Unable to open file ' . $fileName . ' for writing!');
+    public function update() {
+        // Update the problem meta information (JSON file in the problem folder)
+        $infoPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_INFO_FILENAME']);
+        $infoFile = fopen($infoPath, 'w');
+        if (!$infoFile) {
+            error_log('Unable to open file ' . $infoPath . ' for writing!');
             return false;
         }
-        if (!fwrite($file, json_encode($this->arrayFromInstance(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            error_log('Unable to write to file ' . $fileName . '!');
+        if (!fwrite($infoFile, json_encode($this->arrayFromInstance(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+            error_log('Unable to write to file ' . $infoPath . '!');
             return false;
         }
+
+        // Update the problem statement (HTML file in the problem folder)
+        $statementPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+        if (!file_put_contents($statementPath, $_POST['statement'])) {
+            error_log('Unable to write to file ' . $statementPath . '!');
+            return false;
+        }
+
         $brain = new Brain();
-        $brain->updateProblem($this);
-        return true;
+        return $brain->updateProblem($this);
+    }
+
+    public function create() {
+        // Add the problem to the database
+        $brain = new Brain();
+        $result = $brain->addProblem($this);
+        if (!$result) {
+            return false;
+        }
+        $this->id = $result;
+
+        // Create main folder
+        $problemPath = sprintf("%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder);
+        if (!mkdir($problemPath)) {
+            error_log('Unable to create problem folder ' . $problemPath . '!');
+            return false;
+        }
+
+        // Create tests folder
+        $testsPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_TESTS_FOLDER']);
+        if (!mkdir($testsPath)) {
+            error_log('Unable to create problem tests folder ' . $testsPath . '!');
+            return false;
+        }
+
+        // Create solutions folder
+        $solutionsPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_SOLUTIONS_FOLDER']);
+        if (!mkdir($solutionsPath)) {
+            error_log('Unable to create problem solutions folder ' . $solutionsPath . '!');
+            return false;
+        }
+
+        // Update the meta information and the statement
+        return $this->update();
     }
 
     public function scoreSubmit($submit) {

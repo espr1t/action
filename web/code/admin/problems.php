@@ -38,12 +38,8 @@ class AdminProblemsPage extends Page {
         $brain = new Brain();
         if ($problemId == 'new') {
             $problem = new Problem();
-            $statementPath = sprintf("%s/%s", $GLOBALS['PATH_PROBLEMS'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-            $statementHTML = file_get_contents($statementPath);
         } else {
             $problem = Problem::get($problemId);
-            $statementPath = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-            $statementHTML = file_get_contents($statementPath);
         }
         $tests = $brain->getProblemTests($problem->id);
 
@@ -161,7 +157,7 @@ class AdminProblemsPage extends Page {
             <div class="right" onclick="toggleStatementHTML();"><a class="fa fa-code"></a></div>
             <div>
                 <div contenteditable id="statement">
-                ' . $statementHTML . '
+                ' . $problem->statement . '
                 </div>
             </div>
 

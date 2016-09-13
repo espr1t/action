@@ -53,6 +53,8 @@ $STATUS_DISPLAY_NAME = array(
 // Problems
 $PROBLEM_INFO_FILENAME = 'info.json';
 $PROBLEM_STATEMENT_FILENAME = 'statement.html';
+$PROBLEM_TESTS_FOLDER = 'Tests';
+$PROBLEM_SOLUTIONS_FOLDER = 'Solutions';
 
 // Spam protection
 $SPAM_INTERVAL = 86400; // Seconds in 24 hours

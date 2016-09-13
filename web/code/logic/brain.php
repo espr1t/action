@@ -66,7 +66,13 @@ class Brain {
     }
 
     // Problems
+    function addProblem($problem) {
+        // TODO
+        return 42;
+    }
+
     function updateProblem($problem) {
+        /*
         $response = $this->db->query("
             UPDATE `Problems` SET
                 name = `" . $problem->name . "`,
@@ -76,7 +82,8 @@ class Brain {
                 memoryLimit = `" . $problem->memoryLimit . "`,
                 type = `" . $problem->type . "`,
                 difficulty = `" . $problem->difficulty . "`,
-                tags = `" . implode(',', $probme->tags) . "`,
+                statement = `" . $this->db->escape($problem->statement) . "`,
+                tags = `" . implode(',', $problem->tags) . "`,
                 origin = `" . $problem->origin . "`,
                 checker = `" . $problem->checker . "`,
                 executor = `" . $problem->executor . "`
@@ -86,6 +93,8 @@ class Brain {
             error_log('Could not update info for problem "' . $problem->name . '"!');
             return null;
         }
+        return true;
+        */
         return true;
     }
 

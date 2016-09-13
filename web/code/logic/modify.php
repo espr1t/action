@@ -28,56 +28,26 @@ $problem->addedBy = $_POST['addedBy'];
 
 $brain = new Brain();
 
-
-// Updating existing problem
-if ($_POST['id'] != 'new') {
-    $problem->id = $_POST['id'];
-}
 // New problem
-else {
-    // Add the problem to the database.
-    $result = $brain->addProblem($problem);
-    if (!$result) {
+if ($_POST['id'] == 'new') {
+    if (!$problem->create()) {
         printAjaxResponse(array(
             'status' => 'ERROR',
             'message' => 'Възникна проблем при създаването на задачата.'
         ));
     }
-    $problem->id = $result;
-
-    // Create a folder and meta information.
-    $problemPath = sprintf("%s/%s",  $GLOBALS['PATH_PROBLEMS'], $problem->folder);
-    if (!mkdir($problemPath)) {
+}
+// Updating existing problem
+else {
+    $problem->id = $_POST['id'];
+    if (!$problem->update()) {
         printAjaxResponse(array(
             'status' => 'ERROR',
-            'message' => 'Не може да бъде създадена директория за задачата.'
+            'message' => 'Възникна проблем при записа на задачата.'
         ));
     }
 }
 
-// Update the problem info in the database
-$result = $brain->updateProblem($problem);
-if (!$result) {
-    printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Възникна проблем при записа на задачата.'
-    ));
-}
-
-// Update the problem meta information (JSON file in the problem folder)
-$infoPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_INFO_FILENAME']);
-$infoFile = fopen($infoPath, 'w');
-if (!$infoFile) {
-    printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Възникна проблем при записа на мета информацията.'
-    ));
-}
-fwrite($infoFile, json_encode($problem->arrayFromInstance(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-// Update the problem statement (HTML file in the problem folder)
-$statementPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-file_put_contents($statementPath, $_POST['statement']);
 
 // Update the tests
 // TODO
