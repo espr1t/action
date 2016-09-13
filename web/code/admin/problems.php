@@ -34,9 +34,19 @@ class AdminProblemsPage extends Page {
         return $problems;
     }
 
-    private function getEditProblemForm($problem) {
+    private function getEditProblemForm($problemId) {
         $brain = new Brain();
+        if ($problemId == 'new') {
+            $problem = new Problem();
+            $statementPath = sprintf("%s/%s", $GLOBALS['PATH_PROBLEMS'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+            $statementHTML = file_get_contents($statementPath);
+        } else {
+            $problem = Problem::get($problemId);
+            $statementPath = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+            $statementHTML = file_get_contents($statementPath);
+        }
         $tests = $brain->getProblemTests($problem->id);
+
         $initTestsRows = '';
         for ($i = 0; $i < count($tests); $i = $i + 1) {
             $initTestsRows .= '
@@ -49,8 +59,6 @@ class AdminProblemsPage extends Page {
             ';
         }
 
-        $statementPath = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-        $statementHTML = file_get_contents($statementPath);
 
         $content = '
             <div class="left">
@@ -88,13 +96,23 @@ class AdminProblemsPage extends Page {
                 </div>
                 <br>
                 <div class="edit-problem-section-field">
+                    <b>Тип:</b>
+                        <select name="type" id="problemType">
+                            <option value="ioi"' . ($problem->type == 'ioi' ? 'selected' : '') . '>IOI</option>
+                            <option value="acm"' . ($problem->type == 'acm' ? 'selected' : '') . '>ACM</option>
+                            <option value="relative"' . ($problem->type == 'relative' ? 'selected' : '') . '>Relative</option>
+                            <option value="game"' . ($problem->type == 'game' ? 'selected' : '') . '>Game</option>
+                        </select>
+                </div>
+                <br>
+                <div class="edit-problem-section-field">
                     <b>Сложност:</b>
-                        <select name="difficulty" id="difficulty">
-                            <option value="Trivial">Trivial</option>
-                            <option value="Easy">Easy</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="Hard">Hard</option>
-                            <option value="Brutal">Brutal</option>
+                        <select name="difficulty" id="problemDifficulty">
+                            <option value="trivial"' . ($problem->difficulty == 'trivial' ? 'selected' : '') . '>Trivial</option>
+                            <option value="easy"' . ($problem->difficulty == 'easy' ? 'selected' : '') . '>Easy</option>
+                            <option value="medium"' . ($problem->difficulty == 'medium' ? 'selected' : '') . '>Medium</option>
+                            <option value="hard"' . ($problem->difficulty == 'hard' ? 'selected' : '') . '>Hard</option>
+                            <option value="brutal"' . ($problem->difficulty == 'brutal' ? 'selected' : '') . '>Brutal</option>
                         </select>
                 </div>
                 <br>
@@ -170,6 +188,20 @@ class AdminProblemsPage extends Page {
                     </label>
                 </div>
             </div>
+            <div class="edit-problem-section-title">
+                Допълнителни
+            </div>
+            <div class="edit-problem-section">
+                <div class="edit-problem-section-field">
+                    <b>Чекер:</b>
+                    <input type="file" id="checkerSelector" onchange="updateChecker();">
+                </div>
+                <br>
+                <div class="edit-problem-section-field">
+                    <b>Тестер:</b>
+                    <input type="file" id="testerSelector" onchange="updateTester();">
+                </div>
+            </div>
 
             <div class="center" style="margin-top: 12px;">
                 <input type="submit" value="Запази" onclick="submitEditProblemForm();" class="button button-color-red button-large">
@@ -185,18 +217,17 @@ class AdminProblemsPage extends Page {
             <h1>Админ::Задачи</h1>
 
             <div class="problem-submit">
-                <input type="submit" value="Нова задача" onclick="showForm();" class="button button-color-blue button-large">
+                <input type="submit" value="Нова задача" onclick="window.location.href=\'problems/new\';" class="button button-color-blue button-large">
             </div>
         ');
         $content .= $this->getProblemList();
 
         // Specific problem is open
         if (isset($_GET['problem'])) {
-            $problem = Problem::get($_GET['problem']);
             $redirect = '/admin/problems';
             $content .= '
                 <script>
-                    showEditProblemForm(`' . $this->getEditProblemForm($problem) . '`, `' . $redirect . '`);
+                    showEditProblemForm(`' . $this->getEditProblemForm($_GET['problem']) . '`, `' . $redirect . '`);
                 </script>
             ';
         }

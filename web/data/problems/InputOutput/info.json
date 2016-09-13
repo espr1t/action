@@ -8,7 +8,7 @@
     "type": "acm",
     "difficulty": "trivial",
     "checker": "",
-    "executor": "",
+    "tester": "",
     "tags": ["implementation"],
     "origin": "informatika.bg training",
     "addedBy": "espr1t"
