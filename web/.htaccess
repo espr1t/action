@@ -39,4 +39,4 @@ RewriteRule    ^actions/(\w+)$                          /code/logic/actions.php?
 RewriteRule    ^admin/init$                             /code/db/init.php                                               [NC,L,QSA]
 RewriteRule    ^admin/news$                             /code/admin/admin.php?page=news                                 [NC,L,QSA]
 RewriteRule    ^admin/problems$                         /code/admin/admin.php?page=problems                             [NC,L,QSA]
-RewriteRule    ^admin/problems/(\d+)$                   /code/admin/admin.php?page=problems&problem=$1                  [NC,L,QSA]
+RewriteRule    ^admin/problems/(\d+|new)$               /code/admin/admin.php?page=problems&problem=$1                  [NC,L,QSA]

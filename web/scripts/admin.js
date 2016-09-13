@@ -86,5 +86,45 @@ function toggleStatementHTML() {
 }
 
 function submitEditProblemForm() {
-    // TODO: implement
+    var id = 'new'; // TODO
+
+    var name = document.getElementById('problemName').value;
+    var folder = document.getElementById('problemFolder').value;
+    var author = document.getElementById('problemAuthor').value;
+    var origin = document.getElementById('problemOrigin').value;
+    var timeLimit = document.getElementById('problemTL').value;
+    var memoryLimit = document.getElementById('problemML').value;
+    var type = document.getElementById('problemType').value;
+    var difficulty = document.getElementById('problemDifficulty').value;
+    var statement = (document.getElementById('statement').innerHTML || document.getElementById('statement').value).trim();
+    var tags = []; // TODO
+    var checker = ''; // TODO
+    var tester = ''; // TODO
+
+    var data = {
+        'id': id,
+        'name': name,
+        'folder': folder,
+        'author': author,
+        'origin': origin,
+        'timeLimit': timeLimit,
+        'memoryLimit': memoryLimit,
+        'type': type,
+        'difficulty': difficulty,
+        'checker': checker,
+        'tester': tester,
+        'statement': statement,
+        'tags': tags,
+        'addedBy': 'espr1t'
+    };
+
+    var callback = function(response) {
+        alert(response);
+        response = submitActionForm(response, 'Задачата беше запазена успешно.', 'Възникна проблем при записването на задачата.');
+        if (response.hasOwnProperty(id)) {
+            alert('New problem with ID: ' + id);
+            window.location.href= '/' + id;
+        }
+    }
+    ajaxCall('/actions/modify', data, callback);
 }

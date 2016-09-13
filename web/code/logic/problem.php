@@ -18,7 +18,15 @@ class Problem {
     public $addedBy = '';
 
     public function __construct() {
-        $addedBy = $GLOBALS['user']->username;
+        $this->name = 'ProblemName';
+        $this->author = 'Problem Author';
+        $this->folder = 'ProblemFolder';
+        $this->timeLimit = 0.1;
+        $this->memoryLimit = 64;
+        $this->type = 'ioi';
+        $this->difficulty = 'medium';
+        $this->origin = 'Problem Origin';
+        $this->addedBy = $GLOBALS['user']->username;
     }
 
     private function arrayFromInstance() {
