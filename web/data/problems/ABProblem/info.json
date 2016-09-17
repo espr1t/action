@@ -7,9 +7,11 @@
     "memoryLimit": 0.5,
     "type": "ioi",
     "difficulty": "trivial",
+    "tags": [
+        "math"
+    ],
     "origin": "informatika.bg training",
     "checker": "",
     "tester": "",
-    "tags": ["math"],
     "addedBy": "espr1t"
 }

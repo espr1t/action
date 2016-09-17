@@ -86,7 +86,8 @@ function toggleStatementHTML() {
 }
 
 function submitEditProblemForm() {
-    var id = 'new'; // TODO
+    var urlTokens = window.location.href.split('/');
+    var id = urlTokens[urlTokens.length - 1];
 
     var name = document.getElementById('problemName').value;
     var folder = document.getElementById('problemFolder').value;
@@ -97,7 +98,15 @@ function submitEditProblemForm() {
     var type = document.getElementById('problemType').value;
     var difficulty = document.getElementById('problemDifficulty').value;
     var statement = (document.getElementById('statement').innerHTML || document.getElementById('statement').value).trim();
-    var tags = []; // TODO
+
+    var tags = '';
+    var tagCheckboxes = document.getElementsByName('problemTags');
+    for (var i = 0; i < tagCheckboxes.length; i++) {
+        if (tagCheckboxes[i].checked) {
+            tags = tags + (tags == '' ? '' : ',') + tagCheckboxes[i].value;
+        }
+    }
+
     var checker = ''; // TODO
     var tester = ''; // TODO
 
@@ -114,16 +123,14 @@ function submitEditProblemForm() {
         'checker': checker,
         'tester': tester,
         'statement': statement,
-        'tags': tags,
-        'addedBy': 'espr1t'
+        'tags': tags
     };
 
     var callback = function(response) {
-        alert(response);
-        response = submitActionForm(response, 'Задачата беше запазена успешно.', 'Възникна проблем при записването на задачата.');
-        if (response.hasOwnProperty(id)) {
-            alert('New problem with ID: ' + id);
-            window.location.href= '/' + id;
+        // alert(response);
+        response = submitActionForm(response, 'Задачата беше запазена успешно.', 'Възникна проблем при записването на задачата.', false);
+        if (id == 'new' && 'id' in response) {
+            window.location.href = '/admin/problems?action=success';
         }
     }
     ajaxCall('/actions/modify', data, callback);

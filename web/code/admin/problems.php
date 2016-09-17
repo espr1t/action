@@ -34,6 +34,47 @@ class AdminProblemsPage extends Page {
         return $problems;
     }
 
+    private function getTagsTable($problem) {
+        $tags = [
+            'implement' => 'Implementation',
+            'search' => 'Search',
+            'dp' => 'Dynamic Programming',
+            'graph' => 'Graphs',
+            'math' => 'Math',
+            'geometry' => 'Geometry',
+            'ad-hoc' => 'Ad-hoc',
+            'flow' => 'Flows',
+            'divconq' => 'Divide & Conquer',
+            'bsearch' => 'Binary Search',
+            'hashing' => 'Hashing',
+            'strings' => 'Strings',
+            'sorting' => 'Sorting',
+            'greedy' => 'Greedy',
+            'sg' => 'Game Theory',
+            'mitm' => 'Meet in the Middle',
+            'datastruct' => 'Data Structures',
+            'np' => 'NP-Complete'
+        ];
+        $table = '<table style="width: 100%;">';
+        while ($tag = current($tags)) {
+            $table .= '<tr>';
+            for ($c = 0; $c < 3 && $tag = current($tags); $c = $c + 1) {
+                $table .= '
+                    <td>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="problemTags" value="' . key($tags) . '" ' .
+                                (in_array(key($tags), $problem->tags) ? 'checked' : '') . '> ' . $tag . '
+                        </label>
+                    </td>';
+                next($tags);
+            }
+            $table .= '</tr>
+            ';
+        }
+        $table .= '</table>';
+        return $table;
+    }
+
     private function getEditProblemForm($problemId) {
         $brain = new Brain();
         if ($problemId == 'new') {
@@ -55,6 +96,7 @@ class AdminProblemsPage extends Page {
             ';
         }
 
+        $tagsTable = $this->getTagsTable($problem);
 
         $content = '
             <div class="left">
@@ -115,38 +157,7 @@ class AdminProblemsPage extends Page {
                 <div class="edit-problem-section-field">
                 <fieldset>
                     <legend><b>Тагове</b></legend>
-                    <table style="width: 100%;">
-                        <tr>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="implement"> Implementation</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="search"> Search</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="dp"> DP</label></td>
-                        </tr>
-                        <tr>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="graph"> Graphs</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="math"> Math</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="geometry"> Geometry</label></td>
-                        </tr>
-                        <tr>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="ad-hoc"> Ad-hoc</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="flow"> Flow</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="divconq"> Divide & Conquer</label></td>
-                        </tr>
-                        <tr>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="bsearch"> Binary Search</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="hashing"> Hashing</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="strings"> Strings</label></td>
-                        </tr>
-                        <tr>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="sorting"> Sorting</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="greedy"> Greedy</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="sg"> Game Theory</label></td>
-                        </tr>
-                        <tr>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="mitm"> Meet in the Middle</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="datastruct"> Data Structures</label></td>
-                            <td><label class="checkbox-label"><input type="checkbox" name="animal" value="stl"> NP</label></td>
-                        </tr>
-                    </table>
+                    ' . $tagsTable . '
                 </fieldset>
                 </div>
             </div>

@@ -15,7 +15,7 @@ class Problem {
     public $tags = array();
     public $origin = '';
     public $checker = '';
-    public $executor = '';
+    public $tester = '';
     public $addedBy = '';
 
     public function __construct() {
@@ -46,26 +46,26 @@ class Problem {
             'tags' => $this->tags,
             'origin' => $this->origin,
             'checker' => $this->checker,
-            'executor' => $this->executor,
+            'tester' => $this->tester,
             'addedBy' => $this->addedBy
         );
     }
 
     private static function instanceFromArray($info) {
         $problem = new Problem;
-        $problem->id = getValue($info, 'id');
+        $problem->id = intval(getValue($info, 'id'));
         $problem->name = getValue($info, 'name');
         $problem->author = getValue($info, 'author');
         $problem->folder = getValue($info, 'folder');
-        $problem->timeLimit = getValue($info, 'timeLimit');
-        $problem->memoryLimit = getValue($info, 'memoryLimit');
+        $problem->timeLimit = floatval(getValue($info, 'timeLimit'));
+        $problem->memoryLimit = floatval(getValue($info, 'memoryLimit'));
         $problem->type = getValue($info, 'type');
         $problem->difficulty = getValue($info, 'difficulty');
         $problem->statement = getValue($info, 'statement');
-        $problem->tags = getValue($info, 'tags');
+        $problem->tags = explode(',', getValue($info, 'tags'));
         $problem->origin = getValue($info, 'origin');
         $problem->checker = getValue($info, 'checker');
-        $problem->executor = getValue($info, 'executor');
+        $problem->tester = getValue($info, 'tester');
         $problem->addedBy = getValue($info, 'addedBy');
         return $problem;
     }
@@ -82,21 +82,16 @@ class Problem {
 
     public function update() {
         // Update the problem meta information (JSON file in the problem folder)
-        $infoPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_INFO_FILENAME']);
-        $infoFile = fopen($infoPath, 'w');
-        if (!$infoFile) {
-            error_log('Unable to open file ' . $infoPath . ' for writing!');
-            return false;
-        }
-        if (!fwrite($infoFile, json_encode($this->arrayFromInstance(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            error_log('Unable to write to file ' . $infoPath . '!');
+        $infoPath = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_INFO_FILENAME']);
+        if (!file_put_contents($infoPath, json_encode($this->arrayFromInstance(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+            error_log('Unable to record data in file "' . $infoPath . '"!');
             return false;
         }
 
         // Update the problem statement (HTML file in the problem folder)
         $statementPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-        if (!file_put_contents($statementPath, $_POST['statement'])) {
-            error_log('Unable to write to file ' . $statementPath . '!');
+        if (!file_put_contents($statementPath, $this->statement)) {
+            error_log('Unable to write statement to file "' . $statementPath . '"!');
             return false;
         }
 
@@ -107,30 +102,30 @@ class Problem {
     public function create() {
         // Add the problem to the database
         $brain = new Brain();
-        $result = $brain->addProblem($this);
+        $result = $brain->addProblem();
         if (!$result) {
             return false;
         }
         $this->id = $result;
 
         // Create main folder
-        $problemPath = sprintf("%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder);
+        $problemPath = sprintf("%s/%s", $GLOBALS['PATH_PROBLEMS'], $this->folder);
         if (!mkdir($problemPath)) {
-            error_log('Unable to create problem folder ' . $problemPath . '!');
+            error_log('Unable to create problem folder "' . $problemPath . '"!');
             return false;
         }
 
         // Create tests folder
-        $testsPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_TESTS_FOLDER']);
+        $testsPath = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_TESTS_FOLDER']);
         if (!mkdir($testsPath)) {
-            error_log('Unable to create problem tests folder ' . $testsPath . '!');
+            error_log('Unable to create problem tests folder "' . $testsPath . '"!');
             return false;
         }
 
         // Create solutions folder
-        $solutionsPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_SOLUTIONS_FOLDER']);
+        $solutionsPath = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_SOLUTIONS_FOLDER']);
         if (!mkdir($solutionsPath)) {
-            error_log('Unable to create problem solutions folder ' . $solutionsPath . '!');
+            error_log('Unable to create problem solutions folder "' . $solutionsPath . '"!');
             return false;
         }
 
@@ -144,7 +139,6 @@ class Problem {
 
         if (count($submit->results) != count($tests)) {
             error_log('Number of tests of problem ' . $submit->problemId . ' differs from results in submission ' . $submit->id . '!');
-            echo 'Number of tests of problem ' . $submit->problemId . ' differs from results in submission ' . $submit->id . '!';
         }
 
         $scoredSubmit = array();

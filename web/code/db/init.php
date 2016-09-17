@@ -66,7 +66,7 @@ Table::Problems
     "statement": "...",
     "origin": "informatika.bg training",
     "checker": "",
-    "executor": "",
+    "tester": "",
     "tags": ["implementation"],
     "addedBy": "espr1t"
 }
@@ -90,28 +90,8 @@ if ($db->tableExists('Problems')) {
             statement TEXT NOT NULL,
             origin VARCHAR(128) NOT NULL,
             checker VARCHAR(32) NOT NULL,
-            executor VARCHAR(32) NOT NULL,
-            tags SET(
-                'implement',
-                'search',
-                'dp',
-                'graph',
-                'math',
-                'geometry',
-                'ad-hoc',
-                'flow',
-                'divconq',
-                'bsearch',
-                'hashing',
-                'strings',
-                'sorting',
-                'greedy',
-                'sg',
-                'mitm',
-                'datastruct',
-                'stl',
-                'np'
-            ) NOT NULL,
+            tester VARCHAR(32) NOT NULL,
+            tags TINYTEXT NOT NULL,
             addedBy VARCHAR(32) NOT NULL,
             PRIMARY KEY (id)
         )

@@ -66,35 +66,40 @@ class Brain {
     }
 
     // Problems
-    function addProblem($problem) {
-        // TODO
-        return 42;
+    function addProblem() {
+        $response = $this->db->query("
+            INSERT INTO `Problems` (name, author, folder, timeLimit, memoryLimit, type, difficulty, statement, tags, origin, checker, tester, addedBy)
+            VALUES ('', '', '', 0, 0, 'ioi', 'trivial', '', '', '', '', '', '')
+        ");
+        if (!$response) {
+            error_log('Could not add new problem!');
+            return null;
+        }
+        return $this->db->lastId();
     }
 
     function updateProblem($problem) {
-        /*
         $response = $this->db->query("
             UPDATE `Problems` SET
-                name = `" . $problem->name . "`,
-                author = `" . $problem->author . "`,
-                folder = `" . $problem->folder . "`,
-                timeLimit = `" . $problem->timeLimit . "`,
-                memoryLimit = `" . $problem->memoryLimit . "`,
-                type = `" . $problem->type . "`,
-                difficulty = `" . $problem->difficulty . "`,
-                statement = `" . $this->db->escape($problem->statement) . "`,
-                tags = `" . implode(',', $problem->tags) . "`,
-                origin = `" . $problem->origin . "`,
-                checker = `" . $problem->checker . "`,
-                executor = `" . $problem->executor . "`
-            WHERE `id` = " . $problem->id . "
+                name = '" . $problem->name . "',
+                author = '" . $problem->author . "',
+                folder = '" . $problem->folder . "',
+                timeLimit = '" . $problem->timeLimit . "',
+                memoryLimit = '" . $problem->memoryLimit . "',
+                type = '" . $problem->type . "',
+                difficulty = '" . $problem->difficulty . "',
+                statement = '" . $this->db->escape($problem->statement) . "',
+                tags = '" . implode(',', $problem->tags) . "',
+                origin = '" . $problem->origin . "',
+                checker = '" . $problem->checker . "',
+                tester = '" . $problem->tester . "',
+                addedBy = '" . $problem->addedBy . "'
+            WHERE id = " . $problem->id . "
         ");
         if (!$response) {
             error_log('Could not update info for problem "' . $problem->name . '"!');
             return null;
         }
-        return true;
-        */
         return true;
     }
 
@@ -284,17 +289,17 @@ class Brain {
     function updateUser($user) {
         $response = $this->db->query("
             UPDATE `Users` SET
-                access = `" . $user->access . "`,
-                registered = `" . $user->registered . "`,
-                username = `" . $user->username . "`,
-                password = `" . $user->password . "`,
-                name = `" . $user->name . "`,
-                email = `" . $user->email . "`,
-                town = `" . $user->town . "`,
-                country = `" . $user->country . "`,
-                gender = `" . $user->gender . "`,
-                birthdate = `" . $user->birthdate . "`,
-                avatar = `" . $this->db->escape($user->avatar) . "`
+                access = '" . $user->access . "',
+                registered = '" . $user->registered . "',
+                username = '" . $user->username . "',
+                password = '" . $user->password . "',
+                name = '" . $user->name . "',
+                email = '" . $user->email . "',
+                town = '" . $user->town . "',
+                country = '" . $user->country . "',
+                gender = '" . $user->gender . "',
+                birthdate = '" . $user->birthdate . "',
+                avatar = '" . $this->db->escape($user->avatar) . "'
             WHERE id = " . $user->id . "
         ");
         if (!$response) {
@@ -381,7 +386,7 @@ class Brain {
 
     function incrementSpamCounter($user, $type, $time) {
         $response = $this->db->query("
-            INSERT INTO `Spam`(type, user, time)
+            INSERT INTO `Spam` (type, user, time)
             VALUES (
                 " . $type . ", " . $user->id . ", " . $time . ")
         ");

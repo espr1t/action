@@ -51,6 +51,42 @@ $STATUS_DISPLAY_NAME = array(
 );
 
 // Problems
+$PROBLEM_TYPES = [
+    'ioi',
+    'acm',
+    'game',
+    'relative'
+];
+
+$PROBLEM_DIFFICULTIES = [
+    'trivial',
+    'easy',
+    'medium',
+    'hard',
+    'brutal'
+];
+
+$PROBLEM_TAGS = [
+    'implement',
+    'search',
+    'dp',
+    'graph',
+    'math',
+    'geometry',
+    'ad-hoc',
+    'flow',
+    'divconq',
+    'bsearch',
+    'hashing',
+    'strings',
+    'sorting',
+    'greedy',
+    'sg',
+    'mitm',
+    'datastruct',
+    'np'
+];
+
 $PROBLEM_INFO_FILENAME = 'info.json';
 $PROBLEM_STATEMENT_FILENAME = 'statement.html';
 $PROBLEM_TESTS_FOLDER = 'Tests';

@@ -1,15 +1,18 @@
 {
     "id": 2,
-    "name": "Input/Output",
+    "name": "Input\/Output",
     "author": "Александър Георгиев",
     "folder": "InputOutput",
     "timeLimit": 0.2,
     "memoryLimit": 16,
     "type": "acm",
     "difficulty": "trivial",
+    "tags": [
+        "implement",
+        "sorting"
+    ],
+    "origin": "informatika.bg training",
     "checker": "",
     "tester": "",
-    "tags": ["implementation"],
-    "origin": "informatika.bg training",
     "addedBy": "espr1t"
 }

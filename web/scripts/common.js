@@ -159,7 +159,7 @@ function hideActionForm(redirect) {
     }
 }
 
-function submitActionForm(response, successMessage, errorMessage) {
+function submitActionForm(response, successMessage, errorMessage, hideOnSuccess = true) {
     try {
         response = JSON.parse(response);
     } catch(ex) {
@@ -170,7 +170,7 @@ function submitActionForm(response, successMessage, errorMessage) {
     if ($message == '') {
         $message = ($type == 'ERROR' ? errorMessage : successMessage);
     }
-    if ($type == 'INFO') {
+    if ($type == 'INFO' && hideOnSuccess) {
         hideActionForm();
     }
     showMessage($type, $message);
