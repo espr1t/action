@@ -5,6 +5,21 @@ function showEditProblemForm(content, redirect) {
     showActionForm(content, redirect);
 }
 
+function changeTab(clickedId) {
+    var tabIds = ['statementTab', 'optionsTab', 'testsTab'];
+    for (var i = 0; i < tabIds.length; i++) {
+        var buttonEl = document.getElementById(tabIds[i]);
+        var contentEl = document.getElementById(tabIds[i] + 'Content');
+
+        buttonEl.className = 'edit-problem-tab-button';
+        contentEl.style.display = 'none';
+        if (tabIds[i] == clickedId) {
+            buttonEl.className += ' underline';
+            contentEl.style.display = 'block';
+        }
+    }
+}
+
 function readFile(row, key, file) {
     var fileReader = new FileReader();
     fileReader.addEventListener('load', function() {

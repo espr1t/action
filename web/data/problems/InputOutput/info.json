@@ -3,7 +3,7 @@
     "name": "Input\/Output",
     "author": "Александър Георгиев",
     "folder": "InputOutput",
-    "timeLimit": 0.2,
+    "timeLimit": 0.5,
     "memoryLimit": 16,
     "type": "acm",
     "difficulty": "trivial",
@@ -11,7 +11,7 @@
         "implement",
         "sorting"
     ],
-    "origin": "informatika.bg training",
+    "origin": "informatika.bg",
     "checker": "",
     "tester": "",
     "addedBy": "espr1t"

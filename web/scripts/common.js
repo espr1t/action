@@ -132,13 +132,12 @@ function showActionForm(content, redirect) {
     }
 
     // Add it to the DOM using a fade-in animation
-    document.getElementById('main').appendChild(form);
-//    document.body.appendChild(form);
+    document.body.appendChild(form);
     form.className = 'action-form fade-in';
 
     // Center it vertically
     var screenHeight = window.innerHeight || document.documentElement.clientHeight;
-    var offset = Math.min(form.clientHeight / 2 + 20, screenHeight / 2 - 160);
+    var offset = Math.min(form.clientHeight / 2 + 20, screenHeight / 2 - 20);
     form.style.marginTop = -offset + 'px';
 }
 
@@ -149,7 +148,7 @@ function hideActionForm(redirect) {
     // Hide the form box using a fade-out animation
     form.className = 'action-form fade-out';
     setTimeout(function() {
-        document.getElementById('main').removeChild(form);
+        document.body.removeChild(form);
     }, 300);
     hideOverlay();
 

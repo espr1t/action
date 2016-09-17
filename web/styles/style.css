@@ -835,6 +835,10 @@ table.gray th {
     color: #CCCCCC;
 }
 
+.underline {
+    border-bottom: 1px dotted #CCCCCC;
+}
+
 div.achievement {
     cursor: default;
     display: inline-block;
@@ -851,12 +855,18 @@ div.achievement {
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.24);
 }
 
-div.edit-problem-section-title {
-    color: #0099FF;
+div.edit-problem-tab {
     margin-top: 12px;
     font-size: 1.2em;
     font-weight: bold;
     text-align: center;
+    margin-bottom: 6px;
+}
+
+div.edit-problem-tab-button {
+    display: inline-block;
+    color: #0099FF;
+    cursor: pointer;
 }
 
 div.edit-problem-section {

@@ -102,10 +102,24 @@ class AdminProblemsPage extends Page {
             <div class="left">
                 <h2><span class="blue">' . $problem->name . '</span> :: Промяна</h2>
             </div>
-            <div class="edit-problem-section-title">
-                Настройки
+            <div class="edit-problem-tab">
+                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button underline" id="statementTab">Условие</div> |
+                <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button" id="optionsTab">Настройки</div> |
+                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div>
             </div>
-            <div class="edit-problem-section">
+
+            <div id="statementTabContent">
+                <div class="edit-problem-section" style="margin-bottom: 4px;">
+                    <div class="right" onclick="toggleStatementHTML();"><a>edit html</a>&nbsp;</div>
+                </div>
+                <div>
+                    <div contenteditable id="statement">
+                    ' . $problem->statement . '
+                    </div>
+                </div>
+            </div>
+
+            <div class="edit-problem-section" id="optionsTabContent" style="display: none;">
                 <div class="edit-problem-section-field">
                     <b>Заглавие:</b>
                     <input type="text" class="edit-problem-text-field" id="problemName" value="' . $problem->name . '" size="' . (mb_strlen($problem->name, 'UTF-8') + 1) . '">
@@ -160,22 +174,19 @@ class AdminProblemsPage extends Page {
                     ' . $tagsTable . '
                 </fieldset>
                 </div>
-            </div>
-
-            <div class="edit-problem-section-title">
-                Условие
-            </div>
-            <div class="right" onclick="toggleStatementHTML();"><a class="fa fa-code"></a></div>
-            <div>
-                <div contenteditable id="statement">
-                ' . $problem->statement . '
+                <br>
+                <div class="edit-problem-section-field">
+                    <b>Чекер:</b>
+                    <input type="file" id="checkerSelector" onchange="updateChecker();">
+                </div>
+                <br>
+                <div class="edit-problem-section-field">
+                    <b>Тестер:</b>
+                    <input type="file" id="testerSelector" onchange="updateTester();">
                 </div>
             </div>
 
-            <div class="edit-problem-section-title">
-                Тестове
-            </div>
-            <div class="edit-problem-section">
+            <div class="edit-problem-section" id="testsTabContent" style="display: none;">
                 <div class="center" style="padding: 0px 8px 4px 8px;">
                     <table class="default" id="testList">
                         <thead>
@@ -193,20 +204,6 @@ class AdminProblemsPage extends Page {
                         <input type="file" id="testSelector" onchange="updateTests();" style="display:none;" multiple>
                         <i class="fa fa-plus-circle fa-2x green"></i>
                     </label>
-                </div>
-            </div>
-            <div class="edit-problem-section-title">
-                Допълнителни
-            </div>
-            <div class="edit-problem-section">
-                <div class="edit-problem-section-field">
-                    <b>Чекер:</b>
-                    <input type="file" id="checkerSelector" onchange="updateChecker();">
-                </div>
-                <br>
-                <div class="edit-problem-section-field">
-                    <b>Тестер:</b>
-                    <input type="file" id="testerSelector" onchange="updateTester();">
                 </div>
             </div>
 

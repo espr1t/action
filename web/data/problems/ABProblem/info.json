@@ -5,12 +5,12 @@
     "folder": "ABProblem",
     "timeLimit": 0.1,
     "memoryLimit": 0.5,
-    "type": "ioi",
+    "type": "acm",
     "difficulty": "trivial",
     "tags": [
         "math"
     ],
-    "origin": "informatika.bg training",
+    "origin": "informatika.bg",
     "checker": "",
     "tester": "",
     "addedBy": "espr1t"
