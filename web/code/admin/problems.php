@@ -82,6 +82,10 @@ class AdminProblemsPage extends Page {
         } else {
             $problem = Problem::get($problemId);
         }
+
+        $headerText = $problem->id == -1 ? 'Нова задача' : '<span class="blue">' . $problem->name . '</span> :: Промяна';
+        $buttonText = $problem->id == -1 ? 'Създай' : 'Запази';
+
         $tests = $brain->getProblemTests($problem->id);
 
         $initTestsRows = '';
@@ -100,7 +104,7 @@ class AdminProblemsPage extends Page {
 
         $content = '
             <div class="left">
-                <h2><span class="blue">' . $problem->name . '</span> :: Промяна</h2>
+                <h2>' . $headerText . '</h2>
             </div>
             <div class="edit-problem-tab">
                 <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button underline" id="statementTab">Условие</div> |
@@ -208,7 +212,7 @@ class AdminProblemsPage extends Page {
             </div>
 
             <div class="center" style="margin-top: 12px;">
-                <input type="submit" value="Запази" onclick="submitEditProblemForm();" class="button button-color-red button-large">
+                <input type="submit" value="' . $buttonText . '" onclick="submitEditProblemForm();" class="button button-color-red button-large">
             </div>
         ';
 
