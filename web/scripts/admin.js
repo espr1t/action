@@ -5,6 +5,11 @@ function showEditProblemForm(content, redirect) {
     showActionForm(content, redirect);
 }
 
+function getProblemId() {
+    var urlTokens = window.location.href.split('/');
+    return urlTokens[urlTokens.length - 1];
+}
+
 function changeTab(clickedId) {
     var tabIds = ['statementTab', 'optionsTab', 'testsTab'];
     for (var i = 0; i < tabIds.length; i++) {
@@ -20,61 +25,130 @@ function changeTab(clickedId) {
     }
 }
 
-function readFile(row, key, file) {
+var tests = [];
+
+function updateTestTable() {
+    var testTable = document.getElementById('testList');
+
+    // Order by position
+    tests.sort(function(t1, t2) {
+        return (t1['position'] < t2['position'] ? -1 : 1);
+    });
+
+    // Clear the current contents of the table
+    var rowCount = testTable.rows.length - 1;
+    for (var i = 0; i < rowCount; i++)
+        testTable.deleteRow(1);
+
+    // Add all tests on separate rows
+    for (var i = 0; i < tests.length; i++) {
+        var row = testTable.insertRow(-1);
+
+        var inputCol = row.insertCell(-1);
+        var inputHash = (tests[i]['inpHash'] == 'error' ? 'red' : (tests[i]['inpHash'] == 'waiting' ? 'gray' : 'blue'));
+        inputCol.innerHTML = tests[i]['inpFile'] + '<div class="edit-problem-test-hash ' + inputHash + '">' + tests[i]['inpHash'] + '</div>';
+
+        var outputCol = row.insertCell(-1);
+        var outputHash = (tests[i]['solHash'] == 'error' ? 'red' : (tests[i]['solHash'] == 'waiting' ? 'gray' : 'blue'));
+        outputCol.innerHTML = tests[i]['solFile'] + '<div class="edit-problem-test-hash ' + outputHash + '">' + tests[i]['solHash'] + '</div>';
+
+        var scoreCol = row.insertCell(-1);
+        scoreCol.innerHTML = tests[i]['score'];
+        scoreCol.contentEditable = true;
+
+        var statusCol = row.insertCell(-1);
+        statusCol.innerHTML =
+            (tests[i]['inpHash'] == 'error' || tests[i]['solHash'] == 'error') ? '<i class="fa fa-exclamation-circle red"></i>' :
+            (tests[i]['inpHash'] == 'waiting' || tests[i]['solHash'] == 'waiting') ? '<i class="fa fa-spinner fa-spin"></i>' :
+            '<i class="fa fa-check green"></i>'
+        ;
+    }
+}
+
+function uploadTest(problemId, testFile) {
     var fileReader = new FileReader();
     fileReader.addEventListener('load', function() {
-        row[key] = fileReader.result;
+        var data = {
+            'problemId': problemId,
+            'name': testFile.name,
+            'content': fileReader.result
+        };
 
-        row['status']++;
-        if (row['status'] == 2) {
-            row.cells[3].innerHTML = '<i class="fa fa-upload"></i>';
-        }
+        var callback = function(response) {
+            var exception = false;
+            try {
+                response = JSON.parse(response);
+            } catch(ex) {
+                exception = true;
+            }
+            if (exception || response['status'] !== 'OK') {
+                showMessage('ERROR', 'Възникна проблем при качването на тест "' + testFile.name + '"!');
+                updateTest(testFile.name, 'error');
+            } else {
+                updateTest(testFile.name, response['hash']);
+            }
+        };
+        ajaxCall('/actions/upload', data, callback);
     });
-    fileReader.readAsDataURL(file);
+    fileReader.readAsDataURL(testFile);
 }
 
-function uploadTest(row) {
-    row.cells[3].innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-    // TODO: Implement
-    setTimeout(function() {
-        row.cells[3].innerHTML = '<i class="fa fa-check green"></i>';
-    }, 1000);
-    // TODO: Add the md5 of the file to the table once uploaded.
-    var result = {
-        'inputHash': '0bf75d3a2e7420260475364e547db250',
-        'outputHash': 'e934f7ab1999febc67c63ef7d1be5f62'
-    };
-
-    row.cells[0].innerHTML =
-            row['input'] + '<div class="edit-problem-test-hash">' + result['inputHash'] + '</div>';
-    row.cells[1].innerHTML =
-            row['output'] + '<div class="edit-problem-test-hash">' + result['outputHash'] + '</div>';
-
-    // Remove the event listener. A bit ugly, since the function is created with .bind()
-    row.replaceChild(row.cells[3].cloneNode(true), row.cells[3]);
+function closeTestName(name1, name2) {
+    return name1.substr(0, name1.lastIndexOf('.')) === name2.substr(0, name2.lastIndexOf('.'));
 }
 
-function updateTests() {
-    var testSelector = document.getElementById('testSelector');
-    var newTestList = testSelector.files;
-
-    var testList = document.getElementById('testList');
-    for (var i = 0; i < newTestList.length; i += 2) {
-        var row = testList.insertRow(-1);
-        row['input'] = newTestList[i + 0].name;
-        row['output'] = newTestList[i + 1].name;
-        row['score'] = 10;
-        row['status'] = 0;
-
-        var input = row.insertCell(-1); input.innerHTML = row['input'];
-        var output = row.insertCell(-1); output.innerHTML = row['output'];
-        var score = row.insertCell(-1); score.innerHTML = row['score']; score.contentEditable = true;
-        var status = row.insertCell(-1); status.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
-        status.addEventListener('click', uploadTest.bind(this, row));
-
-        readFile(row, 'inputContent', newTestList[i + 0]);
-        readFile(row, 'outputContent', newTestList[i + 1]);
+function updateTest(fileName, hash) {
+    var updated = false;
+    for (var i = 0; i < tests.length; i++) {
+        if (tests[i]['inpFile'] === fileName) {
+            tests[i]['inpHash'] = hash;
+            updated = true;
+        } else if (tests[i]['solFile'] === fileName) {
+            tests[i]['solHash'] = hash;
+            updated = true;
+        } else if (closeTestName(tests[i]['solFile'], fileName)) {
+            tests[i]['inpFile'] = fileName;
+            tests[i]['inpHash'] = hash;
+            updated = true;
+        } else if (closeTestName(tests[i]['inpFile'], fileName)) {
+            tests[i]['solFile'] = fileName;
+            tests[i]['solHash'] = hash;
+            updated = true;
+        }
     }
+    if (updated) {
+        updateTestTable();
+    }
+    return updated;
+}
+
+function addTests() {
+    var problemId = getProblemId();
+    var testSelector = document.getElementById('testSelector');
+    for (var i = 0; i < testSelector.files.length; i++) {
+        var name = testSelector.files[i].name;
+        if (!updateTest(name, 'waiting')) {
+            var tokens = name.split('.');
+            if (tokens.length != 3) {
+                showMessage('ERROR', 'Невалидно име на тест "' + name + '"!');
+                continue;
+            }
+            var position = parseInt(tokens[1]);
+            var extension = tokens[2];
+
+            var test = {
+                'inpFile': ((extension == 'in' || extension == 'inp') ? name : '-'),
+                'inpHash': 'waiting',
+                'solFile': ((extension == 'sol' || extension == 'out') ? name : '-'),
+                'solHash': 'waiting',
+                'position': position,
+                'score': 10
+            };
+            tests.push(test);
+        }
+        uploadTest(problemId, testSelector.files[i]);
+    }
+    updateTestTable();
 }
 
 function toggleStatementHTML() {
@@ -101,9 +175,7 @@ function toggleStatementHTML() {
 }
 
 function submitEditProblemForm() {
-    var urlTokens = window.location.href.split('/');
-    var id = urlTokens[urlTokens.length - 1];
-
+    var id = getProblemId();
     var name = document.getElementById('problemName').value;
     var folder = document.getElementById('problemFolder').value;
     var author = document.getElementById('problemAuthor').value;

@@ -75,31 +75,36 @@ class AdminProblemsPage extends Page {
         return $table;
     }
 
-    private function getEditProblemForm($problemId) {
+    private function getEditProblemScript($problem) {
         $brain = new Brain();
-        if ($problemId == 'new') {
-            $problem = new Problem();
-        } else {
-            $problem = Problem::get($problemId);
-        }
+        $tests = $brain->getProblemtests($problem->id);
 
+        $editProblemScript = '<script>';
+        for ($i = 0; $i < count($tests); $i = $i + 1) {
+            $editProblemScript .= '
+                tests.push({
+                    \'inpFile\': \'' . $tests[$i]['inpFile'] . '\',
+                    \'inpHash\': \'' . $tests[$i]['inpHash'] . '\',
+                    \'solFile\': \'' . $tests[$i]['solFile'] . '\',
+                    \'solHash\': \'' . $tests[$i]['solHash'] . '\',
+                    \'score\': ' . $tests[$i]['score'] . ',
+                    \'position\': ' . $tests[$i]['position'] . '
+                });
+            ';
+        }
+        $editProblemScript .= 'updateTestTable();';
+        $editProblemScript .= '</script>';
+        return $editProblemScript;
+    }
+
+    private function getEditProblemForm($problem) {
+        $brain = new Brain();
+
+        // Header and Footer
         $headerText = $problem->id == -1 ? 'Нова задача' : '<span class="blue">' . $problem->name . '</span> :: Промяна';
         $buttonText = $problem->id == -1 ? 'Създай' : 'Запази';
 
-        $tests = $brain->getProblemTests($problem->id);
-
-        $initTestsRows = '';
-        for ($i = 0; $i < count($tests); $i = $i + 1) {
-            $initTestsRows .= '
-                <tr>
-                    <td>' . $tests[$i]['inpFile'] . '<div class="edit-problem-test-hash">' . $tests[$i]['inpHash'] . '</div></td>
-                    <td>' . $tests[$i]['solFile'] . '<div class="edit-problem-test-hash">' . $tests[$i]['solHash'] . '</div></td>
-                    <td contenteditable="true">' . $tests[$i]['score'] . '</td>
-                    <td><i class="fa fa-check green"></i></td>
-                </tr>
-            ';
-        }
-
+        // Tags
         $tagsTable = $this->getTagsTable($problem);
 
         $content = '
@@ -107,12 +112,12 @@ class AdminProblemsPage extends Page {
                 <h2>' . $headerText . '</h2>
             </div>
             <div class="edit-problem-tab">
-                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button underline" id="statementTab">Условие</div> |
+                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button" id="statementTab">Условие</div> |
                 <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button" id="optionsTab">Настройки</div> |
-                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div>
+                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button underline" id="testsTab">Тестове</div>
             </div>
 
-            <div id="statementTabContent">
+            <div id="statementTabContent" style="display: none;">
                 <div class="edit-problem-section" style="margin-bottom: 4px;">
                     <div class="right" onclick="toggleStatementHTML();"><a>edit html</a>&nbsp;</div>
                 </div>
@@ -190,7 +195,7 @@ class AdminProblemsPage extends Page {
                 </div>
             </div>
 
-            <div class="edit-problem-section" id="testsTabContent" style="display: none;">
+            <div class="edit-problem-section" id="testsTabContent">
                 <div class="center" style="padding: 0px 8px 4px 8px;">
                     <table class="default" id="testList">
                         <thead>
@@ -199,13 +204,12 @@ class AdminProblemsPage extends Page {
                             </tr>
                         </thead>
                         <tbody>
-                        ' . $initTestsRows . '
                         </tbody>
                     </table>
                 </div>
                 <div class="center">
                     <label class="custom-file-upload">
-                        <input type="file" id="testSelector" onchange="updateTests();" style="display:none;" multiple>
+                        <input type="file" id="testSelector" onchange="addTests();" style="display:none;" multiple>
                         <i class="fa fa-plus-circle fa-2x green"></i>
                     </label>
                 </div>
@@ -233,11 +237,23 @@ class AdminProblemsPage extends Page {
         // Specific problem is open
         if (isset($_GET['problem'])) {
             $redirect = '/admin/problems';
+
+            $brain = new Brain();
+            if ($_GET['problem'] == 'new') {
+                $problem = new Problem();
+            } else {
+                $problem = Problem::get($_GET['problem']);
+            }
+            if ($problem == null) {
+                $content .= showMessage('ERROR', 'Не съществува задача с този идентификатор!');
+            }
+
             $content .= '
                 <script>
-                    showEditProblemForm(`' . $this->getEditProblemForm($_GET['problem']) . '`, `' . $redirect . '`);
+                    showEditProblemForm(`' . $this->getEditProblemForm($problem) . '`, `' . $redirect . '`);
                 </script>
             ';
+            $content .= $this->getEditProblemScript($problem);
         }
 
         return $content;
