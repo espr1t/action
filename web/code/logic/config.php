@@ -1,5 +1,10 @@
 <?php
 
+// Logging configuration
+$ERROR_LOG_PATH = $_SERVER['DOCUMENT_ROOT'] . '/error_log.txt';
+ini_set('error_log', $ERROR_LOG_PATH);
+ini_set('log_errors', false);
+
 // Set timezone
 date_default_timezone_set('Europe/Sofia');
 
