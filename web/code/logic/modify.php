@@ -93,7 +93,12 @@ else {
 
 
 // Update the tests
-// TODO
+for ($i = 0; $i <= 1000; $i++) {
+    $key = sprintf("test_%d", $i);
+    if (isset($_POST[$key])) {
+        $brain->updateTestScore($problem->id, $i, $_POST[$key]);
+    }
+}
 
 // Everything seems okay
 printAjaxResponse(array(

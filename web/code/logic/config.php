@@ -26,9 +26,6 @@ $ACCESS_SUBMIT_SOLUTION = 1;
 
 // System paths
 $PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems';
-$PATH_USERS = $_SERVER['DOCUMENT_ROOT'] . '/data/users';
-$PATH_NEWS = $_SERVER['DOCUMENT_ROOT'] . '/data/news';
-$PATH_SUBMISSIONS = $_SERVER['DOCUMENT_ROOT'] . '/data/submissions';
 $PATH_LOGIC = $_SERVER['DOCUMENT_ROOT'] . '/code/logic';
 $PATH_ACHIEVEMENTS = $_SERVER['DOCUMENT_ROOT'] . '/data/achievements';
 

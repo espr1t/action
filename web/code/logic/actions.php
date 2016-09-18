@@ -27,6 +27,9 @@ switch ($_GET['action']) {
     case 'modify':
         require_once('modify.php');
         break;
+    case 'upload':
+        require_once('upload.php');
+        break;
     default:
         printAjaxResponse(array(
             'status' => 'WARNING',

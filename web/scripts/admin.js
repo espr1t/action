@@ -27,6 +27,32 @@ function changeTab(clickedId) {
 
 var tests = [];
 
+function isSameTest(name1, name2) {
+    return name1.substr(0, name1.lastIndexOf('.')) == name2.substr(0, name2.lastIndexOf('.'));
+}
+
+function findTest(fileName) {
+    for (var i = 0; i < tests.length; i++) {
+        if (isSameTest(tests[i]['inpFile'], fileName) || isSameTest(tests[i]['solFile'], fileName)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function updateFileHash(fileName, hash) {
+    var test = findTest(fileName);
+    if (test != -1) {
+        if (tests[test]['inpFile'] == fileName) {
+            tests[test]['inpHash'] = hash;
+        }
+        if (tests[test]['solFile'] == fileName) {
+            tests[test]['solHash'] = hash;
+        }
+        updateTestTable();
+    }
+}
+
 function updateTestTable() {
     var testTable = document.getElementById('testList');
 
@@ -55,26 +81,35 @@ function updateTestTable() {
         var scoreCol = row.insertCell(-1);
         scoreCol.innerHTML = tests[i]['score'];
         scoreCol.contentEditable = true;
+        scoreCol.addEventListener('input', (function(position, element) {
+            for (var i = 0; i < tests.length; i++) {
+                if (tests[i]['position'] == position) {
+                    tests[i]['score'] = parseInt(element.innerHTML);
+                    break;
+                }
+            }
+        }).bind(this, tests[i]['position'], scoreCol));
 
         var statusCol = row.insertCell(-1);
         statusCol.innerHTML =
             (tests[i]['inpHash'] == 'error' || tests[i]['solHash'] == 'error') ? '<i class="fa fa-exclamation-circle red"></i>' :
             (tests[i]['inpHash'] == 'waiting' || tests[i]['solHash'] == 'waiting') ? '<i class="fa fa-spinner fa-spin"></i>' :
-            '<i class="fa fa-check green"></i>'
-        ;
+            '<i class="fa fa-check green"></i>';
     }
 }
 
-function uploadTest(problemId, testFile) {
+function uploadTest(problemId, position, testFile) {
     var fileReader = new FileReader();
     fileReader.addEventListener('load', function() {
         var data = {
             'problemId': problemId,
-            'name': testFile.name,
-            'content': fileReader.result
+            'testName': testFile.name,
+            'testContent': fileReader.result.match(/,(.*)$/)[1],
+            'testPosition': position
         };
 
         var callback = function(response) {
+            alert(response);
             var exception = false;
             try {
                 response = JSON.parse(response);
@@ -83,9 +118,9 @@ function uploadTest(problemId, testFile) {
             }
             if (exception || response['status'] !== 'OK') {
                 showMessage('ERROR', 'Възникна проблем при качването на тест "' + testFile.name + '"!');
-                updateTest(testFile.name, 'error');
+                updateFileHash(testFile.name, 'error');
             } else {
-                updateTest(testFile.name, response['hash']);
+                updateFileHash(testFile.name, response['hash']);
             }
         };
         ajaxCall('/actions/upload', data, callback);
@@ -93,60 +128,32 @@ function uploadTest(problemId, testFile) {
     fileReader.readAsDataURL(testFile);
 }
 
-function closeTestName(name1, name2) {
-    return name1.substr(0, name1.lastIndexOf('.')) === name2.substr(0, name2.lastIndexOf('.'));
-}
-
-function updateTest(fileName, hash) {
-    var updated = false;
-    for (var i = 0; i < tests.length; i++) {
-        if (tests[i]['inpFile'] === fileName) {
-            tests[i]['inpHash'] = hash;
-            updated = true;
-        } else if (tests[i]['solFile'] === fileName) {
-            tests[i]['solHash'] = hash;
-            updated = true;
-        } else if (closeTestName(tests[i]['solFile'], fileName)) {
-            tests[i]['inpFile'] = fileName;
-            tests[i]['inpHash'] = hash;
-            updated = true;
-        } else if (closeTestName(tests[i]['inpFile'], fileName)) {
-            tests[i]['solFile'] = fileName;
-            tests[i]['solHash'] = hash;
-            updated = true;
-        }
-    }
-    if (updated) {
-        updateTestTable();
-    }
-    return updated;
-}
-
 function addTests() {
     var problemId = getProblemId();
     var testSelector = document.getElementById('testSelector');
     for (var i = 0; i < testSelector.files.length; i++) {
         var name = testSelector.files[i].name;
-        if (!updateTest(name, 'waiting')) {
-            var tokens = name.split('.');
-            if (tokens.length != 3) {
+        // New test, add it to tests[] first
+        if (findTest(name) == -1) {
+            if (!name.match(/^[A-Za-z]+(\.\d\d)?\.(in|inp|out|sol)$/)) {
                 showMessage('ERROR', 'Невалидно име на тест "' + name + '"!');
                 continue;
             }
-            var position = parseInt(tokens[1]);
-            var extension = tokens[2];
+            var tokens = name.split('.');
+            var position = tokens.length == 2 ? 0 : parseInt(tokens[1]);
+            var extension = tokens[tokens.length - 1];
 
-            var test = {
+            tests.push({
                 'inpFile': ((extension == 'in' || extension == 'inp') ? name : '-'),
                 'inpHash': 'waiting',
                 'solFile': ((extension == 'sol' || extension == 'out') ? name : '-'),
                 'solHash': 'waiting',
                 'position': position,
                 'score': 10
-            };
-            tests.push(test);
+            });
         }
-        uploadTest(problemId, testSelector.files[i]);
+        updateFileHash(name, 'waiting');
+        uploadTest(problemId, tests[findTest(name)]['position'], testSelector.files[i]);
     }
     updateTestTable();
 }
@@ -194,6 +201,8 @@ function submitEditProblemForm() {
         }
     }
 
+    var solutions = []; // TODO
+    var testgen = ''; // TODO
     var checker = ''; // TODO
     var tester = ''; // TODO
 
@@ -212,6 +221,10 @@ function submitEditProblemForm() {
         'statement': statement,
         'tags': tags
     };
+
+    for (var i = 0; i < tests.length; i++) {
+        data['test_' + tests[i]['position']] = tests[i]['score'];
+    }
 
     var callback = function(response) {
         // alert(response);

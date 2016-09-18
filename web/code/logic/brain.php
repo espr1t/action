@@ -142,6 +142,76 @@ class Brain {
         return $this->getResults($response);
     }
 
+    function getTestId($problemId, $position, $insertIfNotFound) {
+        // Find the ID of the testcase (or create a new one and get its ID if not present)
+        $response = $this->db->query("
+            SELECT * FROM `Tests`
+            WHERE problem = " . $problemId . " AND position = " . $position . "
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute updateTest() query properly!');
+            return -1;
+        }
+        $result = $this->getResult($response);
+
+        $id = -1;
+        if (!$result) {
+            // Insert in the database if a new test
+            if ($insertIfNotFound) {
+                $response = $this->db->query("
+                    INSERT INTO `Tests` (problem, position, inpFile, inpHash, solFile, solHash, score)
+                    VALUES (" . $problemId . ", " . $position . ", '', '', '', '', 10)
+                ");
+                if (!$response) {
+                    error_log('Could not add new test for problem ' . $problemId . ' with position ' . $position . '!');
+                    return null;
+                }
+                $id = $this->db->lastId();
+            }
+        } else {
+            $id = $result['id'];
+        }
+        return $id;
+    }
+
+    function updateTestScore($problemId, $position, $score) {
+        $id = $this->getTestId($problemId, $position, false);
+        if ($id == -1) {
+            return null;
+        }
+        $response = $this->db->query("
+            UPDATE `Tests` SET
+                score = " . $score . "
+            WHERE id = " . $id . "
+        ");
+        if (!$response) {
+            error_log('Could not update test score for problem ' . $problemId . ' with position ' . $position . '!');
+            return null;
+        }
+        return true;
+    }
+
+    function updateTestFile($problemId, $position, $name, $hash) {
+        $id = $this->getTestId($problemId, $position, true);
+        if ($id == -1) {
+            return null;
+        }
+
+        $extension = end(explode('.', $name));
+        $response = $this->db->query("
+            UPDATE `Tests` SET
+                " . (($extension == 'in' || $extension == 'inp') ? 'inpFile' : 'solFile') . " = '" . $name . "',
+                " . (($extension == 'in' || $extension == 'inp') ? 'inpHash' : 'solHash') . " = '" . $hash . "'
+            WHERE id = " . $id . "
+        ");
+        if (!$response) {
+            error_log('Could not update test file for problem ' . $problemId . ' with position ' . $position . '!');
+            return null;
+        }
+        return true;
+    }
+
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
