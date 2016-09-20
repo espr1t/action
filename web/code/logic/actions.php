@@ -30,6 +30,9 @@ switch ($_GET['action']) {
     case 'upload':
         require_once('upload.php');
         break;
+    case 'delete':
+        require_once('delete.php');
+        break;
     default:
         printAjaxResponse(array(
             'status' => 'WARNING',

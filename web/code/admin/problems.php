@@ -200,7 +200,7 @@ class AdminProblemsPage extends Page {
                     <table class="default" id="testList">
                         <thead>
                             <tr>
-                                <th>Входен файл</th><th>Изходен файл</th><th>Точки</th><th>Статус</th>
+                                <th>Входен файл</th><th>Изходен файл</th><th>Точки</th><th>Статус</th><th style="min-width: 6px;"></th>
                             </tr>
                         </thead>
                         <tbody>

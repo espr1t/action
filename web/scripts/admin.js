@@ -95,6 +95,39 @@ function updateTestTable() {
             (tests[i]['inpHash'] == 'error' || tests[i]['solHash'] == 'error') ? '<i class="fa fa-exclamation-circle red"></i>' :
             (tests[i]['inpHash'] == 'waiting' || tests[i]['solHash'] == 'waiting') ? '<i class="fa fa-spinner fa-spin"></i>' :
             '<i class="fa fa-check green"></i>';
+
+        var deleteCol = row.insertCell(-1);
+        deleteCol.innerHTML = '<i class="fa fa-trash red" style="cursor: pointer;"></i>';
+        deleteCol.addEventListener('click', deleteTest.bind(undefined, tests[i]['position']));
+    }
+}
+
+function deleteTest(position) {
+    var index = 0;
+    while (index < tests.length && tests[index]['position'] != position)
+        index++;
+
+    if (index < tests.length) {
+        var data = {
+            'problemId': getProblemId(),
+            'inpFile': tests[index]['inpFile'],
+            'solFile': tests[index]['solFile'],
+            'position': tests[index]['position']
+        };
+
+        var callback = function(response) {
+            try {
+                response = JSON.parse(response);
+                if (response['status'] == 'OK') {
+                    tests.splice(index, 1);
+                    updateTestTable();
+                    showMessage('INFO', 'Тестът беше изтрит успешно.');
+                }
+            } catch(ex) {
+                showMessage('ERROR', 'Тестът не беше изтрит успешно.');
+            }
+        }
+        ajaxCall('/actions/delete', data, callback);
     }
 }
 
@@ -109,7 +142,6 @@ function uploadTest(problemId, position, testFile) {
         };
 
         var callback = function(response) {
-            alert(response);
             var exception = false;
             try {
                 response = JSON.parse(response);
@@ -227,7 +259,6 @@ function submitEditProblemForm() {
     }
 
     var callback = function(response) {
-        // alert(response);
         response = submitActionForm(response, 'Задачата беше запазена успешно.', 'Възникна проблем при записването на задачата.', false);
         if (id == 'new' && 'id' in response) {
             window.location.href = '/admin/problems?action=success';

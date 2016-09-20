@@ -212,6 +212,18 @@ class Brain {
         return true;
     }
 
+    function deleteTest($problemId, $position) {
+        $response = $this->db->query("
+            DELETE FROM `Tests`
+            WHERE problem = " . $problemId . " AND position = " . $position . "
+        ");
+        if (!$response) {
+            error_log('Could not delete test from problem ' . $problemId . ' at position ' . $position . '!');
+            return null;
+        }
+        return true;
+    }
+
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
