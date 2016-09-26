@@ -229,7 +229,7 @@ class AdminProblemsPage extends Page {
             <h1>Админ::Задачи</h1>
 
             <div class="problem-submit">
-                <input type="submit" value="Нова задача" onclick="window.location.href=\'problems/new\';" class="button button-color-blue button-large">
+                <input type="submit" value="Нова задача" onclick="redirect(\'problems/new\');" class="button button-color-blue button-large">
             </div>
         ');
         $content .= $this->getProblemList();

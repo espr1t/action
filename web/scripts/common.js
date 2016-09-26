@@ -23,6 +23,13 @@ function ajaxCall(url, data, callback) {
 }
 
 /*
+ * Redirect
+ */
+function redirect(url) {
+    window.location = url;
+}
+
+/*
  * Key bindings
  */
 var keyDownEventStack = [];
@@ -138,11 +145,10 @@ function showActionForm(content, redirect) {
     }
 }
 
-function hideActionForm(redirect) {
+function hideActionForm(redirectUrl) {
     // Redirect to another page if requested
-    if (redirect && redirect != 'undefined') {
-        window.location = redirect;
-        return false;
+    if (redirectUrl && redirectUrl != 'undefined') {
+        redirect(redirectUrl);
     }
 
     // Otherwise just hide the form box using a fade-out animation
@@ -227,8 +233,7 @@ function submitSubmitForm() {
     var callback = function(response) {
         response = submitActionForm(response, '', 'Решението не може да бъде изпратено в момента!');
         if ('id' in response) {
-            window.location = window.location.href + '/submits/' + response.id;
-            return false;
+            redirect(window.location.href + '/submits/' + response.id);
         }
     }
     ajaxCall('/actions/submit', data, callback);

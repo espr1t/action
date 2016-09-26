@@ -261,7 +261,7 @@ function submitEditProblemForm() {
     var callback = function(response) {
         response = submitActionForm(response, 'Задачата беше запазена успешно.', 'Възникна проблем при записването на задачата.', false);
         if (id == 'new' && 'id' in response) {
-            window.location.href = '/admin/problems?action=success';
+            redirect('/admin/problems?action=success');
         }
     }
     ajaxCall('/actions/modify', data, callback);
