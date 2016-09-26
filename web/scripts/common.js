@@ -117,29 +117,25 @@ function showActionForm(content, redirect) {
     // Create an overlay shadowing the rest of the page
     showOverlay();
 
-    // Create the form box
+    // Create the form box and add it to the DOM using a fade-in animation
     var form = document.createElement('div');
-    // TODO: Test if removing the initial className changes anything
-    form.className = 'action-form';
     form.innerHTML = '' +
         '<div class="action-form-close" onclick="hideActionForm(\'' + redirect + '\');"><i class="fa fa-close fa-fw"></i></div>' +
         content
     ;
+    document.body.appendChild(form);
+    form.className = 'action-form fade-in';
+
+    // Position the box in the center of the screen (well, kind of)
+    var screenHeight = window.innerHeight || document.documentElement.clientHeight;
+    var offset = Math.min(form.clientHeight / 2 + 20, screenHeight / 2 - 20);
+    form.style.marginTop = -offset + 'px';
 
     // Bind escape button for closing it
     keyDownEventStack.push(document.onkeydown);
     document.onkeydown = function(event) {
         identifyEscKeyPressedEvent(event, function() {hideActionForm(redirect);});
     }
-
-    // Add it to the DOM using a fade-in animation
-    document.body.appendChild(form);
-    form.className = 'action-form fade-in';
-
-    // Center it vertically
-    var screenHeight = window.innerHeight || document.documentElement.clientHeight;
-    var offset = Math.min(form.clientHeight / 2 + 20, screenHeight / 2 - 20);
-    form.style.marginTop = -offset + 'px';
 }
 
 function hideActionForm(redirect) {
