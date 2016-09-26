@@ -9,13 +9,15 @@ require_once('problem.php');
 if (isset($_GET['action']) && $_GET['action'] == 'submit') {
     if ($user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
         printAjaxResponse(array(
-            'status' => 'UNAUTHORIZED'
+            'status' => 'UNAUTHORIZED',
+            'message' => 'Нямате права да изпратите задача.'
         ));
     }
 
     if (!passSpamProtection($user, $GLOBALS['SPAM_SUBMIT_ID'], $GLOBALS['SPAM_SUBMIT_LIMIT'])) {
         printAjaxResponse(array(
-            'status' => 'SPAM'
+            'status' => 'SPAM',
+            'message' => 'Превишили сте лимита си за деня.'
         ));
         exit();
     }
@@ -27,7 +29,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'submit') {
     // to the grader for judging (the grader machine is down or not accessible)
     if (!$submit->write() || !$submit->send()) {
         printAjaxResponse(array(
-            'status' => 'ERROR'
+            'status' => 'ERROR',
+            'message' => 'Възникна проблем при изпращането на решението.'
         ));
     }
     // Otherwise print success and return the submit ID
