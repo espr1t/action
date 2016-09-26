@@ -26,9 +26,9 @@ class ProfilePage extends Page {
         $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни", "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
 
         // Profile heading (avatar + nickname)
-        $avatarUrl = '/images/avatars/default_avatar.png';
+        $avatarUrl = sprintf('%s/%s', $GLOBALS['PATH_AVATARS'], 'default_avatar.png');
         if ($this->profile->avatar != '') {
-            $avatarUrl = '/images/avatars/' . $this->profile->avatar;
+            $avatarUrl = sprintf('%s/%s', $GLOBALS['PATH_AVATARS'], $this->profile->avatar);
         }
 
         $head = '

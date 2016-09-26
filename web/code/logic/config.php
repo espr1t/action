@@ -28,6 +28,7 @@ $ACCESS_SUBMIT_SOLUTION = 1;
 $PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems';
 $PATH_LOGIC = $_SERVER['DOCUMENT_ROOT'] . '/code/logic';
 $PATH_ACHIEVEMENTS = $_SERVER['DOCUMENT_ROOT'] . '/data/achievements';
+$PATH_AVATARS = '/images/avatars';
 
 // Submission status
 $STATUS_WAITING = -1;
