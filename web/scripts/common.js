@@ -28,8 +28,9 @@ function ajaxCall(url, data, callback) {
 var keyDownEventStack = [];
 function identifyEscKeyPressedEvent(event, action) {
     if (event.keyCode == 27) {
-        action();
+        event.preventDefault();
         event.stopPropagation();
+        action();
     }
 }
 
@@ -142,20 +143,20 @@ function showActionForm(content, redirect) {
 }
 
 function hideActionForm(redirect) {
+    // Redirect to another page if requested
+    if (redirect && redirect != 'undefined') {
+        window.location = redirect;
+        return false;
+    }
+
+    // Otherwise just hide the form box using a fade-out animation
     document.onkeydown = keyDownEventStack.pop();
     var form = document.getElementsByClassName('action-form')[0];
-
-    // Hide the form box using a fade-out animation
     form.className = 'action-form fade-out';
     setTimeout(function() {
         document.body.removeChild(form);
     }, 300);
     hideOverlay();
-
-    // Redirect to another page if requested
-    if (redirect && redirect != 'undefined') {
-        window.location.href = redirect;
-    }
 }
 
 function submitActionForm(response, successMessage, errorMessage, hideOnSuccess = true) {
@@ -230,8 +231,8 @@ function submitSubmitForm() {
     var callback = function(response) {
         response = submitActionForm(response, '', 'Решението не може да бъде изпратено в момента!');
         if ('id' in response) {
-            window.location.href = window.location.href + '/submits/' + response.id;
-            exit();
+            window.location = window.location.href + '/submits/' + response.id;
+            return false;
         }
     }
     ajaxCall('/actions/submit', data, callback);
