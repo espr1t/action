@@ -147,7 +147,7 @@ class Submit {
         $submit->problemName = $info['problemName'];
         $submit->source = $info['source'];
         $submit->language = $info['language'];
-        $submit->results = explode(',', $info['results']);
+        $submit->results = array_map('intval', explode(',', $info['results']));
         $submit->status = $info['status'];
         $submit->message = $info['message'];
         return $submit;

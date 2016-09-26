@@ -160,9 +160,9 @@ class Problem {
             // Negative results indicate exceptional cases
             else {
                 // Exceptional cases are considered a zero for the test
-                $scoredSubmit['results'][$i] = 0;
+                $scoredSubmit['results'][$i] = $result;
                 // The possible statuses are ordered by priority - assign the status of the problem to be the highest one
-                $scoredSubmit['status'] = Math.max([$scoredSubmit['status'], $result]);
+                $scoredSubmit['status'] = max([$scoredSubmit['status'], $result]);
             }
         }
 
