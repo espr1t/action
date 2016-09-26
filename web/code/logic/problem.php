@@ -73,8 +73,13 @@ class Problem {
     public static function get($id) {
         $brain = new Brain();
         try {
-            return Problem::instanceFromArray($brain->getProblem($id));
-        } catch(Exception $ex) {
+            $info = $brain->getProblem($id);
+            if ($info == null) {
+                error_log('Could not get problem ' . $id . '!');
+                return null;
+            }
+            return Problem::instanceFromArray($info);
+        } catch (Exception $ex) {
             error_log('Could not get problem ' . $id . '. Exception: ' . $ex->getMessage());
         }
         return null;
