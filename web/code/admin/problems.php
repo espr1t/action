@@ -235,19 +235,18 @@ class AdminProblemsPage extends Page {
         $content .= $this->getProblemList();
 
         // Specific problem is open
-        if (isset($_GET['problem'])) {
-            $redirect = '/admin/problems';
-
+        if (isset($_GET['problemId'])) {
             $brain = new Brain();
-            if ($_GET['problem'] == 'new') {
+            if ($_GET['problemId'] == 'new') {
                 $problem = new Problem();
             } else {
-                $problem = Problem::get($_GET['problem']);
+                $problem = Problem::get($_GET['problemId']);
             }
             if ($problem == null) {
                 $content .= showMessage('ERROR', 'Не съществува задача с този идентификатор!');
             }
 
+            $redirect = '/admin/problems';
             $content .= '
                 <script>
                     showEditProblemForm(`' . $this->getEditProblemForm($problem) . '`, `' . $redirect . '`);

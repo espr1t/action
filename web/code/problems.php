@@ -224,18 +224,18 @@ class ProblemsPage extends Page {
     }
 
     public function getContent() {
-        if (isset($_GET['problem'])) {
-            $problem = Problem::get($_GET['problem']);
+        if (isset($_GET['problemId'])) {
+            $problem = Problem::get($_GET['problemId']);
             if ($problem == null) {
                 return $this->getMainPage();
             }
 
             $content = $this->getStatement($problem);
             if (isset($_GET['submits'])) {
-                if (!isset($_GET['id'])) {
+                if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    $content .= $this->getSubmitInfoBox($problem, $_GET['id']);
+                    $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
                 }
             }
             return $content;
