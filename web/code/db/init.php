@@ -46,7 +46,7 @@ if ($db->tableExists('Users')) {
             birthdate DATE NOT NULL,
             avatar VARCHAR(255) NOT NULL,
             PRIMARY KEY (id)
-        );
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -94,7 +94,7 @@ if ($db->tableExists('Problems')) {
             tags TINYTEXT NOT NULL,
             addedBy VARCHAR(32) NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -130,7 +130,7 @@ if ($db->tableExists('Tests')) {
             solHash VARCHAR(32) NOT NULL,
             score INT NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -171,7 +171,7 @@ if ($db->tableExists('Submits')) {
             status INT NOT NULL,
             message TEXT NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -209,7 +209,7 @@ if ($db->tableExists('Pending')) {
             progress FLOAT NOT NULL,
             status INT NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -247,7 +247,7 @@ if ($db->tableExists('Latest')) {
             progress FLOAT NOT NULL,
             status INT NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -275,7 +275,7 @@ if ($db->tableExists('News')) {
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -304,7 +304,7 @@ if ($db->tableExists('Achievements')) {
             achievement INT NOT NULL,
             date DATE NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
@@ -332,7 +332,7 @@ if ($db->tableExists('Spam')) {
             user INT NOT NULL,
             time INT NOT NULL,
             PRIMARY KEY (id)
-        )
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }

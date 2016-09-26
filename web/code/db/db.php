@@ -1,5 +1,9 @@
 <?php
-require_once('config.php');
+$DB_SERVER = '192.168.1.123';
+$DB_PORT = 3306;
+$DB_USERNAME = 'action';
+$DB_PASSWORD = 'password';
+$DB_DATABASE = 'action';
 
 class DB {
     private $db;
@@ -12,8 +16,10 @@ class DB {
         // Check connection
         if ($this->db->connect_error) {
             die('Connection failed: ' . $this->db->connect_error);
-        } 
-        // echo 'Connected to database ' . $GLOBALS['DB_DATABASE'] . '.<br>';
+        }
+
+        // Set connection character encoding to UTF-8 (in case server is not configured properly)
+        $this->db->set_charset('utf8');
     }
 
     function __destruct() {
