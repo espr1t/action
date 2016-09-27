@@ -1,13 +1,38 @@
 /*
- * Edit Problem
+ * Publish/Edit News
  */
-function showEditProblemForm(content, redirect) {
+function showEditNewsForm(content, redirect) {
     showActionForm(content, redirect);
 }
 
-function getProblemId() {
-    var urlTokens = window.location.href.split('/');
-    return urlTokens[urlTokens.length - 1];
+function submitEditNewsForm() {
+    var id = getLastUrlToken();
+    var date = document.getElementById('newsDate').value;
+    var title = document.getElementById('newsTitle').value;
+    var content = document.getElementById('newsContent').value;
+
+    var data = {
+        'id': id,
+        'date': date,
+        'title': title,
+        'content': content
+    };
+
+    var callback = function(response) {
+        response = submitActionForm(response, 'Новината беше запазена успешно.', 'Възникна проблем при записването на новината.', false);
+        if (id == 'new' && 'id' in response) {
+            redirect('/admin/news?action=success');
+        }
+    }
+    ajaxCall('/actions/publish', data, callback);
+}
+
+
+/*
+ * Create/Edit Problem
+ */
+function showEditProblemForm(content, redirect) {
+    showActionForm(content, redirect);
 }
 
 function changeTab(clickedId) {
@@ -109,7 +134,7 @@ function deleteTest(position) {
 
     if (index < tests.length) {
         var data = {
-            'problemId': getProblemId(),
+            'problemId': getLastUrlToken(),
             'inpFile': tests[index]['inpFile'],
             'solFile': tests[index]['solFile'],
             'position': tests[index]['position']
@@ -161,7 +186,7 @@ function uploadTest(problemId, position, testFile) {
 }
 
 function addTests() {
-    var problemId = getProblemId();
+    var problemId = getLastUrlToken();
     var testSelector = document.getElementById('testSelector');
     for (var i = 0; i < testSelector.files.length; i++) {
         var name = testSelector.files[i].name;
@@ -214,7 +239,7 @@ function toggleStatementHTML() {
 }
 
 function submitEditProblemForm() {
-    var id = getProblemId();
+    var id = getLastUrlToken();
     var name = document.getElementById('problemName').value;
     var folder = document.getElementById('problemFolder').value;
     var author = document.getElementById('problemAuthor').value;

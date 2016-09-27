@@ -15,7 +15,7 @@ class HomePage extends Page {
         ');
 
         $brain = new Brain();
-        foreach ($brain->getNews() as $entry) {
+        foreach ($brain->getAllNews() as $entry) {
             $news .= inBox('
                  <div class="news-title">' . $entry['title'] . '</div>
                  ' . $entry['content'] . '

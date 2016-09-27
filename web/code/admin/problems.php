@@ -98,8 +98,6 @@ class AdminProblemsPage extends Page {
     }
 
     private function getEditProblemForm($problem) {
-        $brain = new Brain();
-
         // Header and Footer
         $headerText = $problem->id == -1 ? 'Нова задача' : '<span class="blue">' . $problem->name . '</span> :: Промяна';
         $buttonText = $problem->id == -1 ? 'Създай' : 'Запази';
@@ -236,7 +234,6 @@ class AdminProblemsPage extends Page {
 
         // Specific problem is open
         if (isset($_GET['problemId'])) {
-            $brain = new Brain();
             if ($_GET['problemId'] == 'new') {
                 $problem = new Problem();
             } else {

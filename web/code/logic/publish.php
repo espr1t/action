@@ -6,24 +6,54 @@ if ($user->access < $GLOBALS['ACCESS_PUBLISH_NEWS']) {
         'status' => 'ERROR',
         'message' => 'Нямате права да публикувате новини.'
     ));
-    exit();
 }
 
 require_once('brain.php');
+require_once('news.php');
 
-$brain = new Brain();
-$result = $brain->addNews($_POST['date'], $_POST['title'], $_POST['content']);
+function validateData($news) {
+    if (!preg_match('/\d{4}-\d{2}-\d{2}$/', $news->date))
+        return 'Въведената дата е невалидна!';
+    return '';
+}
 
-if ($result) {
-    printAjaxResponse(array(
-        'status' => 'OK',
-        'message' => 'Новината е публикувана успешно.'
-    ));
-} else {
+$news = new News();
+$news->date = $_POST['date'];
+$news->title = $_POST['title'];
+$news->content = $_POST['content'];
+
+$errorMessage = validateData($news);
+if ($errorMessage != '') {
     printAjaxResponse(array(
         'status' => 'ERROR',
-        'message' => 'Възникна проблем при публикуването.'
+        'message' => $errorMessage
     ));
 }
+
+// New problem
+if ($_POST['id'] == 'new') {
+    if (!$news->create()) {
+        printAjaxResponse(array(
+            'status' => 'ERROR',
+            'message' => 'Възникна проблем при публикуването на новината.'
+        ));
+    }
+}
+// Updating existing problem
+else {
+    $news->id = intval($_POST['id']);
+    if (!$news->update()) {
+        printAjaxResponse(array(
+            'status' => 'ERROR',
+            'message' => 'Възникна проблем при записа на новината.'
+        ));
+    }
+}
+
+printAjaxResponse(array(
+    'id' => $news->id,
+    'status' => 'OK',
+    'message' => 'Новината е записана успешно.'
+));
 
 ?>

@@ -69,8 +69,6 @@ if ($errorMessage != '') {
     ));
 }
 
-$brain = new Brain();
-
 // New problem
 if ($_POST['id'] == 'new') {
     if (!$problem->create()) {
@@ -91,8 +89,8 @@ else {
     }
 }
 
-
 // Update the tests
+$brain = new Brain();
 for ($i = 0; $i <= 1000; $i++) {
     $key = sprintf("test_%d", $i);
     if (isset($_POST[$key])) {

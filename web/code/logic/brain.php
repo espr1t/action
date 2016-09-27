@@ -35,24 +35,35 @@ class Brain {
     }
 
     // News
-    function addNews($date, $title, $content) {
+    function addNews() {
         $response = $this->db->query("
             INSERT INTO `News`(date, title, content)
-            VALUES (
-                '" . $this->db->escape($date) . "',
-                '" . $this->db->escape($title) . "',
-                '" . $this->db->escape($content) . "'
-            )
+            VALUES ('', '', '')
         ");
 
         if (!$response) {
-            error_log('Could not publish news with title "' . $title . '"!');
+            error_log('Could not execute addNews() query properly!');
             return null;
         }
         return $this->db->lastId();
     }
 
-    function getNews() {
+    function updateNews($news) {
+        $response = $this->db->query("
+            UPDATE `News` SET
+                date = '" . $news->date . "',
+                title = '" . $this->db->escape($news->title) . "',
+                content = '" . $this->db->escape($news->content) . "'
+            WHERE id = " . $news->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update news with id "' . $news->id . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function getAllNews() {
         $response = $this->db->query("
             SELECT * FROM `News`
             ORDER BY date DESC
@@ -63,6 +74,20 @@ class Brain {
             return null;
         }
         return $this->getResults($response);
+    }
+
+    function getNews($id) {
+        $response = $this->db->query("
+            SELECT * FROM `News`
+            WHERE id = " . $id . "
+            ORDER BY date DESC
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getNews(' . $id . ') query properly!');
+            return null;
+        }
+        return $this->getResult($response);
     }
 
     // Problems

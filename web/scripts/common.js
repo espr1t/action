@@ -1,4 +1,12 @@
 /*
+ * Get last url token (can be problem id, submission id, news id, etc.)
+ */
+function getLastUrlToken() {
+    var urlTokens = window.location.href.split('/');
+    return urlTokens[urlTokens.length - 1];
+}
+
+/*
  * AJAX calls
  */
 function ajaxCall(url, data, callback) {
@@ -179,29 +187,6 @@ function submitActionForm(response, successMessage, errorMessage, hideOnSuccess 
     return response;
 }
 
-/*
- * Publish News
- */
-function showNewsForm(content) {
-    showActionForm(content);
-}
-
-function submitNewsForm() {
-    var date = document.getElementById('newsDate').value;
-    var title = document.getElementById('newsTitle').value;
-    var content = document.getElementById('newsContent').value;
-
-    var data = {
-        'date': date,
-        'title': title,
-        'content': content
-    };
-
-    var callback = function(response) {
-        submitActionForm(response, 'Новината беше публикувана успешно.', 'Новината не беше публикувана успешно.');
-    }
-    ajaxCall('/actions/publish', data, callback);
-}
 
 /*
  * Submit form handling
@@ -222,8 +207,7 @@ function showSubmitForm(content) {
 function submitSubmitForm() {
     var source = document.getElementById('source').value;
     var language = detectLanguage(source);
-    var tokens = window.location.href.split('/');
-    var problemId = tokens[tokens.length - 1];
+    var problemId = getLastUrlToken();
     var data = {
         'problemId': problemId,
         'source' : source,
