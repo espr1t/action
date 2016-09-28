@@ -110,12 +110,12 @@ class AdminProblemsPage extends Page {
                 <h2>' . $headerText . '</h2>
             </div>
             <div class="edit-problem-tab">
-                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button" id="statementTab">Условие</div> |
+                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button underline" id="statementTab">Условие</div> |
                 <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button" id="optionsTab">Настройки</div> |
-                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button underline" id="testsTab">Тестове</div>
+                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div>
             </div>
 
-            <div id="statementTabContent" style="display: none;">
+            <div id="statementTabContent">
                 <div class="edit-problem-section" style="margin-bottom: 4px;">
                     <div class="right" onclick="toggleStatementHTML();"><a>edit html</a>&nbsp;</div>
                 </div>
@@ -193,7 +193,7 @@ class AdminProblemsPage extends Page {
                 </div>
             </div>
 
-            <div class="edit-problem-section" id="testsTabContent">
+            <div class="edit-problem-section" id="testsTabContent" style="display: none;">
                 <div class="center" style="padding: 0px 8px 4px 8px;">
                     <table class="default" id="testList">
                         <thead>
