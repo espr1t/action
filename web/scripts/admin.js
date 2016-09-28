@@ -65,14 +65,24 @@ function findTest(fileName) {
     return -1;
 }
 
-function updateFileHash(fileName, hash) {
+function updateFileHash(fileName, fileHash) {
     var test = findTest(fileName);
     if (test != -1) {
-        if (tests[test]['inpFile'] == fileName) {
-            tests[test]['inpHash'] = hash;
+        if (tests[test]['inpFile'] != '-') {
+            if (tests[test]['inpFile'] == fileName) {
+                tests[test]['inpHash'] = fileHash;
+            } else {
+                tests[test]['solFile'] = fileName;
+                tests[test]['solHash'] = fileHash;
+            }
         }
-        if (tests[test]['solFile'] == fileName) {
-            tests[test]['solHash'] = hash;
+        if (tests[test]['solFile'] != '-') {
+            if (tests[test]['solFile'] == fileName) {
+                tests[test]['solHash'] = fileHash;
+            } else {
+                tests[test]['inpFile'] = fileName;
+                tests[test]['inpHash'] = fileHash;
+            }
         }
         updateTestTable();
     }
