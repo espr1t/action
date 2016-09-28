@@ -1,5 +1,6 @@
 <?php
-require_once('logic/config.php');
+require_once('db/brain.php');
+require_once('config.php');
 require_once('common.php');
 require_once('page.php');
 
@@ -9,68 +10,34 @@ class StatsPage extends Page {
     }
     
     public function getContent() {
-        // TODO: Make this entire action smarter as it may be too slow.
+        $brain = new Brain();
 
-        // Calculate problem statistics
-        $numProblems = 0;
-        $language = array('C++' => 0, 'Java' => 0, 'Python' => 0);
-        $difficulty = array('trivial' => 0, 'easy' => 0, 'medium' => 0, 'hard' => 0, 'brutal' => 0);
-
-        foreach (scandir($GLOBALS['PATH_PROBLEMS']) as $dir) {
-            if ($dir == '.' || $dir == '..') {
-                continue;
-            }
-            $fileName = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $dir, $GLOBALS['PROBLEM_INFO_FILENAME']);
-            $info = json_decode(file_get_contents($fileName), true);
-            $difficulty[$info['difficulty']] = $difficulty[$info['difficulty']] + 1;
-            $numProblems = $numProblems + 1;
+        // Problem statistics
+        $difficulty = array();
+        $numProblems = $brain->getCount('Problems');
+        foreach ($GLOBALS['PROBLEM_DIFFICULTIES'] as $diff) {
+            $difficulty[$diff] = $brain->getCountWhere('Problems', 'difficulty', $diff);
         }
 
-        $numSubmissions = 0;
-        foreach (scandir($GLOBALS['PATH_SUBMISSIONS']) as $bucket) {
-            if ($bucket == '.' || $bucket == '..') {
-                continue;
-            }
-            foreach (scandir(sprintf('%s/%s', $GLOBALS['PATH_SUBMISSIONS'], $bucket)) as $file) {
-                if (strpos($file, '.json') == false) {
-                    continue;
-                }
-                $fileName = sprintf('%s/%s/%s', $GLOBALS['PATH_SUBMISSIONS'], $bucket, $file);
-                $info = json_decode(file_get_contents($fileName), true);
-                $language[$info['language']] = $language[$info['language']] + 1;
-                $numSubmissions = $numSubmissions + 1;
-            }
+        // Submission statistics
+        $language = array();
+        $numSubmissions = $brain->getCount('Submits');
+        foreach ($GLOBALS['SUPPORTED_LANGUAGES'] as $lang) {
+            $language[$lang] = $brain->getCountWhere('Submits', 'language', $lang);
         }
 
-        // Calculate user statistics
-        $numUsers = 0;
-        $users = array('male' => 0, 'female' => 0, 'unknown' => 0);
-        foreach (scandir($GLOBALS['PATH_USERS']) as $entry) {
-            if (!preg_match(User::$user_info_re, basename($entry))) {
-                continue;
-            }
-
-            $fileName = sprintf("%s/%s", $GLOBALS['PATH_USERS'], $entry);
-            $info = json_decode(file_get_contents($fileName), true);
-
-            if ($info['username'] == 'anonymous') {
-                continue;
-            }
-            if ($info['gender'] == '') {
-                $users['unknown'] = $users['unknown'] + 1;
-            } else {
-                $users[$info['gender']] = $users[$info['gender']] + 1;
-            }
-            $numUsers = $numUsers + 1;
-        }
+        // User statistics
+        $genders = array();
+        $numUsers = $brain->getCount('Users');
+        $genders['male'] = $brain->getCountWhere('Users', 'gender', 'male');
+        $genders['female'] = $brain->getCountWhere('Users', 'gender', 'female');
+        $genders['unknown'] = $brain->getCountWhere('Users', 'gender', '');
 
         $content = inBox('
             <h1>Статистики</h1>
             Произволни статистики за системата и потребителите.
         ') . inBox('
             <h2>Задачи и решения</h2>
-
-            <br>
 
             <b>Брой задачи:</b> ' . $numProblems . '<br>
             <ul>
@@ -80,37 +47,43 @@ class StatsPage extends Page {
                 <li>Hard: ' . $difficulty['hard'] . '</li>
                 <li>Brutal: ' . $difficulty['brutal'] . '</li>
             </ul>
+            (да се направи на pie chart)
 
-            <br>
+            <br><br>
+
+            <b>Bar chart с таговете на задачите</b>
+
+            <br><br>
 
             <b>Брой предадени решения:</b> ' . $numSubmissions . '
             <ul>
-                <li>C++: ' . ($language['C++'] * 100.0 / $numSubmissions) . '%</li>
-                <li>Java: ' . ($language['Java'] * 100.0 / $numSubmissions) . '%</li>
-                <li>Python: ' . ($language['Python'] * 100.0 / $numSubmissions) . '%</li>
+                <li>C++: ' . sprintf('%.2f', $language['C++'] * 100.0 / $numSubmissions) . '%</li>
+                <li>Java: ' . sprintf('%.2f', $language['Java'] * 100.0 / $numSubmissions) . '%</li>
+                <li>Python: ' . sprintf('%.2f', $language['Python'] * 100.0 / $numSubmissions) . '%</li>
             </ul>
+            (да се направи на pie chart)
 
-            <br>
+            <br><br>
 
             <b>Графика по час на деня</b><br>
         ') . inBox('
             <h2>Потребители</h2>
 
-            <br>
-
             <b>Брой потребители:</b> ' . $numUsers . '<br>
             <ul>
-                <li>Mъже: ' . $users['male'] . '</li>
-                <li>Жени: ' . $users['female'] . '</li>
-                <li>Не са казали: ' . $users['unknown'] . '</li>
+                <li>Mъже: ' . $genders['male'] . '</li>
+                <li>Жени: ' . $genders['female'] . '</li>
+                <li>Не са казали: ' . $genders['unknown'] . '</li>
             </ul>
+            (да се направи на pie chart)
 
-            <br>
+            <br><br>
 
-            <b>Графика по възраст</b><br>
-            <b>Графика брой във времето</b><br>
+            <b>Хистограма по възраст</b><br>
+            <b>Графика брой потребители във времето</b><br>
             <b>Графика на брой активни потребители по ден в годината</b><br>
             <b>Графика на брой активни потребители по час в денонощието</b><br>
+            <b>Word Cloud с постиженията на юзърите<b></br>
         ');
         return $content;
     }

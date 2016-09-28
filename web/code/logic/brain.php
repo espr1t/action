@@ -34,6 +34,30 @@ class Brain {
         return $results;
     }
 
+    // Generic
+    function getCount($tableName) {
+        $response = $this->db->query("
+            SELECT COUNT(*) FROM `" . $tableName . "`
+        ");
+        if (!$response) {
+            error_log('Could not execute getCount() query on table `' . $tableName . '`!');
+            return null;
+        }
+        return $this->getIntResults($response)[0];
+    }
+
+    function getCountWhere($tableName, $column, $value) {
+        $response = $this->db->query("
+            SELECT COUNT(*) FROM `" . $tableName . "` WHERE " . $column . " = '" . $value . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getCountWhere() query on table `' . $tableName . '` with ' .
+                      'column ' . $column . ' being equal to "' . $value . '"!');
+            return null;
+        }
+        return $this->getIntResults($response)[0];
+    }
+
     // News
     function addNews() {
         $response = $this->db->query("
