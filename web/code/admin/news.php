@@ -17,14 +17,12 @@ class AdminNewsPage extends Page {
         $brain = new Brain();
         foreach ($brain->getAllNews() as $entry) {
             $newsList .= '
-                <a href="/admin/news/' . $entry['id'] . '" class="decorated">
-                    <div class="box boxlink">
-                        <div class="news-title">' . $entry['title'] . '</div>
-                        ' . $entry['content'] . '
-                        <div class="separator"></div>
-                        <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
-                    </div>
-                 </a>
+                <div class="box boxlink" onclick="redirect(\'/admin/news/' . $entry['id'] . '\');">
+                    <div class="news-title">' . $entry['title'] . '</div>
+                    ' . $entry['content'] . '
+                    <div class="separator"></div>
+                    <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
+                </div>
             ';
         }
         return $newsList;
