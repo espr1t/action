@@ -1,47 +1,8 @@
 <?php
-require_once('brain.php');
-require_once('config.php');
-require_once('widgets.php');
-require_once('user.php');
-require_once('problem.php');
-
-// In case an actual submit, not only using the class
-if (isset($_GET['action']) && $_GET['action'] == 'submit') {
-    if ($user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
-        printAjaxResponse(array(
-            'status' => 'UNAUTHORIZED',
-            'message' => 'Нямате права да изпратите задача.'
-        ));
-    }
-
-    if (!passSpamProtection($user, $GLOBALS['SPAM_SUBMIT_ID'], $GLOBALS['SPAM_SUBMIT_LIMIT'])) {
-        printAjaxResponse(array(
-            'status' => 'SPAM',
-            'message' => 'Превишили сте лимита си за деня.'
-        ));
-        exit();
-    }
-
-    // User has rights to submit and has not exceeded the limit for the day
-    $submit = Submit::newSubmit($user, $_POST['problemId'], $_POST['language'], $_POST['source']);
-
-    // If cannot write the submit info file or update the user/problem or the solution cannot be sent
-    // to the grader for judging (the grader machine is down or not accessible)
-    if (!$submit->write() || !$submit->send()) {
-        printAjaxResponse(array(
-            'status' => 'ERROR',
-            'message' => 'Възникна проблем при изпращането на решението.'
-        ));
-    }
-    // Otherwise print success and return the submit ID
-    else {
-        printAjaxResponse(array(
-            'status' => 'OK',
-            'id' => $submit->id
-        ));
-    }
-    exit();
-}
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../db/brain.php');
+require_once(__DIR__ . '/problem.php');
+require_once(__DIR__ . '/widgets.php');
 
 class Submit {
     public $id = -1;
@@ -142,24 +103,34 @@ class Submit {
 
     private static function instanceFromArray($info) {
         $submit = new Submit();
-        $submit->id = $info['id'];
-        $submit->time = $info['time'];
-        $submit->userId = $info['userId'];
-        $submit->userName = $info['userName'];
-        $submit->problemId = $info['problemId'];
-        $submit->problemName = $info['problemName'];
-        $submit->source = $info['source'];
-        $submit->language = $info['language'];
-        $submit->results = array_map('intval', explode(',', $info['results']));
-        $submit->status = $info['status'];
-        $submit->message = $info['message'];
+        $submit->id = getValue($info, 'id');
+        $submit->time = getValue($info, 'time');
+        $submit->userId = getValue($info, 'userId');
+        $submit->userName = getValue($info, 'userName');
+        $submit->problemId = getValue($info, 'problemId');
+        $submit->problemName = getValue($info, 'problemName');
+        $submit->source = getValue($info, 'source');
+        $submit->language = getValue($info, 'language');
+        $submit->results = array_map('intval', explode(',', getValue($info, 'results')));
+        $submit->status = getValue($info, 'status');
+        $submit->message = getValue($info, 'message');
         return $submit;
     }
 
-    public static function getSubmit($submitId) {
+    public static function get($id) {
         $brain = new Brain();
-        $submitMap = $brain->getSubmit($submitId);
-        return Submit::instanceFromArray($submitMap);
+        try {
+            $info = $brain->getSubmit($id);
+            if ($info == null) {
+                error_log('Could not get submit ' . $id . '!');
+                return null;
+            }
+            return Submit::instanceFromArray($info);
+        } catch (Exception $ex) {
+            error_log('Could not get submit ' . $id . '. Exception: ' . $ex->getMessage());
+        }
+        return null;
+
     }
 
     public static function getUserSubmits($userId, $problemId) {

@@ -8,6 +8,13 @@ ini_set('log_errors', false);
 // Set timezone
 date_default_timezone_set('Europe/Sofia');
 
+// Database
+$DB_SERVER = '192.168.1.123';
+$DB_PORT = 3306;
+$DB_USERNAME = 'action';
+$DB_PASSWORD = 'password';
+$DB_DATABASE = 'action';
+
 // Session and cookie
 $COOKIE_NAME = 'action.informatika.bg';
 
@@ -19,7 +26,7 @@ $ADMIN_USER_ACCESS = 100;
 $DEFAULT_USER_ACCESS = 10;
 
 $ACCESS_ADMIN_PAGES = 100;
-$ACCESS_MODIFY_PROBLEM = 60;
+$ACCESS_EDIT_PROBLEM = 60;
 $ACCESS_PUBLISH_NEWS = 50;
 $ACCESS_REPORT_PROBLEM = 2;
 $ACCESS_SUBMIT_SOLUTION = 1;
@@ -52,6 +59,13 @@ $STATUS_DISPLAY_NAME = array(
     $STATUS_WRONG_ANSWER => 'Wrong Answer',
     $STATUS_ACCEPTED => 'Accepted'
 );
+
+// Languages
+$SUPPORTED_LANGUAGES = [
+    'C++',
+    'Java',
+    'Python'
+];
 
 // Problems
 $PROBLEM_TYPES = [

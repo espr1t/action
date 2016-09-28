@@ -1,7 +1,7 @@
 <?php
-require_once('brain.php');
-require_once('config.php');
-require_once('widgets.php');
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../db/brain.php');
+require_once(__DIR__ . '/widgets.php');
 
 class User {
     public static $user_info_re = '/^user_\d{5}\.json$/';

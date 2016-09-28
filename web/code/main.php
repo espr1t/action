@@ -1,9 +1,9 @@
 <?php
-session_start();
-
-require_once('logic/config.php');
-require_once('logic/user.php');
+require_once('entities/user.php');
+require_once('config.php');
 require_once('common.php');
+
+session_start();
 
 $user = !isset($_SESSION['userId']) ? new User() : User::get($_SESSION['userId']);
 if ($user == null) {

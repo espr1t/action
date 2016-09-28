@@ -1,4 +1,6 @@
 <?php
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../entities/widgets.php');
 
 // User doesn't have access level needed for sending a mail
 if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
@@ -6,7 +8,6 @@ if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
         'status' => 'ERROR',
         'message' => 'Нямате права да изпращате съобщения.'
     ));
-    exit();
 }
 
 // User has sent too many messages in the last day
@@ -15,10 +16,8 @@ if (!passSpamProtection($user, $GLOBALS['SPAM_EMAIL_ID'], $GLOBALS['SPAM_EMAIL_L
         'status' => 'ERROR',
         'message' => 'Надвишили сте максималния брой съобщения за деня.'
     ));
-    exit();
 }
 
-// Everything's okay, send the mail
 // Use double-quotes as single quotes have problems with \r and \n
 $headers = "MIME-Version: 1.0\r\n";
 $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
@@ -37,7 +36,7 @@ $text = "<html><body>" .
 if (mail($address, $subject, $text, $headers)) {
     printAjaxResponse(array(
         'status' => 'OK',
-        'message' => 'Съобщението беше изпратено успешно.'
+        'message' => 'Докладваният проблем беше изпратен успешно.'
     ));
 } else {
     printAjaxResponse(array(

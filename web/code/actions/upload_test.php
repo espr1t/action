@@ -1,13 +1,13 @@
 <?php
-require_once('brain.php');
-require_once('config.php');
-require_once('problem.php');
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../db/brain.php');
+require_once(__DIR__ . '/../entities/problem.php');
 
-// User doesn't have access level needed for adding a testcase
-if ($user->access < $GLOBALS['ACCESS_MODIFY_PROBLEM']) {
+// User doesn't have access level needed for adding testcases
+if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
         'status' => 'ERROR',
-        'message' => 'Нямате права да променяте задачи.'
+        'message' => 'Нямате права да добавяте тестове.'
     ));
 }
 

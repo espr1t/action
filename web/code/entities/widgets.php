@@ -1,6 +1,6 @@
 <?php
-require_once('brain.php');
-require_once('config.php');
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../db/brain.php');
 
 function saltHashPassword($password) {
     return md5($password . $GLOBALS['PASSWORD_SALT']);
@@ -8,7 +8,7 @@ function saltHashPassword($password) {
 
 function getValue($array, $key) {
     if (!array_key_exists($key, $array)) {
-        error_log('User info does not contain value for key "'. $key . '"!');
+        error_log('Array does not contain value for key "'. $key . '"!');
         return null;
     }
     return $array[$key];

@@ -19,12 +19,12 @@ function submitEditNewsForm() {
     };
 
     var callback = function(response) {
-        response = submitActionForm(response, 'Новината беше запазена успешно.', 'Възникна проблем при записването на новината.', false);
+        response = submitActionForm(response, false);
         if (id == 'new' && 'id' in response) {
             redirect('/admin/news?action=success');
         }
     }
-    ajaxCall('/actions/publish', data, callback);
+    ajaxCall('/actions/publishNews', data, callback);
 }
 
 
@@ -152,7 +152,7 @@ function deleteTest(position) {
                 showMessage('ERROR', 'Тестът не беше изтрит успешно.');
             }
         }
-        ajaxCall('/actions/delete', data, callback);
+        ajaxCall('/actions/deleteTest', data, callback);
     }
 }
 
@@ -180,7 +180,7 @@ function uploadTest(problemId, position, testFile) {
                 updateFileHash(testFile.name, response['hash']);
             }
         };
-        ajaxCall('/actions/upload', data, callback);
+        ajaxCall('/actions/uploadTest', data, callback);
     });
     fileReader.readAsDataURL(testFile);
 }
@@ -284,10 +284,10 @@ function submitEditProblemForm() {
     }
 
     var callback = function(response) {
-        response = submitActionForm(response, 'Задачата беше запазена успешно.', 'Възникна проблем при записването на задачата.', false);
+        response = submitActionForm(response, false);
         if (id == 'new' && 'id' in response) {
             redirect('/admin/problems?action=success');
         }
     }
-    ajaxCall('/actions/modify', data, callback);
+    ajaxCall('/actions/editProblem', data, callback);
 }

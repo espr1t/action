@@ -1,6 +1,6 @@
 <?php
-require_once(__DIR__ . '/../db/db.php');
-require_once(__DIR__ . '/config.php');
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/db.php');
 
 class Brain {
     private $db;
@@ -284,7 +284,7 @@ class Brain {
                 '" . $submit->problemId . "',
                 '" . $submit->problemName . "',
                 '" . $this->db->escape($submit->source) . "',
-                '" . strtolower($submit->language) . "',
+                '" . $this->db->escape($submit->language) . "',
                 '" . implode(',', $submit->results) . "',
                 '" . $submit->status . "',
                 '" . $this->db->escape($submit->message) . "'

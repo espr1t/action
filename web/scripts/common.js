@@ -169,21 +169,20 @@ function hideActionForm(redirectUrl) {
     hideOverlay();
 }
 
-function submitActionForm(response, successMessage, errorMessage, hideOnSuccess = true) {
+function submitActionForm(response, hideOnSuccess = true) {
     try {
         response = JSON.parse(response);
     } catch(ex) {
-        response = '';
+        alert(response);
+        response = null;
     }
-    $type = (!response || response.status != 'OK') ? 'ERROR' : 'INFO';
-    $message = (!response || response.message == '') ? '' : response.message;
-    if ($message == '') {
-        $message = ($type == 'ERROR' ? errorMessage : successMessage);
-    }
-    if ($type == 'INFO' && hideOnSuccess) {
+    var type = (response && response.status == 'OK') ? 'INFO' : 'ERROR';
+    var message = (response && response.message != '') ? response.message :
+            (type == 'INFO') ? 'Действието беше изпълнено успешно.' : 'Действието не може да бъде изпълнено.';
+    if (type == 'INFO' && hideOnSuccess) {
         hideActionForm();
     }
-    showMessage($type, $message);
+    showMessage(type, message);
     return response;
 }
 
@@ -215,12 +214,12 @@ function submitSubmitForm() {
     };
 
     var callback = function(response) {
-        response = submitActionForm(response, '', 'Решението не може да бъде изпратено в момента!');
+        response = submitActionForm(response);
         if ('id' in response) {
             redirect(window.location.href + '/submits/' + response.id);
         }
     }
-    ajaxCall('/actions/submit', data, callback);
+    ajaxCall('/actions/submitSolution', data, callback);
 }
 
 /*
@@ -240,8 +239,8 @@ function submitReportForm() {
     };
 
     var callback = function(response) {
-        submitActionForm(response, 'Докладваният проблем беше изпратен успешно.', 'Съобщението не може да бъде изпратено в момента!');
+        submitActionForm(response);
     }
-    ajaxCall('/actions/mail', data, callback);
+    ajaxCall('/actions/reportProblem', data, callback);
 }
 

@@ -1,9 +1,9 @@
 <?php
-session_start();
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
+require_once(__DIR__ . '/../entities/user.php');
 
-require_once('../logic/config.php');
-require_once('../logic/user.php');
-require_once('../common.php');
+session_start();
 
 $user = !isset($_SESSION['userId']) ? new User() : User::get($_SESSION['userId']);
 if ($user == null || $user->access < $GLOBALS['ACCESS_ADMIN_PAGES']) {
@@ -21,17 +21,20 @@ if (isset($_GET['action'])) {
 }
 
 switch ($_GET['page']) {
+
     case 'news':
         require_once('news.php');
         $page = new AdminNewsPage($user);
         break;
+
     case 'problems':
         require_once('problems.php');
         $page = new AdminProblemsPage($user);
         break;
+
     default:
-        require_once('../error.php');
-        $page = new ErrorPage($user);
+        header('Location: /error');
+        exit();
 }
 $content = $page->getContent();
 

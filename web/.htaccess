@@ -33,9 +33,9 @@ RewriteRule    ^problems/(\d+)/submits/(\d+)$           /code/main.php?page=prob
 RewriteRule    ^users/(\w[\w.]{1,15})$                  /code/main.php?page=profile&user=$1                                     [NC,L,QSA]
 
 # Actions
-RewriteRule    ^actions/(\w+)$                          /code/logic/actions.php?action=$1                                       [NC,L,QSA]
+RewriteRule    ^actions/(\w+)$                          /code/actions/dispatch.php?action=$1                                    [NC,L,QSA]
 
-# Administration pages
+# Admin pages
 RewriteRule    ^admin/init$                             /code/db/init.php                                                       [NC,L,QSA]
 RewriteRule    ^admin/news$                             /code/admin/admin.php?page=news                                         [NC,L,QSA]
 RewriteRule    ^admin/news/(\d+|new)$                   /code/admin/admin.php?page=news&newsId=$1                               [NC,L,QSA]

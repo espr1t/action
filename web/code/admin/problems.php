@@ -1,7 +1,7 @@
 <?php
-require_once('../logic/problem.php');
-require_once('../common.php');
-require_once('../page.php');
+require_once(__DIR__ . '/../common.php');
+require_once(__DIR__ . '/../page.php');
+require_once(__DIR__ . '/../entities/problem.php');
 
 class AdminProblemsPage extends Page {
     public function getTitle() {

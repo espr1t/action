@@ -1,8 +1,8 @@
 <?php
-require_once('logic/brain.php');
-require_once('logic/config.php');
-require_once('logic/problem.php');
-require_once('logic/submit.php');
+require_once('db/brain.php');
+require_once('entities/problem.php');
+require_once('entities/submit.php');
+require_once('config.php');
 require_once('common.php');
 require_once('page.php');
 
@@ -100,7 +100,7 @@ class ProblemsPage extends Page {
             return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        $submit = Submit::getSubmit($submitId);
+        $submit = Submit::get($submitId);
         if ($submit == null) {
             return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }

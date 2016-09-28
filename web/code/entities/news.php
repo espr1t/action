@@ -1,6 +1,7 @@
 <?php
-require_once('config.php');
-require_once('widgets.php');
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../db/brain.php');
+require_once(__DIR__ . '/widgets.php');
 
 class News {
     public $id = -1;
@@ -41,7 +42,7 @@ class News {
         return $brain->updateNews($this);
     }
 
-    public function create() {
+    public function publish() {
         $brain = new Brain();
         $result = $brain->addNews();
         if (!$result) {

@@ -1,7 +1,7 @@
 <?php
-require_once('../common.php');
-require_once('../page.php');
-require_once('../logic/news.php');
+require_once(__DIR__ . '/../common.php');
+require_once(__DIR__ . '/../page.php');
+require_once(__DIR__ . '/../entities/news.php');
 
 class AdminNewsPage extends Page {
     public function getTitle() {
@@ -59,7 +59,7 @@ class AdminNewsPage extends Page {
         ');
         $content .= $this->getNewsList();
 
-        // Specific news is open
+        // Specific news entry is open
         if (isset($_GET['newsId'])) {
             $brain = new Brain();
             if ($_GET['newsId'] == 'new') {
@@ -78,7 +78,6 @@ class AdminNewsPage extends Page {
                 </script>
             ';
         }
-
 
         return $content;
     }

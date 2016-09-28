@@ -1,5 +1,5 @@
 <?php
-require_once('db.php');
+require_once(__DIR_ . '/db.php');
 
 $db = new DB();
 
@@ -166,7 +166,7 @@ if ($db->tableExists('Submits')) {
             problemId INT NOT NULL,
             problemName VARCHAR(32) NOT NULL,
             source TEXT NOT NULL,
-            language ENUM('cpp', 'java', 'python') NOT NULL,
+            language ENUM('C++', 'Java', 'Python') NOT NULL,
             results TEXT NOT NULL,
             status INT NOT NULL,
             message TEXT NOT NULL,

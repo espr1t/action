@@ -1,17 +1,13 @@
 <?php
-$DB_SERVER = '192.168.1.123';
-$DB_PORT = 3306;
-$DB_USERNAME = 'action';
-$DB_PASSWORD = 'password';
-$DB_DATABASE = 'action';
+require_once(__DIR__ . '/../config.php');
 
 class DB {
     private $db;
 
     function __construct() {
         // Create connection
-        $this->db = new mysqli($GLOBALS['DB_SERVER'], $GLOBALS['DB_USERNAME'], $GLOBALS['DB_PASSWORD'],
-                               $GLOBALS['DB_DATABASE'], $GLOBALS['DB_PORT']);
+        $this->db = new mysqli($GLOBALS['DB_SERVER'], $GLOBALS['DB_USERNAME'],
+                $GLOBALS['DB_PASSWORD'], $GLOBALS['DB_DATABASE'], $GLOBALS['DB_PORT']);
 
         // Check connection
         if ($this->db->connect_error) {
