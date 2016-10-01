@@ -20,6 +20,7 @@ $COOKIE_NAME = 'action.informatika.bg';
 
 // Grader
 $GRADER_URL = 'localhost:5000';
+$GRADER_PATH_HEALTHCHECK = '/healthcheck';
 
 // User access
 $ADMIN_USER_ACCESS = 100;

@@ -1,5 +1,6 @@
 <?php
 require_once('db/brain.php');
+require_once('entities/grader.php');
 require_once('config.php');
 require_once('common.php');
 require_once('page.php');
@@ -13,7 +14,6 @@ class QueuePage extends Page {
         $list = '';
         for ($i = 0; $i < count($data); $i = $i + 1) {
             $entry = $data[$i];
-            // <td>' . date('H:i:s', $entry['timestamp']) . '</td>
             $list .= '
                 <tr>
                     <td>' . ($i + 1) . '</td>
@@ -49,7 +49,16 @@ class QueuePage extends Page {
             Информация за системата и опашката от решения.
         ');
 
-        $time = '<div class="right smaller italic" style="padding-right: 4px;">Текущо време на системата: ' . date('H:i') . '</div>';
+        $grader = new Grader();
+        $graderStatus = $grader->healthy() ?
+                '<i class="fa fa-check-circle green" title="Грейдърът е пич."></i>' :
+                '<i class="fa fa-exclamation-circle red" title="Грейдърът се прави на недостъпен."></i>';
+
+        $time = '
+            <div class="right smaller italic" style="padding-right: 4px;">
+                Текущо време на системата: ' . date('H:i') . ' | ' . $graderStatus .'
+            </div>
+        ';
 
         $brain = new Brain();
 
