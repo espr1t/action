@@ -181,12 +181,12 @@ Table::Pending
 ===========
 {
     "id": 1,
-    "submit": 421337,
-    "time": "2016-08-30 00:24:11",
+    "submitId": 421337,
     "userId": 1,
     "userName": "espr1t",
     "problemId": 1,
     "problemName": "Input/Output",
+    "time": "2016-08-30 00:24:11",
     "progress": 0.66,
     "status": -3
 }
@@ -200,12 +200,12 @@ if ($db->tableExists('Pending')) {
     $result = $db->query("
         CREATE TABLE `Pending`(
             id INT NOT NULL AUTO_INCREMENT,
-            submit INT NOT NULL,
-            time DATETIME NOT NULL,
+            submitId INT NOT NULL,
             userId INT NOT NULL,
             userName VARCHAR(32) NOT NULL,
             problemId INT NOT NULL,
             problemName VARCHAR(32) NOT NULL,
+            time DATETIME NOT NULL,
             progress FLOAT NOT NULL,
             status INT NOT NULL,
             PRIMARY KEY (id)
@@ -219,12 +219,12 @@ Table::Latest
 ===========
 {
     "id": 1,
-    "submit": 421337,
-    "time": "2016-08-29 23:54:33",
+    "submitId": 421337,
     "userId": 1,
     "userName": "espr1t",
     "problemId": 1,
     "problemName": "Input/Output",
+    "time": "2016-08-29 23:54:33",
     "progress": 1.0,
     "status": -9
 }
@@ -238,12 +238,12 @@ if ($db->tableExists('Latest')) {
     $result = $db->query("
         CREATE TABLE `Latest`(
             id INT NOT NULL AUTO_INCREMENT,
-            submit INT NOT NULL,
-            time DATETIME NOT NULL,
+            submitId INT NOT NULL,
             userId INT NOT NULL,
             userName VARCHAR(32) NOT NULL,
             problemId INT NOT NULL,
             problemName VARCHAR(32) NOT NULL,
+            time DATETIME NOT NULL,
             progress FLOAT NOT NULL,
             status INT NOT NULL,
             PRIMARY KEY (id)

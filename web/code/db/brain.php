@@ -361,7 +361,7 @@ class Brain {
 
     function addPending($submit) {
         $response = $this->db->query("
-            INSERT INTO `Pending`(submit, userId, userName, problemId, problemName, time, progress, status)
+            INSERT INTO `Pending`(submitId, userId, userName, problemId, problemName, time, progress, status)
             VALUES (
                 '" . $submit->id . "',
                 '" . $submit->userId . "',
