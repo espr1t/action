@@ -17,8 +17,8 @@ class QueuePage extends Page {
             $list .= '
                 <tr>
                     <td>' . ($i + 1) . '</td>
-                    <td>' . getUserLink($entry['user_name']) . '</td>
-                    <td>' . getProblemLink($entry['problem_id'], $entry['problem_name']) . '</td>
+                    <td>' . getUserLink($entry['userName']) . '</td>
+                    <td>' . getProblemLink($entry['problemId'], $entry['problemName']) . '</td>
                     <td>' . explode(' ', $entry['time'])[1] . '</td>
                     <td>' . intval($entry['progress'] * 100) . '%</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$entry['status']] . '</td>
