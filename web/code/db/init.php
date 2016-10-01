@@ -205,7 +205,7 @@ if ($db->tableExists('Pending')) {
             userId INT NOT NULL,
             userName VARCHAR(32) NOT NULL,
             problemId INT NOT NULL,
-            problem_Name VARCHAR(32) NOT NULL,
+            problemName VARCHAR(32) NOT NULL,
             progress FLOAT NOT NULL,
             status INT NOT NULL,
             PRIMARY KEY (id)
