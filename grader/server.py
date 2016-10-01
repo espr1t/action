@@ -5,9 +5,10 @@
 #   / => For debug purposes only
 #   /healthcheck => For checking whether the Grader is available.
 #
+from flask import Flask
+from common import requires_auth, create_response
 
-import flask
-app = flask.Flask(__name__)
+app = Flask(__name__)
 
 
 #
@@ -15,11 +16,7 @@ app = flask.Flask(__name__)
 #
 @app.route("/")
 def main_page():
-    response = {
-        "status": 200,
-        "message": "Grader root directory."
-    }
-    return flask.jsonify(**response)
+    return create_response(200, "Grader root directory.")
 
 
 #
@@ -27,12 +24,9 @@ def main_page():
 # Returns a response with status 200 if the service is healthy.
 #
 @app.route("/healthcheck", methods=['GET', 'POST'])
+@requires_auth
 def health_check():
-    response = {
-        "status": 200,
-        "message": "healthy"
-    }
-    return flask.jsonify(**response)
+    return create_response(200, "Grader is healthy.")
 
 if __name__ == "__main__":
     app.run(debug=True)
