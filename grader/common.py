@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Use static scheduler and executor
 scheduler = ThreadPoolExecutor(config.WORKER_COUNT)
+executor = ThreadPoolExecutor(config.WORKER_COUNT)
 
 
 def create_response(status, message, data=None):

@@ -12,6 +12,8 @@ from os import path, makedirs
 import config
 import requests
 import shutil
+from compiler import Compiler
+from common import executor
 from enum import Enum
 
 
@@ -80,6 +82,16 @@ class Evaluator:
         if write_source_status != "":
             results = self.fill_results(TestStatus.INTERNAL_ERROR)
             self.send_update(Progress.FINISHED, write_source_status, results)
+            return
+
+        # Send an update that the compilation has been started for this submission
+        self.send_update(Progress.COMPILING)
+
+        # Compile
+        compile_status = self.compile()
+        if compile_status != "":
+            results = self.fill_results(TestStatus.COMPILATION_ERROR)
+            self.send_update(Progress.FINISHED, compile_status, results)
             return
 
         # Clean up remaining files
@@ -153,6 +165,15 @@ class Evaluator:
             with open(self.path_source, "w") as file:
                 file.write(self.source)
         except OSError as ex:
+            status = "Internal error: " + str(ex)
+            logging.error(ex)
+        return status
+
+    def compile(self):
+        try:
+            status = executor.submit(Compiler.compile, self.path_source, self.language, self.path_executable).result()
+        except ValueError as ex:
+            # If a non-compiler error occurred, log the message in addition to sending it to the user
             status = "Internal error: " + str(ex)
             logging.error(ex)
         return status

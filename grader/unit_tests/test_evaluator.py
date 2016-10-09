@@ -9,6 +9,7 @@ from os import path, makedirs
 import vcr
 
 import config
+from compiler import Compiler
 from evaluator import Evaluator, Progress
 
 
@@ -72,6 +73,25 @@ class TestEvaluator(unittest.TestCase):
         with open(evaluator.path_source, "r") as file:
             self.assertEqual(evaluator.source, file.read())
         shutil.rmtree(evaluator.path_sandbox)
+
+    def test_cpp_compile(self):
+        """ You may need to add g++ to your PATH in order for this to run """
+
+        # Successful, returns an empty string as an error message
+        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        evaluator.create_sandbox_dir()
+        evaluator.write_source()
+        message = Compiler.compile(evaluator.path_source, evaluator.language, evaluator.path_executable)
+        self.assertEqual(message, "", "The C++ compilation expected to pass, but failed.")
+        evaluator.cleanup()
+
+        # Unsuccessful, returns the compilation message as an error string
+        evaluator = self.get_evaluator("fixtures/problem_submit_ce.json")
+        evaluator.create_sandbox_dir()
+        evaluator.write_source()
+        message = Compiler.compile(evaluator.path_source, evaluator.language, evaluator.path_executable)
+        self.assertNotEqual(message, "", "The C++ compilation expected error message, but passed successfully.")
+        evaluator.cleanup()
 
     def test_cleanup(self):
         # Create a new instance and write the source
