@@ -11,7 +11,6 @@ from evaluator import Evaluator
 import json
 from pprint import PrettyPrinter
 
-
 app = Flask(__name__)
 
 

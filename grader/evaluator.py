@@ -10,10 +10,9 @@ import logging
 
 from os import path, makedirs
 import config
-import requests
 import shutil
 from compiler import Compiler
-from common import executor
+from common import executor, send_request
 from enum import Enum
 
 
@@ -100,15 +99,14 @@ class Evaluator:
     def send_update(self, status, message="", results=None):
         data = {
             "id": self.id,
-            "status": status,
+            "status": status.value,
             "message": message
         }
         if results is not None:
             data["results"] = results
 
         print(data)
-        response = requests.post(self.update_url, data, auth=(config.AUTH_USERNAME, config.AUTH_PASSWORD))
-        print("Response (" + response.status_code + "): " + response.text)
+        send_request("post", self.update_url, data)
 
     def fill_results(self, status):
         results = []
@@ -139,7 +137,7 @@ class Evaluator:
         # If not, we should download it
         url = self.tests_url + test_name
         logging.info("Downloading file " + test_name + " with hash " + test_hash + " from URL: " + url)
-        response = requests.get(url, stream=True)
+        response = send_request("get", url)
         if response.status_code != 200:
             logging.error("Could not download test " + test_name + " with hash " + test_hash + " using URL: " + url)
             raise Exception("Could not download test file!")

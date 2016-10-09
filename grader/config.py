@@ -4,6 +4,8 @@
 
 WORKER_COUNT = 3
 
+# Will not work with random UTF-8 characters since the utf8_encode() algorithm
+# in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
 AUTH_USERNAME = "username"
 AUTH_PASSWORD = "password"
 

@@ -9,7 +9,7 @@ ini_set('log_errors', false);
 date_default_timezone_set('Europe/Sofia');
 
 // Database
-$DB_SERVER = '192.168.1.123';
+$DB_SERVER = '192.168.1.144';
 $DB_PORT = 3306;
 $DB_USERNAME = 'action';
 $DB_PASSWORD = 'password';
@@ -20,9 +20,13 @@ $COOKIE_NAME = 'action.informatika.bg';
 
 // Grader
 $GRADER_URL = 'localhost:5000';
+
+// Will not work with random UTF-8 characters since the utf8_encode() algorithm
+// in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
 $GRADER_USERNAME = 'username';
 $GRADER_PASSWORD = 'password';
-$GRADER_PATH_HEALTHCHECK = '/healthcheck';
+
+$GRADER_ENDPOINT_HEALTHCHECK = '/healthcheck';
 
 // User access
 $ADMIN_USER_ACCESS = 100;
@@ -35,10 +39,9 @@ $ACCESS_REPORT_PROBLEM = 2;
 $ACCESS_SUBMIT_SOLUTION = 1;
 
 // System paths
-$PATH_PROBLEMS = $_SERVER['DOCUMENT_ROOT'] . '/data/problems';
-$PATH_LOGIC = $_SERVER['DOCUMENT_ROOT'] . '/code/logic';
-$PATH_ACHIEVEMENTS = $_SERVER['DOCUMENT_ROOT'] . '/data/achievements';
-$PATH_AVATARS = '/images/avatars';
+$PATH_PROBLEMS = sprintf('%s/data/problems', $_SERVER['DOCUMENT_ROOT']);
+$PATH_ACHIEVEMENTS = sprintf('%s/data/achievements', $_SERVER['DOCUMENT_ROOT']);
+$PATH_AVATARS = sprintf('/images/avatars');
 
 // Submission status
 $STATUS_WAITING = -1;

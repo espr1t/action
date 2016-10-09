@@ -2,18 +2,26 @@
 require_once(__DIR__ . '/../config.php');
 
 class Grader {
-    function call($path, $data) {
+    private static $METHOD_GET = 'GET';
+    private static $METHOD_POST = 'POST';
+
+    function call($path, $data, $method) {
         $curl = curl_init();
 
         // Setup the connection
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        if ($method == Grader::$METHOD_POST) {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, array('data' => json_encode($data)));
+        }
+
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_URL, $GLOBALS['GRADER_URL'] . $path);
 
         // Setup authentication
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_USERPWD, $GLOBALS['GRADER_USERNAME'] . ':' . $GLOBALS['GRADER_PASSWORD']);
+        $hashedUsername = sha1($GLOBALS['GRADER_USERNAME']);
+        $hashedPassword = sha1($GLOBALS['GRADER_PASSWORD']);
+        curl_setopt($curl, CURLOPT_USERPWD, $hashedUsername . ':' . $hashedPassword);
 
         // Execute the request
         $response = curl_exec($curl);
@@ -34,7 +42,7 @@ class Grader {
     }
 
     function healthy() {
-        $response = $this->call($GLOBALS['GRADER_PATH_HEALTHCHECK'], []);
+        $response = $this->call($GLOBALS['GRADER_ENDPOINT_HEALTHCHECK'], [], Grader::$METHOD_GET);
         return $response['status'] == 200;
     }
 }
