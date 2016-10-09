@@ -6,9 +6,12 @@
 #     3. The solution is being executed against each test case in a sandbox.
 # Updates the frontend after each test case, but no more often than 0.5 sec (with the last test being an exception).
 #
+import logging
 
+from os import path, makedirs
 import config
 import requests
+import shutil
 from enum import Enum
 
 
@@ -61,6 +64,16 @@ class Evaluator:
         # Send an update that preparation has been started for executing this submission
         self.send_update(Progress.PREPARING)
 
+        # Create sandbox directory
+        status = self.create_sandbox_dir()
+        if status != "":
+            results = self.fill_results(TestStatus.INTERNAL_ERROR)
+            self.send_update(Progress.FINISHED, status, results)
+            return
+
+        # Clean up remaining files
+        self.cleanup()
+
     def send_update(self, status, message="", results=None):
         data = {
             "id": self.id,
@@ -73,3 +86,26 @@ class Evaluator:
         print(data)
         response = requests.post(self.update_url, data, auth=(config.AUTH_USERNAME, config.AUTH_PASSWORD))
         print("Response (" + response.status_code + "): " + response.text)
+
+    def fill_results(self, status):
+        results = []
+        for test in self.tests:
+            results[test["position"]] = status
+        return results
+
+    def create_sandbox_dir(self):
+        status = ""
+        try:
+            # Delete if already present (maybe regrade?)
+            if path.exists(self.path_sandbox):
+                shutil.rmtree(self.path_sandbox)
+            # Create the submit testing directory
+            makedirs(self.path_sandbox)
+        except OSError as ex:
+            status = str(ex)
+            logging.error(ex)
+        return status
+
+    def cleanup(self):
+        logging.info("Cleaning up sandbox of submission {id}".format(id=self.id))
+        shutil.rmtree(self.path_sandbox)
