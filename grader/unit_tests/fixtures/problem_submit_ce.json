@@ -1,0 +1,34 @@
+{
+    "id": 42,
+    "language": "C++",
+    "source":  "#include <cstdio>\n\nint main(void) {\n    fprintf(stdout, \"Hello, World!\\n\");\n    fprintf(stdout, \"%lf\\n\", sqrt(42.0));\n    return 0;\n}",
+    "timeLimit": 0.1,
+    "memoryLimit": 0.5,
+    "tester": "",
+    "checker": "",
+    "tests": [
+        {
+            "position": 1,
+            "inpFile": "ABProblem.01.in",
+            "inpHash": "43586469c2fa5c8045fea3143acb5cfc",
+            "solFile": "ABProblem.01.sol",
+            "solHash": "ed265bc903a5a097f61d3ec064d96d2e"
+        },
+        {
+            "position": 2,
+            "inpFile": "ABProblem.02.in",
+            "inpHash": "75e0f7cbc9a2e1c6126e256773877ec3",
+            "solFile": "ABProblem.02.sol",
+            "solHash": "6d40ec74b08c42d003e9562fe524e025"
+        },
+        {
+            "position": 3,
+            "inpFile": "ABProblem.03.in",
+            "inpHash": "dc361c167527c45e3e7a9063b638e976",
+            "solFile": "ABProblem.03.sol",
+            "solHash": "7ae40fa8d78f21b07697d4c2d8b7bdba"
+        }
+    ],
+    "updateEndpoint": "http://localhost/actions/update",
+    "testsEndpoint": "http://localhost/data/problems/ABProblem/Tests/"
+}
