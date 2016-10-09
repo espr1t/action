@@ -71,6 +71,17 @@ class Evaluator:
             self.send_update(Progress.FINISHED, status, results)
             return
 
+        # Download the test files (if not downloaded already)
+        if self.download_tests() != "":
+            return
+
+        # Save the source to a file so we can compile it later
+        write_source_status = self.write_source()
+        if write_source_status != "":
+            results = self.fill_results(TestStatus.INTERNAL_ERROR)
+            self.send_update(Progress.FINISHED, write_source_status, results)
+            return
+
         # Clean up remaining files
         self.cleanup()
 
@@ -103,6 +114,46 @@ class Evaluator:
             makedirs(self.path_sandbox)
         except OSError as ex:
             status = str(ex)
+            logging.error(ex)
+        return status
+
+    def download_test(self, test_name, test_hash):
+        test_path = config.PATH_TESTS + test_hash
+
+        # Check if file already exists
+        if path.exists(test_path):
+            return
+
+        # If not, we should download it
+        url = self.tests_url + test_name
+        logging.info("Downloading file " + test_name + " with hash " + test_hash + " from URL: " + url)
+        response = requests.get(url, stream=True)
+        if response.status_code != 200:
+            logging.error("Could not download test " + test_name + " with hash " + test_hash + " using URL: " + url)
+            raise Exception("Could not download test file!")
+        with open(test_path, "wb") as file:
+            # Write 1MB chunks from the file at a time
+            for chunk in response.iter_content(config.FILE_DOWNLOAD_CHUNK_SIZE):
+                file.write(chunk)
+
+    def download_tests(self):
+        status = ""
+        try:
+            for test in self.tests:
+                self.download_test(test["inpFile"], test["inpHash"])
+                self.download_test(test["solFile"], test["solHash"])
+        except Exception as ex:
+            status = str(ex)
+            logging.error(ex)
+        return status
+
+    def write_source(self):
+        status = ""
+        try:
+            with open(self.path_source, "w") as file:
+                file.write(self.source)
+        except OSError as ex:
+            status = "Internal error: " + str(ex)
             logging.error(ex)
         return status
 

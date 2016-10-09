@@ -1,0 +1,28 @@
+{
+    "id": 42,
+    "tests": [
+        {
+            "position": 1,
+            "inpFile": "ABProblem.01.in",
+            "inpHash": "Hash_ABProblem_01_in",
+            "solFile": "ABProblem.01.sol",
+            "solHash": "Hash_ABProblem_01_sol"
+        },
+        {
+            "position": 2,
+            "inpFile": "ABProblem.02.in",
+            "inpHash": "Hash_ABProblem_02_in",
+            "solFile": "ABProblem.02.sol",
+            "solHash": "Hash_ABProblem_02_sol"
+        },
+        {
+            "position": 3,
+            "inpFile": "ABProblem.03.in",
+            "inpHash": "Hash_ABProblem_03_in",
+            "solFile": "ABProblem.03.sol",
+            "solHash": "Hash_ABProblem_03_sol"
+        }
+    ],
+    "updateEndpoint": "http://localhost/actions/update",
+    "testsEndpoint": "http://localhost/data/problems/ABProblem/Tests/"
+}

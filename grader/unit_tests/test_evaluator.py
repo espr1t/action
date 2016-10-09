@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 import shutil
 from os import path, makedirs
+import vcr
 
 import config
 from evaluator import Evaluator, Progress
@@ -14,11 +15,18 @@ from evaluator import Evaluator, Progress
 class TestEvaluator(unittest.TestCase):
     def setUp(self):
         config.PATH_SANDBOX = "test_sandbox/"
+        config.PATH_DATA = "test_data/"
+        config.PATH_TESTS = "test_data/tests/"
         if not path.exists(config.PATH_SANDBOX):
             makedirs(config.PATH_SANDBOX)
+        if not path.exists(config.PATH_DATA):
+            makedirs(config.PATH_DATA)
+        if not path.exists(config.PATH_TESTS):
+            makedirs(config.PATH_TESTS)
 
     def tearDown(self):
         shutil.rmtree(config.PATH_SANDBOX)
+        shutil.rmtree(config.PATH_DATA)
 
     def get_evaluator(self, data_file):
         with open(data_file) as file:
@@ -38,16 +46,46 @@ class TestEvaluator(unittest.TestCase):
         self.assertTrue(path.exists(evaluator.path_sandbox))
         shutil.rmtree(evaluator.path_sandbox)
 
+    @vcr.use_cassette("fixtures/cassettes/download_tests.yaml")
+    def test_download_tests(self):
+        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+
+        # Assert none of the files is already present
+        for test in evaluator.tests:
+            self.assertFalse(path.exists(config.PATH_TESTS + test["inpHash"]))
+            self.assertFalse(path.exists(config.PATH_TESTS + test["solHash"]))
+
+        # Do the actual download
+        evaluator.download_tests()
+
+        # Assert all of the files are now present
+        for test in evaluator.tests:
+            self.assertTrue(path.exists(config.PATH_TESTS + test["inpHash"]))
+            self.assertTrue(path.exists(config.PATH_TESTS + test["solHash"]))
+
+    def test_write_source(self):
+        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        self.assertFalse(path.isfile(evaluator.path_source))
+        evaluator.create_sandbox_dir()
+        evaluator.write_source()
+        self.assertTrue(path.isfile(evaluator.path_source))
+        with open(evaluator.path_source, "r") as file:
+            self.assertEqual(evaluator.source, file.read())
+        shutil.rmtree(evaluator.path_sandbox)
+
     def test_cleanup(self):
         # Create a new instance and write the source
         evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
         evaluator.create_sandbox_dir()
+        evaluator.write_source()
 
         # Assert the submit directory and source file are created
         self.assertTrue(path.exists(evaluator.path_sandbox))
+        self.assertTrue(path.isfile(evaluator.path_source))
 
         # Do the cleanup
         evaluator.cleanup()
 
         # Assert the submit directory and source file are removed
+        self.assertFalse(path.isfile(evaluator.path_source))
         self.assertFalse(path.exists(evaluator.path_sandbox))
