@@ -22,20 +22,29 @@ if (!passSpamProtection($user, $GLOBALS['SPAM_SUBMIT_ID'], $GLOBALS['SPAM_SUBMIT
 // User has rights to submit and has not exceeded the limit for the day
 $submit = Submit::newSubmit($user, $_POST['problemId'], $_POST['language'], $_POST['source']);
 
-// If cannot write the submit info file or update the user/problem or the solution cannot be sent
-// to the grader for judging (the grader machine is down or not accessible)
-if (!$submit->write() || !$submit->send()) {
+// In case the solution cannot be written to the database, return an error
+// so the user knows something is wrong
+if (!$submit->write()) {
     printAjaxResponse(array(
         'status' => 'ERROR',
-        'message' => 'Възникна проблем при изпращането на решението.'
+        'message' => 'Възникна проблем при записването на решението.'
     ));
 }
-// Otherwise print success and return the submit ID
-else {
+
+// In case the submission cannot be sent to the grader, return a warning, but record
+// it for later evaluation
+if (!$submit->send()) {
     printAjaxResponse(array(
-        'status' => 'OK',
-        'id' => $submit->id
+        'status' => 'WARNING',
+        'message' => 'Решението ще бъде тествано по-късно.'
     ));
 }
+
+// Otherwise print success and return the submit ID
+printAjaxResponse(array(
+    'status' => 'OK',
+    'message' => 'Решението беше изпратено успешно.',
+    'id' => $submit->id
+));
 
 ?>

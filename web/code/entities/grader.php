@@ -45,6 +45,11 @@ class Grader {
         $response = $this->call($GLOBALS['GRADER_ENDPOINT_HEALTHCHECK'], [], Grader::$METHOD_GET);
         return $response['status'] == 200;
     }
+
+    function evaluate($data) {
+        $response = $this->call($GLOBALS['GRADER_ENDPOINT_EVALUATE'], $data, Grader::$METHOD_POST);
+        return true;
+    }
 }
 
 ?>

@@ -33,6 +33,7 @@ RewriteRule    ^problems/(\d+)/submits/(\d+)$           /code/main.php?page=prob
 RewriteRule    ^users/(\w[\w.]{1,15})$                  /code/main.php?page=profile&user=$1                                     [NC,L,QSA]
 
 # Actions
+RewriteRule    ^actions/update$                         /code/actions/grader_update.php                                         [NC,L,QSA]
 RewriteRule    ^actions/(\w+)$                          /code/actions/dispatch.php?action=$1                                    [NC,L,QSA]
 
 # Admin pages

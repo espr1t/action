@@ -27,6 +27,12 @@ $GRADER_USERNAME = 'username';
 $GRADER_PASSWORD = 'password';
 
 $GRADER_ENDPOINT_HEALTHCHECK = '/healthcheck';
+$GRADER_ENDPOINT_EVALUATE = '/evaluate';
+
+// Grader-exposed system endpoints
+$WEB_ENDPOINT_UPDATE = sprintf('http://%s/actions/update', $_SERVER['HTTP_HOST']);
+$WEB_ENDPOINT_TESTS = sprintf('http://%s/data/problems/%%s/Tests/', $_SERVER['HTTP_HOST']);
+
 
 // User access
 $ADMIN_USER_ACCESS = 100;

@@ -3,6 +3,7 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/problem.php');
 require_once(__DIR__ . '/widgets.php');
+require_once(__DIR__ . '/grader.php');
 
 class Submit {
     public $id = -1;
@@ -63,42 +64,40 @@ class Submit {
         // Record the request in the submission queue
         $brain = new Brain();
         $brain->addPending($this);
+        $problem = Problem::get($this->problemId);
 
-        $url = $GLOBALS['GRADER_URL'] . '/grade';
+        $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
+        $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
+        $tests = $brain->getProblemTests($this->problemId);
+
+        // Remove unnecessary data
+        for ($i = 0; $i < count($tests); $i = $i + 1) {
+            unset($tests[$i]['id']);
+            unset($tests[$i]['problem']);
+            unset($tests[$i]['score']);
+        }
+
+        // Convert strings to numbers where needed
+        for ($i = 0; $i < count($tests); $i = $i + 1) {
+            $tests[$i]['position'] = intval($tests[$i]['position']);
+        }
+
+        // Compile all the data, required by the grader to evaluate the solution
         $data = array(
             'id' => $this->id,
             'source' => $this->source,
             'language' => $this->language,
-            'checker' => 'none',
-            'path' => 'localhost/data/problems/a_b_problem',
-            'timeLimit' => 0.5,
-            'memoryLimit' => 64,
-            'tests' => array(
-                array(
-                    'test_id' => 1,
-                    'test_name' => 'a_b_problem.01.in',
-                    'test_md5' => 'awdawd',
-                    'solution_name' => 'a_b_problem.01.sol',
-                    'solution_md5' => 'foobarbaz'
-                ),
-                array(
-                    'test_id' => 2,
-                    'test_name' => 'a_b_problem.02.in',
-                    'test_md5' => 'awdawd',
-                    'solution_name' => 'a_b_problem.02.sol',
-                    'solution_md5' => 'foobarbaz'
-                ),
-                array(
-                    'test_id' => 3,
-                    'test_name' => 'a_b_problem.03.in',
-                    'test_md5' => 'awdawd',
-                    'solution_name' => 'a_b_problem.03.sol',
-                    'solution_md5' => 'foobarbaz'
-                )
-            )
+            'checker' => $problem->checker,
+            'tester' => $problem->tester,
+            'timeLimit' => $problem->timeLimit,
+            'memoryLimit' => $problem->memoryLimit,
+            'tests' => $tests,
+            'testsEndpoint' => $testsEndpoint,
+            'updateEndpoint' => $updateEndpoint
         );
 
-        return true;
+        $grader = new Grader();
+        return $grader->evaluate($data);
     }
 
     private static function instanceFromArray($info) {
