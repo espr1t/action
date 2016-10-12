@@ -29,13 +29,14 @@ def hashed_auth_token(token):
 def send_request(method, url, data=None):
     username = hashed_auth_token(config.AUTH_USERNAME)
     password = hashed_auth_token(config.AUTH_PASSWORD)
+    response = None
     if method == "get":
         response = requests.get(url, data, auth=(username, password), stream=True)
     elif method == "post":
         response = requests.post(url, data, auth=(username, password))
     else:
-        logging.error("Unsupported request method '" + method + "'!")
-    print("Response (" + response.status_code + "): " + response.text)
+        logging.error("Unsupported request method '{}'!".format(method))
+    return response
 
 
 def authorized(auth):

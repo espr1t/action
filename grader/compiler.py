@@ -24,7 +24,7 @@ class Compiler:
         elif language == "Python":
             return Compiler.compile_python(path_source, path_executable)
         else:
-            raise ValueError("Unknown Language " + language + "!")
+            raise ValueError("Unknown Language {}!".format(language))
 
     @staticmethod
     def compile_cpp(path_source, path_executable):
