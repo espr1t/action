@@ -16,15 +16,11 @@ from common import executor, send_request
 from enum import Enum
 
 
-class Progress(Enum):
-    """ Defines variable response types (depending on what happened) """
+class TestStatus(Enum):
+    """ Defines variable results (or progress) of running the tests. """
     PREPARING = "Preparing",
     COMPILING = "Compiling",
     TESTING = "Testing",
-    FINISHED = "Finished"
-
-
-class TestStatus(Enum):
     COMPILATION_ERROR = "Compilation Error",
     WRONG_ANSWER = "Wrong Answer",
     RUNTIME_ERROR = "Runtime Error",
@@ -66,7 +62,7 @@ class Evaluator:
         self.logger.addHandler(console_handler)
         self.logger.propagate = False
 
-        def get_source_extension(self):
+    def get_source_extension(self):
         return ".cpp" if self.language == "C++" else ".java" if self.language == "Java" else ".py"
 
     def get_executable_extension(self):
@@ -75,14 +71,13 @@ class Evaluator:
     def evaluate(self):
         # Send an update that preparation has been started for executing this submission
         self.logger.info("Evaluating submission {}".format(self.id))
-        self.send_update(Progress.PREPARING)
+        self.send_update(TestStatus.PREPARING.name, self.set_results(TestStatus.PREPARING))
 
         # Create sandbox directory
         self.logger.info("  >> creating sandbox directory...")
-        status = self.create_sandbox_dir()
-        if status != "":
-            results = self.fill_results(TestStatus.INTERNAL_ERROR)
-            self.send_update(Progress.FINISHED, status, results)
+        create_sandbox_status = self.create_sandbox_dir()
+        if create_sandbox_status != "":
+            self.send_update(create_sandbox_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Download the test files (if not downloaded already)
@@ -94,43 +89,41 @@ class Evaluator:
         self.logger.info("  >> writing source code to file...")
         write_source_status = self.write_source()
         if write_source_status != "":
-            results = self.fill_results(TestStatus.INTERNAL_ERROR)
-            self.send_update(Progress.FINISHED, write_source_status, results)
+            self.send_update(write_source_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Send an update that the compilation has been started for this submission
-        self.send_update(Progress.COMPILING)
+        self.send_update(TestStatus.COMPILING.name, self.set_results(TestStatus.COMPILING))
 
         # Compile
         self.logger.info("  >> compiling...")
         compile_status = self.compile()
         if compile_status != "":
             self.logger.info("    -- compilation error!")
-            results = self.fill_results(TestStatus.COMPILATION_ERROR)
-            self.send_update(Progress.FINISHED, compile_status, results)
+            self.send_update(compile_status, self.set_results(TestStatus.COMPILATION_ERROR))
             return
+
+        # Send an update that the testing has been started for this submission
+        self.send_update(TestStatus.TESTING.name, self.set_results(TestStatus.TESTING))
 
         # Clean up remaining files
         self.logger.info("  >> cleaning up...")
         self.cleanup()
 
-    def send_update(self, status, message="", results=None):
+    def send_update(self, message="", results=None):
         self.logger.info("  >> sending update with message = {}".format(message))
         data = {
             "id": self.id,
-            "status": status.value,
             "message": message
         }
         if results is not None:
             data["results"] = results
-
-        print(data)
         send_request("post", self.update_url, data)
 
-    def fill_results(self, status):
-        results = []
+    def set_results(self, status):
+        results = dict()
         for test in self.tests:
-            results[test["position"]] = status
+            results[test["position"]] = status.value
         return results
 
     def create_sandbox_dir(self):
@@ -160,12 +153,19 @@ class Evaluator:
         if response.status_code != 200:
             self.logger.error("Could not download test {} with hash {} using URL: {}".format(test_name, test_hash, url))
             raise Exception("Could not download test file!")
+
         with open(test_path, "wb") as file:
             # Write 1MB chunks from the file at a time
             for chunk in response.iter_content(config.FILE_DOWNLOAD_CHUNK_SIZE):
                 file.write(chunk)
 
     def download_tests(self):
+        # In case the directory for the tests does not exist, create it
+        if not path.exists(config.PATH_DATA):
+            makedirs(config.PATH_DATA)
+        if not path.exists(config.PATH_TESTS):
+            makedirs(config.PATH_TESTS)
+
         status = ""
         try:
             for test in self.tests:

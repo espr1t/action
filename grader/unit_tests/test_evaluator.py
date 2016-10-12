@@ -10,7 +10,7 @@ import vcr
 
 import config
 from compiler import Compiler
-from evaluator import Evaluator, Progress
+from evaluator import Evaluator, TestStatus
 
 
 class TestEvaluator(unittest.TestCase):
@@ -34,11 +34,19 @@ class TestEvaluator(unittest.TestCase):
             data = json.loads(file.read())
             return Evaluator(data)
 
+
     @mock.patch("requests.post")
     def test_send_update(self, requests_post_mock):
         evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
-        evaluator.send_update(Progress.FINISHED, "Some message")
+        evaluator.send_update(TestStatus.COMPILING, "Some message")
         self.assertTrue(requests_post_mock.called, "An update to the frontend is not being sent.")
+
+    def test_set_results(self):
+        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        results = evaluator.set_results(TestStatus.RUNTIME_ERROR)
+        self.assertEqual(len(results), 3, "There must be exactly three results")
+        for i in range(1, 3):
+            self.assertEqual(results[i], TestStatus.RUNTIME_ERROR.value)
 
     def test_create_sandbox_dir(self):
         evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")

@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/problem.php');
 
 class Grader {
     private static $METHOD_GET = 'GET';
@@ -49,6 +50,23 @@ class Grader {
     function evaluate($data) {
         $response = $this->call($GLOBALS['GRADER_ENDPOINT_EVALUATE'], $data, Grader::$METHOD_POST);
         return true;
+    }
+
+    function update($submitId, $message, $results) {
+        error_log(sprintf('Received update on submit %d with message: %s', $submitId, $message));
+
+        $submit = Submit::get($submitId);
+        if ($submit == null) {
+            error_log('Received update on invalid submit: ' . $submitId);
+            exit();
+        }
+
+        $submit->message = $message;
+        error_log('Results = ' . $results);
+        for ($i = 0; $i < count($results); $i = $i + 1) {
+            error_log('Results[$i] = ' . $results[$i]);
+            $brain->updateTest($submit->problemId, $results[$i]['position'], $results[$i]['score']);
+        }
     }
 }
 

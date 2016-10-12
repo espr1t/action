@@ -1,6 +1,5 @@
 <?php
-require_once(__DIR__ . '/../entities/user.php');
-require_once(__DIR__ . '/../entities/widgets.php');
+require_once(__DIR__ . '/../entities/grader.php');
 
 if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
     error_log('Update command sent without authentication from IP: ' . $_SERVER['REMOTE_ADDR']);
@@ -15,11 +14,11 @@ if (sha1($GLOBALS['GRADER_PASSWORD']) != $_SERVER['PHP_AUTH_PW']) {
     exit();
 }
 
-$submitId = $_POST['id'];
-$status = $_POST['status'];
-$message = $_POST['message'];
+$id = isset($_POST['id']) ? $_POST['id'] : -1;
+$message = isset($_POST['message']) ? $_POST['message'] : '';
+$results = isset($_POST['results']) ? $_POST['results'] : [];
 
-error_log(sprintf('Received update on submission %d with status %s and message: %s', $submitId, $status, $message));
-
+$grader = new Grader();
+$grader->update($id, $message, $results);
 
 ?>
