@@ -56,11 +56,19 @@ class Evaluator:
         self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter(
                 "%(levelname)s %(asctime)s (submission {}): %(message)s".format(self.id), "%Y-%m-%dT%H:%M:%S")
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(formatter)
-        self.logger.addHandler(console_handler)
+        self.handler = logging.StreamHandler()
+        self.handler.setLevel(logging.INFO)
+        self.handler.setFormatter(formatter)
+        self.logger.addHandler(self.handler)
         self.logger.propagate = False
+
+    def __del__(self):
+        # Remove log handler
+        self.logger.removeHandler(self.handler)
+
+        # Clean up remaining files
+        self.logger.info("  >> cleaning up...")
+        self.cleanup()
 
     def get_source_extension(self):
         return ".cpp" if self.language == "C++" else ".java" if self.language == "Java" else ".py"
@@ -105,10 +113,6 @@ class Evaluator:
 
         # Send an update that the testing has been started for this submission
         self.send_update(TestStatus.TESTING.name, self.set_results(TestStatus.TESTING))
-
-        # Clean up remaining files
-        self.logger.info("  >> cleaning up...")
-        self.cleanup()
 
     def send_update(self, message="", results=None):
         self.logger.info("  >> sending update with message = {}".format(message))
