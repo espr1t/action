@@ -6,6 +6,7 @@
 #     3. The solution is being executed against each test case in a sandbox.
 # Updates the frontend after each test case, but no more often than 0.5 sec (with the last test being an exception).
 #
+import json
 import logging
 
 from os import path, makedirs
@@ -13,21 +14,8 @@ import config
 import shutil
 from compiler import Compiler
 from common import executor, send_request
-from enum import Enum
-
-
-class TestStatus(Enum):
-    """ Defines variable results (or progress) of running the tests. """
-    PREPARING = "Preparing",
-    COMPILING = "Compiling",
-    TESTING = "Testing",
-    COMPILATION_ERROR = "Compilation Error",
-    WRONG_ANSWER = "Wrong Answer",
-    RUNTIME_ERROR = "Runtime Error",
-    TIME_LIMIT = "Time Limit",
-    MEMORY_LIMIT = "Memory Limit",
-    INTERNAL_ERROR = "Internal Error",
-    ACCEPTED = "Accepted"
+from status import TestStatus
+from runner import Runner
 
 
 class Evaluator:
@@ -40,11 +28,11 @@ class Evaluator:
         self.id = data["id"]
         self.source = data["source"]
         self.language = data["language"]
-        self.checker = data["checker"]
-        self.tester = data["tester"]
         self.time_limit = data["timeLimit"]
         self.memory_limit = data["memoryLimit"]
         self.tests = data["tests"]
+        self.checker = data["checker"] if "checker" in data else ""
+        self.tester = data["tester"] if "tester" in data else ""
 
         # Path to sandbox and files inside
         self.path_sandbox = config.PATH_SANDBOX + "submit_{:06d}/".format(self.id)
@@ -107,12 +95,20 @@ class Evaluator:
         self.logger.info("  >> compiling...")
         compile_status = self.compile()
         if compile_status != "":
-            self.logger.info("    -- compilation error!")
+            self.logger.info("    -- error while compiling the solution!")
             self.send_update(compile_status, self.set_results(TestStatus.COMPILATION_ERROR))
             return
 
         # Send an update that the testing has been started for this submission
         self.send_update(TestStatus.TESTING.name, self.set_results(TestStatus.TESTING))
+
+        # Execute each of the tests
+        self.logger.info("  >> starting processing tests...")
+        run_status = self.process_tests()
+        if run_status != "":
+            self.logger.info("    -- error while running the solution!")
+            self.send_update(run_status, self.set_results(TestStatus.INTERNAL_ERROR))
+            return
 
     def send_update(self, message="", results=None):
         self.logger.info("  >> sending update with message = {}".format(message))
@@ -121,13 +117,17 @@ class Evaluator:
             "message": message
         }
         if results is not None:
-            data["results"] = results
+            data["results"] = json.dumps(results)
         send_request("post", self.update_url, data)
 
     def set_results(self, status):
-        results = dict()
+        results = []
         for test in self.tests:
-            results[test["position"]] = status.value
+            results.append({
+                "position": test["position"],
+                "status": status.name,
+                "score": 0
+            })
         return results
 
     def create_sandbox_dir(self):
@@ -199,6 +199,28 @@ class Evaluator:
             self.logger.error(ex)
         return status
 
+    def process_tests(self):
+        errors = ""
+        for test in range(0, len(self.tests)):
+            try:
+                status = executor.submit(Runner.run, self, test).result()
+            except ValueError as ex:
+                errors += "Internal error on test " + test["inpHash"] + ": " + str(ex)
+                self.logger.error(ex)
+                break
+
+            # Record the results for the current test and send update to the frontend
+            # TODO: Send batch updates by aggregating several results and send them at least 0.2 seconds apart
+            results = [{
+                "position": self.tests[test]["position"],
+                "status": status.name,
+                "score": 1 if status == TestStatus.ACCEPTED else 0
+            }]
+            self.send_update(TestStatus.TESTING.name, results)
+            
+        return errors
+
     def cleanup(self):
         self.logger.info("Cleaning up sandbox of submission {id}".format(id=self.id))
-        shutil.rmtree(self.path_sandbox)
+        if path.exists(self.path_sandbox):
+            shutil.rmtree(self.path_sandbox)
