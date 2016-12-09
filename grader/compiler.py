@@ -8,7 +8,7 @@ from os import getcwd
 
 
 class Compiler:
-    COMPILE_LINE_CPP = "g++ -O2 -std=c++11 -o {path_executable} {path_source}"
+    COMPILE_LINE_CPP = "g++ -O2 -std=c++11 -w -o {path_executable} {path_source}"
     COMPILE_LINE_JAVA = "javac {source_file}"
     COMPILE_LINE_PYTHON = "python -m py_compile {source_file}"
 
