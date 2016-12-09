@@ -1,6 +1,8 @@
 <?php
+require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/problem.php');
+require_once(__DIR__ . '/submit.php');
 
 class Grader {
     private static $METHOD_GET = 'GET';
@@ -53,8 +55,6 @@ class Grader {
     }
 
     function update($submitId, $message, $results) {
-        error_log(sprintf('Received update on submit %d with message: %s', $submitId, $message));
-
         $submit = Submit::get($submitId);
         if ($submit == null) {
             error_log('Received update on invalid submit: ' . $submitId);
@@ -62,11 +62,15 @@ class Grader {
         }
 
         $submit->message = $message;
-        error_log('Results = ' . $results);
         for ($i = 0; $i < count($results); $i = $i + 1) {
-            error_log('Results[$i] = ' . $results[$i]);
-            $brain->updateTest($submit->problemId, $results[$i]['position'], $results[$i]['score']);
+            if ($results[$i]['status'] == 'ACCEPTED') {
+                $submit->results[$results[$i]['position']] = floatval($results[$i]['score']);
+            } else {
+                $submit->results[$results[$i]['position']] = $GLOBALS['STATUS_' . $results[$i]['status']];
+            }
         }
+        $brain = new Brain();
+        $brain->updateSubmit($submit);
     }
 }
 

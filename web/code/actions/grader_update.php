@@ -14,9 +14,9 @@ if (sha1($GLOBALS['GRADER_PASSWORD']) != $_SERVER['PHP_AUTH_PW']) {
     exit();
 }
 
-$id = isset($_POST['id']) ? $_POST['id'] : -1;
+$id = isset($_POST['id']) ? intval($_POST['id']) : -1;
 $message = isset($_POST['message']) ? $_POST['message'] : '';
-$results = isset($_POST['results']) ? $_POST['results'] : [];
+$results = isset($_POST['results']) ? json_decode($_POST['results'], true) : [];
 
 $grader = new Grader();
 $grader->update($id, $message, $results);

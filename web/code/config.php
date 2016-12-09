@@ -3,7 +3,7 @@
 // Logging configuration
 $ERROR_LOG_PATH = $_SERVER['DOCUMENT_ROOT'] . '/error_log.txt';
 ini_set('error_log', $ERROR_LOG_PATH);
-ini_set('log_errors', false);
+ini_set('log_errors', true);
 
 // Set timezone
 date_default_timezone_set('Europe/Sofia');
@@ -50,29 +50,31 @@ $PATH_ACHIEVEMENTS = sprintf('%s/data/achievements', $_SERVER['DOCUMENT_ROOT']);
 $PATH_AVATARS = sprintf('/images/avatars');
 
 // Submission status
-$STATUS_WAITING = -1;
-$STATUS_PREPARING = -2;
-$STATUS_COMPILING = -3;
-$STATUS_TESTING = -4;
-$STATUS_INTERNAL_ERROR = -5;
-$STATUS_COMPILATION_ERROR = -6;
-$STATUS_MEMORY_LIMIT = -7;
-$STATUS_TIME_LIMIT = -8;
-$STATUS_RUNTIME_ERROR = -9;
-$STATUS_WRONG_ANSWER = -10;
-$STATUS_ACCEPTED = -11; // Individual tests are marked with a non-negative number indicating the score for the test
+$STATUS_WAITING = 'W';
+$STATUS_PREPARING = 'P';
+$STATUS_COMPILING = 'C';
+$STATUS_TESTING = 'T';
+$STATUS_QUEUED = 'Q';
+$STATUS_INTERNAL_ERROR = 'IE';
+$STATUS_COMPILATION_ERROR = 'CE';
+$STATUS_WRONG_ANSWER = 'WA';
+$STATUS_TIME_LIMIT = 'TL';
+$STATUS_MEMORY_LIMIT = 'ML';
+$STATUS_RUNTIME_ERROR = 'RE';
+$STATUS_ACCEPTED = 'AC'; // Individual tests are marked with a non-negative number indicating the score for the test
 
 $STATUS_DISPLAY_NAME = array(
     $STATUS_WAITING => 'Waiting',
     $STATUS_PREPARING => 'Preparing',
     $STATUS_COMPILING => 'Compiling',
     $STATUS_TESTING => 'Testing',
+    $STATUS_QUEUED => 'Queued',
     $STATUS_INTERNAL_ERROR => 'Internal Error',
     $STATUS_COMPILATION_ERROR => 'Compilation Error',
-    $STATUS_MEMORY_LIMIT => 'Memory Limit',
-    $STATUS_TIME_LIMIT => 'Time Limit',
-    $STATUS_RUNTIME_ERROR => 'Runtime Error',
     $STATUS_WRONG_ANSWER => 'Wrong Answer',
+    $STATUS_TIME_LIMIT => 'Time Limit',
+    $STATUS_MEMORY_LIMIT => 'Memory Limit',
+    $STATUS_RUNTIME_ERROR => 'Runtime Error',
     $STATUS_ACCEPTED => 'Accepted'
 );
 

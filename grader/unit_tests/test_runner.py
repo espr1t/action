@@ -26,6 +26,20 @@ class TestRunner(unittest.TestCase):
         if not path.exists(config.PATH_TESTS):
             makedirs(config.PATH_TESTS)
 
+        # First, we need to create an Evaluator object
+        self.evaluator = self.get_evaluator("fixtures/tests_runner.json")
+
+        # Then create the sandbox dir
+        self.evaluator.create_sandbox_dir()
+
+        # Then we need to compile the source
+        Compiler.compile("fixtures/ThreeSum/ThreeSum.cpp", "C++", self.evaluator.path_executable)
+
+        # Then we need to copy the tests to the test_data folder
+        for test in self.evaluator.tests:
+            shutil.copy("fixtures/ThreeSum/" + test["inpFile"], config.PATH_TESTS + test["inpHash"])
+            shutil.copy("fixtures/ThreeSum/" + test["solFile"], config.PATH_TESTS + test["solHash"])
+
     def tearDown(self):
         shutil.rmtree(config.PATH_SANDBOX)
         shutil.rmtree(config.PATH_DATA)
@@ -39,44 +53,45 @@ class TestRunner(unittest.TestCase):
     We'll use a dummy task for testing various run statuses. The task is the following:
     Given a number N, return the sum of products of all distinct triplets of numbers in [1, N] modulo 1000000007.
     """
-    def test_run(self):
-        # First, we need to create an Evaluator object
-        evaluator = self.get_evaluator("fixtures/tests_runner.json")
 
-        # Then create the sandbox dir
-        evaluator.create_sandbox_dir()
+    # Test ThreeSum_01: N = 20, the solution returns the correct answer (ACCEPTED)
+    def test_accepted(self):
+        runner = Runner(self.evaluator)
 
-        # Then we need to compile the source
-        Compiler.compile("fixtures/ThreeSum/ThreeSum.cpp", "C++", evaluator.path_executable)
+        result = runner.run(self.evaluator.tests[0])
+        self.assertEqual(result.status, TestStatus.ACCEPTED)
+        self.assertEqual(result.error_message, "")
 
-        # Then we need to copy the tests to the test_data folder
-        for test in evaluator.tests:
-            shutil.copy("fixtures/ThreeSum/" + test["inpFile"], config.PATH_TESTS + test["inpHash"])
-            shutil.copy("fixtures/ThreeSum/" + test["solFile"], config.PATH_TESTS + test["solHash"])
+    # Test ThreeSum_02: N = 200, the solution returns a wrong answer (WRONG_ANSWER)
+    def test_wrong_answer(self):
+        runner = Runner(self.evaluator)
 
-        # Everything's set up now. We need to call the runner for each test and see whether we get the expected results
+        result = runner.run(self.evaluator.tests[1])
+        self.assertEqual(result.status, TestStatus.WRONG_ANSWER)
+        self.assertEqual(result.error_message[:8], "Expected")
 
-        # Test ThreeSum_01: N = 20, the solution returns the correct answer (ACCEPTED)
-        status, message = Runner.run(evaluator, 0)
-        self.assertEqual(status, TestStatus.ACCEPTED)
-        self.assertEqual(message, "")
+    # Test ThreeSum_03: N = 2000, the solution is too slow (TIME_LIMIT)
+    def test_time_limit(self):
+        runner = Runner(self.evaluator)
 
-        # Test ThreeSum_02: N = 200, the solution returns a wrong answer (WRONG_ANSWER)
-        status, message = Runner.run(evaluator, 1)
-        self.assertEqual(status, TestStatus.WRONG_ANSWER)
-        self.assertEqual(message[:8], "Expected")
+        result = runner.run(self.evaluator.tests[2])
+        self.assertEqual(result.status, TestStatus.TIME_LIMIT)
+        self.assertGreater(result.exec_time, self.evaluator.time_limit)
 
-        # Test ThreeSum_03: N = 2000, the solution is too slow (TIME_LIMIT)
-        status, message = Runner.run(evaluator, 2)
-        self.assertEqual(status, TestStatus.TIME_LIMIT)
-        self.assertGreater(message, str(evaluator.time_limit))
+    # Test ThreeSum_04: N = 20000, the solution accesses invalid array index (RUNTIME_ERROR)
+    def test_runtime_error(self):
+        runner = Runner(self.evaluator)
 
-        # Test ThreeSum_04: N = 20000, the solution accesses invalid array index (RUNTIME_ERROR)
-        status, message = Runner.run(evaluator, 3)
-        self.assertEqual(status, TestStatus.RUNTIME_ERROR)
+        result = runner.run(self.evaluator.tests[3])
+        self.assertEqual(result.status, TestStatus.RUNTIME_ERROR)
+        self.assertNotEqual(result.exit_code, 0)
 
-        # Test ThreeSum_05: N = 200000, the solution uses too much memory (MEMORY_LIMIT)
-        status, message = Runner.run(evaluator, 4)
-        self.assertEqual(status, TestStatus.MEMORY_LIMIT)
+    # Test ThreeSum_05: N = 200000, the solution uses too much memory (MEMORY_LIMIT)
+    def test_memory_limit(self):
+        runner = Runner(self.evaluator)
+
+        result = runner.run(self.evaluator.tests[4])
+        self.assertEqual(result.status, TestStatus.MEMORY_LIMIT)
+        self.assertGreater(result.exec_memory, self.evaluator.memory_limit)
 
 

@@ -297,6 +297,21 @@ class Brain {
         return $this->db->lastId();
     }
 
+    function updateSubmit($submit) {
+        $response = $this->db->query("
+            UPDATE `Submits` SET
+                results = '" . implode(',', $submit->results) . "',
+                status = '" . $submit->status . "',
+                message = '" . $this->db->escape($submit->message) . "'
+            WHERE id = " . $submit->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update submit with id ' . $submit->userName . '!');
+            return null;
+        }
+        return true;
+    }
+
     function getSubmit($submitId) {
         $response = $this->db->query("
             SELECT * FROM `Submits`

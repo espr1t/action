@@ -30,9 +30,9 @@ def send_request(method, url, data=None):
     username = hashed_auth_token(config.AUTH_USERNAME)
     password = hashed_auth_token(config.AUTH_PASSWORD)
     response = None
-    if method == "get":
+    if method == "GET":
         response = requests.get(url, data, auth=(username, password), stream=True)
-    elif method == "post":
+    elif method == "POST":
         response = requests.post(url, data, auth=(username, password))
     else:
         logging.error("Unsupported request method '{}'!".format(method))

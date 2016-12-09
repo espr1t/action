@@ -12,48 +12,77 @@ import config
 from status import TestStatus
 
 
+class RunResult:
+    def __init__(self, status, error_message, exit_code, exec_time, exec_memory, score):
+        self.status = status
+        self.error_message = error_message
+        self.exit_code = exit_code
+        self.exec_time = exec_time
+        self.exec_memory = exec_memory
+        self.score = score
+
+
 class Runner:
     CHECK_INTERVAL = 0.01
     KILLED_TIME_LIMIT = 1
     KILLED_MEMORY_LIMIT = 2
     KILLED_RUNTIME_ERROR = 3
 
-    @staticmethod
-    def run(evaluator, test):
-        logging.info("Executing solution {} on test {}".format(evaluator.id, evaluator.tests[test]["inpFile"]))
-        inp_file = config.PATH_TESTS + evaluator.tests[test]["inpHash"]
-        out_file = evaluator.path_sandbox + "output.out"
-        sol_file = config.PATH_TESTS + evaluator.tests[test]["solHash"]
+    def __init__(self, evaluator):
+        self.evaluator = evaluator
 
-        executable = evaluator.path_executable
+        # Configure logger
+        self.logger = logging.getLogger("Runner")
+        self.logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            "%(levelname)s %(asctime)s (submission {}): %(message)s".format(self.evaluator.id), "%Y-%m-%dT%H:%M:%S")
+        self.handler = logging.StreamHandler()
+        self.handler.setLevel(logging.INFO)
+        self.handler.setFormatter(formatter)
+        self.logger.addHandler(self.handler)
+        self.logger.propagate = False
+
+    def __del__(self):
+        # Remove log handler
+        self.logger.removeHandler(self.handler)
+
+    def run(self, test):
+        self.logger.info("Running solution on test {}".format(test["inpFile"]))
+        inp_file = config.PATH_TESTS + test["inpHash"]
+        out_file = self.evaluator.path_sandbox + "output.out"
+        sol_file = config.PATH_TESTS + test["solHash"]
+
+        executable = self.evaluator.path_executable
         # Change slashes with backslashes for Windows paths (grr)
         if name == "nt":
             executable = executable.replace("/", "\\")
 
-        exec_time, exec_memory, exit_code, error = Runner.exec_solution(
-                executable, inp_file, out_file, evaluator.time_limit, evaluator.memory_limit)
+        result = self.exec_solution(executable, inp_file, out_file)
 
-        if error != "":
-            logging.info("Got error while executing test {} of submission {}: \"{}\"".format(
-                evaluator.tests[test]["inpFile"], evaluator.id, error))
-            return TestStatus.RUNTIME_ERROR, error
+        if result.error_message != "":
+            self.logger.info("Got error while executing test {}: \"{}\"".format(test["inpFile"], result.error_message))
+            result.status = TestStatus.RUNTIME_ERROR
+            return result
 
-        if exec_time > evaluator.time_limit:
-            return TestStatus.TIME_LIMIT, "Execution time: {} seconds.".format(exec_time)
+        if result.exec_time > self.evaluator.time_limit:
+            result.status = TestStatus.TIME_LIMIT
+            return result
 
-        if exec_memory > evaluator.memory_limit:
-            return TestStatus.MEMORY_LIMIT, "Peak memory: {} megabytes.".format(exec_memory)
+        if result.exec_memory > self.evaluator.memory_limit:
+            result.status = TestStatus.MEMORY_LIMIT
+            return result
 
-        if exit_code != 0:
-            logging.info("Process exited with non-zero exit code while executing test {} of submission {}: \"{}\"".
-                         format(evaluator.tests[test]["inpFile"], evaluator.id, exit_code))
-            return TestStatus.RUNTIME_ERROR, "Exit code: {}".format(exit_code)
+        if result.exit_code != 0:
+            result.status = TestStatus.RUNTIME_ERROR
+            return result
 
-        message = Runner.validate_output(out_file, sol_file)
-        if message != "":
-            return TestStatus.WRONG_ANSWER, message
+        result.error_message, result.score = Runner.validate_output(out_file, sol_file)
+        if result.error_message != "":
+            result.status = TestStatus.WRONG_ANSWER
+            return result
 
-        return TestStatus.ACCEPTED, ""
+        result.status = TestStatus.ACCEPTED
+        return result
 
     # TODO:
     # Limit network usage
@@ -61,8 +90,7 @@ class Runner:
     # Limit writing to the disk
     # Use checker if provided
 
-    @staticmethod
-    def exec_solution(executable, inp_file, out_file, time_limit, memory_limit):
+    def exec_solution(self, executable, inp_file, out_file):
         inp_data = open(inp_file, "rt")
         out_data = open(out_file, "wt")
         process = psutil.Popen([], executable=executable, stdin=inp_data, stdout=out_data, stderr=subprocess.PIPE)
@@ -80,7 +108,7 @@ class Runner:
                 break
             if not process.is_running():
                 break
-            if clock() - start_time > time_limit * 2:
+            if clock() - start_time > self.evaluator.time_limit * 2:
                 exit_code = Runner.KILLED_RUNTIME_ERROR
                 process.kill()
                 break
@@ -90,13 +118,6 @@ class Runner:
                 exec_time = max(exec_time, process.cpu_times().user)
                 exec_memory = max(exec_memory, process.memory_full_info().uss / 1048576.0)
 
-                """
-                logging.warning(str(process.cpu_times()))
-                logging.warning(str(process.memory_full_info()))
-                logging.warning("Current execution time: {0:.2f} seconds".format(exec_time))
-                logging.warning("Current execution memory: {0:.2f} megabytes".format(exec_memory))
-                """
-
                 # Spawning processes or threads
                 if process.num_threads() > 2:
                     exit_code = Runner.KILLED_RUNTIME_ERROR
@@ -104,13 +125,13 @@ class Runner:
                     break
 
                 # Time Limit, kill the process
-                if exec_time > time_limit:
+                if exec_time > self.evaluator.time_limit:
                     exit_code = Runner.KILLED_TIME_LIMIT
                     process.kill()
                     break
 
                 # Memory Limit, kill the process
-                if exec_memory > memory_limit:
+                if exec_memory > self.evaluator.memory_limit:
                     exit_code = Runner.KILLED_MEMORY_LIMIT
                     process.kill()
                     break
@@ -118,16 +139,17 @@ class Runner:
             except psutil.NoSuchProcess:
                 break
 
-        logging.info("Elapsed time: {0:.3f} seconds. "
-                     "Used memory: {1:.3f} megabytes. "
-                     "Total testing time: {2:.3f} seconds.".format(exec_time, exec_memory, clock() - start_time))
+        self.logger.info("  >> Elapsed time: {0:.3f}s. "
+                         "Used memory: {1:.3f}MB. "
+                         "Total testing time: {2:.3f}s.".format(exec_time, exec_memory, clock() - start_time))
 
         exit_code = process.poll() if exit_code is None else exit_code
 
-        error = process.communicate()[1]
-        error = error.decode("utf-8") if error is not None else ""
+        error_message = process.communicate()[1]
+        error_message = error_message.decode("utf-8") if error_message is not None else ""
 
-        return exec_time, exec_memory, exit_code, error
+        # Leave the parent function decide what the test status will be
+        return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0)
 
     @staticmethod
     def validate_output(out_file, sol_file):
@@ -137,7 +159,7 @@ class Runner:
                     out_line = out.readline()
                     sol_line = sol.readline()
                     if not out_line and not sol_line:
-                        return ""
+                        return "", 1.0
 
                     out_line = out_line.strip() if out_line else ""
                     sol_line = sol_line.strip() if sol_line else ""
@@ -146,4 +168,4 @@ class Runner:
                             out_line = out_line[:20] + "..."
                         if len(sol_line) > 20:
                             sol_line = sol_line[:20] + "..."
-                        return "Expected \"{}\" but received \"{}\".".format(out_line, sol_line)
+                        return "Expected \"{}\" but received \"{}\".".format(out_line, sol_line), 0.0

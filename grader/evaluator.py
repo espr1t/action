@@ -100,7 +100,7 @@ class Evaluator:
             return
 
         # Send an update that the testing has been started for this submission
-        self.send_update(TestStatus.TESTING.name, self.set_results(TestStatus.TESTING))
+        self.send_update(TestStatus.QUEUED.name, self.set_results(TestStatus.QUEUED))
 
         # Execute each of the tests
         self.logger.info("  >> starting processing tests...")
@@ -110,15 +110,18 @@ class Evaluator:
             self.send_update(run_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
+        # Finished with this submission
+        self.logger.info("  >> done with {}!".format(self.id))
+
     def send_update(self, message="", results=None):
-        self.logger.info("  >> sending update with message = {}".format(message))
+        # self.logger.info("  >> sending update with message = {}".format(message))
         data = {
             "id": self.id,
             "message": message
         }
         if results is not None:
             data["results"] = json.dumps(results)
-        send_request("post", self.update_url, data)
+        send_request("POST", self.update_url, data)
 
     def set_results(self, status):
         results = []
@@ -200,22 +203,31 @@ class Evaluator:
         return status
 
     def process_tests(self):
+        runner = Runner(self)
         errors = ""
-        for test in range(0, len(self.tests)):
+        for test in self.tests:
+            # TODO: Send batch updates by aggregating several results and send them at least 0.2 seconds apart
+            results = [{
+                "position": test["position"],
+                "status": TestStatus.TESTING.name,
+                "score": 0
+            }]
+            self.send_update(TestStatus.TESTING.name, results)
+
             try:
-                status = executor.submit(Runner.run, self, test).result()
+                result = executor.submit(runner.run, test).result()
             except ValueError as ex:
-                errors += "Internal error on test " + test["inpHash"] + ": " + str(ex)
+                self.logger.info("Got exception :(")
+                errors += "Internal error on test " + test["inpFile"] + "(" + test["inpHash"] + "): " + str(ex)
                 self.logger.error(ex)
                 break
 
             # Record the results for the current test and send update to the frontend
-            # TODO: Send batch updates by aggregating several results and send them at least 0.2 seconds apart
-            results = [{
-                "position": self.tests[test]["position"],
-                "status": status.name,
-                "score": 1 if status == TestStatus.ACCEPTED else 0
-            }]
+            results[0]["status"] = result.status.name
+            results[0]["error_message"] = result.error_message
+            results[0]["exec_time"] = result.exec_time
+            results[0]["exec_memory"] = result.exec_memory
+            results[0]["score"] = result.score
             self.send_update(TestStatus.TESTING.name, results)
             
         return errors

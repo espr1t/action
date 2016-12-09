@@ -9,12 +9,13 @@ class TestStatus(Enum):
     """ Defines variable results (or progress) of running the tests. """
     PREPARING = 0
     COMPILING = 1
-    TESTING = 2
-    COMPILATION_ERROR = 3
-    WRONG_ANSWER = 4
-    RUNTIME_ERROR = 5
-    TIME_LIMIT = 6
-    MEMORY_LIMIT = 7
-    INTERNAL_ERROR = 8
-    ACCEPTED = 9
+    QUEUED = 2
+    TESTING = 3
+    COMPILATION_ERROR = 4
+    WRONG_ANSWER = 5
+    RUNTIME_ERROR = 6
+    TIME_LIMIT = 7
+    MEMORY_LIMIT = 8
+    INTERNAL_ERROR = 9
+    ACCEPTED = 10
 

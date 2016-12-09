@@ -115,11 +115,14 @@ class ProblemsPage extends Page {
 
         $scoredSubmit = $problem->scoreSubmit($submit);
 
-        $color = 'gray';
-        if ($scoredSubmit['status'] <= $GLOBALS['STATUS_INTERNAL_ERROR']) {
-            $color = 'red';
+        $color = 'red';
+        if ($scoredSubmit['status'] == $GLOBALS['STATUS_WAITING'] ||
+            $scoredSubmit['status'] == $GLOBALS['STATUS_PREPARING'] ||
+            $scoredSubmit['status'] == $GLOBALS['STATUS_COMPILING'] ||
+            $scoredSubmit['status'] == $GLOBALS['STATUS_TESTING']) {
+            $color = 'gray';
         }
-        if ($scoredSubmit['status'] <= $GLOBALS['STATUS_ACCEPTED']) {
+        if ($scoredSubmit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
             $color = 'green';
         }
 
@@ -144,8 +147,8 @@ class ProblemsPage extends Page {
             $testResults .= '
                 <tr>
                     <td>' . $i . '</td>
-                    <td>' . ($result < 0 ? $GLOBALS['STATUS_DISPLAY_NAME'][$result] : 'OK') . '</td>
-                    <td>' . ($result < 0 ? 0 : $result) . '</td>
+                    <td>' . (is_numeric($result) ? 'OK' : $GLOBALS['STATUS_DISPLAY_NAME'][$result]) . '</td>
+                    <td>' . (is_numeric($result) ? $result : 0) . '</td>
                 </tr>
             ';
         }

@@ -110,7 +110,7 @@ class Submit {
         $submit->problemName = getValue($info, 'problemName');
         $submit->source = getValue($info, 'source');
         $submit->language = getValue($info, 'language');
-        $submit->results = array_map('intval', explode(',', getValue($info, 'results')));
+        $submit->results = explode(',', getValue($info, 'results'));
         $submit->status = getValue($info, 'status');
         $submit->message = getValue($info, 'message');
         return $submit;
@@ -129,7 +129,6 @@ class Submit {
             error_log('Could not get submit ' . $id . '. Exception: ' . $ex->getMessage());
         }
         return null;
-
     }
 
     public static function getUserSubmits($userId, $problemId) {
