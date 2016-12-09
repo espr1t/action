@@ -77,16 +77,23 @@ class AdminProblemsPage extends Page {
 
     private function getEditProblemScript($problem) {
         $brain = new Brain();
-        $tests = $brain->getProblemtests($problem->id);
+        $tests = $brain->getProblemTests($problem->id);
 
         $editProblemScript = '<script>';
         for ($i = 0; $i < count($tests); $i = $i + 1) {
+            $inpPath = sprintf("%s/%s/%s/%s",
+                    $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_TESTS_FOLDER'], $tests[$i]['inpFile']);
+            $solPath = sprintf("%s/%s/%s/%s",
+                    $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_TESTS_FOLDER'], $tests[$i]['solFile']);
+
             $editProblemScript .= '
                 tests.push({
                     \'inpFile\': \'' . $tests[$i]['inpFile'] . '\',
                     \'inpHash\': \'' . $tests[$i]['inpHash'] . '\',
+                    \'inpPath\': \'' . $inpPath . '\',
                     \'solFile\': \'' . $tests[$i]['solFile'] . '\',
                     \'solHash\': \'' . $tests[$i]['solHash'] . '\',
+                    \'solPath\': \'' . $solPath . '\',
                     \'score\': ' . $tests[$i]['score'] . ',
                     \'position\': ' . $tests[$i]['position'] . '
                 });

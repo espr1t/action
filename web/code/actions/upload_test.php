@@ -37,7 +37,8 @@ $brain->updateTestFile($_POST['problemId'], $_POST['testPosition'], $testName, $
 printAjaxResponse(array(
     'status' => 'OK',
     'message' => 'Тестът е добавен успешно.',
-    'hash' => $testHash
+    'hash' => $testHash,
+    'path' => $testPath
 ));
 
 ?>

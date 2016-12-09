@@ -65,26 +65,40 @@ function findTest(fileName) {
     return -1;
 }
 
-function updateFileHash(fileName, fileHash) {
+function updateFileHash(fileName, fileHash, filePath) {
     var test = findTest(fileName);
     if (test != -1) {
         if (tests[test]['inpFile'] != '-') {
             if (tests[test]['inpFile'] == fileName) {
                 tests[test]['inpHash'] = fileHash;
+                tests[test]['inpPath'] = filePath;
             } else {
                 tests[test]['solFile'] = fileName;
                 tests[test]['solHash'] = fileHash;
+                tests[test]['solPath'] = filePath;
             }
         }
         if (tests[test]['solFile'] != '-') {
             if (tests[test]['solFile'] == fileName) {
                 tests[test]['solHash'] = fileHash;
+                tests[test]['solPath'] = filePath;
             } else {
                 tests[test]['inpFile'] = fileName;
                 tests[test]['inpHash'] = fileHash;
+                tests[test]['inpPath'] = filePath;
             }
         }
         updateTestTable();
+    }
+}
+
+function getHashLabel(fileHash, filePath) {
+    if (fileHash == 'error') {
+        return '<div class="edit-problem-test-hash red">error</div>'
+    } else if (fileHash == 'waiting') {
+        return '<div class="edit-problem-test-hash gray">waiting</div>'
+    } else {
+        return '<div class="edit-problem-test-hash blue"><a href="' + filePath + '" target="_blank">' + fileHash + '</a></div>';
     }
 }
 
@@ -106,12 +120,10 @@ function updateTestTable() {
         var row = testTable.insertRow(-1);
 
         var inputCol = row.insertCell(-1);
-        var inputHash = (tests[i]['inpHash'] == 'error' ? 'red' : (tests[i]['inpHash'] == 'waiting' ? 'gray' : 'blue'));
-        inputCol.innerHTML = tests[i]['inpFile'] + '<div class="edit-problem-test-hash ' + inputHash + '">' + tests[i]['inpHash'] + '</div>';
+        inputCol.innerHTML = tests[i]['inpFile'] + getHashLabel(tests[i]['inpHash'], tests[i]['inpPath']);
 
         var outputCol = row.insertCell(-1);
-        var outputHash = (tests[i]['solHash'] == 'error' ? 'red' : (tests[i]['solHash'] == 'waiting' ? 'gray' : 'blue'));
-        outputCol.innerHTML = tests[i]['solFile'] + '<div class="edit-problem-test-hash ' + outputHash + '">' + tests[i]['solHash'] + '</div>';
+        outputCol.innerHTML = tests[i]['solFile'] + getHashLabel(tests[i]['solHash'], tests[i]['solPath']);
 
         var scoreCol = row.insertCell(-1);
         scoreCol.innerHTML = tests[i]['score'];
@@ -187,7 +199,7 @@ function uploadTest(problemId, position, testFile) {
                 showMessage('ERROR', 'Възникна проблем при качването на тест "' + testFile.name + '"!');
                 updateFileHash(testFile.name, 'error');
             } else {
-                updateFileHash(testFile.name, response['hash']);
+                updateFileHash(testFile.name, response['hash'], response['path']);
             }
         };
         ajaxCall('/actions/uploadTest', data, callback);
@@ -213,8 +225,10 @@ function addTests() {
             tests.push({
                 'inpFile': ((extension == 'in' || extension == 'inp') ? name : '-'),
                 'inpHash': 'waiting',
+                'inpPath': '',
                 'solFile': ((extension == 'sol' || extension == 'out') ? name : '-'),
                 'solHash': 'waiting',
+                'solPath': '',
                 'position': position,
                 'score': 10
             });
