@@ -10,6 +10,7 @@ import json
 import logging
 
 from os import path, makedirs
+from time import perf_counter
 import config
 import shutil
 from compiler import Compiler
@@ -156,7 +157,7 @@ class Evaluator:
         # If not, we should download it
         url = self.tests_url + test_name
         self.logger.info("Downloading file {} with hash {} from URL: {}".format(test_name, test_hash, url))
-        response = send_request("get", url)
+        response = send_request("GET", url)
         if response.status_code != 200:
             self.logger.error("Could not download test {} with hash {} using URL: {}".format(test_name, test_hash, url))
             raise Exception("Could not download test file!")
@@ -203,6 +204,7 @@ class Evaluator:
         return status
 
     def process_tests(self):
+        start_time = perf_counter()
         runner = Runner(self)
         errors = ""
         for test in self.tests:
@@ -229,7 +231,8 @@ class Evaluator:
             results[0]["exec_memory"] = result.exec_memory
             results[0]["score"] = result.score
             self.send_update(TestStatus.TESTING.name, results)
-            
+
+        self.logger.info("    -- executed {0} tests in {1:.3f}s.".format(len(self.tests), perf_counter() - start_time))
         return errors
 
     def cleanup(self):

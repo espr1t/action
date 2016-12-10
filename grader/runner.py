@@ -5,7 +5,7 @@ Runs the executable in a sandbox and returns the result for a single test case
 import logging
 import subprocess
 from os import name
-from time import sleep, clock
+from time import sleep, perf_counter
 import psutil
 
 import config
@@ -93,13 +93,15 @@ class Runner:
     def exec_solution(self, executable, inp_file, out_file):
         inp_data = open(inp_file, "rt")
         out_data = open(out_file, "wt")
-        process = psutil.Popen([], executable=executable, stdin=inp_data, stdout=out_data, stderr=subprocess.PIPE)
 
         exec_time = 0.0
         exec_memory = 0.0
         exit_code = None
 
-        start_time = clock()
+        start_time = perf_counter()
+
+        process = psutil.Popen([], executable=executable, stdin=inp_data, stdout=out_data, stderr=subprocess.PIPE)
+
         while True:
             sleep(Runner.CHECK_INTERVAL)
 
@@ -108,7 +110,9 @@ class Runner:
                 break
             if not process.is_running():
                 break
-            if clock() - start_time > self.evaluator.time_limit * 2:
+
+            # Process has hung up
+            if perf_counter() - start_time > self.evaluator.time_limit * 2:
                 exit_code = Runner.KILLED_RUNTIME_ERROR
                 process.kill()
                 break
@@ -141,7 +145,7 @@ class Runner:
 
         self.logger.info("  >> Elapsed time: {0:.3f}s. "
                          "Used memory: {1:.3f}MB. "
-                         "Total testing time: {2:.3f}s.".format(exec_time, exec_memory, clock() - start_time))
+                         "Total testing time: {2:.3f}s.".format(exec_time, exec_memory, perf_counter() - start_time))
 
         exit_code = process.poll() if exit_code is None else exit_code
 
