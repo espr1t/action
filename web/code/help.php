@@ -8,10 +8,17 @@ class HelpPage extends Page {
     }
     
     public function getContent() {
+        $version = '
+            <div class="right smaller italic" style="padding-right: 4px;">
+                Версия на системата: <a href="https://github.com/espr1t/action/commit/06e0734fb41b2433fb65f13ac78c96cb62d61389" target="_blank">v.161211.06e0734</a>
+            </div>
+        ';
+
         $content = inBox('
             <h1>Упътване</h1>
             Тук е описано как работи системата и какво да очаквате, когато направите някое действие.
-        ') . inBox('
+        ') . $version
+           . inBox('
             <h2 id="report-a-problem"><a href="#report-a-problem">Съобщаване за проблеми</a></h2>
             В менюто отдолу има линк "report a bug", чрез който регистрираните потребители могат да се свържат с админ и да съобщят за проблем (било то със системата или с някоя от
             задачите). Не се притеснявайте да го ползвате дори за малки проблеми като правописни грешки.
