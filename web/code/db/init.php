@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR_ . '/db.php');
+require_once(__DIR__ . '/db.php');
 
 $db = new DB();
 
@@ -128,7 +128,7 @@ if ($db->tableExists('Tests')) {
             inpHash VARCHAR(32) NOT NULL,
             solFile VARCHAR(32) NOT NULL,
             solHash VARCHAR(32) NOT NULL,
-            score INT NOT NULL,
+            score FLOAT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
@@ -147,7 +147,7 @@ Table::Submits
     "problemName": "Input/Output",
     "language": java,
     "results": "1,1,-3,0.42,-6",
-    "status": -1,
+    "status": "T",
     "message": "Undefined variable 'foo'"
 }
 */
@@ -168,7 +168,7 @@ if ($db->tableExists('Submits')) {
             source TEXT NOT NULL,
             language ENUM('C++', 'Java', 'Python') NOT NULL,
             results TEXT NOT NULL,
-            status INT NOT NULL,
+            status VARCHAR(2) NOT NULL,
             message TEXT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -188,7 +188,7 @@ Table::Pending
     "problemName": "Input/Output",
     "time": "2016-08-30 00:24:11",
     "progress": 0.66,
-    "status": -3
+    "status": "W"
 }
 */
 output('');
@@ -207,7 +207,7 @@ if ($db->tableExists('Pending')) {
             problemName VARCHAR(32) NOT NULL,
             time DATETIME NOT NULL,
             progress FLOAT NOT NULL,
-            status INT NOT NULL,
+            status VARCHAR(2) NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
@@ -226,7 +226,7 @@ Table::Latest
     "problemName": "Input/Output",
     "time": "2016-08-29 23:54:33",
     "progress": 1.0,
-    "status": -9
+    "status": "AC"
 }
 */
 output('');
@@ -245,7 +245,7 @@ if ($db->tableExists('Latest')) {
             problemName VARCHAR(32) NOT NULL,
             time DATETIME NOT NULL,
             progress FLOAT NOT NULL,
-            status INT NOT NULL,
+            status VARCHAR(2) NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

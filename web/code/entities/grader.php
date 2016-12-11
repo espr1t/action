@@ -44,8 +44,8 @@ class Grader {
         return $response;
     }
 
-    function healthy() {
-        $response = $this->call($GLOBALS['GRADER_ENDPOINT_HEALTHCHECK'], [], Grader::$METHOD_GET);
+    function available() {
+        $response = $this->call($GLOBALS['GRADER_ENDPOINT_AVAILABLE'], [], Grader::$METHOD_GET);
         return $response['status'] == 200;
     }
 

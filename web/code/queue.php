@@ -50,7 +50,7 @@ class QueuePage extends Page {
         ');
 
         $grader = new Grader();
-        $graderStatus = $grader->healthy() ?
+        $graderStatus = $grader->available() ?
                 '<i class="fa fa-check-circle green" title="Грейдърът е пич."></i>' :
                 '<i class="fa fa-exclamation-circle red" title="Грейдърът се прави на недостъпен."></i>';
 

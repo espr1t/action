@@ -26,7 +26,7 @@ $GRADER_URL = 'localhost:5000';
 $GRADER_USERNAME = 'username';
 $GRADER_PASSWORD = 'password';
 
-$GRADER_ENDPOINT_HEALTHCHECK = '/healthcheck';
+$GRADER_ENDPOINT_AVAILABLE = '/available';
 $GRADER_ENDPOINT_EVALUATE = '/evaluate';
 
 // Grader-exposed system endpoints
