@@ -47,9 +47,9 @@ class Runner:
         self.logger.removeHandler(self.handler)
 
     def run(self, test):
-        self.logger.info("Running solution on test {}".format(test["inpFile"]))
+        # self.logger.info("Running solution on test {}".format(test["inpFile"]))
         inp_file = config.PATH_TESTS + test["inpHash"]
-        out_file = self.evaluator.path_sandbox + "output.out"
+        out_file = self.evaluator.path_sandbox + test["inpFile"].replace(".in", ".out")
         sol_file = config.PATH_TESTS + test["solHash"]
 
         executable = self.evaluator.path_executable
@@ -57,31 +57,28 @@ class Runner:
         if name == "nt":
             executable = executable.replace("/", "\\")
 
+        start_time = perf_counter()
         result = self.exec_solution(executable, inp_file, out_file)
 
         if result.error_message != "":
             self.logger.info("Got error while executing test {}: \"{}\"".format(test["inpFile"], result.error_message))
             result.status = TestStatus.RUNTIME_ERROR
-            return result
-
-        if result.exec_time > self.evaluator.time_limit:
+        elif result.exec_time > self.evaluator.time_limit:
             result.status = TestStatus.TIME_LIMIT
-            return result
-
-        if result.exec_memory > self.evaluator.memory_limit:
+        elif result.exec_memory > self.evaluator.memory_limit:
             result.status = TestStatus.MEMORY_LIMIT
-            return result
-
-        if result.exit_code != 0:
+        elif result.exit_code != 0:
             result.status = TestStatus.RUNTIME_ERROR
-            return result
+        else:
+            result.error_message, result.score = Runner.validate_output(out_file, sol_file)
+            if result.error_message != "":
+                result.status = TestStatus.WRONG_ANSWER
+            else:
+                result.status = TestStatus.ACCEPTED
 
-        result.error_message, result.score = Runner.validate_output(out_file, sol_file)
-        if result.error_message != "":
-            result.status = TestStatus.WRONG_ANSWER
-            return result
+        self.logger.info("    -- executed {}: Time: {:.3f}s. Memory: {:.3f}MB. Testing time: {:.3f}s :: {}".format(
+                test["inpFile"], result.exec_time, result.exec_memory, perf_counter() - start_time, result.status.name))
 
-        result.status = TestStatus.ACCEPTED
         return result
 
     # TODO:
@@ -91,6 +88,7 @@ class Runner:
     # Use checker if provided
 
     def exec_solution(self, executable, inp_file, out_file):
+
         inp_data = open(inp_file, "rt")
         out_data = open(out_file, "wt")
 
@@ -99,7 +97,6 @@ class Runner:
         exit_code = None
 
         start_time = perf_counter()
-
         process = psutil.Popen([], executable=executable, stdin=inp_data, stdout=out_data, stderr=subprocess.PIPE)
 
         while True:
@@ -142,10 +139,6 @@ class Runner:
 
             except psutil.NoSuchProcess:
                 break
-
-        self.logger.info("  >> Elapsed time: {0:.3f}s. "
-                         "Used memory: {1:.3f}MB. "
-                         "Total testing time: {2:.3f}s.".format(exec_time, exec_memory, perf_counter() - start_time))
 
         exit_code = process.poll() if exit_code is None else exit_code
 

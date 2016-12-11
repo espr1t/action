@@ -101,7 +101,7 @@ class Evaluator:
             return
 
         # Send an update that the testing has been started for this submission
-        self.send_update(TestStatus.QUEUED.name, self.set_results(TestStatus.QUEUED))
+        self.send_update(TestStatus.TESTING.name, self.set_results(TestStatus.TESTING))
 
         # Execute each of the tests
         self.logger.info("  >> starting processing tests...")
@@ -207,17 +207,16 @@ class Evaluator:
         start_time = perf_counter()
         runner = Runner(self)
         errors = ""
-        for test in self.tests:
-            # TODO: Send batch updates by aggregating several results and send them at least 0.2 seconds apart
-            results = [{
-                "position": test["position"],
-                "status": TestStatus.TESTING.name,
-                "score": 0
-            }]
-            self.send_update(TestStatus.TESTING.name, results)
 
+        test_futures = []
+        for test in self.tests:
+            test_futures.append([test, executor.submit(runner.run, test)])
+
+        # TODO: Send batch updates by aggregating several results and send them at least 0.2 seconds apart
+        for test_future in test_futures:
+            test, future = test_future
             try:
-                result = executor.submit(runner.run, test).result()
+                result = future.result()
             except ValueError as ex:
                 self.logger.info("Got exception :(")
                 errors += "Internal error on test " + test["inpFile"] + "(" + test["inpHash"] + "): " + str(ex)
@@ -225,11 +224,14 @@ class Evaluator:
                 break
 
             # Record the results for the current test and send update to the frontend
-            results[0]["status"] = result.status.name
-            results[0]["error_message"] = result.error_message
-            results[0]["exec_time"] = result.exec_time
-            results[0]["exec_memory"] = result.exec_memory
-            results[0]["score"] = result.score
+            results = [{
+                "position": test["position"],
+                "status": result.status.name,
+                "error_message": result.error_message,
+                "exec_time": result.exec_time,
+                "exec_memory": result.exec_memory,
+                "score": result.score
+            }]
             self.send_update(TestStatus.TESTING.name, results)
 
         self.logger.info("    -- executed {0} tests in {1:.3f}s.".format(len(self.tests), perf_counter() - start_time))
