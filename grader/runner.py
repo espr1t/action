@@ -76,7 +76,7 @@ class Runner:
             else:
                 result.status = TestStatus.ACCEPTED
 
-        self.logger.info("    -- executed {}: Time: {:.3f}s. Memory: {:.3f}MB. Testing time: {:.3f}s :: {}".format(
+        self.logger.info("    -- executed {}: Time: {:.3f}s. Memory: {:.0f}KiB. Testing time: {:.3f}s :: {}".format(
                 test["inpFile"], result.exec_time, result.exec_memory, perf_counter() - start_time, result.status.name))
 
         return result
@@ -117,7 +117,9 @@ class Runner:
             try:
                 # Update statistics
                 exec_time = max(exec_time, process.cpu_times().user)
-                exec_memory = max(exec_memory, process.memory_full_info().uss / 1048576.0)
+                # Returned memory is given in bytes, convert to KiB.
+                # Consider using USS instead of PSS if available (currently it returns zeroes only)
+                exec_memory = max(exec_memory, process.memory_full_info().pss / 1024.0)
 
                 # Spawning processes or threads
                 if process.num_threads() > 2:

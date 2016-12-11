@@ -131,11 +131,15 @@ class ProblemsPage extends Page {
                 <tr>
                     <th style="width: 30px;">#</th>
                     <th>Статус на задачата</th>
+                    <th style="width: 100px;">Време</th>
+                    <th style="width: 100px;">Памет</th>
                     <th style="width: 100px;">Точки</th>
                 </tr>
                 <tr>
                     <td>-</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$scoredSubmit['status']] . '</td>
+                    <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
+                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory) / 1024.0) . '</td>
                     <td>' . $scoredSubmit['score'] . '</td>
                 </tr>
             </table>
@@ -148,6 +152,8 @@ class ProblemsPage extends Page {
                 <tr>
                     <td>' . $i . '</td>
                     <td>' . (is_numeric($result) ? 'OK' : $GLOBALS['STATUS_DISPLAY_NAME'][$result]) . '</td>
+                    <td>' . sprintf("%.2fs", $submit->exec_time[$i]) . '</td>
+                    <td>' . sprintf("%.2f MiB", $submit->exec_memory[$i] / 1024.0) . '</td>
                     <td>' . (is_numeric($result) ? $result : 0) . '</td>
                 </tr>
             ';
@@ -158,6 +164,8 @@ class ProblemsPage extends Page {
                 <tr>
                     <th style="width: 30px;">#</th>
                     <th>Статус по тестове</th>
+                    <th style="width: 100px;">Време</th>
+                    <th style="width: 100px;">Памет</th>
                     <th style="width: 100px;">Точки</th>
                 </tr>
                 ' . $testResults . '

@@ -146,7 +146,7 @@ Table::Submits
     "problemId": 1,
     "problemName": "Input/Output",
     "language": java,
-    "results": "1,1,-3,0.42,-6",
+    "results": "1,1,TL,0.42,WA",
     "status": "T",
     "message": "Undefined variable 'foo'"
 }
@@ -168,6 +168,8 @@ if ($db->tableExists('Submits')) {
             source TEXT NOT NULL,
             language ENUM('C++', 'Java', 'Python') NOT NULL,
             results TEXT NOT NULL,
+            exec_time TEXT NOT NULL,
+            exec_memory TEXT NOT NULL,
             status VARCHAR(2) NOT NULL,
             message TEXT NOT NULL,
             PRIMARY KEY (id)

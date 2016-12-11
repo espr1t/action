@@ -30,7 +30,8 @@ class Evaluator:
         self.source = data["source"]
         self.language = data["language"]
         self.time_limit = data["timeLimit"]
-        self.memory_limit = data["memoryLimit"]
+        # Memory limit is given in MiB, convert to KiB.
+        self.memory_limit = data["memoryLimit"] * 1024.0
         self.tests = data["tests"]
         self.checker = data["checker"] if "checker" in data else ""
         self.tester = data["tester"] if "tester" in data else ""
@@ -68,7 +69,7 @@ class Evaluator:
     def evaluate(self):
         # Send an update that preparation has been started for executing this submission
         self.logger.info("Evaluating submission {}".format(self.id))
-        self.send_update(TestStatus.PREPARING.name, self.set_results(TestStatus.PREPARING))
+        self.send_update("", self.set_results(TestStatus.PREPARING))
 
         # Create sandbox directory
         self.logger.info("  >> creating sandbox directory...")
@@ -90,7 +91,7 @@ class Evaluator:
             return
 
         # Send an update that the compilation has been started for this submission
-        self.send_update(TestStatus.COMPILING.name, self.set_results(TestStatus.COMPILING))
+        self.send_update("", self.set_results(TestStatus.COMPILING))
 
         # Compile
         self.logger.info("  >> compiling...")
@@ -101,7 +102,7 @@ class Evaluator:
             return
 
         # Send an update that the testing has been started for this submission
-        self.send_update(TestStatus.TESTING.name, self.set_results(TestStatus.TESTING))
+        self.send_update("", self.set_results(TestStatus.TESTING))
 
         # Execute each of the tests
         self.logger.info("  >> starting processing tests...")
@@ -112,6 +113,7 @@ class Evaluator:
             return
 
         # Finished with this submission
+        self.send_update("DONE")
         self.logger.info("  >> done with {}!".format(self.id))
 
     def send_update(self, message="", results=None):
@@ -232,7 +234,7 @@ class Evaluator:
                 "exec_memory": result.exec_memory,
                 "score": result.score
             }]
-            self.send_update(TestStatus.TESTING.name, results)
+            self.send_update("", results)
 
         self.logger.info("    -- executed {0} tests in {1:.3f}s.".format(len(self.tests), perf_counter() - start_time))
         return errors

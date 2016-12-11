@@ -276,7 +276,7 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (time, userId, userName, problemId, problemName, source, language, results, status, message)
+            INSERT INTO `Submits` (time, userId, userName, problemId, problemName, source, language, results, exec_time, exec_memory, status, message)
             VALUES (
                 '" . $submit->time . "',
                 '" . $submit->userId . "',
@@ -286,6 +286,8 @@ class Brain {
                 '" . $this->db->escape($submit->source) . "',
                 '" . $this->db->escape($submit->language) . "',
                 '" . implode(',', $submit->results) . "',
+                '" . implode(',', $submit->exec_time) . "',
+                '" . implode(',', $submit->exec_memory) . "',
                 '" . $submit->status . "',
                 '" . $this->db->escape($submit->message) . "'
             )
@@ -301,6 +303,8 @@ class Brain {
         $response = $this->db->query("
             UPDATE `Submits` SET
                 results = '" . implode(',', $submit->results) . "',
+                exec_time = '" . implode(',', $submit->exec_time) . "',
+                exec_memory = '" . implode(',', $submit->exec_memory) . "',
                 status = '" . $submit->status . "',
                 message = '" . $this->db->escape($submit->message) . "'
             WHERE id = " . $submit->id . "
@@ -328,7 +332,7 @@ class Brain {
     function getProblemSubmits($problemId, $status) {
         $response = $this->db->query("
             SELECT id FROM `Submits`
-            WHERE problemId = " . $problemId . " AND status = " . $status . "
+            WHERE problemId = " . $problemId . " AND status = '" . $status . "'
             GROUP BY userId
         ");
         if (!$response) {

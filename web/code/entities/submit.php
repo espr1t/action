@@ -15,6 +15,8 @@ class Submit {
     public $source = '';
     public $language = '';
     public $results = array();
+    public $exec_time = array();
+    public $exec_memory = array();
     public $progress = 0;
     public $status = -1;
     public $message = '';
@@ -44,9 +46,13 @@ class Submit {
         $submit->source = $source;
         $submit->language = $language;
         $submit->results = array();
+        $submit->exec_time = array();
+        $submit->exec_memory = array();
         $numTests = count($submit->brain->getProblemTests($problem->id));
         for ($i = 0; $i < $numTests; $i = $i + 1) {
             $submit->results[$i] = $GLOBALS['STATUS_WAITING'];
+            $submit->exec_time[$i] = 0;
+            $submit->exec_memory[$i] = 0;
         }
         $submit->progress = 0;
         $submit->status = $GLOBALS['STATUS_WAITING'];
@@ -111,6 +117,8 @@ class Submit {
         $submit->source = getValue($info, 'source');
         $submit->language = getValue($info, 'language');
         $submit->results = explode(',', getValue($info, 'results'));
+        $submit->exec_time = explode(',', getValue($info, 'exec_time'));
+        $submit->exec_memory = explode(',', getValue($info, 'exec_memory'));
         $submit->status = getValue($info, 'status');
         $submit->message = getValue($info, 'message');
         return $submit;

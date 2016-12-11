@@ -68,9 +68,15 @@ class Grader {
             } else {
                 $submit->results[$results[$i]['position']] = $GLOBALS['STATUS_' . $results[$i]['status']];
             }
+            $submit->exec_time[$results[$i]['position']] = floatval($results[$i]['exec_time']);
+            $submit->exec_memory[$results[$i]['position']] = floatval($results[$i]['exec_memory']);
         }
         $brain = new Brain();
         $brain->updateSubmit($submit);
+
+        if ($submit->message != '') {
+            // TODO: Update Latest and Pending, also Submit status column
+        }
     }
 }
 
