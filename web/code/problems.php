@@ -113,18 +113,8 @@ class ProblemsPage extends Page {
             return showMessage('ERROR', 'Решението не е по поисканата задача!');
         }
 
-        $scoredSubmit = $problem->scoreSubmit($submit);
-
-        $color = 'red';
-        if ($scoredSubmit['status'] == $GLOBALS['STATUS_WAITING'] ||
-            $scoredSubmit['status'] == $GLOBALS['STATUS_PREPARING'] ||
-            $scoredSubmit['status'] == $GLOBALS['STATUS_COMPILING'] ||
-            $scoredSubmit['status'] == $GLOBALS['STATUS_TESTING']) {
-            $color = 'gray';
-        }
-        if ($scoredSubmit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
-            $color = 'green';
-        }
+        $status = $submit->calcStatus();
+        $color = ($status == $GLOBALS['STATUS_ACCEPTED'] ? 'green' : (strlen($status) == 1 ? 'gray' : 'red'));
 
         $summaryTable = '
             <table class="default ' . $color . '">
@@ -137,24 +127,25 @@ class ProblemsPage extends Page {
                 </tr>
                 <tr>
                     <td>-</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$scoredSubmit['status']] . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$status] . '</td>
                     <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
                     <td>' . sprintf("%.2f MiB", max($submit->exec_memory) / 1024.0) . '</td>
-                    <td>' . $scoredSubmit['score'] . '</td>
+                    <td>' . $submit->calcScore() . '</td>
                 </tr>
             </table>
         ';
 
+        $scores = $submit->calcScores();
         $testResults = '';
-        for ($i = 0; $i < count($scoredSubmit['results']); $i = $i + 1) {
-            $result = $scoredSubmit['results'][$i];
+        for ($i = 0; $i < count($scores); $i = $i + 1) {
+            $result = $submit->results[$i];
             $testResults .= '
                 <tr>
                     <td>' . $i . '</td>
                     <td>' . (is_numeric($result) ? 'OK' : $GLOBALS['STATUS_DISPLAY_NAME'][$result]) . '</td>
                     <td>' . sprintf("%.2fs", $submit->exec_time[$i]) . '</td>
                     <td>' . sprintf("%.2f MiB", $submit->exec_memory[$i] / 1024.0) . '</td>
-                    <td>' . (is_numeric($result) ? $result : 0) . '</td>
+                    <td>' . $scores[$i] . '</td>
                 </tr>
             ';
         }
@@ -196,7 +187,6 @@ class ProblemsPage extends Page {
         $submitList = '';
         for ($i = 0; $i < count($submits); $i = $i + 1) {
             $submit = $submits[$i];
-            $scoredSubmit = $problem->scoreSubmit($submit);
             $submitLink = '<a href="/problems/' . $problem->id . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
             $submitList .= '
                 <tr>
@@ -204,8 +194,8 @@ class ProblemsPage extends Page {
                     <td>' . explode(' ', $submit->time)[0] . '</td>
                     <td>' . explode(' ', $submit->time)[1] . '</td>
                     <td>' . $submitLink . '</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$scoredSubmit['status']] . '</td>
-                    <td>' . round($scoredSubmit['score'], 3) . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->calcStatus()] . '</td>
+                    <td>' . round($submit->calcScore(), 3) . '</td>
                 </tr>
             ';
         }

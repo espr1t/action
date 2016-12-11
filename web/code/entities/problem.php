@@ -138,58 +138,6 @@ class Problem {
         // Update the meta information and the statement
         return $this->update();
     }
-
-    public function scoreSubmit($submit) {
-        $brain = new Brain();
-        $tests = $brain->getProblemTests($submit->problemId);
-
-        if (count($submit->results) != count($tests)) {
-            error_log('Number of tests of problem ' . $submit->problemId . ' differs from results in submission ' . $submit->id . '!');
-        }
-
-        $scoredSubmit = array();
-
-        $maxScore = 0.0;
-        $scoredSubmit['score'] = 0;
-        $scoredSubmit['status'] = $GLOBALS['STATUS_ACCEPTED'];
-
-        $scoredSubmit['results'] = array();
-        for ($i = 0; $i < count($submit->results); $i = $i + 1) {
-            $maxScore += $tests[$i]['score'];
-            $result = $submit->results[$i];
-
-            // Non-negative results indicate actually graded tests
-            if (is_numeric($result)) {
-                // The grader assigns 0/1 value for each test of IOI- and ACM-style problems and [0, 1] real fraction of the score
-                // for games and relative problems. In both cases, multiplying the score of the test by this value is correct.
-                $scoredSubmit['results'][$i] = $result * $tests[$i]['score'];
-                $scoredSubmit['score'] += $scoredSubmit['results'][$i];
-            }
-            // Negative results indicate exceptional cases
-            else {
-                // Exceptional cases are considered a zero for the test
-                $scoredSubmit['results'][$i] = $result;
-
-                // Also update the status of the entire problem
-                $statii = $GLOBALS['STATUS_DISPLAY_NAME'];
-                while ($status = current($statii)) {
-                    if ($result == key($statii)) {
-                        $scoredSubmit['status'] = $result;
-                        break;
-                    }
-                    if ($scoredSubmit['status'] == key($statii)) {
-                        break;
-                    }
-                    next($statii);
-                }
-            }
-        }
-        if ($maxScore > 0.0) {
-            $scoredSubmit['score'] = 100.0 * $scoredSubmit['score'] / $maxScore;
-        }
-        return $scoredSubmit;
-    }
-
 }
 
 ?>

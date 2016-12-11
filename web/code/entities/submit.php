@@ -149,6 +149,42 @@ class Submit {
         return $submits;
     }
 
+    public function calcStatus() {
+        $statii = $GLOBALS['STATUS_DISPLAY_NAME'];
+        while ($status = current($statii)) {
+            foreach ($this->results as $result) {
+                if ($result == key($statii)) {
+                    return $result;
+                }
+            }
+            next($statii);
+        }
+        // If all tests are numeric, thus tested and scored successfully, declare the submit ACCEPTED
+        return $GLOBALS['STATUS_ACCEPTED'];
+    }
+
+    public function calcScores() {
+        $brain = new Brain();
+        $tests = $brain->getProblemTests($this->problemId);
+
+        if (count($this->results) != count($tests)) {
+            error_log('Number of tests of problem ' . $submit->problemId . ' differs from results in submission ' . $submit->id . '!');
+        }
+
+        $scores = [];
+        $maxScore = 0.0;
+        for ($i = 0; $i < count($this->results); $i = $i + 1) {
+            $maxScore += $tests[$i]['score'];
+            // The grader assigns 0/1 value for each test of IOI- and ACM-style problems and [0, 1] real fraction of the score
+            // for games and relative problems. In both cases, multiplying the score of the test by this value is correct.
+            array_push($scores, (is_numeric($this->results[$i]) ? $this->results[$i] : 0.0) * $tests[$i]['score']);
+        }
+        return array_map(function($num) use($maxScore) {return 100.0 * $num / $maxScore;}, $scores);
+    }
+
+    public function calcScore() {
+        return array_sum($this->calcScores());
+    }
 }
 
 ?>

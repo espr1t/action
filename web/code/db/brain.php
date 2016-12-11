@@ -357,7 +357,7 @@ class Brain {
     function getSolved($userId) {
         $response = $this->db->query("
             SELECT DISTINCT problemId FROM `Submits`
-            WHERE userId = " . $userId . " AND status = " . $GLOBALS['STATUS_ACCEPTED'] . "
+            WHERE userId = " . $userId . " AND status = '" . $GLOBALS['STATUS_ACCEPTED'] . "'
         ");
         if (!$response) {
             error_log('Could not execute getSolved() query for user with id ' . $userId . '!');
@@ -399,6 +399,40 @@ class Brain {
         return $this->db->lastId();
     }
 
+    function updatePending($submit) {
+        $executed = 0;
+        foreach ($submit->results as $result) {
+            if (is_numeric($result) || strlen($result) == 2) {
+                $executed = $executed + 1;
+            }
+        }
+        $progress = count($submit->results) == 0 ? 0.0 : 1.0 * $executed / count($submit->results);
+
+        $response = $this->db->query("
+            UPDATE `Pending` SET
+                progress = '" . $progress . "'
+            WHERE submitId = " . $submit->id . "
+        ");
+
+        if (!$response) {
+            error_log('Could not update submit ' . $submit->id . ' in pending queue!');
+            return null;
+        }
+        return true;
+    }
+
+    function erasePending($submit) {
+        $response = $this->db->query("
+            DELETE FROM `Pending`
+            WHERE submitId = " . $submit->id . "
+        ");
+        if (!$response) {
+            error_log('Could not erase submit ' . $submit->id . ' from pending queue!');
+            return null;
+        }
+        return true;
+    }
+
     // Latest
     function getLatest() {
         $response = $this->db->query("
@@ -409,6 +443,38 @@ class Brain {
             return null;
         }
         return $this->getResults($response);
+    }
+
+    function addLatest($submit) {
+        $response = $this->db->query("
+            INSERT INTO `Latest`(submitId, userId, userName, problemId, problemName, time, progress, status)
+            VALUES (
+                '" . $submit->id . "',
+                '" . $submit->userId . "',
+                '" . $submit->userName . "',
+                '" . $submit->problemId . "',
+                '" . $submit->problemName . "',
+                '" . $submit->time . "',
+                '" . 1 . "',
+                '" . $submit->status . "'
+            )
+        ");
+        if (!$response) {
+            error_log('Could not add submit ' . $submit->id . ' to pending queue!');
+            return null;
+        }
+        return $this->db->lastId();
+    }
+
+    function trimLatest($lastId) {
+        $response = $this->db->query("
+            DELETE FROM `Latest` WHERE id <= " . ($lastId - 10) . "
+        ");
+        if (!$response) {
+            error_log('Could not trim Latest submits!!');
+            return null;
+        }
+        return true;
     }
 
     // Users
