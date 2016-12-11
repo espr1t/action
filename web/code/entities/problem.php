@@ -149,11 +149,13 @@ class Problem {
 
         $scoredSubmit = array();
 
+        $maxScore = 0.0;
         $scoredSubmit['score'] = 0;
         $scoredSubmit['status'] = $GLOBALS['STATUS_ACCEPTED'];
 
         $scoredSubmit['results'] = array();
         for ($i = 0; $i < count($submit->results); $i = $i + 1) {
+            $maxScore += $tests[$i]['score'];
             $result = $submit->results[$i];
 
             // Non-negative results indicate actually graded tests
@@ -182,7 +184,9 @@ class Problem {
                 }
             }
         }
-
+        if ($maxScore > 0.0) {
+            $scoredSubmit['score'] = 100.0 * $scoredSubmit['score'] / $maxScore;
+        }
         return $scoredSubmit;
     }
 

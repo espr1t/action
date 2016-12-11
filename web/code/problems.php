@@ -197,7 +197,7 @@ class ProblemsPage extends Page {
                     <td>' . explode(' ', $submit->time)[1] . '</td>
                     <td>' . $submitLink . '</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$scoredSubmit['status']] . '</td>
-                    <td>' . $scoredSubmit['score'] . '</td>
+                    <td>' . round($scoredSubmit['score'], 3) . '</td>
                 </tr>
             ';
         }
