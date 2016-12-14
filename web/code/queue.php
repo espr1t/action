@@ -49,10 +49,7 @@ class QueuePage extends Page {
             Информация за системата и опашката от решения.
         ');
 
-        $grader = new Grader();
-        $graderStatus = $grader->available() ?
-                '<i class="fa fa-check-circle green" title="Грейдърът е пич."></i>' :
-                '<i class="fa fa-exclamation-circle red" title="Грейдърът се прави на недостъпен."></i>';
+        $graderStatus ='<i id="graderStatus" class="fa fa-question-circle yellow" title="Проверка на грейдъра..."></i>';
 
         $time = '
             <div class="right smaller italic" style="padding-right: 4px;">
@@ -75,7 +72,9 @@ class QueuePage extends Page {
         $compilers = '<div class="center" style="margin-top: -6px; margin-bottom: 6px;">Информация за ползваните
                 <a href="help#compilation">компилатори</a> и конфигурацията на <a href="help#grader">тестващата машина</a>.</div>';
 
-        return $head . $time . $latest . $pending . $compilers;
+        $invokeGraderCheck = '<script>updateGraderStatus();</script>';
+
+        return $head . $time . $latest . $pending . $compilers . $invokeGraderCheck;
     }
     
 }

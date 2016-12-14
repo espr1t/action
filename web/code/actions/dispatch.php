@@ -14,6 +14,10 @@ if ($user == null) {
 
 switch ($_GET['action']) {
 
+    case 'checkGrader':
+        require_once('check_grader.php');
+        break;
+
     case 'reportProblem':
         require_once('report_problem.php');
         break;

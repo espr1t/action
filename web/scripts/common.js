@@ -244,3 +244,30 @@ function submitReportForm() {
     ajaxCall('/actions/reportProblem', data, callback);
 }
 
+/*
+ * Update grader status
+ */
+function updateGraderStatus() {
+    var callback = function(response) {
+        try {
+            response = JSON.parse(response);
+        } catch(ex) {
+            alert(response);
+            response = null;
+        }
+
+        if (response != null) {
+            var statusEl = document.getElementById('graderStatus');
+            if ('status' in response) {
+                if (response['status'] == 'OK') {
+                    statusEl.className = 'fa fa-check-circle green';
+                    statusEl.title = 'Грейдърът е достъпен за ' + response['message'] + 's.';
+                } else {
+                    statusEl.className = 'fa fa-exclamation-circle red';
+                    statusEl.title = 'Грейдърът се прави на недостъпен.';
+                }
+            }
+        }
+    }
+    ajaxCall('/actions/checkGrader', {}, callback);
+}

@@ -17,7 +17,7 @@ class Grader {
             curl_setopt($curl, CURLOPT_POSTFIELDS, array('data' => json_encode($data)));
         }
 
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 1);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_URL, $GLOBALS['GRADER_URL'] . $path);
 
