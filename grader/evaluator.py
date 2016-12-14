@@ -17,10 +17,16 @@ from compiler import Compiler
 from common import executor, send_request
 from status import TestStatus
 from runner import Runner
+from threading import Thread
 
 
 class Evaluator:
     def __init__(self, data):
+        # Update Timer
+        self.update_timer = -1
+        self.update_message = ""
+        self.update_results = []
+
         # Server endpoints
         self.update_url = data["updateEndpoint"]
         self.tests_url = data["testsEndpoint"]
@@ -69,13 +75,13 @@ class Evaluator:
     def evaluate(self):
         # Send an update that preparation has been started for executing this submission
         self.logger.info("Evaluating submission {}".format(self.id))
-        self.send_update("", self.set_results(TestStatus.PREPARING))
+        self.update_frontend("", self.set_results(TestStatus.PREPARING))
 
         # Create sandbox directory
         self.logger.info("  >> creating sandbox directory...")
         create_sandbox_status = self.create_sandbox_dir()
         if create_sandbox_status != "":
-            self.send_update(create_sandbox_status, self.set_results(TestStatus.INTERNAL_ERROR))
+            self.update_frontend(create_sandbox_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Download the test files (if not downloaded already)
@@ -87,44 +93,59 @@ class Evaluator:
         self.logger.info("  >> writing source code to file...")
         write_source_status = self.write_source()
         if write_source_status != "":
-            self.send_update(write_source_status, self.set_results(TestStatus.INTERNAL_ERROR))
+            self.update_frontend(write_source_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Send an update that the compilation has been started for this submission
-        self.send_update("", self.set_results(TestStatus.COMPILING))
+        self.update_frontend("", self.set_results(TestStatus.COMPILING))
 
         # Compile
         self.logger.info("  >> compiling...")
         compile_status = self.compile()
         if compile_status != "":
             self.logger.info("    -- error while compiling the solution!")
-            self.send_update(compile_status, self.set_results(TestStatus.COMPILATION_ERROR))
+            self.update_frontend(compile_status, self.set_results(TestStatus.COMPILATION_ERROR))
             return
 
         # Send an update that the testing has been started for this submission
-        self.send_update("", self.set_results(TestStatus.TESTING))
+        self.update_frontend("", self.set_results(TestStatus.TESTING))
 
         # Execute each of the tests
         self.logger.info("  >> starting processing tests...")
         run_status = self.process_tests()
         if run_status != "":
             self.logger.info("    -- error while running the solution!")
-            self.send_update(run_status, self.set_results(TestStatus.INTERNAL_ERROR))
+            self.update_frontend(run_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Finished with this submission
-        self.send_update("DONE")
+        self.update_frontend("DONE")
         self.logger.info("  >> done with {}!".format(self.id))
 
-    def send_update(self, message="", results=None):
-        # self.logger.info("  >> sending update with message = {}".format(message))
-        data = {
-            "id": self.id,
-            "message": message
-        }
+    def update_frontend(self, message="", results=None):
+        # Merge current message and results with previous ones
+        self.update_message = message
         if results is not None:
-            data["results"] = json.dumps(results)
-        send_request("POST", self.update_url, data)
+            for result in results:
+                found = False
+                for i in range(len(self.update_results)):
+                    if self.update_results[i]['position'] == result['position']:
+                        self.update_results[i] = result
+                        found = True
+                        break
+                if not found:
+                    self.update_results.append(result)
+
+        if perf_counter() - self.update_timer > config.UPDATE_INTERVAL or self.update_message != "":
+            # self.logger.info("  >> sending update with message = {}".format(self.update_message))
+            self.update_timer = perf_counter()
+            data = {
+                "id": self.id,
+                "message": self.update_message,
+                "results": json.dumps(self.update_results)
+            }
+            # Make the updates asynchronous so we don't stop the execution of the tests
+            Thread(target=send_request, args=["POST", self.update_url, data]).start()
 
     def set_results(self, status):
         results = []
@@ -214,7 +235,6 @@ class Evaluator:
         for test in self.tests:
             test_futures.append([test, executor.submit(runner.run, test)])
 
-        # TODO: Send batch updates by aggregating several results and send them at least 0.2 seconds apart
         for test_future in test_futures:
             test, future = test_future
             try:
@@ -234,7 +254,7 @@ class Evaluator:
                 "exec_memory": result.exec_memory,
                 "score": result.score
             }]
-            self.send_update("", results)
+            self.update_frontend("", results)
 
         self.logger.info("    -- executed {0} tests in {1:.3f}s.".format(len(self.tests), perf_counter() - start_time))
         return errors
