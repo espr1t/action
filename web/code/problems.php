@@ -115,6 +115,10 @@ class ProblemsPage extends Page {
 
         $status = $submit->calcStatus();
         $color = ($status == $GLOBALS['STATUS_ACCEPTED'] ? 'green' : (strlen($status) == 1 ? 'gray' : 'red'));
+        $problemStatus = $GLOBALS['STATUS_DISPLAY_NAME'][$status];
+        if ($problemStatus == $GLOBALS['STATUS_DISPLAY_NAME'][$GLOBALS['STATUS_COMPILATION_ERROR']]) {
+            $problemStatus = '<a title="' . $submit->message . '">' . $problemStatus . '</a>';
+        }
 
         $summaryTable = '
             <table class="default ' . $color . '">
@@ -127,7 +131,7 @@ class ProblemsPage extends Page {
                 </tr>
                 <tr>
                     <td>-</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$status] . '</td>
+                    <td>' . $problemStatus . '</td>
                     <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
                     <td>' . sprintf("%.2f MiB", max($submit->exec_memory) / 1024.0) . '</td>
                     <td>' . $submit->calcScore() . '</td>
