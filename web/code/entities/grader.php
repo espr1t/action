@@ -65,12 +65,19 @@ class Grader {
         // Add new information about individual tests
         $submit->message = $message;
         for ($i = 0; $i < count($results); $i = $i + 1) {
+            // Update the status of the test
             if ($results[$i]['status'] == 'ACCEPTED') {
                 $submit->results[$results[$i]['position']] = floatval($results[$i]['score']);
-                $submit->exec_time[$results[$i]['position']] = floatval($results[$i]['exec_time']);
-                $submit->exec_memory[$results[$i]['position']] = floatval($results[$i]['exec_memory']);
             } else {
                 $submit->results[$results[$i]['position']] = $GLOBALS['STATUS_' . $results[$i]['status']];
+            }
+            // Update the execution time (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
+            if (array_key_exists('exec_time', $results[$i])) {
+                $submit->exec_time[$results[$i]['position']] = floatval($results[$i]['exec_time']);
+            }
+            // Update the execution memory (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
+            if (array_key_exists('exec_memory', $results[$i])) {
+                $submit->exec_memory[$results[$i]['position']] = floatval($results[$i]['exec_memory']);
             }
         }
         $submit->status = $submit->calcStatus();
