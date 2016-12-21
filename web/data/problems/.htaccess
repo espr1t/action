@@ -1,0 +1,8 @@
+# https://www.addedbytes.com/blog/code/password-protect-a-directory-with-htaccess/
+# Generate passwords using "htpasswd -c /path/to/file/file user"
+
+AuthUserFile D:/WebSites/action/web/.htpasswd
+AuthName "Please Log In"
+AuthType Basic
+
+require user username

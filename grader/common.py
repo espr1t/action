@@ -27,7 +27,7 @@ def hashed_auth_token(token):
 
 
 def send_request(method, url, data=None):
-    username = hashed_auth_token(config.AUTH_USERNAME)
+    username = config.AUTH_USERNAME
     password = hashed_auth_token(config.AUTH_PASSWORD)
     response = None
     if method == "GET":
