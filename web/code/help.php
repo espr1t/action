@@ -53,6 +53,7 @@ class HelpPage extends Page {
                 <li><b>Java (OpenJDK 8):</b> <pre>-Xmx=ML</pre></li>
                 <li><b>Python (3.5):</b> <pre>python &lt;source&gt;</pre></li>
             </ul>
+            Максималното време за компилация е 3 секунди.
         ') . inBox('
             <h2 id="grader"><a href="#grader">Тестова машина</a></h2>
             Тестовата машина има следната хардуерна конфигурация:

@@ -133,7 +133,7 @@ class ProblemsPage extends Page {
                     <td>-</td>
                     <td>' . $problemStatus . '</td>
                     <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
-                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory) / 1024.0) . '</td>
+                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
                     <td>' . $submit->calcScore() . '</td>
                 </tr>
             </table>
@@ -148,7 +148,7 @@ class ProblemsPage extends Page {
                     <td>' . $i . '</td>
                     <td>' . (is_numeric($result) ? 'OK' : $GLOBALS['STATUS_DISPLAY_NAME'][$result]) . '</td>
                     <td>' . sprintf("%.2fs", $submit->exec_time[$i]) . '</td>
-                    <td>' . sprintf("%.2f MiB", $submit->exec_memory[$i] / 1024.0) . '</td>
+                    <td>' . sprintf("%.2f MiB", $submit->exec_memory[$i]) . '</td>
                     <td>' . $scores[$i] . '</td>
                 </tr>
             ';

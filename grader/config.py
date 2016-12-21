@@ -4,6 +4,16 @@
 
 WORKER_COUNT = 3  # Threads
 
+# Evaluation
+UPDATE_INTERVAL = 0.5  # Seconds
+FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
+
+# Execution
+EXECUTION_CHECK_INTERVAL = 0.01  # Seconds
+
+# Compilation
+MAX_COMPILATION_TIME = 3.0  # Seconds
+
 # Will not work with random UTF-8 characters since the utf8_encode() algorithm
 # in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
 AUTH_USERNAME = "username"
@@ -15,7 +25,3 @@ PATH_SANDBOX = "sandbox/"
 
 SOURCE_NAME = "source"
 EXECUTABLE_NAME = "executable"
-
-FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1MB of data
-
-UPDATE_INTERVAL = 0.5  # Seconds

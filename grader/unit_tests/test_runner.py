@@ -33,7 +33,7 @@ class TestRunner(unittest.TestCase):
         self.evaluator.create_sandbox_dir()
 
         # Then we need to compile the source
-        Compiler.compile("fixtures/ThreeSum/ThreeSum.cpp", "C++", self.evaluator.path_executable)
+        Compiler.compile("C++", "fixtures/ThreeSum/ThreeSum.cpp", self.evaluator.path_executable)
 
         # Then we need to copy the tests to the test_data folder
         for test in self.evaluator.tests:

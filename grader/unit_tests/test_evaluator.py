@@ -10,7 +10,6 @@ import vcr
 
 import config
 from status import TestStatus
-from compiler import Compiler
 from evaluator import Evaluator
 
 
@@ -38,7 +37,7 @@ class TestEvaluator(unittest.TestCase):
     @mock.patch("requests.post")
     def test_send_update(self, requests_post_mock):
         evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
-        evaluator.send_update(TestStatus.COMPILING, "Some message")
+        evaluator.update_frontend(TestStatus.COMPILING, [])
         self.assertTrue(requests_post_mock.called, "An update to the frontend is not being sent.")
 
     def test_set_results(self):
@@ -80,23 +79,6 @@ class TestEvaluator(unittest.TestCase):
         self.assertTrue(path.isfile(evaluator.path_source))
         with open(evaluator.path_source, "r") as file:
             self.assertEqual(evaluator.source, file.read())
-
-    def test_cpp_compile(self):
-        """ You may need to add g++ to your PATH in order for this to run """
-
-        # Successful, returns an empty string as an error message
-        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
-        evaluator.create_sandbox_dir()
-        evaluator.write_source()
-        message = Compiler.compile(evaluator.path_source, evaluator.language, evaluator.path_executable)
-        self.assertEqual(message, "", "The C++ compilation expected to pass, but failed.")
-
-        # Unsuccessful, returns the compilation message as an error string
-        evaluator = self.get_evaluator("fixtures/problem_submit_ce.json")
-        evaluator.create_sandbox_dir()
-        evaluator.write_source()
-        message = Compiler.compile(evaluator.path_source, evaluator.language, evaluator.path_executable)
-        self.assertNotEqual(message, "", "The C++ compilation expected error message, but passed successfully.")
 
     def test_cleanup(self):
         # Create a new instance and write the source

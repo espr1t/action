@@ -10,7 +10,7 @@ import json
 import logging
 
 from os import path, makedirs
-from time import perf_counter
+from time import sleep, perf_counter
 import config
 import shutil
 from compiler import Compiler
@@ -36,8 +36,8 @@ class Evaluator:
         self.source = data["source"]
         self.language = data["language"]
         self.time_limit = data["timeLimit"]
-        # Memory limit is given in MiB, convert to KiB.
-        self.memory_limit = data["memoryLimit"] * 1024.0
+        # Memory limit is given in MiB, convert to bytes.
+        self.memory_limit = data["memoryLimit"] * 1048576
         self.tests = data["tests"]
         self.checker = data["checker"] if "checker" in data else ""
         self.tester = data["tester"] if "tester" in data else ""
@@ -219,7 +219,7 @@ class Evaluator:
 
     def compile(self):
         try:
-            status = executor.submit(Compiler.compile, self.path_source, self.language, self.path_executable).result()
+            status = executor.submit(Compiler.compile, self.language, self.path_source, self.path_executable).result()
         except ValueError as ex:
             # If a non-compiler error occurred, log the message in addition to sending it to the user
             status = "Internal error: " + str(ex)
@@ -251,7 +251,7 @@ class Evaluator:
                 "status": result.status.name,
                 "error_message": result.error_message,
                 "exec_time": result.exec_time,
-                "exec_memory": result.exec_memory,
+                "exec_memory": result.exec_memory / 1048576.0,  # Convert back to megabytes
                 "score": result.score
             }]
             self.update_frontend("", results)

@@ -23,7 +23,6 @@ class RunResult:
 
 
 class Runner:
-    CHECK_INTERVAL = 0.01
     KILLED_TIME_LIMIT = 1
     KILLED_MEMORY_LIMIT = 2
     KILLED_RUNTIME_ERROR = 3
@@ -76,8 +75,9 @@ class Runner:
             else:
                 result.status = TestStatus.ACCEPTED
 
-        self.logger.info("    -- executed {}: Time: {:.3f}s. Memory: {:.0f}KiB. Testing time: {:.3f}s :: {}".format(
-                test["inpFile"], result.exec_time, result.exec_memory, perf_counter() - start_time, result.status.name))
+        total_time = perf_counter() - start_time
+        self.logger.info("    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}".format(
+                test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name))
 
         return result
 
@@ -88,19 +88,16 @@ class Runner:
     # Use checker if provided
 
     def exec_solution(self, executable, inp_file, out_file):
-
-        inp_data = open(inp_file, "rt")
-        out_data = open(out_file, "wt")
-
         exec_time = 0.0
         exec_memory = 0.0
         exit_code = None
 
         start_time = perf_counter()
-        process = psutil.Popen([], executable=executable, stdin=inp_data, stdout=out_data, stderr=subprocess.PIPE)
+        process = psutil.Popen(args=[], executable=executable,
+                               stdin=open(inp_file, "rt"), stdout=open(out_file, "wt"), stderr=subprocess.PIPE)
 
         while True:
-            sleep(Runner.CHECK_INTERVAL)
+            sleep(config.EXECUTION_CHECK_INTERVAL)
 
             # Process already terminated
             if process.poll() is not None:
@@ -117,9 +114,9 @@ class Runner:
             try:
                 # Update statistics
                 exec_time = max(exec_time, process.cpu_times().user)
-                # Returned memory is given in bytes, convert to KiB.
                 # Consider using USS instead of PSS if available (currently it returns zeroes only)
-                exec_memory = max(exec_memory, process.memory_full_info().pss / 1024.0)
+                mem_info = process.memory_full_info()
+                exec_memory = max(exec_memory, mem_info.pss if "pss" in mem_info else mem_info.rss)
 
                 # Spawning processes or threads
                 if process.num_threads() > 2:
