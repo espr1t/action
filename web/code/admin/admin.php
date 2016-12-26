@@ -32,6 +32,11 @@ switch ($_GET['page']) {
         $page = new AdminProblemsPage($user);
         break;
 
+    case 'regrade':
+        require_once('regrade.php');
+        $page = new AdminQueuePage($user);
+        break;
+
     default:
         header('Location: /error');
         exit();

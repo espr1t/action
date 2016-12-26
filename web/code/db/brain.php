@@ -460,10 +460,22 @@ class Brain {
             )
         ");
         if (!$response) {
-            error_log('Could not add submit ' . $submit->id . ' to pending queue!');
+            error_log('Could not add submit ' . $submit->id . ' to latest queue!');
             return null;
         }
         return $this->db->lastId();
+    }
+
+    function eraseLatest($submit) {
+        $response = $this->db->query("
+            DELETE FROM `Latest`
+            WHERE submitId = " . $submit->id . "
+        ");
+        if (!$response) {
+            error_log('Could not erase submit ' . $submit->id . ' from latest queue!');
+            return null;
+        }
+        return true;
     }
 
     function trimLatest($lastId) {

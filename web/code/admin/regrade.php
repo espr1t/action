@@ -1,13 +1,14 @@
 <?php
-require_once('db/brain.php');
-require_once('entities/grader.php');
-require_once('config.php');
-require_once('common.php');
-require_once('page.php');
+require_once(__DIR__ . '/../db/brain.php');
+require_once(__DIR__ . '/../entities/grader.php');
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
+require_once(__DIR__ . '/../page.php');
+require_once(__DIR__ . '/../entities/submit.php');
 
-class QueuePage extends Page {
+class AdminQueuePage extends Page {
     public function getTitle() {
-        return 'O(N)::Queue';
+        return 'O(N)::Admin - Regrade';
     }
     
     private function getQueueTable($data) {
@@ -43,7 +44,19 @@ class QueuePage extends Page {
         return $table;
     }
 
+    private function regradeSubmit($submitId) {
+        $submit = Submit::get($submitId);
+        $submit->reset();
+        $submit->send();
+        header('Location: /admin/regrade');
+        exit();
+    }
+
     public function getContent() {
+        if (isset($_GET['submitId'])) {
+            $this->regradeSubmit($_GET['submitId']);
+        }
+
         $head = inBox('
             <h1>Опашка</h1>
             Информация за системата и опашката от решения.

@@ -21,13 +21,8 @@ class Submit {
     public $status = -1;
     public $message = '';
 
-    private $brain = null;
-
-    function __construct() {
-        $this->brain = new Brain();
-    }
-
     public static function newSubmit($user, $problemId, $language, $source) {
+        $brain = new Brain();
         $submit = new Submit();
 
         $problem = Problem::get($problemId);
@@ -48,7 +43,7 @@ class Submit {
         $submit->results = array();
         $submit->exec_time = array();
         $submit->exec_memory = array();
-        $numTests = count($submit->brain->getProblemTests($problem->id));
+        $numTests = count($brain->getProblemTests($problem->id));
         for ($i = 0; $i < $numTests; $i = $i + 1) {
             $submit->results[$i] = $GLOBALS['STATUS_WAITING'];
             $submit->exec_time[$i] = 0;
@@ -58,6 +53,25 @@ class Submit {
         $submit->status = $GLOBALS['STATUS_WAITING'];
         $submit->message = '';
         return $submit;
+    }
+
+    public function reset() {
+        $brain = new Brain();
+        $this->results = array();
+        $this->exec_time = array();
+        $this->exec_memory = array();
+        $numTests = count($brain->getProblemTests($this->problemId));
+        for ($i = 0; $i < $numTests; $i = $i + 1) {
+            $this->results[$i] = $GLOBALS['STATUS_WAITING'];
+            $this->exec_time[$i] = 0;
+            $this->exec_memory[$i] = 0;
+        }
+        $this->progress = 0;
+        $this->status = $GLOBALS['STATUS_WAITING'];
+        $this->message = '';
+        $brain->updateSubmit($this);
+        $brain->erasePending($this);
+        $brain->eraseLatest($this);
     }
 
     public function write() {
@@ -108,11 +122,11 @@ class Submit {
 
     private static function instanceFromArray($info) {
         $submit = new Submit();
-        $submit->id = getValue($info, 'id');
+        $submit->id = intval(getValue($info, 'id'));
         $submit->time = getValue($info, 'time');
-        $submit->userId = getValue($info, 'userId');
+        $submit->userId = intval(getValue($info, 'userId'));
         $submit->userName = getValue($info, 'userName');
-        $submit->problemId = getValue($info, 'problemId');
+        $submit->problemId = intval(getValue($info, 'problemId'));
         $submit->problemName = getValue($info, 'problemName');
         $submit->source = getValue($info, 'source');
         $submit->language = getValue($info, 'language');
