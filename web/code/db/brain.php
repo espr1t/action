@@ -369,7 +369,7 @@ class Brain {
     // Pending
     function getPending() {
         $response = $this->db->query("
-            SELECT * FROM `Pending`;
+            SELECT * FROM `Pending` ORDER BY submitId ASC
         ");
         if (!$response) {
             error_log('Could not execute getPending() query properly!');
@@ -436,7 +436,7 @@ class Brain {
     // Latest
     function getLatest() {
         $response = $this->db->query("
-            SELECT * FROM `Latest`
+            SELECT * FROM `Latest` ORDER BY submitId DESC
         ");
         if (!$response) {
             error_log('Could not execute getLatest() query properly!');
