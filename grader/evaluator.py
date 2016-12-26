@@ -48,7 +48,7 @@ class Evaluator:
         self.path_executable = self.path_sandbox + config.EXECUTABLE_NAME + self.get_executable_extension()
 
         # Configure logger
-        self.logger = logging.getLogger("Evaluator")
+        self.logger = logging.getLogger("Evaluator" + str(self.id))
         self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter(
                 "%(levelname)s %(asctime)s (submission {}): %(message)s".format(self.id), "%Y-%m-%dT%H:%M:%S")
