@@ -8,6 +8,9 @@ ErrorDocument 404 /error
 #
 RewriteEngine on
 
+# Hack for CGI handlers of PHP
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # Generic pages
 RewriteRule    ^$                                       /code/main.php?page=home                                                [NC,L]
 RewriteRule    ^home$                                   /code/main.php?page=home                                                [NC,L,QSA]

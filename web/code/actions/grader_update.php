@@ -1,6 +1,9 @@
 <?php
 require_once(__DIR__ . '/../entities/grader.php');
 
+// Hack to work-around CGI handler for PHP
+list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+
 if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
     error_log('Update command sent without authentication from IP: ' . $_SERVER['REMOTE_ADDR']);
     exit();
