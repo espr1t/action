@@ -49,7 +49,7 @@ class HelpPage extends Page {
             <h2 id="compilation"><a href="#compilation">Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 4.9.4):</b> <pre>g++ -O2 -std=c++14 -w -o &lt;source&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -o &lt;source&gt; &lt;source&gt;.cpp</pre></li>
                 <li><b>Java (OpenJDK 8):</b> <pre>-Xmx=ML</pre></li>
                 <li><b>Python (3.5):</b> <pre>python &lt;source&gt;</pre></li>
             </ul>
@@ -58,9 +58,9 @@ class HelpPage extends Page {
             <h2 id="grader"><a href="#grader">Тестова машина</a></h2>
             Тестовата машина има следната хардуерна конфигурация:
             <ul>
-                <li><b>Процесор:</b> Intel Core i5 :: 4.2GHz</li>
-                <li><b>Рам:</b> Kingston DDR4 8GB :: 2133MHz</li>
-                <li><b>Харддиск:</b> Corsair Force SSD :: 240GB</li>
+                <li><b>Процесор:</b> Core2 Quad :: 3.0GHz</li>
+                <li><b>Рам:</b> DDR2 8GB :: 800MHz</li>
+                <li><b>Харддиск:</b> Corsair Force SSD :: 520MB/s</li>
             </ul>
             Ползваната операционна система на тестовата машина е Ubuntu 16.04.
         ') . inBox('
