@@ -15,9 +15,9 @@ from evaluator import Evaluator
 
 class TestEvaluator(unittest.TestCase):
     def setUp(self):
-        config.PATH_SANDBOX = "test_sandbox/"
-        config.PATH_DATA = "test_data/"
-        config.PATH_TESTS = "test_data/tests/"
+        config.PATH_SANDBOX = "unit_tests/test_sandbox/"
+        config.PATH_DATA = "unit_tests/test_data/"
+        config.PATH_TESTS = "unit_tests/test_data/tests/"
         if not path.exists(config.PATH_SANDBOX):
             makedirs(config.PATH_SANDBOX)
         if not path.exists(config.PATH_DATA):
@@ -36,12 +36,12 @@ class TestEvaluator(unittest.TestCase):
 
     @mock.patch("requests.post")
     def test_send_update(self, requests_post_mock):
-        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        evaluator = self.get_evaluator("unit_tests/fixtures/problem_submit_ok.json")
         evaluator.update_frontend(TestStatus.COMPILING, [])
         self.assertTrue(requests_post_mock.called, "An update to the frontend is not being sent.")
 
     def test_set_results(self):
-        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        evaluator = self.get_evaluator("unit_tests/fixtures/problem_submit_ok.json")
         results = evaluator.set_results(TestStatus.RUNTIME_ERROR)
         self.assertEqual(len(results), 3, "There must be exactly three results")
         for i in range(1, 3):
@@ -49,14 +49,14 @@ class TestEvaluator(unittest.TestCase):
             self.assertEqual(results[i]["status"], TestStatus.RUNTIME_ERROR.name)
 
     def test_create_sandbox_dir(self):
-        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        evaluator = self.get_evaluator("unit_tests/fixtures/problem_submit_ok.json")
         self.assertFalse(path.exists(evaluator.path_sandbox))
         evaluator.create_sandbox_dir()
         self.assertTrue(path.exists(evaluator.path_sandbox))
 
-    @vcr.use_cassette("fixtures/cassettes/download_tests.yaml")
+    @vcr.use_cassette("unit_tests/fixtures/cassettes/download_tests.yaml")
     def test_download_tests(self):
-        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        evaluator = self.get_evaluator("unit_tests/fixtures/problem_submit_ok.json")
 
         # Assert none of the files is already present
         for test in evaluator.tests:
@@ -72,7 +72,7 @@ class TestEvaluator(unittest.TestCase):
             self.assertTrue(path.exists(config.PATH_TESTS + test["solHash"]))
 
     def test_write_source(self):
-        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        evaluator = self.get_evaluator("unit_tests/fixtures/problem_submit_ok.json")
         self.assertFalse(path.isfile(evaluator.path_source))
         evaluator.create_sandbox_dir()
         evaluator.write_source()
@@ -82,7 +82,7 @@ class TestEvaluator(unittest.TestCase):
 
     def test_cleanup(self):
         # Create a new instance and write the source
-        evaluator = self.get_evaluator("fixtures/problem_submit_ok.json")
+        evaluator = self.get_evaluator("unit_tests/fixtures/problem_submit_ok.json")
         evaluator.create_sandbox_dir()
         evaluator.write_source()
 

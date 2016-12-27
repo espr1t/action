@@ -10,7 +10,7 @@ import json
 import logging
 
 from os import path, makedirs
-from time import sleep, perf_counter
+from time import perf_counter
 import config
 import shutil
 from compiler import Compiler
@@ -36,8 +36,7 @@ class Evaluator:
         self.source = data["source"]
         self.language = data["language"]
         self.time_limit = data["timeLimit"]
-        # Memory limit is given in MiB, convert to bytes.
-        self.memory_limit = data["memoryLimit"] * 1048576
+        self.memory_limit = data["memoryLimit"] * 1048576  # Given in MiB, convert to bytes
         self.tests = data["tests"]
         self.checker = data["checker"] if "checker" in data else ""
         self.tester = data["tester"] if "tester" in data else ""
@@ -63,7 +62,6 @@ class Evaluator:
         self.logger.removeHandler(self.handler)
 
         # Clean up remaining files
-        self.logger.info("  >> cleaning up...")
         self.cleanup()
 
     def get_source_extension(self):

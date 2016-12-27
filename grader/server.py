@@ -2,7 +2,7 @@
 Grader entry point. Start the Flask server here.
 
 The following API is exposed:
-    /healthcheck                    For checking whether the Grader is available
+    /available                      For checking whether the Grader is available
     /evaluate                       For evaluation of a submission
 """
 from flask import Flask, request

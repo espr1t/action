@@ -3,13 +3,16 @@ Runs the executable in a sandbox and returns the result for a single test case
 """
 
 import logging
-import subprocess
-from os import name
+from subprocess import PIPE
+from os import name, getcwd, setuid
 from time import sleep, perf_counter
 import psutil
 
 import config
 from status import TestStatus
+
+if name != "nt":
+    import resource
 
 
 class RunResult:
@@ -50,14 +53,16 @@ class Runner:
         inp_file = config.PATH_TESTS + test["inpHash"]
         out_file = self.evaluator.path_sandbox + test["inpFile"].replace(".in", ".out")
         sol_file = config.PATH_TESTS + test["solHash"]
+        sandbox = getcwd() + "/" + self.evaluator.path_sandbox
+        executable = getcwd() + "/" + self.evaluator.path_executable
 
-        executable = self.evaluator.path_executable
         # Change slashes with backslashes for Windows paths (grr)
         if name == "nt":
+            sandbox = sandbox.replace("/", "\\")
             executable = executable.replace("/", "\\")
 
         start_time = perf_counter()
-        result = self.exec_solution(executable, inp_file, out_file)
+        result = self.exec_solution(sandbox, executable, inp_file, out_file)
 
         if result.error_message != "":
             self.logger.info("Got error while executing test {}: \"{}\"".format(test["inpFile"], result.error_message))
@@ -83,18 +88,61 @@ class Runner:
 
     # TODO:
     # Limit network usage
-    # Limit spawning of threads / sub-processes
-    # Limit writing to the disk
     # Use checker if provided
 
-    def exec_solution(self, executable, inp_file, out_file):
+    # Use the resource library to limit process resources when on UNIX
+    if name != "nt":
+        @staticmethod
+        def set_restrictions(time_limit):
+            # Set the user to a low-privileged one, if we have the privileges for this
+            try:
+                setuid(1001)
+            except OSError:
+                pass
+
+            # Set the maximum execution time of the process to the Time Limit of the problem
+            resource.setrlimit(resource.RLIMIT_CPU, (time_limit, time_limit))
+
+            # Set the maximum address space to 1GB (so the process cannot consume all memory before being killed)
+            resource.setrlimit(resource.RLIMIT_AS, (1073741824, 1073741824))
+
+            # Set the stack to be 8MB
+            resource.setrlimit(resource.RLIMIT_STACK, (8388608, 8388608))
+
+            # Set the maximum output to stdout/stderr be 16MB
+            resource.setrlimit(resource.RLIMIT_FSIZE, (16777216, 16777216))
+
+            # Although setting a limit on the file handles doesn't quite work, it seems the programs cannot write
+            # to files anyway. We create the sandbox dir with the user running the grader (typically root),
+            # and since they are owned by a more privileged user, the program cannot write in it. It can, however,
+            # write in its own home directory, so we should chroot the process.
+            resource.setrlimit(resource.RLIMIT_NOFILE, (4, 4))
+
+            # Deny creation of new processes and threads
+            resource.setrlimit(resource.RLIMIT_NPROC, (1, 1))
+
+            # Deny creation of core dump files
+            resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+
+            # Deny writing to message queues
+            resource.setrlimit(resource.RLIMIT_MSGQUEUE, (0, 0))
+
+    def exec_solution(self, sandbox, executable, inp_file, out_file):
         exec_time = 0.0
         exec_memory = 0.0
         exit_code = None
 
+        inp_file_handle = open(inp_file, "rt")
+        out_file_handle = open(out_file, "wt")
+
         start_time = perf_counter()
-        process = psutil.Popen(args=[], executable=executable,
-                               stdin=open(inp_file, "rt"), stdout=open(out_file, "wt"), stderr=subprocess.PIPE)
+        if name == "nt":
+            process = psutil.Popen(args=[], executable=executable, cwd=sandbox,
+                                   stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE)
+        else:
+            process = psutil.Popen(args=[], executable=executable, cwd=sandbox,
+                                   stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE,
+                                   preexec_fn=(lambda: Runner.set_restrictions(self.evaluator.time_limit)))
 
         while True:
             sleep(config.EXECUTION_CHECK_INTERVAL)
@@ -144,13 +192,17 @@ class Runner:
         error_message = process.communicate()[1]
         error_message = error_message.decode("utf-8") if error_message is not None else ""
 
+        # Close the files
+        inp_file_handle.close()
+        out_file_handle.close()
+
         # Leave the parent function decide what the test status will be
         return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0)
 
     @staticmethod
     def validate_output(out_file, sol_file):
-        with open(out_file) as out:
-            with open(sol_file) as sol:
+        with open(out_file, "rt") as out:
+            with open(sol_file, "rt") as sol:
                 while True:
                     out_line = out.readline()
                     sol_line = sol.readline()
@@ -164,4 +216,4 @@ class Runner:
                             out_line = out_line[:20] + "..."
                         if len(sol_line) > 20:
                             sol_line = sol_line[:20] + "..."
-                        return "Expected \"{}\" but received \"{}\".".format(out_line, sol_line), 0.0
+                        return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0

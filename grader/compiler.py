@@ -33,7 +33,6 @@ class Compiler:
     def run_compiler(command):
         start_time = perf_counter()
         process = psutil.Popen(args=command, stderr=PIPE, shell=True)
-        exit_code = None
         while True:
             sleep(config.EXECUTION_CHECK_INTERVAL)
 
