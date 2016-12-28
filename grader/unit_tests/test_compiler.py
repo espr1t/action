@@ -11,8 +11,6 @@ from compiler import Compiler
 
 class TestCompiler(unittest.TestCase):
     def setUp(self):
-        # Make compilation time shorter for the unit tests to run more quickly
-        config.MAX_COMPILATION_TIME = 0.75  # Seconds
         config.PATH_SANDBOX = "unit_tests/test_sandbox/"
         if not path.exists(config.PATH_SANDBOX):
             makedirs(config.PATH_SANDBOX)

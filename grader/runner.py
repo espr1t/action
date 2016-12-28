@@ -96,7 +96,7 @@ class Runner:
         def set_restrictions(time_limit):
             # Set the user to a low-privileged one, if we have the privileges for this
             try:
-                setuid(1001)
+                setuid(1000)
             except OSError:
                 pass
 
