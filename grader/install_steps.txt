@@ -3,5 +3,6 @@ Installation steps:
 1. Clone the repository (git clone https://github.com/espr1t/action.git).
 2. Install python3, pip3, g++.
 3. Install the requirements (pip3 install -r requirements.txt).
-4. Allow the port (sudo ufw allow 5000)
-5. Run the service (python3 server.py)
+4. Create a user with lower privileges and add its id in runner.py ("setuid(XXXX)").
+5. Allow the port (sudo ufw allow 5000)
+6. Run the service as root (sudo python3 server.py)
