@@ -458,21 +458,28 @@ div.news-date {
     margin-bottom: -10px;
 }
 
-div.problem-name {
-    height: 40px;
-    width: 450px;
-    display: table-cell;
+div.problem-status {
+    display: inline-block;
     vertical-align: middle;
+    width: 30px;
+    font-size: 1.25em;
+    text-align: center;
+    padding-top: 3px;
+}
+
+div.problem-name {
+    display: inline-block;
+    vertical-align: middle;
+    width: 460px;
     font-size: 1.25em;
     font-weight: bold;
 }
 
 div.problem-info {
-    height: 32px;
-    width: 240px;
-    display: table-cell;
+    display: inline-block;
     vertical-align: middle;
-    text-align: left;
+    width: 200px;
+    text-align: right;
     font-size: 0.85em;
 }
 

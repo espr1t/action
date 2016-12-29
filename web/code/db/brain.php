@@ -331,7 +331,7 @@ class Brain {
 
     function getProblemSubmits($problemId, $status) {
         $response = $this->db->query("
-            SELECT id FROM `Submits`
+            SELECT id, userId FROM `Submits`
             WHERE problemId = " . $problemId . " AND status = '" . $status . "'
             GROUP BY userId
         ");
@@ -339,7 +339,7 @@ class Brain {
             error_log('Could not execute getProblemSubmits() query properly!');
             return null;
         }
-        return $this->getIntResults($response);
+        return $this->getResults($response);
     }
 
     function getUserSubmits($userId, $problemId) {
