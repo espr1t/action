@@ -23,23 +23,20 @@ class ProblemsPage extends Page {
         $problems = '';
         foreach ($problemsInfo as $problemInfo) {
             $problemSolutions = $brain->getProblemSubmits($problemInfo['id'], $GLOBALS['STATUS_ACCEPTED']);
-            $solutions = count($problemSolutions);
             $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
             foreach ($problemSolutions as $problemSolution) {
                 if ($problemSolution['userId'] == $GLOBALS['user']->id) {
                     $statusIcon = '<i class="fa fa-check green" title="Вече сте решили успешно тази задача!."></i>';
                 }
             }
+            $solutions = '<i class="fa fa-users" title="Решена от"></i> ' . count($problemSolutions);
+
             $problems .= '
                 <a href="problems/' . $problemInfo['id'] . '" class="decorated">
                     <div class="box narrow boxlink">
                             <div class="problem-status">' . $statusIcon . '</div>
                             <div class="problem-name">' . $problemInfo['name'] . '</div>
-                            <div class="problem-info">
-                                Сложност: <strong>' . $problemInfo['difficulty'] . '</strong><br>
-                                Решена от: <strong>' . $solutions . ' човек' . ($solutions == 1 ? '' : 'а') . '</strong><br>
-                                Източник: <strong>' . $problemInfo['origin'] . '</strong>
-                            </div>
+                            <div class="problem-solutions">' . $solutions . '</div>
                     </div>
                 </a>
             ';
@@ -48,10 +45,9 @@ class ProblemsPage extends Page {
     }
 
     private function getOrderings() {
-        $order_by_training = '<a href="?order=training">тренировка</a>';
         $order_by_difficulty = '<a href="?order=difficulty">сложност</a>';
         $order_by_solutions = '<a href="?order=solutions">брой решения</a>';
-        return '<div class="smaller right">Подредба по: ' . $order_by_training . ' | ' . $order_by_difficulty . ' | ' . $order_by_solutions . '</div>';
+        return '<div class="smaller right">Подреди по: ' . $order_by_difficulty . ' | ' . $order_by_solutions . '</div>';
     }
 
     private function getMainPage() {

@@ -475,12 +475,13 @@ div.problem-name {
     font-weight: bold;
 }
 
-div.problem-info {
+div.problem-solutions {
     display: inline-block;
     vertical-align: middle;
     width: 200px;
+    font-size: 1.5em;
     text-align: right;
-    font-size: 0.85em;
+    padding-top: 1px;
 }
 
 div.problem-title {
