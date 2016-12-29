@@ -4,13 +4,13 @@
         <?php echo createHead($page); ?>
         <?php
             $reportFormContent = '
-                <h2>Report a problem</h2>
+                <h2>Съобщаване за Проблем</h2>
                 <div class="italic right" style="font-size: 0.8em;">
-                    On page: http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '
+                    На страница: http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '
                 </div>
                 <textarea name="problem" class="report-problem" id="reportText"></textarea>
                 <div class="input-wrapper">
-                    <input type="submit" class="button button-color-red" onclick="return submitReportForm();">
+                    <input type="submit" class="button button-color-red" onclick="return submitReportForm();" value="Изпрати">
                 </div>
             ';
         ?>

@@ -79,18 +79,18 @@ class ProblemsPage extends Page {
                     showSubmitForm(`' . $submitFormContent . '`);
                 }
             </script>
-            <div class="problem-submit">
+            <div class="center">
                 <input type="submit" value="Предай решение" onclick="showForm();" class="button button-color-blue button-large">
                 <br>
-                <a href="/problems/' . $problem->id . '/submits" style="font-size: 0.8em;">Предадени решения</a>
+                <a style="font-size: smaller;" href="/problems/' . $problem->id . '/submits"">Предадени решения</a>
             </div>
         ';
 
         return '
-            <div class="box">
+            <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
-                <div class="problem-resources">Time Limit: ' . $problem->timeLimit . 's, Memory Limit: ' . $problem->memoryLimit . 'MiB</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
+                <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submitButtons . '

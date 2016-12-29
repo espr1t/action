@@ -37,11 +37,11 @@ class RegisterPage extends Page {
         $content = '
             <div class="register centered">
                 <div class="box">
-                    <h2>Create Account</h2>
+                    <h2>Регистрация на Потребител</h2>
                     <form class="register" name="register" action="register" onsubmit="return validateRegistration() && saltHashRegisterPasswords()" method="post" accept-charset="utf-8">
                         <table class="register">
                             <tr>
-                                <td class="left"><b>Username:</b></td>
+                                <td class="left"><b>Потребител:</b></td>
                                 <td class="right">
                                     <input type="text" name="username" placeholder="Username" class="text" minlength=2 maxlength=16 required
                                         title="Username must be between 2 and 16 characters long and can contain only Lattin letters, digits, dots, and underscores. It cannot start with a dot."
@@ -50,7 +50,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left"><b>First Name:</b></td>
+                                <td class="left"><b>Име:</b></td>
                                 <td class="right">
                                     <input type="text" name="name" placeholder="First Name" class="text" minlength=1 maxlength=32 required
                                         title="Names must be between 1 and 32 characters long and can contain only Cyrillic or Lattin letters and dashes."
@@ -59,7 +59,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left"><b>Last Name:</b></td>
+                                <td class="left"><b>Фамилия:</b></td>
                                 <td class="right">
                                     <input type="text" name="surname" placeholder="Last Name" class="text" minlength=1 maxlength=32 required
                                         title="Names must be between 1 and 32 characters long and can contain only Cyrillic or Lattin letters and dashes."
@@ -68,7 +68,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left"><b>Password:</b></td>
+                                <td class="left"><b>Парола:</b></td>
                                 <td class="right">
                                     <input type="password" name="password1" placeholder="Password" class="text" minlength=1 maxlength=32 required
                                         title="Password must be between 1 and 32 characters long."
@@ -77,7 +77,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left"><b>Repeat Password:</b></td>
+                                <td class="left"><b>Повторно Парола:</b></td>
                                 <td class="right">
                                     <input type="password" name="password2" placeholder="Repeat Password" class="text" minlength=1 maxlength=32 required
                                         title="Password must be between 1 and 32 characters long."
@@ -87,7 +87,7 @@ class RegisterPage extends Page {
                             </tr>
                             <tr><td>&nbsp;</td></tr>
                             <tr>
-                                <td class="left">E-Mail:</td>
+                                <td class="left">Поща:</td>
                                 <td class="right">
                                     <input type="email" name="email" placeholder="example@mail.com" class="text" minlength=0 maxlength=32
                                         title="E-mail must look like a valid e-mail address."
@@ -96,7 +96,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left">Date of Birth:</td>
+                                <td class="left">Дата на Раждане:</td>
                                 <td class="right">
                                     <input type="text" name="birthdate" placeholder="YYYY-MM-DD" class="text" minlength=0 maxlength=32
                                         title="The date of birth should follow the ISO format: YYYY-MM-DD."
@@ -105,7 +105,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left">Town:</td>
+                                <td class="left">Град:</td>
                                 <td class="right">
                                     <input type="text" name="town" placeholder="Town" class="text" minlength=0 maxlength=32
                                         title="Town must be between 1 and 32 characters long and can contain only Cyrillic or Latin letters and spaces."
@@ -114,7 +114,7 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left">Country:</td>
+                                <td class="left">Държава:</td>
                                 <td class="right">
                                     <input type="text" name="country" placeholder="Country" class="text" minlength=0 maxlength=32
                                         title="Country must be between 1 and 32 characters long and can contain only Cyrillic or Latin letters and spaces."
@@ -123,25 +123,25 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                             <tr>
-                                <td class="left">Gender:</td>
+                                <td class="left">Пол:</td>
                                 <td class="right">
-                                    <input type="radio" name="gender" value="male"> Male<br>
-                                    <input type="radio" name="gender" value="female"> Female
+                                    <input class="radio" type="radio" name="gender" value="male"> Мъж<br>
+                                    <input class="radio" type="radio" name="gender" value="female"> Жена
                                 </td>
                             </tr>
                             <tr><td>&nbsp;</td></tr>
                             <tr>
-                                <td class="left"><b>Unscramble the city "' . $captcha . '":</b></td>
+                                <td class="left" title="Например за \'cveLho\' трябва да въведете \'Lovech\'."><b>Разшифровай града "' . $captcha . '":</b></td>
                                 <td class="right">
                                     <input type="text" name="captcha" class="text" required
-                                         title="For example \'cveLho\' should become \'Lovech\'."
+                                         title="For example the correct unscrambling of \'cveLho\' is \'Lovech\'."
                                          onkeyup="validateCaptcha()">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconCaptcha"></i>
                                     <input type="hidden" name="expected" value="' . $expected . '">
                                 </td>
                             </tr>
                         </table>
-                        <input name="submit" type="submit" class="button button-color-blue" value="Register">
+                        <input name="submit" type="submit" class="button button-color-blue" value="Регистрация">
                     </form>
                 </div>
             </div>

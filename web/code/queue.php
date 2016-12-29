@@ -49,11 +49,17 @@ class QueuePage extends Page {
             Информация за системата и опашката от решения.
         ');
 
-        $graderStatus ='<i id="graderStatus" class="fa fa-question-circle yellow" title="Проверка на грейдъра..."></i>';
+        if ($GLOBALS['user']->id != -1) {
+            $graderStatus = ' | <i id="graderStatus" class="fa fa-question-circle yellow" title="Проверка на грейдъра..."></i>';
+            $invokeGraderCheck = '<script>updateGraderStatus();</script>';
+        } else {
+            $graderStatus = '';
+            $invokeGraderCheck = '';
+        }
 
         $time = '
-            <div class="right smaller italic" style="padding-right: 4px;">
-                Текущо време на системата: ' . date('H:i') . ' | ' . $graderStatus .'
+            <div class="help-version"">
+                Текущо време на системата: ' . date('H:i') . $graderStatus .'
             </div>
         ';
 
@@ -69,10 +75,9 @@ class QueuePage extends Page {
             ' . $this->getQueueTable($brain->getPending()) . '
         ');
 
-        $compilers = '<div class="center" style="margin-top: -6px; margin-bottom: 6px;">Информация за ползваните
+        $compilers = '<div class="center" style="font-size: smaller; margin-top: -0.25rem; margin-bottom: 0.375rem;">Информация за ползваните
                 <a href="help#compilation">компилатори</a> и конфигурацията на <a href="help#grader">тестващата машина</a>.</div>';
 
-        $invokeGraderCheck = '<script>updateGraderStatus();</script>';
 
         return $head . $time . $latest . $pending . $compilers . $invokeGraderCheck;
     }

@@ -19,7 +19,7 @@ class HomePage extends Page {
             $news .= inBox('
                  <div class="news-title">' . $entry['title'] . '</div>
                  ' . $entry['content'] . '
-                 <div class="separator"></div>
+                 <div class="separator" style="margin-top: 0.5rem;"></div>
                  <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
             ');
         }

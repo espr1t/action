@@ -20,7 +20,7 @@ class AdminNewsPage extends Page {
                 <div class="box boxlink" onclick="redirect(\'/admin/news/' . $entry['id'] . '\');">
                     <div class="news-title">' . $entry['title'] . '</div>
                     ' . $entry['content'] . '
-                    <div class="separator"></div>
+                    <div class="separator" style="margin-top: 0.5rem;"></div>
                     <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
                 </div>
             ';
@@ -53,7 +53,7 @@ class AdminNewsPage extends Page {
         $content = inBox('
             <h1>Админ::Новини</h1>
 
-            <div class="problem-submit">
+            <div class="centered">
                 <input type="submit" value="Публикувай новина" onclick="redirect(\'news/new\');" class="button button-color-blue button-large">
             </div>
         ');

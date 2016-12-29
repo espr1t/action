@@ -9,7 +9,7 @@ class HelpPage extends Page {
     
     public function getContent() {
         $version = '
-            <div class="right smaller italic" style="padding-right: 4px;">
+            <div class="help-version">
                 Версия на системата: <a href="https://github.com/espr1t/action/commit/06e0734fb41b2433fb65f13ac78c96cb62d61389" target="_blank">v.161211.06e0734</a>
             </div>
         ';
@@ -50,8 +50,10 @@ class HelpPage extends Page {
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
                 <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -o &lt;source&gt; &lt;source&gt;.cpp</pre></li>
+                <!--
                 <li><b>Java (OpenJDK 8):</b> <pre>-Xmx=ML</pre></li>
                 <li><b>Python (3.5):</b> <pre>python &lt;source&gt;</pre></li>
+                -->
             </ul>
             Максималното време за компилация е 3 секунди.
         ') . inBox('

@@ -22,10 +22,8 @@ class AdminProblemsPage extends Page {
                 <a href="/admin/problems/' . $problemInfo['id'] . '" class="decorated">
                     <div class="box narrow boxlink">
                         <div class="problem-name">' . $problemInfo['name'] . '</div>
-                        <div class="problem-info">
-                            <div class="right">
-                                Добавена от: <strong>' . $problemInfo['addedBy'] . '</strong><br>
-                            </div>
+                        <div class="problem-solutions" style="font-size: 0.875rem; width: 14rem;">
+                            Добавена от: <strong>' . $problemInfo['addedBy'] . '</strong><br>
                         </div>
                     </div>
                 </a>
@@ -221,7 +219,7 @@ class AdminProblemsPage extends Page {
             </div>
 
             <div class="center" style="margin-top: 12px;">
-                <input type="submit" value="' . $buttonText . '" onclick="submitEditProblemForm();" class="button button-color-red button-large">
+                <input type="submit" value="' . $buttonText . '" onclick="submitEditProblemForm();" class="button button-large button-color-red">
             </div>
         ';
 
@@ -233,8 +231,8 @@ class AdminProblemsPage extends Page {
         $content = inBox('
             <h1>Админ::Задачи</h1>
 
-            <div class="problem-submit">
-                <input type="submit" value="Нова задача" onclick="redirect(\'problems/new\');" class="button button-color-blue button-large">
+            <div class="centered">
+                <input type="submit" value="Нова задача" onclick="redirect(\'problems/new\');" class="button button-large button-color-blue">
             </div>
         ');
         $content .= $this->getProblemList();

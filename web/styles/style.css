@@ -24,8 +24,8 @@ body {
 
 body, td, th, input {
     font-family: "Century Gothic", "Trebuchet MS", "Ubuntu", sans-serif;
-    font-size: 0.9em;
     text-align: justify;
+    font-size: 0.875rem;
     color: #000000;
     word-wrap: break-word;
     font-weight: normal;
@@ -39,15 +39,12 @@ pre {
 code {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
     display: inline;
-    font-size: 0.9em;
+    font-size: 0.8125rem;
     white-space: pre-wrap;
 }
 
 var {
     font-family: "Century Gothic", "Trebuchet MS", "Ubuntu", sans-serif;
-    /*
-    font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
-    */
     color: #000000;
     font-weight: bold;
     font-style: normal;
@@ -131,42 +128,38 @@ a.white:hover, div.white:hover {
      Section Headers
 ************************/
 h1 {
-    font-size: 1.8em;
+    font-size: 2rem;
     font-weight: bold;
-    margin-bottom: 2px;
-    padding-bottom: 1px;
-    border-bottom: 1px dotted #999999;
+    margin-bottom: 0.125rem;
+    padding-bottom: 0.0625rem;
+    border-bottom: 0.0625rem dotted #999999;
 }
 h2 {
-    font-size: 1.2em;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #333333;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    padding-bottom: 1px;
-    border-bottom: 1px dotted #999999;
+    margin: 0.375rem 0;
+    padding-bottom: 0.125rem;
+    border-bottom: 0.0625rem dotted #999999;
 }
 h3 {
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: bold;
-    margin-top: 24px;
-    margin-bottom: 0px;
+    margin-top: 1.5rem;
 }
 h4 {
-    font-size: 0.9em;
+    font-size: 0.875rem;
     font-weight: bold;
     font-style: italic;
     color: #333333;
-    margin-top: 16px;
-    margin-bottom: 0px;
+    margin-top: 1rem;
 }
 
 /***********************
          Lists
 ************************/
 ol, ul {
-    margin-top: 4px;
-    margin-bottom: 4px;
+    margin: 0.25rem, 0;
 }
 
 /***********************
@@ -179,7 +172,7 @@ div.wrapper {
 
 div.header {
     width: 100%;
-    height: 90px;
+    height: 5.625rem;
     overflow: hidden;
     background: #0099FF;
     top: 0;
@@ -188,13 +181,13 @@ div.header {
 div.main {
     width: 100%;
     overflow-x: auto;
-    top: 90px;
-    padding-bottom: 30px;
+    top: 5.625rem;
+    padding-bottom: 1.875rem;
 }
 
 div.footer {
     width: 100%;
-    height: 30px;
+    height: 1.875rem;
     overflow: hidden;
     color: #EEEEEE;
     background: #0099FF;
@@ -205,33 +198,33 @@ div.footer {
 div.footer-left {
     display: inline-block;
     float: left;
-    width: 100px;
-    line-height: 30px;
+    width: 6.25rem;
+    line-height: 1.875rem;
     text-align: left;
 }
 
 div.footer-middle {
     display: inline-block;
     float: left;
-    font-size: 0.7em;
-    line-height: 30px;
-    width: 600px;
+    font-size: 0.6875rem;
+    line-height: 1.875rem;
+    width: 37.5rem;
     text-align: center;
 }
 
 div.footer-right {
     display: inline-block;
     float: left;
-    width: 100px;
-    line-height: 30px;
+    width: 6.25rem;
+    line-height: 1.875rem;
     text-align: right;
 }
 
 div.container {
-    width: 800px;
-    min-width: 800px;
-    max-width: 800px;
-    margin: 0px auto 0px auto;
+    width: 50rem;
+    min-width: 50rem;
+    max-width: 50rem;
+    margin: 0 auto;
 }
 
 div.noselect {
@@ -242,16 +235,20 @@ div.noselect {
 }
 
 div.box {
-    margin: 8px auto 8px auto;
-    padding: 30px 50px 30px 50px;
+    margin: 0.5rem auto;
+    padding: 1.5rem 3.5rem 2rem 3.5rem;
     background: #FFFFFF;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
-    border-radius: 4px;
+    border: 0.0625rem solid #ccc;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
+    border-radius: 0.25rem;
+}
+
+div.box-problem {
+    padding-bottom: 1rem;
 }
 
 div.narrow {
-    padding: 10px 50px 10px 50px;
+    padding: 0.625rem 3.125rem;
 }
 
 div.boxlink:hover {
@@ -264,101 +261,87 @@ div.boxlink:active {
 }
 
 div.fullsize {
-    width: 700px;
-    min-width: 700px;
-    max-width: 700px;
+    width: 43.75rem;
+    min-width: 43.75rem;
+    max-width: 43.75rem;
 }
 
 div.centered {
     text-align: center;
 }
 
-div.smaller {
-    line-height: 2em;
-    font-size: 0.8em;
-}
-
 div.authenticate {
     position: absolute;
-
-    width: 340px;
-    min-width: 340px;
-    max-width: 340px;
-
+    height: 16rem;
+    width: 24rem;
+    min-width: 24rem;
+    max-width: 24rem;
     top: 50%;
-    margin-top: -125px;
-
+    margin-top: -8rem;
     left: 50%;
-    margin-left: -170px;
+    margin-left: -12rem;
 }
 
 div.register {
     position: absolute;
-
-    width: 800px;
-    min-width: 800px;
-    max-width: 800px;
-
+    height: 34rem;
+    width: 50rem;
+    min-width: 50rem;
+    max-width: 50rem;
     top: 50%;
-    margin-top: -275px;
-
+    margin-top: -17rem;
     left: 50%;
-    margin-left: -400px;
+    margin-left: -25rem;
 }
-
 
 div.login {
-    padding: 10px 50px 10px 50px;
+    padding: 1rem 3rem;
 }
 
-div.register-link {
-    margin-top: -8px;
-    margin-right: 6px;
-}
 
 div.menu {
-    width: 800px;
-    height: 90px;
+    width: 50rem;
+    height: 5.625rem;
     left: 50%;
     position: absolute;
-    margin-left: -400px;
+    margin-left: -25rem;
     overflow: hidden;
 }
 table.menu {
-    width: 800px;
-    height: 90px;
-    border-spacing: 0px;
+    width: 50rem;
+    border-spacing: 0;
 }
 table.menu .button {
-    padding: 0px;
-    width: 100px;
+    padding: 0;
+    width: 6.25rem;
+    font-size: 0.9375rem;
     text-align: center;
     vertical-align: middle;
 }
 
 table.menu .logo {
-    width: 200px;
+    width: 12.5rem;
     vertical-align: middle;
 }
 
 div.logo {
-    height: 80px;
-    line-height: 80px;
+    height: 5rem;
+    line-height: 5rem;
     text-align: center;
-    font-size: 5em;
+    font-size: 4rem;
     font-family: "Ruthie", cursive;
     color: #FFFFFF;
     cursor: default;
 }
 
 div.userInfo {
-    width: 780px;
-    padding: 0px 10px 0px 10px;
-    height: 20px;
-    margin: 10px auto 0px auto;
-    line-height: 20px;
+    width: 48.75rem;
+    padding: 0 0.625rem;
+    height: 1.25rem;
+    margin: 0.625rem auto 0 auto;
+    line-height: 1.25rem;
     text-align: right;
-    font-size: 0.9em;
+    font-size: 0.8125rem;
 }
 
 div.user {
@@ -375,8 +358,8 @@ div.problem {
 
 div.profile-head {
     position: relative;
-    height: 82px;
-    margin-bottom: 24px;
+    height: 5.125rem;
+    margin-bottom: 1.5rem;
     border-spacing: 0;
     border-collapse: collapse;
 }
@@ -384,22 +367,22 @@ div.profile-head {
 div.profile-avatar {
     position: absolute;
     left: 0;
-    height: 80px;
-    width: 80px;
+    height: 5rem;
+    width: 5rem;
     background: #00CCFF;
-    background-size: 80px 80px;
+    background-size: 5rem 5rem;
     background-repeat: no-repeat;
-    border: 1px solid #FFFFFF;
-    border-radius: 40px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
+    border: 0.0625rem solid #FFFFFF;
+    border-radius: 2.5rem;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
     z-index: 3;
 }
 
 div.profile-line {
     position: absolute;
     width: 100%;
-    height: 41px;
-    border-bottom: dotted 1px #CCCCCC;
+    height: 2.625rem;
+    border-bottom: dotted 0.0625rem #CCCCCC;
     z-index: 2;
 }
 
@@ -409,118 +392,115 @@ div.profile-username {
     border-spacing: 0;
     border-collapse: collapse;
     display: inline-block;
-    font-size: 1.8em;
-    line-height: 82px;
+    font-size: 1.8rem;
+    line-height: 5.125rem;
     text-align: right;
-    padding-left: 8px;
-    padding-right: 4px;
-    margin-top: -2px;
+    padding-left: 0.5rem;
+    padding-right: 0.25rem;
+    margin-top: -0.125rem;
     font-weight: bold;
     background-color: #FFFFFF;
     z-index: 3;
 }
 
 div.button {
-    font-size: 1.15em;
-    line-height: 88px;
-    border-top: solid 2px #0099FF;
+    font-size: 1rem;
+    line-height: 5.5rem;
+    border-top: solid 0.125rem #0099FF;
     color: #ECECEC;
 }
 
 div.button:hover {
     cursor: pointer;
     color: #FFFFFF;
-    border-top: solid 2px #FFFFFF; 
+    border-top: solid 0.125rem #FFFFFF; 
     transition: all 0.2s ease 0s;
 }
 
 div.separator {
     width: 100%;
-    border-top: dotted 1px #999999;
-    margin-top: 4px;
-    margin-bottom: 4px;
+    border-top: dotted 0.0625rem #999999;
+    margin-top: 0.25rem 0;
 }
 
 div.news-title {
-    margin-top: -6px;
-    font-size: 1.33em;
+    margin-top: -0.375rem;
+    font-size: 1.25rem;
     font-weight: bold;
-    padding-bottom: 1px;
-    margin-bottom: 4px;
-    border-bottom: 1px dotted #999999;
+    padding-bottom: 0.0625rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 0.0625rem dotted #999999;
 }
 
 div.news-date {
     text-align: right;
-    font-size: 0.9em;
+    font-size: 0.75rem;
     font-style: italic;
     color: #333333;
-    margin-bottom: -10px;
+    margin-bottom: -0.625rem;
 }
 
 div.problem-status {
     display: inline-block;
     vertical-align: middle;
-    width: 30px;
-    font-size: 1.25em;
+    width: 2rem;
+    line-height: 3rem;
+    font-size: 1.25rem;
     text-align: center;
-    padding-top: 3px;
+    padding-top: 0.125rem;
 }
 
 div.problem-name {
     display: inline-block;
     vertical-align: middle;
-    width: 460px;
-    font-size: 1.25em;
+    width: 29rem;
+    line-height: 3rem;
+    font-size: 1.25rem;
     font-weight: bold;
 }
 
 div.problem-solutions {
     display: inline-block;
     vertical-align: middle;
-    width: 200px;
-    font-size: 1.5em;
+    width: 12rem;
+    line-height: 3rem;
+    font-size: 1.25rem;
     text-align: right;
-    padding-top: 1px;
 }
 
 div.problem-title {
-    font-size: 1.5em;
+    font-size: 1.5rem;
     font-weight: bold;
-    margin-bottom: 2px;
-}
-
-div.problem-resources {
-    line-height: 10px;
-    font-size: 0.9em;
-    text-align: left;
+    margin-bottom: 0.125rem;
 }
 
 div.problem-origin {
-    line-height: 10px;
-    font-size: 0.9em;
-    font-style: italic;
+    line-height: 0.75rem;
+    font-size: 0.875rem;
+}
+
+div.problem-resources {
+    line-height: 0.875rem;
+    font-size: 0.875rem;
+    text-align: left;
     text-align: right;
 }
 
 div.problem-statement {
-    padding-top: 10px;
+    margin-top: 0.25rem;
+    line-height: 1.125rem;
 }
 
 div.problem-io {
-    margin-top: 1em;
+    font-size: 0.9375rem;
+    margin-top: 1rem;
     font-weight: bold;
 }
 
 div.problem-explanation {
-    font-size: 0.8em;
+    font-size: 0.75rem;
     text-align: center;
     font-style: italic;
-}
-
-div.problem-submit {
-    margin-top: 20px;
-    text-align: center;
 }
 
 table.problem-sample {
@@ -528,28 +508,29 @@ table.problem-sample {
     border-spacing: 0;
     border-collapse: collapse;
     white-space: pre-wrap;
-    margin-top: 1em;
-    margin-bottom: 0.1em;
+    margin-top: 1rem;
+    margin-bottom: 0.0625rem;
 }
 
 table.problem-sample tr th {
-    font-style: italic;
+    font-weight: bold;
 }
 
 table.problem-sample tr td {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
     vertical-align: top;
-    font-size: 0.9em;
+    font-size: 0.8125rem;
 }
 
 table.problem-sample tr td, table.problem-sample tr th {
-    padding: 4px 8px;
+    padding: 0.25rem 0.5rem;
     page-break-inside: avoid;
-    border: 1px solid #666666;
+    border: 0.0625rem solid #666666;
 }
 
 table.register {
     width: 100%;
+    font-size: 1rem;
     border-spacing: 0;
     border-collapse: collapse;
 }
@@ -557,33 +538,33 @@ table.register {
 table.register tr td.left {
     width: 50%;
     text-align: right;
-    padding-right: 2px;
+    padding-right: 0.125rem;
 }
 
 table.register tr td.right {
     width: 50%;
     text-align: left;
-    padding-left: 2px;
+    padding-left: 0.125rem;
 }
 
 input.text {
-    height: 1.6em;
-    padding: 2px 6px 2px 6px;
-    margin: 1px 0px 1px 0px;
-    border: 1px solid #888888;
-    border-radius: 3px;
+    height: 1.6rem;
+    padding: 0.125rem 0.3125rem;
+    margin: 0.0625rem 0;
+    border: 0.0625rem solid #888888;
+    border-radius: 0.1875rem;
 }
 
 input.text:focus {
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
 }
 
 form.login {
-    margin-top: 1em;
+    margin-top: 1rem;
 }
 
 form.register {
-    margin-top: 1em;
+    margin-top: 1rem;
 }
 
 div.input-wrapper {
@@ -591,24 +572,25 @@ div.input-wrapper {
 }
 
 input.button {
-    padding-left: 12px;
-    padding-right: 12px;
-    height: 28px;
+    padding: 0 0.75rem;
+    width: 8rem;
+    min-width: 8rem;
     left: 50%;
+    margin-top: 0.5rem;
     margin-left: auto;
-    min-width: 60px;
+    line-height: 2rem;
     text-align: center;
-    font-size: 1em;
-    line-height: 1em;
     color: #ECECEC;
-    border: 1px solid #FFFFFF;
-    border-radius: 4px;
+    border: 0.0625rem solid #FFFFFF;
+    border-radius: 0.25rem;
+    font-weight: bold;
 }
 
 input.button-large {
-    width: 240px;
-    height: 42px;
-    font-weight: bold;
+    width: 14rem;
+    min-width: 14rem;
+    margin-top: 1rem;
+    line-height: 2.5rem;
 }
 
 input.button-color-blue {
@@ -616,7 +598,11 @@ input.button-color-blue {
 }
 
 input.button-color-red {
-    background-color: #d84a38;
+    background-color: #D84A38;
+}
+
+input.radio {
+    margin-left: 0.5rem;
 }
 
 div.overlay {
@@ -633,23 +619,23 @@ div.overlay {
 div.action-form {
     position: absolute;
     overflow-y: auto;
-    width: 600px;
+    width: 37rem;
     top: 50%;
     left: 50%;
-    margin: 20px auto 20px -340px;
-    padding: 20px 40px 16px 40px;
+    margin: 1.25rem auto 1.25rem -21rem;
+    padding: 1.25rem 2.5rem 1rem 2.5rem;
     background: #FFFFFF;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
-    border-radius: 4px;
+    border: 0.0625rem solid #ccc;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
+    border-radius: 0.25rem;
     z-index: 89;
 }
 
 div.action-form-close {
     display: inline-block;
     position: absolute;
-    margin-left: 612px;
-    margin-top: -12px;
+    margin-left: 38rem;
+    margin-top: -0.75rem;
     color: #555555;
 }
 
@@ -659,32 +645,34 @@ div.action-form-close:hover {
 }
 
 textarea.report-problem {
-    margin-top: 4px;
+    margin-top: 0.25rem;
     width: 100%;
-    height: 240px;
+    height: 15rem;
 }
 
 textarea.submit-source {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
     width: 98%;
-    height: 360px;
-    font-size: 0.9em;
+    height: 22.5rem;
+    font-size: 0.9375rem;
     white-space: pre-wrap;
     padding: 1%;
 }
 
 input.news-form-title {
+    margin-top: 0.5rem;
     width: 100%;
-    height: 30px;
-    font-size: 1.2em;
+    height: 1.75rem;
+    font-size: 1rem;
     font-weight: bold;
     text-align: center;
     border: none;
 }
 
 input.news-form-date {
-    width: 100px;
-    height: 20px;
+    width: 6.25rem;
+    height: 1rem;
+    font-size: 0.75rem;
     text-align: center;
     font-style: italic;
     border: none;
@@ -692,36 +680,33 @@ input.news-form-date {
 
 textarea.news-form-content {
     width: 100%;
-    height: 348px;
+    height: 21rem;
 }
 
 div.message {
     position: fixed;
-    width: 500px;
-    height: 2em;
-    top: 110px;
+    width: 31rem;
+    top: 7rem;
     left: 50%;
-    margin-left: -250px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.24);
-    border-radius: 1em;
-    font-size: 1em;
+    margin-left: -15.5rem;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
+    border-radius: 1rem;
     z-index: 100;
     background-color: #0099FF;
 }
 
 div.message-info {
-    background-color: #45b891;
+    background-color: #45B891;
 }
 
 div.message-error {
-    background-color: #d84a38;
+    background-color: #D84A38;
 }
 
 div.message-content {
-    margin-top: 0.5em;
-    line-height: 1em;
+    line-height: 2rem;
     vertical-align: middle;
-    padding: 0 8px 0 16px;
+    padding: 0 0.75rem 0 1rem;
 }
 
 div.message-icon {
@@ -730,14 +715,12 @@ div.message-icon {
 }
 
 div.message-text {
-    padding-left: 4px;
-    font-size: 1em;
+    padding-left: 0.25rem;
     display: inline-block;
     color: #FFFFFF;
 }
 
 div.message-close {
-    font-size: 1em;
     display: inline-block;
     float: right;
     color: #FFFFFF;
@@ -790,7 +773,7 @@ div.fade-out-overlay {
 
 table.default {
     width: 100%;
-    line-height: 1.5em;
+    line-height: 1.75rem;
 }
 
 table.default th {
@@ -798,14 +781,14 @@ table.default th {
     text-align: center;
     color: #FFFFFF;
     background-color: #0099FF;
-    line-height: 2em;
-    border-radius: 2px;
+    line-height: 2rem;
+    border-radius: 0.125rem;
 }
 
 table.default td {
     text-align: center;
-    border-radius: 2px;
-    padding: 0 2px;
+    border-radius: 0.125rem;
+    padding: 0 0.125rem;
 }
 
 table.default tr:nth-child(odd) {
@@ -847,31 +830,31 @@ table.gray th {
 }
 
 .underline {
-    border-bottom: 1px dotted #CCCCCC;
+    border-bottom: 0.0625rem dotted #CCCCCC;
 }
 
 div.achievement {
     cursor: default;
     display: inline-block;
-    height: 24px;
-    margin-right: 4px;
-    margin-bottom: 4px;
-    padding-left: 4px;
-    padding-right: 8px;
-    line-height: 24px;
-    font-size: 12px;
+    height: 1.5rem;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.5rem;
+    line-height: 1.5rem;
+    font-size: 0.75rem;
     color: #FFFFFF;
     background-color: #0099FF;
-    border-radius: 12px 2px 2px 12px;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.24);
+    border-radius: 0.75rem 0.125rem 0.125rem 0.75rem;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
 }
 
 div.edit-problem-tab {
-    margin-top: 12px;
-    font-size: 1.2em;
+    margin-top: 0.75rem;
+    font-size: 1rem;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 6px;
+    margin-bottom: 0.375rem;
 }
 
 div.edit-problem-tab-button {
@@ -882,15 +865,15 @@ div.edit-problem-tab-button {
 
 div.edit-problem-section {
     width: 100%;
-    padding: 8px 0px;
+    padding: 0.5rem 0;
     background-color: #FCFCFC;
-    border: 1px dashed #999999;
+    border: 0.0625rem dashed #999999;
 }
 
 div.edit-problem-section-field {
     text-align: left;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
 }
 
 input.edit-problem-text-field {
@@ -898,7 +881,7 @@ input.edit-problem-text-field {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
 
     border: none;
-    border-bottom: 1px dotted #CCCCCC;
+    border-bottom: 0.0625rem dotted #CCCCCC;
 }
 
 textarea.edit-problem-statement {
@@ -914,16 +897,23 @@ select {
 }
 
 fieldset {
-    border: 1px solid #999999;
+    border: 0.0625rem solid #999999;
 }
 
 label.checkbox-label input[type="checkbox"] {
     position: relative;
     vertical-align: middle;
-    bottom: 1px;
+    bottom: 0.0625rem;
 }
 
 div.edit-problem-test-hash {
-    font-size: 0.8em;
-    margin-top: -8px;
+    font-size: 0.75rem;
+    margin-top: -0.5rem;
+}
+
+div.help-version {
+    font-size: 0.75rem;
+    font-style: italic;
+    text-align: right;
+    padding-right: 0.25rem;
 }
