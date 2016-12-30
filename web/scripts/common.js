@@ -128,7 +128,7 @@ function hideOverlay() {
 /*
  * Form actions (show/hide/submit)
  */
-function showActionForm(content, redirect) {
+function showActionForm(content, redirect, fixed) {
     // Create an overlay shadowing the rest of the page
     showOverlay();
 
@@ -138,6 +138,9 @@ function showActionForm(content, redirect) {
         '<div class="action-form-close" onclick="hideActionForm(\'' + redirect + '\');"><i class="fa fa-close fa-fw"></i></div>' +
         content
     ;
+    if (fixed) {
+        form.style.position = 'fixed';
+    }
     document.body.appendChild(form);
     form.className = 'action-form fade-in';
 
@@ -191,7 +194,7 @@ function submitActionForm(response, hideOnSuccess = true) {
  * Submit form handling
  */
 function showSubmitForm(content) {
-    showActionForm(content);
+    showActionForm(content, '', true);
 
     // Run language detection after every update
     var sourceEl = document.getElementById('source');
@@ -226,7 +229,7 @@ function submitSubmitForm() {
  * Report form handling
  */
 function showReportForm(content) {
-    showActionForm(content);
+    showActionForm(content, '', true);
 }
 
 function submitReportForm() {
