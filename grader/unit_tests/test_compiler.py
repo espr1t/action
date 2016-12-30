@@ -19,7 +19,7 @@ class TestCompiler(unittest.TestCase):
         shutil.rmtree(config.PATH_SANDBOX)
 
     def test_compilation_timeout_fail(self):
-        # Too slow compilation, over the 0.5 second limit (2.11s on the machine I'm currently writing this)
+        # Too slow compilation: over the 3 second limit (5.84s on the machine I'm currently writing this)
         language = "C++"
         path_source = "unit_tests/fixtures/TemplateFibo.cpp"
         path_executable = "unit_tests/test_sandbox/TemplateFibo.o"

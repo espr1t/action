@@ -4,7 +4,7 @@ Runs the executable in a sandbox and returns the result for a single test case
 
 import logging
 from subprocess import PIPE
-from os import name, getcwd, setuid
+from os import name, getcwd
 from time import sleep, perf_counter
 import psutil
 
@@ -13,6 +13,7 @@ from status import TestStatus
 
 if name != "nt":
     import resource
+    from os import setuid
 
 
 class RunResult:
@@ -96,7 +97,7 @@ class Runner:
         def set_restrictions(time_limit):
             # Set the user to a low-privileged one, if we have the privileges for this
             try:
-                setuid(1000)
+                setuid(1001)
             except OSError:
                 pass
 
@@ -189,8 +190,9 @@ class Runner:
 
         exit_code = process.poll() if exit_code is None else exit_code
 
-        error_message = process.communicate()[1]
-        error_message = error_message.decode("utf-8") if error_message is not None else ""
+        #error_message = process.communicate()[1]
+        #error_message = error_message.decode("utf-8") if error_message is not None else ""
+        error_message = ""
 
         # Close the files
         inp_file_handle.close()
