@@ -53,7 +53,7 @@ class Problem {
     }
 
     private static function instanceFromArray($info) {
-        $problem = new Problem;
+        $problem = new Problem();
         $problem->id = intval(getValue($info, 'id'));
         $problem->name = getValue($info, 'name');
         $problem->author = getValue($info, 'author');
@@ -95,7 +95,7 @@ class Problem {
         }
 
         // Update the problem statement (HTML file in the problem folder)
-        $statementPath = sprintf("%s/%s/%s",  $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+        $statementPath = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $this->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         if (!file_put_contents($statementPath, $this->statement)) {
             error_log('Unable to write statement to file "' . $statementPath . '"!');
             return false;

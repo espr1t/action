@@ -84,6 +84,10 @@ class AdminProblemsPage extends Page {
             $solPath = sprintf("%s/%s/%s/%s",
                     $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_TESTS_FOLDER'], $tests[$i]['solFile']);
 
+            # Since this is a link, make it only a relative path (do not include /home/user/...)
+            $inpPath = explode($_SERVER['DOCUMENT_ROOT'], $inpPath)[1];
+            $solPath = explode($_SERVER['DOCUMENT_ROOT'], $solPath)[1];
+
             $editProblemScript .= '
                 tests.push({
                     \'inpFile\': \'' . $tests[$i]['inpFile'] . '\',
@@ -218,7 +222,7 @@ class AdminProblemsPage extends Page {
                 </div>
             </div>
 
-            <div class="center" style="margin-top: 12px;">
+            <div class="center">
                 <input type="submit" value="' . $buttonText . '" onclick="submitEditProblemForm();" class="button button-large button-color-red">
             </div>
         ';

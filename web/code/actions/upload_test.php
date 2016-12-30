@@ -33,6 +33,9 @@ $testHash = md5($testContent);
 $brain = new Brain();
 $brain->updateTestFile($_POST['problemId'], $_POST['testPosition'], $testName, $testHash);
 
+// Return the relative path to the thest so it is displayed properly on the frontend
+$testPath = explode($_SERVER['DOCUMENT_ROOT'], $testPath)[1];
+
 // Everything seems okay
 printAjaxResponse(array(
     'status' => 'OK',
