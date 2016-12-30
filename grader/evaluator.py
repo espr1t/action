@@ -10,7 +10,7 @@ import json
 import logging
 
 from os import path, makedirs
-from time import perf_counter
+from time import perf_counter, sleep
 import config
 import shutil
 from compiler import Compiler
@@ -134,7 +134,15 @@ class Evaluator:
                 if not found:
                     self.update_results.append(result)
 
-        if perf_counter() - self.update_timer > config.UPDATE_INTERVAL or self.update_message != "":
+        time_last_update = perf_counter() - self.update_timer
+        if time_last_update > config.UPDATE_INTERVAL or self.update_message != "":
+            # TODO: Consider sending the perf_counter or some sequential ID so the frontend
+            #       can ignore updates that happened before an update that was already applied.
+
+            # Sleep for a little while to reduce the chance for race condition (immediate update after another update)
+            if time_last_update < config.UPDATE_INTERVAL:
+                sleep(config.UPDATE_INTERVAL - time_last_update)
+
             # self.logger.info("  >> sending update with message = {}".format(self.update_message))
             self.update_timer = perf_counter()
             data = {
