@@ -50,6 +50,14 @@ var {
     font-style: normal;
 }
 
+/*
+These are intentionally set to em, instead of rem. Do not change!
+*/
+sub, sup {
+    font-size: 0.66em;
+    line-height: 1em;
+}
+
 /***********************
          Links
 ************************/
@@ -413,7 +421,7 @@ div.button {
 div.button:hover {
     cursor: pointer;
     color: #FFFFFF;
-    border-top: solid 0.125rem #FFFFFF; 
+    border-top: solid 0.125rem #FFFFFF;
     transition: all 0.2s ease 0s;
 }
 
@@ -514,12 +522,16 @@ table.problem-sample {
 
 table.problem-sample tr th {
     font-weight: bold;
+    width: 50%;
+    max-width: 50%;
 }
 
 table.problem-sample tr td {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
     vertical-align: top;
     font-size: 0.8125rem;
+    width: 50%;
+    max-width: 50%;
 }
 
 table.problem-sample tr td, table.problem-sample tr th {
@@ -589,7 +601,6 @@ input.button {
 input.button-large {
     width: 14rem;
     min-width: 14rem;
-    margin-top: 1rem;
     line-height: 2.5rem;
 }
 
@@ -619,10 +630,10 @@ div.overlay {
 div.action-form {
     position: absolute;
     overflow-y: auto;
-    width: 37rem;
+    width: 39rem;
     top: 50%;
     left: 50%;
-    margin: 1.25rem auto 1.25rem -21rem;
+    margin: 1.25rem auto 1.25rem -22rem;
     padding: 1.25rem 2.5rem 1rem 2.5rem;
     background: #FFFFFF;
     border: 0.0625rem solid #ccc;
@@ -634,7 +645,7 @@ div.action-form {
 div.action-form-close {
     display: inline-block;
     position: absolute;
-    margin-left: 38rem;
+    margin-left: 39.75rem;
     margin-top: -0.75rem;
     color: #555555;
 }
