@@ -214,7 +214,7 @@ function addTests() {
         var name = testSelector.files[i].name;
         // New test, add it to tests[] first
         if (findTest(name) == -1) {
-            if (!name.match(/^[A-Za-z0-9]+(\.\d\d)?\.(in|inp|out|sol)$/)) {
+            if (!name.match(/^[A-Za-z0-9]+(\.\d{2,3})?\.(in|inp|out|sol)$/)) {
                 showMessage('ERROR', 'Невалидно име на тест "' + name + '"!');
                 continue;
             }
