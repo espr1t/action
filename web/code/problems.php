@@ -47,7 +47,7 @@ class ProblemsPage extends Page {
     private function getOrderings() {
         $order_by_difficulty = '<a href="?order=difficulty">сложност</a>';
         $order_by_solutions = '<a href="?order=solutions">брой решения</a>';
-        return '<div class="smaller right">Подреди по: ' . $order_by_difficulty . ' | ' . $order_by_solutions . '</div>';
+        return '<div class="right" style="font-size: smaller;">Подреди по: ' . $order_by_difficulty . ' | ' . $order_by_solutions . '</div>';
     }
 
     private function getMainPage() {

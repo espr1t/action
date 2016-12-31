@@ -20,6 +20,7 @@ $COOKIE_NAME = 'action.informatika.bg';
 
 // Grader
 $GRADER_URL = 'localhost:5000';
+#$GRADER_URL = '192.168.1.111:5000';
 
 // Will not work with random UTF-8 characters since the utf8_encode() algorithm
 // in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
