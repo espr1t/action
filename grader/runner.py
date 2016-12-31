@@ -7,6 +7,7 @@ from subprocess import PIPE
 from os import name, getcwd
 from time import sleep, perf_counter
 import psutil
+from math import fabs
 
 import config
 from status import TestStatus
@@ -213,9 +214,38 @@ class Runner:
 
                     out_line = out_line.strip() if out_line else ""
                     sol_line = sol_line.strip() if sol_line else ""
-                    if out_line != sol_line:
-                        if len(out_line) > 20:
-                            out_line = out_line[:20] + "..."
-                        if len(sol_line) > 20:
-                            sol_line = sol_line[:20] + "..."
-                        return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0
+
+                    if out_line == sol_line:
+                        continue
+
+                    # If a float (or a list of floats), try comparing with absolute or relative error
+                    out_tokens = out_line.split()
+                    sol_tokens = sol_line.split()
+                    relative_comparison_okay = True
+                    if len(out_tokens) != len(sol_tokens):
+                        relative_comparison_okay = False
+                    else:
+                        for i in range(len(out_tokens)):
+                            try:
+                                out_num = float(out_tokens[i])
+                                sol_num = float(sol_tokens[i])
+                                if fabs(out_num - sol_num) > config.FLOAT_PRECISION:
+                                    abs_out_num, abs_sol_num = fabs(out_num), fabs(sol_num)
+                                    if abs_out_num < (1.0 - config.FLOAT_PRECISION) * abs_sol_num or \
+                                            abs_out_num > (1.0 + config.FLOAT_PRECISION) * abs_sol_num:
+                                        relative_comparison_okay = False
+                                        break
+                            except ValueError:
+                                print("Parsing failed!")
+                                relative_comparison_okay = False
+                                break
+
+                    if relative_comparison_okay:
+                        continue
+
+                    # If none of the checks proved the answer to be correct, return a Wrong Answer
+                    if len(out_line) > 20:
+                        out_line = out_line[:20] + "..."
+                    if len(sol_line) > 20:
+                        sol_line = sol_line[:20] + "..."
+                    return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0

@@ -25,3 +25,6 @@ PATH_SANDBOX = "sandbox/"
 
 SOURCE_NAME = "source"
 EXECUTABLE_NAME = "executable"
+
+# Output Validation
+FLOAT_PRECISION = 1e-9
