@@ -35,7 +35,8 @@ def send_request(method, url, data=None):
     elif method == "POST":
         response = requests.post(url, data, auth=(username, password))
     else:
-        logging.error("Unsupported request method '{}'!".format(method))
+        logger = logging.getLogger("commn")
+        logger.error("Unsupported request method '{}'!".format(method))
     return response
 
 

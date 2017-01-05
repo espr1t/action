@@ -36,22 +36,13 @@ class Runner:
         self.evaluator = evaluator
 
         # Configure logger
-        self.logger = logging.getLogger("Runner")
-        self.logger.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(levelname)s %(asctime)s (submission {}): %(message)s".format(self.evaluator.id), "%Y-%m-%dT%H:%M:%S")
-        self.handler = logging.StreamHandler()
-        self.handler.setLevel(logging.INFO)
-        self.handler.setFormatter(formatter)
-        self.logger.addHandler(self.handler)
-        self.logger.propagate = False
+        self.logger = logging.getLogger("runnr")
 
     def __del__(self):
         # Remove log handler
         self.logger.removeHandler(self.handler)
 
     def run(self, test):
-        # self.logger.info("Running solution on test {}".format(test["inpFile"]))
         inp_file = config.PATH_TESTS + test["inpHash"]
         out_file = self.evaluator.path_sandbox + test["inpFile"].replace(".in", ".out")
         sol_file = config.PATH_TESTS + test["solHash"]
@@ -67,7 +58,8 @@ class Runner:
         result = self.exec_solution(sandbox, executable, inp_file, out_file)
 
         if result.error_message != "":
-            self.logger.info("Got error while executing test {}: \"{}\"".format(test["inpFile"], result.error_message))
+            self.logger.info("[Submission {}] Got error while executing test {}: \"{}\"".format(
+                             self.evaluator.id, test["inpFile"], result.error_message))
             result.status = TestStatus.RUNTIME_ERROR
         elif result.exec_time > self.evaluator.time_limit:
             result.status = TestStatus.TIME_LIMIT
@@ -83,8 +75,8 @@ class Runner:
                 result.status = TestStatus.ACCEPTED
 
         total_time = perf_counter() - start_time
-        self.logger.info("    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}".format(
-                test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name))
+        self.logger.info("[Submission {}]    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}".format(
+                self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name))
 
         return result
 

@@ -47,20 +47,9 @@ class Evaluator:
         self.path_executable = self.path_sandbox + config.EXECUTABLE_NAME + self.get_executable_extension()
 
         # Configure logger
-        self.logger = logging.getLogger("Evaluator" + str(self.id))
-        self.logger.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-                "%(levelname)s %(asctime)s (submission {}): %(message)s".format(self.id), "%Y-%m-%dT%H:%M:%S")
-        self.handler = logging.StreamHandler()
-        self.handler.setLevel(logging.INFO)
-        self.handler.setFormatter(formatter)
-        self.logger.addHandler(self.handler)
-        self.logger.propagate = False
+        self.logger = logging.getLogger("evltr")
 
     def __del__(self):
-        # Remove log handler
-        self.logger.removeHandler(self.handler)
-
         # Clean up remaining files
         self.cleanup()
 
@@ -72,23 +61,23 @@ class Evaluator:
 
     def evaluate(self):
         # Send an update that preparation has been started for executing this submission
-        self.logger.info("Evaluating submission {}".format(self.id))
+        self.logger.info("[Submission {}] Evaluating submission {}".format(self.id, self.id))
         self.update_frontend("", self.set_results(TestStatus.PREPARING))
 
         # Create sandbox directory
-        self.logger.info("  >> creating sandbox directory...")
+        self.logger.info("[Submission {}]   >> creating sandbox directory...".format(self.id))
         create_sandbox_status = self.create_sandbox_dir()
         if create_sandbox_status != "":
             self.update_frontend(create_sandbox_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Download the test files (if not downloaded already)
-        self.logger.info("  >> downloading test files...")
+        self.logger.info("[Submission {}]   >> downloading test files...".format(self.id))
         if self.download_tests() != "":
             return
 
         # Save the source to a file so we can compile it later
-        self.logger.info("  >> writing source code to file...")
+        self.logger.info("[Submission {}]   >> writing source code to file...".format(self.id))
         write_source_status = self.write_source()
         if write_source_status != "":
             self.update_frontend(write_source_status, self.set_results(TestStatus.INTERNAL_ERROR))
@@ -98,10 +87,10 @@ class Evaluator:
         self.update_frontend("", self.set_results(TestStatus.COMPILING))
 
         # Compile
-        self.logger.info("  >> compiling...")
+        self.logger.info("[Submission {}]   >> compiling...".format(self.id))
         compile_status = self.compile()
         if compile_status != "":
-            self.logger.info("    -- error while compiling the solution!")
+            self.logger.info("[Submission {}]     -- error while compiling the solution!".format(self.id))
             self.update_frontend(compile_status, self.set_results(TestStatus.COMPILATION_ERROR))
             return
 
@@ -109,16 +98,16 @@ class Evaluator:
         self.update_frontend("", self.set_results(TestStatus.TESTING))
 
         # Execute each of the tests
-        self.logger.info("  >> starting processing tests...")
+        self.logger.info("[Submission {}]   >> starting processing tests...".format(self.id))
         run_status = self.process_tests()
         if run_status != "":
-            self.logger.info("    -- error while running the solution!")
+            self.logger.info("[Submission {}]     -- error while running the solution!".format(self.id))
             self.update_frontend(run_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Finished with this submission
         self.update_frontend("DONE")
-        self.logger.info("  >> done with {}!".format(self.id))
+        self.logger.info("[Submission {}]   >> done with {}!".format(self.id, self.id))
 
     def update_frontend(self, message="", results=None):
         # Merge current message and results with previous ones
@@ -143,7 +132,6 @@ class Evaluator:
             if time_last_update < config.UPDATE_INTERVAL:
                 sleep(config.UPDATE_INTERVAL - time_last_update)
 
-            # self.logger.info("  >> sending update with message = {}".format(self.update_message))
             self.update_timer = perf_counter()
             data = {
                 "id": self.id,
@@ -173,7 +161,7 @@ class Evaluator:
             makedirs(self.path_sandbox)
         except OSError as ex:
             status = str(ex)
-            self.logger.error(ex)
+            self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
         return status
 
     def download_test(self, test_name, test_hash):
@@ -185,10 +173,12 @@ class Evaluator:
 
         # If not, we should download it
         url = self.tests_url + test_name
-        self.logger.info("Downloading file {} with hash {} from URL: {}".format(test_name, test_hash, url))
+        self.logger.info("[Submission {}] Downloading file {} with hash {} from URL: {}".format(
+            self.id, test_name, test_hash, url))
         response = send_request("GET", url)
         if response.status_code != 200:
-            self.logger.error("Could not download test {} with hash {} using URL: {}".format(test_name, test_hash, url))
+            self.logger.error("[Submission {}] Could not download test {} with hash {} using URL: {}".format(
+                self.id, test_name, test_hash, url))
             raise Exception("Could not download test file!")
 
         with open(test_path, "wb") as file:
@@ -210,7 +200,7 @@ class Evaluator:
                 self.download_test(test["solFile"], test["solHash"])
         except Exception as ex:
             status = str(ex)
-            self.logger.error(ex)
+            self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
         return status
 
     def write_source(self):
@@ -220,7 +210,7 @@ class Evaluator:
                 file.write(self.source)
         except OSError as ex:
             status = "Internal error: " + str(ex)
-            self.logger.error(ex)
+            self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
         return status
 
     def compile(self):
@@ -229,7 +219,7 @@ class Evaluator:
         except ValueError as ex:
             # If a non-compiler error occurred, log the message in addition to sending it to the user
             status = "Internal error: " + str(ex)
-            self.logger.error(ex)
+            self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
         return status
 
     def process_tests(self):
@@ -244,11 +234,11 @@ class Evaluator:
         for test_future in test_futures:
             test, future = test_future
             try:
+                # Wait for the test to be executed
                 result = future.result()
             except ValueError as ex:
-                self.logger.info("Got exception :(")
                 errors += "Internal error on test " + test["inpFile"] + "(" + test["inpHash"] + "): " + str(ex)
-                self.logger.error(ex)
+                self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
                 break
 
             # Record the results for the current test and send update to the frontend
@@ -262,10 +252,11 @@ class Evaluator:
             }]
             self.update_frontend("", results)
 
-        self.logger.info("    -- executed {0} tests in {1:.3f}s.".format(len(self.tests), perf_counter() - start_time))
+        self.logger.info("[Submission {}]    -- executed {0} tests in {1:.3f}s.".format(
+            self.id, len(self.tests), perf_counter() - start_time))
         return errors
 
     def cleanup(self):
-        self.logger.info("Cleaning up sandbox of submission {id}".format(id=self.id))
+        self.logger.info("[Submission {}] Cleaning up sandbox...".format(self.id))
         if path.exists(self.path_sandbox):
             shutil.rmtree(self.path_sandbox)

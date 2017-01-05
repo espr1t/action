@@ -2,7 +2,6 @@
 Compiles or parses source files and returns information if an error arises.
 """
 
-import logging
 import psutil
 from subprocess import PIPE
 from time import sleep, perf_counter
@@ -58,8 +57,6 @@ class Compiler:
 
     @staticmethod
     def compile_cpp(path_source, path_executable):
-        logging.info("Compiling source {}".format(path_source))
-
         command = Compiler.COMPILE_LINE_CPP.format(path_executable=path_executable, path_source=path_source)
         exit_code, error_message, compilation_time = Compiler.run_compiler(command)
 
