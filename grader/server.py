@@ -5,6 +5,7 @@ The following API is exposed:
     /available                      For checking whether the Grader is available
     /evaluate                       For evaluation of a submission
 """
+import os
 from flask import Flask, request
 from common import scheduler, requires_auth, create_response
 from evaluator import Evaluator
@@ -35,6 +36,9 @@ def evaluate():
 
 
 if __name__ == "__main__":
+    # Change current working directory to the one the script is in
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     import logging, logging.config, yaml
     logging.config.dictConfig(yaml.load(open('logging.conf')))
 
