@@ -21,6 +21,7 @@ int main(void) {
     int n;
     fscanf(stdin, "%d", &n);
 
+    // OK for N = 3 (expected: 90)
     // OK for N = 20 (expected: 1859550)
     // WA for N = 200 (expected: 569495340)
     // TL for N = 2000 (expected: 134460380)

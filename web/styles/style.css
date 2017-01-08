@@ -825,7 +825,6 @@ table.gray th {
 .red {
     color: #DD4337;
 }
-
 .green {
     color: #129D5A;
 }
@@ -835,9 +834,39 @@ table.gray th {
 .blue {
     color: #0099FF;
 }
-
 .gray {
     color: #CCCCCC;
+}
+
+.background-red {
+    background-color: #DD4337;
+}
+.background-dull-red {
+    background-color: #E87467;
+}
+.background-green {
+    background-color: #129D5A;
+}
+.background-dull-green {
+    background-color: #34B67A;
+}
+.background-yellow {
+    background-color: #FBCB43;
+}
+.background-dull-yellow {
+    background-color: #FCCC44;
+}
+.background-blue {
+    background-color: #0099FF;
+}
+.background-dull-blue {
+    background-color: #78A8FC;
+}
+.background-gray {
+    background-color: #CCCCCC;
+}
+.background-dull-gray {
+    background-color: #9A9A9A;
 }
 
 .underline {
@@ -927,4 +956,17 @@ div.help-version {
     font-style: italic;
     text-align: right;
     padding-right: 0.25rem;
+}
+div.test-result {
+    text-align: center;
+    display: inline-block;
+    min-height: 2rem;
+    min-width: 2rem;
+    line-height: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
+    margin: 0.125rem 0.25rem;
+    color: #EEEEEE;
+    cursor: help;
+
 }

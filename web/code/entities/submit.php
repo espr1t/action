@@ -182,7 +182,7 @@ class Submit {
         $tests = $brain->getProblemTests($this->problemId);
 
         if (count($this->results) != count($tests)) {
-            error_log('Number of tests of problem ' . $submit->problemId . ' differs from results in submission ' . $submit->id . '!');
+            error_log('Number of tests of problem ' . $this->problemId . ' differs from results in submission ' . $this->id . '!');
         }
 
         $scores = [];

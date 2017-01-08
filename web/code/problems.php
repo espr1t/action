@@ -126,14 +126,12 @@ class ProblemsPage extends Page {
         $summaryTable = '
             <table class="default ' . $color . '">
                 <tr>
-                    <th style="width: 30px;">#</th>
                     <th>Статус на задачата</th>
                     <th style="width: 100px;">Време</th>
                     <th style="width: 100px;">Памет</th>
                     <th style="width: 100px;">Точки</th>
                 </tr>
                 <tr>
-                    <td>-</td>
                     <td>' . $problemStatus . '</td>
                     <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
                     <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
@@ -143,32 +141,48 @@ class ProblemsPage extends Page {
         ';
 
         $scores = $submit->calcScores();
-        $testResults = '';
-        for ($i = 0; $i < count($scores); $i = $i + 1) {
-            $result = $submit->results[$i];
-            $testResults .= '
-                <tr>
-                    <td>' . $i . '</td>
-                    <td>' . (is_numeric($result) ? 'OK' : $GLOBALS['STATUS_DISPLAY_NAME'][$result]) . '</td>
-                    <td>' . sprintf("%.2fs", $submit->exec_time[$i]) . '</td>
-                    <td>' . sprintf("%.2f MiB", $submit->exec_memory[$i]) . '</td>
-                    <td>' . $scores[$i] . '</td>
-                </tr>
-            ';
-        }
 
-        $detailedTable = '
-            <table class="default">
-                <tr>
-                    <th style="width: 30px;">#</th>
-                    <th>Статус по тестове</th>
-                    <th style="width: 100px;">Време</th>
-                    <th style="width: 100px;">Памет</th>
-                    <th style="width: 100px;">Точки</th>
-                </tr>
-                ' . $testResults . '
-            </table>
-        ';
+        $detailedTable = '<div class="centered">';
+        for ($i = 1; $i < count($scores); $i = $i + 1) {
+            if ($i > 1 && $i % 10 == 1) {
+                $detailedTable .= '<br>';
+            }
+            $result = $submit->results[$i];
+            $title = 'Тест ' . $i . ': ' . (is_numeric($result) ? 'OK' : $result) . '\n' .
+                     'Точки: ' . $scores[$i] . '\n' .
+                     'Време: ' . sprintf("%.2fs", $submit->exec_time[$i]) . '\n' .
+                     'Памет: ' . sprintf("%.2f MiB", $submit->exec_memory[$i]) . '\n' .
+            '';
+            $icon = 'WTF?';
+            $class = 'test-result background-';
+            if (is_numeric($result)) {
+                $class .= 'dull-green';
+                $icon = '<i class="fa fa-check"></i>';
+            } else if ($result == $GLOBALS['STATUS_WAITING'] || $result == $GLOBALS['STATUS_PREPARING'] || $result == $GLOBALS['STATUS_COMPILING']) {
+                $class .= 'dull-gray';
+                $icon = '<i class="fa fa-circle-o"></i>';
+            } else if ($result == $GLOBALS['STATUS_TESTING']) {
+                $class .= 'dull-gray';
+                $icon = '<i class="fa fa-spinner fa-pulse"></i>';
+            } else if ($result == $GLOBALS['STATUS_WRONG_ANSWER']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-times"></i>';
+            } else if ($result == $GLOBALS['STATUS_TIME_LIMIT']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-clock-o"></i>';
+            } else if ($result == $GLOBALS['STATUS_MEMORY_LIMIT']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-database"></i>';
+            } else if ($result == $GLOBALS['STATUS_RUNTIME_ERROR']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-bug"></i>';
+            } else if ($result == $GLOBALS['STATUS_COMPILATION_ERROR']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-code"></i>';
+            }
+            $detailedTable .= '<div class="' . $class . '" title="' . $title . '">' . $icon . '</div>';
+        }
+        $detailedTable .= '</div>';
 
         $content = '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение</h2>

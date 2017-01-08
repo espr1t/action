@@ -22,6 +22,9 @@ from threading import Thread
 
 class Evaluator:
     def __init__(self, data):
+        # Sleep for a very short while so werkzeug can print its log BEFORE we start printing from here
+        sleep(0.01)
+
         # Update Timer
         self.update_timer = -1
         self.update_message = ""
@@ -68,18 +71,23 @@ class Evaluator:
         self.logger.info("[Submission {}]   >> creating sandbox directory...".format(self.id))
         create_sandbox_status = self.create_sandbox_dir()
         if create_sandbox_status != "":
+            self.logger.error("[Submission {}] Could not create sandbox directory. Aborting...".format(self.id))
             self.update_frontend(create_sandbox_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Download the test files (if not downloaded already)
         self.logger.info("[Submission {}]   >> downloading test files...".format(self.id))
-        if self.download_tests() != "":
+        download_tests_status = self.download_tests()
+        if download_tests_status != "":
+            self.logger.error("[Submission {}] Could not download tests properly. Aborting...".format(self.id))
+            self.update_frontend(download_tests_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Save the source to a file so we can compile it later
         self.logger.info("[Submission {}]   >> writing source code to file...".format(self.id))
         write_source_status = self.write_source()
         if write_source_status != "":
+            self.logger.error("[Submission {}] Could not write source file. Aborting...".format(self.id))
             self.update_frontend(write_source_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
@@ -90,24 +98,21 @@ class Evaluator:
         self.logger.info("[Submission {}]   >> compiling...".format(self.id))
         compile_status = self.compile()
         if compile_status != "":
-            self.logger.info("[Submission {}]     -- error while compiling the solution!".format(self.id))
+            self.logger.info("[Submission {}] Could not compile solution. Stopping execution...".format(self.id))
             self.update_frontend(compile_status, self.set_results(TestStatus.COMPILATION_ERROR))
             return
-
-        # Send an update that the testing has been started for this submission
-        self.update_frontend("", self.set_results(TestStatus.TESTING))
 
         # Execute each of the tests
         self.logger.info("[Submission {}]   >> starting processing tests...".format(self.id))
         run_status = self.process_tests()
         if run_status != "":
-            self.logger.info("[Submission {}]     -- error while running the solution!".format(self.id))
+            self.logger.info("[Submission {}] Error while running the solution. Aborting...!".format(self.id))
             self.update_frontend(run_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Finished with this submission
-        self.update_frontend("DONE")
         self.logger.info("[Submission {}]   >> done with {}!".format(self.id, self.id))
+        self.update_frontend("DONE")
 
     def update_frontend(self, message="", results=None):
         # Merge current message and results with previous ones
@@ -235,24 +240,15 @@ class Evaluator:
             test, future = test_future
             try:
                 # Wait for the test to be executed
-                result = future.result()
+                future.result()
             except ValueError as ex:
                 errors += "Internal error on test " + test["inpFile"] + "(" + test["inpHash"] + "): " + str(ex)
                 self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
                 break
+            except Exception as ex:
+                self.logger.error("[Submission {}] Got exception: {}".format(self.id, str(ex)))
 
-            # Record the results for the current test and send update to the frontend
-            results = [{
-                "position": test["position"],
-                "status": result.status.name,
-                "error_message": result.error_message,
-                "exec_time": result.exec_time,
-                "exec_memory": result.exec_memory / 1048576.0,  # Convert back to megabytes
-                "score": result.score
-            }]
-            self.update_frontend("", results)
-
-        self.logger.info("[Submission {}]    -- executed {0} tests in {1:.3f}s.".format(
+        self.logger.info("[Submission {}]    -- executed {} tests in {:.3f}s.".format(
             self.id, len(self.tests), perf_counter() - start_time))
         return errors
 

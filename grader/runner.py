@@ -38,11 +38,47 @@ class Runner:
         # Configure logger
         self.logger = logging.getLogger("runnr")
 
-    def __del__(self):
-        # Remove log handler
-        self.logger.removeHandler(self.handler)
-
     def run(self, test):
+        # Update the frontend that we are running this test
+        results = [{
+            "position": test["position"],
+            "status": TestStatus.TESTING.name,
+            "score": 0
+        }]
+        self.evaluator.update_frontend("", results)
+
+        start_time = perf_counter()
+
+        # Prepare the run input and output data
+        inp_file, out_file, sol_file, sandbox, executable = self.prepare_run(test)
+
+        # Execute the solution
+        result = self.exec_solution(sandbox, executable, inp_file, out_file)
+
+        # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
+        result.status, result_error_message, result.score = self.determine_status(test, result, out_file, sol_file)
+
+        total_time = perf_counter() - start_time
+        self.logger.info("[Submission {}]    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}".format(
+                self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name))
+
+        # Update the frontend once again that we the testing has been completed (along with TL, ML, and score this time)
+        results = [{
+            "position": test["position"],
+            "status": result.status.name,
+            "error_message": result.error_message,
+            "exec_time": result.exec_time,
+            "exec_memory": result.exec_memory / 1048576.0,  # Convert back to megabytes
+            "score": result.score
+        }]
+        self.evaluator.update_frontend("", results)
+        return result
+
+    """
+    Prepare the run by configuring the correct input and output data for this test,
+    as well as the sandbox and executable paths.
+    """
+    def prepare_run(self, test):
         inp_file = config.PATH_TESTS + test["inpHash"]
         out_file = self.evaluator.path_sandbox + test["inpFile"].replace(".in", ".out")
         sol_file = config.PATH_TESTS + test["solHash"]
@@ -54,31 +90,28 @@ class Runner:
             sandbox = sandbox.replace("/", "\\")
             executable = executable.replace("/", "\\")
 
-        start_time = perf_counter()
-        result = self.exec_solution(sandbox, executable, inp_file, out_file)
+        return inp_file, out_file, sol_file, sandbox, executable
 
+    """
+    Determines the proper execution status (OK, WA, TL, ML, RE) and score of the solution
+    """
+    def determine_status(self, test, result, out_file, sol_file):
         if result.error_message != "":
             self.logger.info("[Submission {}] Got error while executing test {}: \"{}\"".format(
-                             self.evaluator.id, test["inpFile"], result.error_message))
-            result.status = TestStatus.RUNTIME_ERROR
+                self.evaluator.id, test["inpFile"], result.error_message))
+            return TestStatus.RUNTIME_ERROR, result.error_message, 0
         elif result.exec_time > self.evaluator.time_limit:
-            result.status = TestStatus.TIME_LIMIT
+            return TestStatus.TIME_LIMIT, "", 0
         elif result.exec_memory > self.evaluator.memory_limit:
-            result.status = TestStatus.MEMORY_LIMIT
+            return TestStatus.MEMORY_LIMIT, "", 0
         elif result.exit_code != 0:
-            result.status = TestStatus.RUNTIME_ERROR
+            return TestStatus.RUNTIME_ERROR, "", 0
         else:
-            result.error_message, result.score = Runner.validate_output(out_file, sol_file)
-            if result.error_message != "":
-                result.status = TestStatus.WRONG_ANSWER
+            error_message, score = self.validate_output(out_file, sol_file)
+            if error_message != "":
+                return TestStatus.WRONG_ANSWER, error_message, 0
             else:
-                result.status = TestStatus.ACCEPTED
-
-        total_time = perf_counter() - start_time
-        self.logger.info("[Submission {}]    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}".format(
-                self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name))
-
-        return result
+                return TestStatus.ACCEPTED, "", 1
 
     # TODO:
     # Limit network usage
@@ -158,7 +191,7 @@ class Runner:
                 exec_time = max(exec_time, process.cpu_times().user)
                 # Consider using USS instead of PSS if available (currently it returns zeroes only)
                 mem_info = process.memory_full_info()
-                exec_memory = max(exec_memory, mem_info.pss if "pss" in mem_info else mem_info.rss)
+                exec_memory = max(exec_memory, mem_info.pss if mem_info.pss is not None else mem_info.rss)
 
                 # Spawning processes or threads
                 if process.num_threads() > 2:
@@ -194,8 +227,7 @@ class Runner:
         # Leave the parent function decide what the test status will be
         return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0)
 
-    @staticmethod
-    def validate_output(out_file, sol_file):
+    def validate_output(self, out_file, sol_file):
         with open(out_file, "rt") as out:
             with open(sol_file, "rt") as sol:
                 while True:
@@ -228,7 +260,7 @@ class Runner:
                                         relative_comparison_okay = False
                                         break
                             except ValueError:
-                                print("Parsing failed!")
+                                self.logger.warning("[Submission {}] Parsing failed!".format(self.evaluator.id))
                                 relative_comparison_okay = False
                                 break
 
