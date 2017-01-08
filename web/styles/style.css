@@ -300,6 +300,7 @@ div.register {
     margin-top: -17rem;
     left: 50%;
     margin-left: -25rem;
+    z-index: 89;
 }
 
 div.login {
