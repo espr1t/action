@@ -13,7 +13,7 @@ class RegisterPage extends Page {
     }
 
     public function onLoad() {
-        return 'document.forms[\'register\'][\'username\'].focus();';
+        return 'document.forms[\'register\'][\'name\'].focus();';
     }
 
     public function getContent() {
@@ -41,15 +41,6 @@ class RegisterPage extends Page {
                     <form class="register" name="register" action="register" onsubmit="return validateRegistration() && saltHashRegisterPasswords()" method="post" accept-charset="utf-8">
                         <table class="register">
                             <tr>
-                                <td class="left"><b>Потребител:</b></td>
-                                <td class="right">
-                                    <input type="text" name="username" placeholder="Username" class="text" minlength=2 maxlength=16 required
-                                        title="Username must be between 2 and 16 characters long and can contain only Lattin letters, digits, dots, and underscores. It cannot start with a dot."
-                                        onkeyup="validateUsername()">
-                                    <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconUsername"></i>
-                                </td>
-                            </tr>
-                            <tr>
                                 <td class="left"><b>Име:</b></td>
                                 <td class="right">
                                     <input type="text" name="name" placeholder="First Name" class="text" minlength=1 maxlength=32 required
@@ -65,6 +56,15 @@ class RegisterPage extends Page {
                                         title="Names must be between 1 and 32 characters long and can contain only Cyrillic or Lattin letters and dashes."
                                         onkeyup="validateSurname()">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconSurname"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="left"><b>Потребителско Име:</b></td>
+                                <td class="right">
+                                    <input type="text" name="username" placeholder="Username" class="text" minlength=2 maxlength=16 required
+                                        title="Username must be between 2 and 16 characters long and can contain only Lattin letters, digits, dots, and underscores. It cannot start with a dot."
+                                        onkeyup="validateUsername()">
+                                    <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconUsername"></i>
                                 </td>
                             </tr>
                             <tr>
