@@ -344,11 +344,18 @@ class Brain {
         return $this->getResults($response);
     }
 
-    function getUserSubmits($userId, $problemId) {
-        $response = $this->db->query("
-            SELECT * FROM `Submits`
-            WHERE userId = " . $userId . " AND problemId = " . $problemId . "
-        ");
+    function getUserSubmits($userId, $problemId = -1) {
+        if ($problemId == -1) {
+            $response = $this->db->query("
+                SELECT * FROM `Submits`
+                WHERE userId = " . $userId . "
+            ");
+        } else {
+            $response = $this->db->query("
+                SELECT * FROM `Submits`
+                WHERE userId = " . $userId . " AND problemId = " . $problemId . "
+            ");
+        }
         if (!$response) {
             error_log('Could not execute getUserSubmits() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
             return null;

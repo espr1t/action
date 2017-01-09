@@ -412,6 +412,19 @@ div.profile-username {
     z-index: 3;
 }
 
+div.profile-dot-box {
+    line-height: 0.75rem;
+    opacity: 0.75;
+}
+
+div.profile-dot {
+    display: inline-block;
+    height: 0.625rem;
+    width: 0.625rem;
+    border-radius: 0.3125rem;
+    margin-right: 0.125rem;
+}
+
 div.button {
     font-size: 1rem;
     line-height: 5.5rem;
@@ -871,12 +884,40 @@ table.gray th {
 .background-dull-blue {
     background-color: #78A8FC;
 }
+.background-purple {
+    background-color: #8E44AD;
+}
+.background-purple-dull {
+    background-color: #9B59B6;
+}
+.background-orange {
+    background-color: #D35400;
+}
+.background-orange-dull {
+    background-color: #E67E22;
+}
+.background-teal {
+    background-color: #16A085;
+}
+.background-teal-dull {
+    background-color: #1ABC9C;
+}
+.background-asphalt {
+    background-color: #2C3E50;
+}
+.background-asphalt-dull {
+    background-color: #3D566E;
+}
 .background-gray {
     background-color: #CCCCCC;
 }
 .background-dull-gray {
     background-color: #9A9A9A;
 }
+.background-black {
+    background-color: #111111;
+}
+
 
 .underline {
     border-bottom: 0.0625rem dotted #CCCCCC;

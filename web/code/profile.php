@@ -22,6 +22,42 @@ class ProfilePage extends Page {
         }
     }
 
+    private function submissionDotChart($brain) {
+        $content = '<div class="profile-dot-box">';
+        $submits = $brain->getUserSubmits($this->profile->id);
+        foreach ($submits as $submit) {
+            $color = 'gray';
+            switch ($submit['status']) {
+                case $GLOBALS['STATUS_ACCEPTED']:
+                    $color = 'green';
+                    break;
+                case $GLOBALS['STATUS_WRONG_ANSWER']:
+                    $color = 'red';
+                    break;
+                case $GLOBALS['STATUS_TIME_LIMIT']:
+                    $color = 'yellow';
+                    break;
+                case $GLOBALS['STATUS_MEMORY_LIMIT']:
+                    $color = 'purple-dull';
+                    break;
+                case $GLOBALS['STATUS_RUNTIME_ERROR']:
+                    $color = 'asphalt';
+                    break;
+                case $GLOBALS['STATUS_COMPILATION_ERROR']:
+                    $color = 'blue';
+                    break;
+                case $GLOBALS['STATUS_INTERNAL_ERROR']:
+                    $color = 'black';
+                    break;
+                default:
+                    $color = 'gray';
+            }
+            $content .= '<div class="profile-dot background-' . $color . '" title="' . $submit['status'] . '"></div>';
+        }
+        $content .= '</div>';
+        return $content;
+    }
+
     public function getContent() {
         $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни", "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
 
@@ -38,6 +74,8 @@ class ProfilePage extends Page {
                 <div class="profile-username">' . $this->profile->username . '</div>
             </div>
         ';
+
+        $brain = new Brain();
 
         $content = '
             <div>
@@ -92,6 +130,14 @@ class ProfilePage extends Page {
         $content .= '
             <br>
         ';
+
+        // Submission information
+        // ====================================================================
+        $content .= '
+                <h2>Предадени Решения</h2>
+        ';
+        $content .= $this->submissionDotChart($brain);
+
 
         // Training progress
         // ====================================================================
