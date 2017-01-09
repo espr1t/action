@@ -9,43 +9,39 @@ class AboutPage extends Page {
     
     public function getContent() {
         $content = inBox('
-            <h1>About</h1>
-            This is a new coding place, part of <a href="http://www.informatika.bg" target="_blank">informatika.bg</a>.
-            It is created and maintained by <a href="http://espr1t.net/me.html" target="_blank">Alexander Georgiev</a>.
+            <h1>За системата</h1>
+            Тази система е част от <a href="http://www.informatika.bg" target="_blank">informatika.bg</a>, като предоставя
+            възможност потребителите на сайта да тренират наученото от темите върху задачи, давани на състезания.
+            Тя е безплатна и свободна за ползване - кодът е достъпен като <a href="https://github.com/espr1t/action" target="_blank">GitHub проект</a>.
 
+            <h3>Задачи</h3>
+            Системата съдържа архив със задачи, давани от мен на различни състезания (национални и международни състезания,
+            лагер-школи, курсове в университета, TopCoder, и други).
+
+            <h3>Тренировка</h3>
+            Системата също така има и възможност за структурирана подготовка, фокусираща се върху различни части от състезателната
+            информатика. Надявам се да се получи нещо сходно на <a href="http://train.usaco.org/usacogate" target="_blank">USACO</a>
+            трейнинга, като може да е безкрайно полезна за по-неопитни състезатели, тъй като темите ще бъдат подредени в нарастваща
+            сложност.
+
+            <h3>Игри</h3>
+            За разлика от много други системи, съвсем скоро тази ще поддържа "игри" за двама или повече души, като всеки играч всъщност
+            ще се състезава с изкуствен интелект, който е написал. Пример за такава игра е "змия за двама", в която две змии биха играли
+            на една и съща дъска с ябълки, като се стремят да изядат възможно най-много, без да се блъснат в стена, в себе си, или в другата
+            змия.
+
+            <h3>Състезания</h3>
+            По някое време системата ще почне да поддържа и състезания, като възнамерявам да има и такива с награди, спонсорирани от
+            мен и други хора и организации.
+
+            <h3>За контакти</h3>
+            Системата се разработва и поддържа от мен - <a href="http://espr1t.net/me.html" target="_blank">Александър Георгиев</a>.
             <br><br>
-
-            <h2>Problems</h2>
-            It will contain a full archive of the problems I\'ve given in various contests (national and international
-            high-school competitions, university classes and competitions, TopCoder, Codeforces, and other).
-
+            Ако забележите проблеми или имате предложения за подобрения, моля използвайте ликна "report a problem" в менюто долу.
+            За други неща можете да се свържете с мен на <a href="mailto:thinkcreative@outlook.com" target="_self">thinkcreative@outlook.com</a>.
             <br><br>
-
-            <h2>Training</h2>
-            The problems on the arena will also be organized in a training ladder pointing to different topics in informatics and
-            problems that are related to it. It will be similar to the <a href="http://train.usaco.org/usacogate" target="_blank">USACO training</a>,
-            and I hope may prove extremely useful for beginners, as the topics and problems will be in increasing difficulty.
-
-            <br><br>
-
-            <h2>Contests</h2>
-            Sometime in the future I plan to start organizing contests every once in a while, with prizes sponsored by me and/or other people.
-            I consider having the possibility allow sponsoring contests (either by gifts or problems or both).
-
-            <br><br>
-
-            <h2>The System</h2>
-            The system is being developed by me, Alexander Georgiev.
-            It is free for use and is available as a <a href="https://github.com" target="_blank">GitHub</a> project:
-            <a href="https://github.com/espr1t/action" target="_blank">Act!O(n)</a>.
-
-            <br><br>
-
-            <h2>Contact</h2>
-            If you spot issues with the system or problems, please use the link "report a problem" below.
-            For other matters you can contact me at <a href="mailto:thinkcreative@outlook.com" target="_self">thinkcreative@outlook.com</a>.
-            Finally, you can like us and discuss things with other visitors of the page on our
-            <a href="https://www.facebook.com/informatika.bg/" target="_blank">Facebook page</a>.
+            Последно, за да се свържете с други потребители на системата или за да покажете, че системата Ви харесва, можете да харесате
+            <a href="https://www.facebook.com/informatika.bg/" target="_blank">страницата ни във Facebook</a>.
         ');
         return $content;
     }
