@@ -274,3 +274,28 @@ function updateGraderStatus() {
     }
     ajaxCall('/actions/checkGrader', {}, callback);
 }
+
+/*
+ * Order ranking by various parameters
+ */
+function orderRanking(orderBy) {
+    var table = document.getElementById('rankingTable');
+    var tableBody = table.tBodies[1];
+    var rows = Array.prototype.slice.call(tableBody.rows, 0);
+    rows = rows.sort(function(a, b) {
+        var townA = a.cells[3].textContent, tasksA = parseInt(a.cells[4].textContent), achievementsA = parseInt(a.cells[5].textContent);
+        var townB = b.cells[3].textContent, tasksB = parseInt(b.cells[4].textContent), achievementsB = parseInt(b.cells[5].textContent);
+        switch (orderBy) {
+            case 'town':
+                return townA != townB ? townA > townB : (tasksA != tasksB ? tasksA < tasksB : achievementsA < achievementsB);
+            case 'achievements':
+                return achievementsA != achievementsB ? achievementsA < achievementsB : (tasksA != tasksB ? tasksA < tasksB : townA > townB);
+            default:
+                return tasksA != tasksB ? tasksA < tasksB : (achievementsA != achievementsB ? achievementsA < achievementsB : townA > townB);
+        }
+    });
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].cells[0].textContent = i + 1;
+        tableBody.appendChild(rows[i]);
+    }
+}

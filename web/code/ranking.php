@@ -43,16 +43,18 @@ class RankingPage extends Page {
     public function getContent() {
         $ranking = $this->getRanking();
         $table = '
-            <table class="default">
+            <table class="default" id="rankingTable">
                 <tr>
                     <th>#</th>
                     <th>Потребител</th>
                     <th>Име</th>
-                    <th>Град</th>
-                    <th style="width: 100px;">Задачи</th>
-                    <th style="width: 100px;">Постижения</th>
+                    <th onclick="orderRanking(\'town\');" style="cursor: pointer;">Град <i class="fa fa-sort" style="font-size: 0.625rem;"></i></th>
+                    <th onclick="orderRanking(\'tasks\');" style="cursor: pointer; width: 100px;">Задачи <i class="fa fa-sort" style="font-size: 0.625rem;"></i></th>
+                    <th onclick="orderRanking(\'achievements\');" style="cursor: pointer; width: 120px;">Постижения <i class="fa fa-sort" style="font-size: 0.625rem;"></i></th>
                 </tr>
+                <tbody>
                 ' . $ranking . '
+                </tbody>
             </table>
         ';
         $content = '
