@@ -18,10 +18,17 @@ class AdminNewsPage extends Page {
         foreach ($brain->getAllNews() as $entry) {
             $newsList .= '
                 <div class="box boxlink" onclick="redirect(\'/admin/news/' . $entry['id'] . '\');">
-                    <div class="news-title">' . $entry['title'] . '</div>
+                 <div class="news-content">
+                    <div class="news-icon">
+                        <i class="fa fa-' . $entry['icon'] . '" title="' . $entry['type'] . '"></i>
+                    </div>
+                    <div class="news-title">
+                        ' . $entry['title'] . '
+                    </div>
                     ' . $entry['content'] . '
                     <div class="separator" style="margin-top: 0.5rem;"></div>
                     <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
+                 </div>
                 </div>
             ';
         }
@@ -35,13 +42,17 @@ class AdminNewsPage extends Page {
 
         $content = '
             <h2>' . $headerText . '</h2>
-            <div class="left" style="margin-bottom: 2px;">
-                <input type="text" name="title" class="news-form-title" id="newsTitle" value="' . $news->title . '">
+            <div style="margin-bottom: 2px;">
+                <input type="text" name="title" class="news-form-title" id="newsTitle" value="' . $news->title . '" title="Title">
             </div>
-            <div class="right" style="margin-bottom: 4px;">
-                <input type="text" name="date" class="news-form-date" id="newsDate" value="' . $news->date . '">
+            <div class="right">
+                <input type="text" name="date" class="news-form-date" id="newsDate" value="' . $news->date . '" title="Date">
             </div>
-            <textarea name="content" class="news-form-content" id="newsContent">' . $news->content . '</textarea>
+            <div class="centered" style="margin-bottom: 4px;">
+                <input type="text" name="icon" id="newsIcon" value="' . $news->icon . '" style="width: 29%;" title="Icon">
+                <input type="text" name="type" id="newsType" value="' . $news->type . '" style="width: 69%;" title="News Type">
+            </div>
+            <textarea name="content" class="news-form-content" id="newsContent" title="Content">' . $news->content . '</textarea>
             <div class="input-wrapper">
                 <input type="submit" value="' . $buttonText . '" onclick="submitEditNewsForm();" class="button button-color-red">
             </div>

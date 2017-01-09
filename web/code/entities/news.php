@@ -8,10 +8,14 @@ class News {
     public $title = '';
     public $date = '';
     public $content = '';
+    public $icon = '';
+    public $type = '';
     
     public function __construct() {
         $this->title = 'Заглавие';
         $this->date = date('Y-m-d');
+        $this->icon = 'arrow-circle-up';
+        $this->type = 'Improvement';
     }
 
     private static function instanceFromArray($info) {
@@ -20,6 +24,9 @@ class News {
         $news->title = getValue($info, 'title');
         $news->date = getValue($info, 'date');
         $news->content = getValue($info, 'content');
+        $news->icon = getValue($info, 'icon');
+        $news->type = getValue($info, 'type');
+
         return $news;
     }
 

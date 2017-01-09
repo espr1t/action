@@ -16,6 +16,8 @@ $news = new News();
 $news->date = $_POST['date'];
 $news->title = $_POST['title'];
 $news->content = $_POST['content'];
+$news->icon = $_POST['icon'];
+$news->type = $_POST['type'];
 
 $errorMessage = validateNews($news);
 if ($errorMessage != '') {

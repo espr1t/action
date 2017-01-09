@@ -10,12 +10,16 @@ function submitEditNewsForm() {
     var date = document.getElementById('newsDate').value;
     var title = document.getElementById('newsTitle').value;
     var content = document.getElementById('newsContent').value;
+    var icon = document.getElementById('newsIcon').value;
+    var type = document.getElementById('newsType').value;
 
     var data = {
         'id': id,
         'date': date,
         'title': title,
-        'content': content
+        'content': content,
+        'icon': icon,
+        'type': type
     };
 
     var callback = function(response) {

@@ -261,7 +261,9 @@ Table::News
     "id": 1,
     "date": 2016-08-19,
     "title": "Работата по Арената е започната!",
-    "text": "Some text"
+    "text": "Some text",
+    "icon": "arrow-circle-up",
+    "type": "Improvement"
 }
 */
 output('');
@@ -276,6 +278,8 @@ if ($db->tableExists('News')) {
             date DATE NOT NULL,
             title TEXT NOT NULL,
             content TEXT NOT NULL,
+            icon TEXT NOT NULL,
+            type TEXT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

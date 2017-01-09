@@ -61,7 +61,7 @@ class Brain {
     // News
     function addNews() {
         $response = $this->db->query("
-            INSERT INTO `News`(date, title, content)
+            INSERT INTO `News`(date, title, content, icon, type)
             VALUES ('', '', '')
         ");
 
@@ -77,7 +77,9 @@ class Brain {
             UPDATE `News` SET
                 date = '" . $news->date . "',
                 title = '" . $this->db->escape($news->title) . "',
-                content = '" . $this->db->escape($news->content) . "'
+                content = '" . $this->db->escape($news->content) . "',
+                icon = '" . $this->db->escape($news->icon) . "',
+                type = '" . $this->db->escape($news->type) . "'
             WHERE id = " . $news->id . "
         ");
         if (!$response) {

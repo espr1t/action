@@ -17,10 +17,17 @@ class HomePage extends Page {
         $brain = new Brain();
         foreach ($brain->getAllNews() as $entry) {
             $news .= inBox('
-                 <div class="news-title">' . $entry['title'] . '</div>
-                 ' . $entry['content'] . '
-                 <div class="separator" style="margin-top: 0.5rem;"></div>
-                 <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
+                 <div class="news-content">
+                    <div class="news-icon">
+                        <i class="fa fa-' . $entry['icon'] . '" title="' . $entry['type'] . '"></i>
+                    </div>
+                    <div class="news-title">
+                        ' . $entry['title'] . '
+                    </div>
+                    ' . $entry['content'] . '
+                    <div class="separator" style="margin-top: 0.5rem;"></div>
+                    <div class="news-date">Публикувано на ' . $entry['date'] . '</div>
+                 </div>
             ');
         }
 
