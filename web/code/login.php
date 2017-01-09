@@ -18,6 +18,12 @@ class LoginPage extends Page {
     }
 
     public function getContent() {
+        // User is already logged in
+        if ($GLOBALS['user']->id != -1) {
+            header('Location: /home');
+            exit();
+        }
+
         $error = '';
 
         // Check if user just entered valid credentials
