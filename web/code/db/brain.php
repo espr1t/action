@@ -331,6 +331,18 @@ class Brain {
         return $this->getResult($response);
     }
 
+    function getPendingSubmits() {
+        $response = $this->db->query("
+            SELECT * FROM `Submits`
+            WHERE status in ('W', 'P', 'C', 'T')
+        ");
+        if (!$response) {
+            error_log('Could not execute getProblemSubmits() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
     function getProblemSubmits($problemId, $status) {
         $response = $this->db->query("
             SELECT id, userId FROM `Submits`

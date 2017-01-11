@@ -48,13 +48,26 @@ class AdminQueuePage extends Page {
         $submit = Submit::get($submitId);
         $submit->reset();
         $submit->send();
-        header('Location: /admin/regrade');
-        exit();
+    }
+
+    private function regradePending() {
+        $brain = new Brain();
+        $pending = $brain->getPendingSubmits();
+        echo "Regrading " . count($pending) . " submissions.";
+        foreach ($pending as $submit) {
+            $this->regradeSubmit($submit['id']);
+        }
     }
 
     public function getContent() {
         if (isset($_GET['submitId'])) {
-            $this->regradeSubmit($_GET['submitId']);
+            if ($_GET['submitId'] == 'pending') {
+                $this->regradePending();
+            } else {
+                $this->regradeSubmit($_GET['submitId']);
+            }
+            header('Location: /admin/regrade');
+            exit();
         }
 
         $head = inBox('
