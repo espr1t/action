@@ -10,6 +10,12 @@ class ProfilePage extends Page {
         return 'O(N)::' . $this->profile->username;
     }
 
+    public function getExtraScripts() {
+        return array(
+            '/scripts/d3.min.js', '/scripts/radarChart.js'
+        );
+    }
+
     public function init() {
         if (!isset($_GET['user'])) {
             header('Location: /error');
@@ -20,6 +26,138 @@ class ProfilePage extends Page {
             header('Location: /error');
             exit();
         }
+    }
+
+    private function getPercentage($total, $solved, $tag) {
+        if ($total[$tag] == 0)
+            return 1.0;
+        return $solved[$tag] / $total[$tag];
+    }
+
+    private function getTopUsersSkills($brain, $problems) {
+        // Get average stats for top 10% of the users
+        $allUsers = $brain->getUsers();
+        $allSolved = array();
+        for ($i = 0; $i < count($allUsers); $i = $i + 1) {
+            $allUsers[$i]['solved'] = $brain->getSolved($allUsers[$i]['id']);
+            array_push($allSolved, count($allUsers[$i]['solved']));
+        }
+        sort($allSolved);
+        array_reverse($allSolved);
+        $targetCount = $allSolved[count($allSolved) / 10];
+        $topSolvedCount = array();
+        $topUsersCount = 0;
+        // Count how many times each of the problems is solved by a top 10% user
+        foreach ($allUsers as $user) {
+            if (count($user['solved']) >= $targetCount) {
+                $topUsersCount += 1;
+                foreach ($user['solved'] as $problem) {
+                    if (!array_key_exists($problem, $topSolvedCount)) {
+                        $topSolvedCount[$problem] = 0;
+                    }
+                    $topSolvedCount[$problem] += 1;
+                }
+            }
+        }
+
+        $topUsersTags = array();
+        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag) {
+            $topUsersTags[$tag] = 0;
+        }
+
+        // Sum the tags for each of the solved problems by the top users
+        foreach ($problems as $problem) {
+            $tags = explode(',', $problem['tags']);
+            foreach ($tags as $tag) {
+                if (array_key_exists($problem['id'], $topSolvedCount)) {
+                    $topUsersTags[$tag] += $topSolvedCount[$problem['id']];
+                }
+            }
+        }
+        // Take the average for the top users
+        $topUsersTags = array_map(function($el) use($topUsersCount) {return $el / $topUsersCount;}, $topUsersTags);
+        return $topUsersTags;
+    }
+
+    private function skillRadarChart($brain) {
+        $content = '';
+
+        // Evaluate how good the users is at each topic (tag).
+        $totalTags = array();
+        $solvedTags = array();
+        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag) {
+            $totalTags[$tag] = 0;
+            $solvedTags[$tag] = 0;
+        }
+
+        $problems = $brain->getAllProblems();
+        $solved = $brain->getSolved($this->profile->id);
+
+        foreach ($problems as $problem) {
+            $tags = explode(',', $problem['tags']);
+            foreach ($tags as $tag) {
+                $totalTags[$tag] += 1;
+                if (in_array($problem['id'], $solved)) {
+                    $solvedTags[$tag] += 1;
+                }
+            }
+        }
+
+        // Prepare the data for the radar chart
+        $skillsData = array(
+            array(
+                array('axis' => 'Data Structures', 'value' => $this->getPercentage($totalTags, $solvedTags, 'datastruct')),
+                array('axis' => 'Greedy', 'value' => $this->getPercentage($totalTags, $solvedTags, 'greedy')),
+                array('axis' => 'Graphs', 'value' => $this->getPercentage($totalTags, $solvedTags, 'graph')),
+                array('axis' => 'Flows', 'value' => $this->getPercentage($totalTags, $solvedTags, 'flow')),
+                array('axis' => 'Sorting', 'value' => $this->getPercentage($totalTags, $solvedTags, 'sorting')),
+                array('axis' => 'Search', 'value' => $this->getPercentage($totalTags, $solvedTags, 'search')),
+                array('axis' => 'Strings', 'value' => $this->getPercentage($totalTags, $solvedTags, 'strings')),
+                array('axis' => 'Geometry', 'value' => $this->getPercentage($totalTags, $solvedTags, 'geometry')),
+                array('axis' => 'Math', 'value' => $this->getPercentage($totalTags, $solvedTags, 'math')),
+                array('axis' => 'DP', 'value' => $this->getPercentage($totalTags, $solvedTags, 'dp')),
+                array('axis' => 'Ad-hoc', 'value' => $this->getPercentage($totalTags, $solvedTags, 'ad-hoc')),
+                array('axis' => 'NP-Complete', 'value' => $this->getPercentage($totalTags, $solvedTags, 'np'))
+            )
+        );
+
+        /*
+        // Evaluate the strengths of the top 10% of the users
+        $topUsersTags = $this->getTopUsersSkills($brain, $problems);
+        array_push($skillsData, array(
+                array('axis' => 'Data Structures', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'datastruct')),
+                array('axis' => 'Greedy', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'greedy')),
+                array('axis' => 'Graphs', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'graph')),
+                array('axis' => 'Flows', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'flow')),
+                array('axis' => 'Sorting', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'sorting')),
+                array('axis' => 'Search', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'search')),
+                array('axis' => 'Strings', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'strings')),
+                array('axis' => 'Geometry', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'geometry')),
+                array('axis' => 'Math', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'math')),
+                array('axis' => 'DP', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'dp')),
+                array('axis' => 'Ad-hoc', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'ad-hoc')),
+                array('axis' => 'NP-Complete', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'np'))
+            )
+        );
+        */
+
+        // Invoke the JS code to generate the radar chart
+        $content .= '
+            <script>
+                var data = ' . json_encode($skillsData) . ';
+                var options = {
+                    w: 200,
+                    h: 200,
+                    margin: {top: 40, right: 50, bottom: 50, left: 50},
+                    maxValue: 1.0,
+                    levels: 5,
+                    roundStrokes: false,
+                    color: d3.scale.ordinal().range(["#0099FF", "#DD4337", "#00A0B0", "#CC333F", "#EDC951"])
+                };
+                RadarChart(".radarChart", data, options);
+            </script>
+        ';
+        return $content;
     }
 
     private function submissionDotChart($brain) {
@@ -79,6 +217,7 @@ class ProfilePage extends Page {
 
         $content = '
             <div>
+            <div class="radarChart" style="float: right; background-color: #FFFFFF; margin-right: -40px;"></div>
         ';
 
         // General information
@@ -130,6 +269,11 @@ class ProfilePage extends Page {
         $content .= '
             <br>
         ';
+
+        // Skills Radar Chart
+        // ====================================================================
+        $content .= $this->skillRadarChart($brain);
+
 
         // Submission information
         // ====================================================================
