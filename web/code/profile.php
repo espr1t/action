@@ -255,28 +255,31 @@ class ProfilePage extends Page {
     }
 
     private function trainingProgress() {
-        /*
+        $content = '
+                <h2>Прогрес</h2>
+        ';
+
+        $submits = $this->brain->getUserSubmits($this->profile->id);
         $tried = array();
         $solved = array();
-        $submits = $this->profile->submits;
+
         foreach ($submits as $submit) {
-            $submitInfo = Submit::getSubmitInfo($submit);
-            if (!in_array($submitInfo['problemId'], $tried)) {
-                array_push($tried, $submitInfo['problemId']);
+            if (!in_array($submit['problemId'], $tried)) {
+                array_push($tried, $submit['problemId']);
             }
-            if ($submitInfo['status'] == $GLOBALS['STATUS_ACCEPTED']) {
-                if (!in_array($submitInfo['problemId'], $solved)) {
-                    array_push($solved, $submitInfo['problemId']);
+            if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                if (!in_array($submit['problemId'], $solved)) {
+                    array_push($solved, $submit['problemId']);
                 }
             }
         }
+
         $content .= '
-                <h2>Прогрес</h2>
-                <b>Брой решени задачи:</b> ' . count($solved) . '<br>
-                <b>Брой пробвани задачи:</b> ' . count($tried) . '<br>
-                <b>Брой изпратени решения:</b> ' . count($submits) . '<br>
+                <b>Решени задачи:</b> ' . count($solved) . '<br>
+                <b>Пробвани задачи:</b> ' . count($tried) . '<br>
+                <b>Изпратени решения:</b> ' . count($submits) . '<br>
         ';
-        */
+        return $content . '<br>';
     }
 
     private function getAchievements() {
