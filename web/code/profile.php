@@ -26,6 +26,7 @@ class ProfilePage extends Page {
             header('Location: /error');
             exit();
         }
+        $this->brain = new Brain();
     }
 
     private function getPercentage($total, $solved, $tag) {
@@ -34,12 +35,12 @@ class ProfilePage extends Page {
         return $solved[$tag] / $total[$tag];
     }
 
-    private function getTopUsersSkills($brain, $problems) {
+    private function getTopUsersSkills($problems) {
         // Get average stats for top 10% of the users
-        $allUsers = $brain->getUsers();
+        $allUsers = $this->brain->getUsers();
         $allSolved = array();
         for ($i = 0; $i < count($allUsers); $i = $i + 1) {
-            $allUsers[$i]['solved'] = $brain->getSolved($allUsers[$i]['id']);
+            $allUsers[$i]['solved'] = $this->brain->getSolved($allUsers[$i]['id']);
             array_push($allSolved, count($allUsers[$i]['solved']));
         }
         sort($allSolved);
@@ -79,8 +80,12 @@ class ProfilePage extends Page {
         return $topUsersTags;
     }
 
-    private function skillRadarChart($brain) {
-        $content = '';
+    private function skillRadarChart() {
+        // Radar chart library taken from: http://www.visualcinnamon.com/2015/10/different-look-d3-radar-chart.html
+
+        $content = '
+             <div class="radarChart" style="float: right; background-color: #FFFFFF; margin-right: -40px;"></div>
+        ';
 
         // Evaluate how good the users is at each topic (tag).
         $totalTags = array();
@@ -90,8 +95,8 @@ class ProfilePage extends Page {
             $solvedTags[$tag] = 0;
         }
 
-        $problems = $brain->getAllProblems();
-        $solved = $brain->getSolved($this->profile->id);
+        $problems = $this->brain->getAllProblems();
+        $solved = $this->brain->getSolved($this->profile->id);
 
         foreach ($problems as $problem) {
             $tags = explode(',', $problem['tags']);
@@ -123,7 +128,7 @@ class ProfilePage extends Page {
 
         /*
         // Evaluate the strengths of the top 10% of the users
-        $topUsersTags = $this->getTopUsersSkills($brain, $problems);
+        $topUsersTags = $this->getTopUsersSkills($problems);
         array_push($skillsData, array(
                 array('axis' => 'Data Structures', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'datastruct')),
                 array('axis' => 'Greedy', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'greedy')),
@@ -160,9 +165,12 @@ class ProfilePage extends Page {
         return $content;
     }
 
-    private function submissionDotChart($brain) {
-        $content = '<div class="profile-dot-box">';
-        $submits = $brain->getUserSubmits($this->profile->id);
+    private function submissionDotChart() {
+        $content = '
+                <h2>Предадени Решения</h2>
+        ';
+        $submits = $this->brain->getUserSubmits($this->profile->id);
+        $content .= '<div class="profile-dot-box">';
         foreach ($submits as $submit) {
             $color = 'gray';
             switch ($submit['status']) {
@@ -196,36 +204,30 @@ class ProfilePage extends Page {
         return $content;
     }
 
-    public function getContent() {
-        $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни", "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
-
-        // Profile heading (avatar + nickname)
-        $avatarUrl = sprintf('%s/%s', $GLOBALS['PATH_AVATARS'], 'default_avatar.png');
-        if ($this->profile->avatar != '') {
-            $avatarUrl = sprintf('%s/%s', $GLOBALS['PATH_AVATARS'], $this->profile->avatar);
-        }
-
-        $head = '
-            <div class="profile-head">
-                <div class="profile-avatar" style="background-image: url(\'' . $avatarUrl . '\'); "></div>
-                <div class="profile-line"></div>
-                <div class="profile-username">' . $this->profile->username . '</div>
-            </div>
-        ';
-
-        $brain = new Brain();
-
+    private function generalInformation() {
         $content = '
-            <div>
-            <div class="radarChart" style="float: right; background-color: #FFFFFF; margin-right: -40px;"></div>
-        ';
-
-        // General information
-        // ====================================================================
-        $content .= '
                 <h2>Информация</h2>
         ';
+        $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни", "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
+
         $content .= '<b>Име:</b> ' . $this->profile->name . '<br>';
+
+        // Birthdate
+        if ($this->profile->birthdate != '0000-00-00') {
+            $birthdate = explode('-', $this->profile->birthdate);
+            $birthdateString = $this->profile->gender== 'female' ? 'Родена на:' : 'Роден на:';
+            $day = intval($birthdate[2]);
+            $month = $months[intval($birthdate[1]) - 1];
+            $year = intval($birthdate[0]);
+            $content .= '<b>' . $birthdateString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
+        }
+
+        // Gender
+        $gender = $this->profile->gender;
+        $gender = ($gender == 'male' ? 'мъж' : ($gender == 'female' ? 'жена' : ''));
+        if ($gender != '') {
+            $content .= '<b>Пол:</b> ' . $gender . '<br>';
+        }
 
         // Location
         $location = $this->profile->town;
@@ -239,23 +241,6 @@ class ProfilePage extends Page {
             $content .= '<b>Град:</b> ' . $location . '<br>';
         }
 
-        // Gender
-        $gender = $this->profile->gender;
-        $gender = ($gender == 'male' ? 'мъж' : ($gender == 'female' ? 'жена' : ''));
-        if ($gender != '') {
-            $content .= '<b>Пол:</b> ' . $gender . '<br>';
-        }
-
-        // Birthdate
-        if ($this->profile->birthdate != '0000-00-00') {
-            $birthdate = explode('-', $this->profile->birthdate);
-            $birthdateString = $this->profile->gender== 'female' ? 'Родена на:' : 'Роден на:';
-            $day = intval($birthdate[2]);
-            $month = $months[intval($birthdate[1]) - 1];
-            $year = intval($birthdate[0]);
-            $content .= '<b>' . $birthdateString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
-        }
-
         // Registered
         $registered = explode('-', $this->profile->registered);
         if (count($registered) == 3) {
@@ -266,27 +251,10 @@ class ProfilePage extends Page {
             $content .= '<b>' . $registeredString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
         }
 
-        $content .= '
-            <br>
-        ';
+        return $content . '<br>';
+    }
 
-        // Skills Radar Chart
-        // ====================================================================
-        $content .= $this->skillRadarChart($brain);
-
-
-        // Submission information
-        // ====================================================================
-        $content .= '
-                <h2>Предадени Решения</h2>
-        ';
-        $content .= $this->submissionDotChart($brain);
-
-
-        // Training progress
-        // ====================================================================
-        // TODO:
-
+    private function trainingProgress() {
         /*
         $tried = array();
         $solved = array();
@@ -308,30 +276,10 @@ class ProfilePage extends Page {
                 <b>Брой пробвани задачи:</b> ' . count($tried) . '<br>
                 <b>Брой изпратени решения:</b> ' . count($submits) . '<br>
         ';
-
-        $content .= '
-            <br>
-        ';
         */
+    }
 
-        // Charts
-        // ====================================================================
-        // TODO
-
-        /*
-        $content .= '
-                <h2>Графики</h2>
-        ';
-
-        $content .= '
-            <br>
-        ';
-        */
-
-        // Achievements
-        // ====================================================================
-        // TODO
-
+    private function getAchievements() {
         /*
         $fileName = sprintf('%s/achievements.json', $GLOBALS['PATH_ACHIEVEMENTS']);
         $achInfo = json_decode(file_get_contents($fileName), true);
@@ -353,13 +301,63 @@ class ProfilePage extends Page {
                 <h2>Постижения</h2>
                 <div>' . $achievements . '</div>
         ';
+        */
+    }
 
-        $content . '
+    private function profileHead() {
+        $avatarUrl = sprintf('%s/%s', $GLOBALS['PATH_AVATARS'], 'default_avatar.png');
+        if ($this->profile->avatar != '') {
+            $avatarUrl = sprintf('%s/%s', $GLOBALS['PATH_AVATARS'], $this->profile->avatar);
+        }
+
+        $content = '
+            <div class="profile-head">
+                <div class="profile-avatar" style="background-image: url(\'' . $avatarUrl . '\'); "></div>
+                <div class="profile-line"></div>
+                <div class="profile-username">' . $this->profile->username . '</div>
             </div>
         ';
-        */
+        return $content;
+    }
 
-        return inBox($head . $content);
+    public function getContent() {
+        $content = '';
+
+        // Profile heading (avatar + nickname)
+        // ====================================================================
+        $content .= $this->profileHead();
+
+        // Percentile
+        // ====================================================================
+        // TODO
+
+        // Skills radar chart
+        // ====================================================================
+        $content .= $this->skillRadarChart();
+
+        // General information
+        // ====================================================================
+        $content .= $this->generalInformation();
+
+        // Training progress
+        // ====================================================================
+        // TODO
+        $content .= $this->trainingProgress();
+
+        // Activity per day
+        // ====================================================================
+        // TODO
+
+        // Achievements
+        // ====================================================================
+        // TODO
+        $content .= $this->getAchievements();
+
+        // Submission information
+        // ====================================================================
+        $content .= $this->submissionDotChart();
+
+        return inBox($content);
     }
 }
 
