@@ -109,13 +109,10 @@ $PROBLEM_TAGS = [
     'ad-hoc',
     'flow',
     'divconq',
-    'bsearch',
-    'hashing',
     'strings',
     'sorting',
     'greedy',
-    'sg',
-    'mitm',
+    'game',
     'datastruct',
     'np'
 ];

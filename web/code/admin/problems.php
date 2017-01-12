@@ -43,13 +43,10 @@ class AdminProblemsPage extends Page {
             'ad-hoc' => 'Ad-hoc',
             'flow' => 'Flows',
             'divconq' => 'Divide & Conquer',
-            'bsearch' => 'Binary Search',
-            'hashing' => 'Hashing',
             'strings' => 'Strings',
             'sorting' => 'Sorting',
             'greedy' => 'Greedy',
-            'sg' => 'Game Theory',
-            'mitm' => 'Meet in the Middle',
+            'game' => 'Game Theory',
             'datastruct' => 'Data Structures',
             'np' => 'NP-Complete'
         ];
