@@ -67,6 +67,7 @@ switch ($_GET['page']) {
     case 'stats':
         require_once('stats.php');
         $page = new StatsPage($user);
+        $page->init();
         break;
     case 'error':
         require_once('error.php');

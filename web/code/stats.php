@@ -8,36 +8,20 @@ class StatsPage extends Page {
     public function getTitle() {
         return 'O(N)::Stats';
     }
-    
-    public function getContent() {
-        $brain = new Brain();
 
-        // Problem statistics
+    public function init() {
+        $this->brain = new Brain();
+    }
+
+    private function getProblemStats() {
         $difficulty = array();
-        $numProblems = $brain->getCount('Problems');
+        $numProblems = $this->brain->getCount('Problems');
         foreach ($GLOBALS['PROBLEM_DIFFICULTIES'] as $diff) {
-            $difficulty[$diff] = $brain->getCountWhere('Problems', 'difficulty', $diff);
+            $difficulty[$diff] = $this->brain->getCountWhere('Problems', 'difficulty', $diff);
         }
 
-        // Submission statistics
-        $language = array();
-        $numSubmissions = $brain->getCount('Submits');
-        foreach ($GLOBALS['SUPPORTED_LANGUAGES'] as $lang) {
-            $language[$lang] = $brain->getCountWhere('Submits', 'language', $lang);
-        }
-
-        // User statistics
-        $genders = array();
-        $numUsers = $brain->getCount('Users');
-        $genders['male'] = $brain->getCountWhere('Users', 'gender', 'male');
-        $genders['female'] = $brain->getCountWhere('Users', 'gender', 'female');
-        $genders['unknown'] = $brain->getCountWhere('Users', 'gender', '');
-
-        $content = inBox('
-            <h1>Статистики</h1>
-            Произволни статистики за системата и потребителите.
-        ') . inBox('
-            <h2>Задачи и решения</h2>
+        $content = '
+            <h2>Задачи</h2>
 
             <b>Брой задачи:</b> ' . $numProblems . '<br>
             <ul>
@@ -47,13 +31,22 @@ class StatsPage extends Page {
                 <li>Hard: ' . $difficulty['hard'] . '</li>
                 <li>Brutal: ' . $difficulty['brutal'] . '</li>
             </ul>
-            (да се направи на pie chart)
-
-            <br><br>
 
             <b>Bar chart с таговете на задачите</b>
+        ';
 
-            <br><br>
+        return inBox($content);
+    }
+
+    private function submissionStats() {
+        $language = array();
+        $numSubmissions = $this->brain->getCount('Submits');
+        foreach ($GLOBALS['SUPPORTED_LANGUAGES'] as $lang) {
+            $language[$lang] = $this->brain->getCountWhere('Submits', 'language', $lang);
+        }
+
+        $content = '
+            <h2>Решения</h2>
 
             <b>Брой предадени решения:</b> ' . $numSubmissions . '
             <ul>
@@ -66,7 +59,18 @@ class StatsPage extends Page {
             <br><br>
 
             <b>Графика по час на деня</b><br>
-        ') . inBox('
+        ';
+        return inBox($content);
+    }
+
+    private function userStats() {
+        $genders = array();
+        $numUsers = $this->brain->getCount('Users');
+        $genders['male'] = $this->brain->getCountWhere('Users', 'gender', 'male');
+        $genders['female'] = $this->brain->getCountWhere('Users', 'gender', 'female');
+        $genders['unknown'] = $this->brain->getCountWhere('Users', 'gender', '');
+
+        $content = '
             <h2>Потребители</h2>
 
             <b>Брой потребители:</b> ' . $numUsers . '<br>
@@ -84,7 +88,25 @@ class StatsPage extends Page {
             <b>Графика на брой активни потребители по ден в годината</b><br>
             <b>Графика на брой активни потребители по час в денонощието</b><br>
             <b>Word Cloud с постиженията на юзърите</b></br>
+        ';
+        return inBox($content);
+    }
+
+    public function getContent() {
+        $content = inBox('
+            <h1>Статистики</h1>
+            Произволни статистики за системата и потребителите.
         ');
+
+        // Problem statistics
+        $content .= $this->getPRoblemStats();
+
+        // Submission statistics
+        $content .= $this->submissionStats();
+
+        // User statistics
+        $content .= $this->userStats();
+
         return $content;
     }
     
