@@ -35,6 +35,7 @@ function ajaxCall(url, data, callback) {
  */
 function redirect(url) {
     window.location = url;
+    exit(0);
 }
 
 /*
