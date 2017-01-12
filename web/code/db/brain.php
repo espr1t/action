@@ -344,11 +344,18 @@ class Brain {
     }
 
     function getProblemSubmits($problemId, $status) {
-        $response = $this->db->query("
-            SELECT id, userId FROM `Submits`
-            WHERE problemId = " . $problemId . " AND status = '" . $status . "'
-            GROUP BY userId
-        ");
+        if ($status == 'all') {
+            $response = $this->db->query("
+                SELECT status, exec_time, exec_memory FROM `Submits`
+                WHERE problemId = " . $problemId . "
+            ");
+        } else {
+            $response = $this->db->query("
+                SELECT id, userId FROM `Submits`
+                WHERE problemId = " . $problemId . " AND status = '" . $status . "'
+                GROUP BY userId
+            ");
+        }
         if (!$response) {
             error_log('Could not execute getProblemSubmits() query properly!');
             return null;

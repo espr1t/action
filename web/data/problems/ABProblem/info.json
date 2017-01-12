@@ -8,6 +8,7 @@
     "type": "acm",
     "difficulty": "trivial",
     "tags": [
+        "implement",
         "math"
     ],
     "origin": "informatika.bg",

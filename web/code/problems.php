@@ -60,6 +60,60 @@ class ProblemsPage extends Page {
         return $header . $orderings . $problems;
     }
 
+    private function getStatsBox($problem) {
+        $brain = new Brain();
+        $submits = $brain->getProblemSubmits($problem->id, 'all');
+
+        $bestTime = 1e10;
+        $bestMemory = 1e10;
+        $acceptedSubmits = 0;
+        $allSubmits = 0;
+        foreach ($submits as $submit) {
+            $allSubmits += 1;
+            if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                $acceptedSubmits += 1;
+                $time = array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time']));
+                $memory = array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory']));
+                $bestTime = min([$bestTime, max($time)]);
+                $bestMemory = min([$bestMemory, max($memory)]);
+            }
+        }
+        $successRate = 100.0 * ($acceptedSubmits == 0 ? 0.0 : $acceptedSubmits / $allSubmits);
+
+        $content = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Статистики</h2>
+            <div class="centered">
+                <div class="problem-stats-field">
+                    <div class="problem-stats-field-circle">' . sprintf("%.2f", $bestTime) . 's</div>
+                    <div class="problem-stats-field-label">време</div>
+                </div>
+                <div class="problem-stats-field">
+                    <div class="problem-stats-field-circle">' . sprintf("%.2f", $bestMemory) . 'MB</div>
+                    <div class="problem-stats-field-label">памет</div>
+                </div>
+                <div class="problem-stats-field">
+                    <div class="problem-stats-field-circle">' . $problem->difficulty . '</div>
+                    <div class="problem-stats-field-label">сложност</div>
+                </div>
+                <div class="problem-stats-field">
+                    <div class="problem-stats-field-circle">' . $acceptedSubmits . '</div>
+                    <div class="problem-stats-field-label">решения</div>
+                </div>
+                <div class="problem-stats-field">
+                    <div class="problem-stats-field-circle">' . sprintf("%.2f", $successRate) . '%</div>
+                    <div class="problem-stats-field-label">успеваемост</div>
+                </div>
+            </div>
+        ';
+
+        $redirect = '/problems/' . $problem->id;
+        return '
+            <script>
+                showActionForm(`' . $content . '`, \'' . $redirect . '\');
+            </script>
+        ';
+    }
+
     private function getStatement($problem) {
         $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
@@ -82,7 +136,7 @@ class ProblemsPage extends Page {
             <div class="center">
                 <input type="submit" value="Предай решение" onclick="showForm();" class="button button-color-blue button-large">
                 <br>
-                <a style="font-size: smaller;" href="/problems/' . $problem->id . '/submits"">Предадени решения</a>
+                <a style="font-size: smaller;" href="/problems/' . $problem->id . '/submits">Предадени решения</a>
             </div>
         ';
 
@@ -94,6 +148,7 @@ class ProblemsPage extends Page {
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submitButtons . '
+                <div class="problem-stats-link""><a class="decorated" href="/problems/' . $problem->id . '/stats"><i class="fa fa-info-circle"></i></a></div>
             </div>
         ';
     }
@@ -259,6 +314,8 @@ class ProblemsPage extends Page {
                 } else {
                     $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
                 }
+            } else if (isset($_GET['stats'])) {
+                $content .= $this->getStatsBox($problem);
             }
             return $content;
         }

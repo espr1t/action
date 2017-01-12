@@ -84,7 +84,7 @@ a:active, div.link:active {
 }
 
 a.decorated {
-    color: #000000;
+    color: #111111;
 }
 
 a.white, div.white {
@@ -531,6 +531,35 @@ div.problem-explanation {
     font-size: 0.75rem;
     text-align: center;
     font-style: italic;
+}
+
+div.problem-stats-link {
+    font-size: smaller;
+    margin-bottom: -0.875rem;
+    margin-right: -3.3rem;
+    text-align: right;
+}
+
+div.problem-stats-field {
+    display: inline-block;
+    text-align: center;
+    margin: 1rem;
+}
+
+div.problem-stats-field-circle {
+    width: 5rem;
+    height: 5rem;
+    font-weight: bold;
+    line-height: 5rem;
+    border-radius: 2.5rem;
+    text-align: center;
+    color: #FFFFFF;
+    background-color: #0099FF;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
+ }
+
+div.problem-stats-field-label {
+    font-size: smaller;
 }
 
 table.problem-sample {
