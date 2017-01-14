@@ -678,9 +678,14 @@ div.overlay {
     z-index: 50;
 }
 
+::-webkit-scrollbar {
+    display: none;
+}
+
 div.action-form {
     overflow-y: auto;
     overflow-x: hidden;
+    -ms-overflow-style: none;
     max-height: 40rem;
     width: 39rem;
     top: 50%;
