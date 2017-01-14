@@ -6,10 +6,12 @@ The following API is exposed:
     /evaluate                       For evaluation of a submission
 """
 import os
+import json
 from flask import Flask, request
+
 from common import scheduler, requires_auth, create_response
 from evaluator import Evaluator
-import json
+from config import PATH_LOG_FILE
 
 app = Flask(__name__)
 
@@ -38,6 +40,14 @@ def evaluate():
 if __name__ == "__main__":
     # Change current working directory to the one the script is in
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    if not os.path.exists(os.path.dirname(PATH_LOG_FILE)):
+        # Create the directory
+        os.mkdir(os.path.dirname(PATH_LOG_FILE))
+
+        # Create and chmod the file
+        open(PATH_LOG_FILE, 'w').close()
+        os.chmod(PATH_LOG_FILE, 0o0664)
 
     import logging, logging.config, yaml
     logging.config.dictConfig(yaml.load(open('logging.conf')))

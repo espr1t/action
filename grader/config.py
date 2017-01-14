@@ -22,6 +22,7 @@ AUTH_PASSWORD = "password"
 PATH_DATA = "data/"
 PATH_TESTS = "data/tests/"
 PATH_SANDBOX = "sandbox/"
+PATH_LOG_FILE = "logs/grader.log"
 
 SOURCE_NAME = "source"
 EXECUTABLE_NAME = "executable"
