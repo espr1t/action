@@ -46,18 +46,6 @@ class Brain {
         return $this->getIntResults($response)[0];
     }
 
-    function getCountWhere($tableName, $column, $value) {
-        $response = $this->db->query("
-            SELECT COUNT(*) FROM `" . $tableName . "` WHERE " . $column . " = '" . $value . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getCountWhere() query on table `' . $tableName . '` with ' .
-                      'column ' . $column . ' being equal to "' . $value . '"!');
-            return null;
-        }
-        return $this->getIntResults($response)[0];
-    }
-
     // News
     function addNews() {
         $response = $this->db->query("
@@ -331,6 +319,17 @@ class Brain {
         return $this->getResult($response);
     }
 
+    function getAllSubmits() {
+        $response = $this->db->query("
+            SELECT * FROM `Submits`
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllSubmits() query!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
     function getPendingSubmits() {
         $response = $this->db->query("
             SELECT * FROM `Submits`
@@ -567,7 +566,7 @@ class Brain {
 
     function getUsers() {
         $response = $this->db->query("
-            SELECT * FROM `Users`
+            SELECT * FROM `Users` ORDER BY id
         ");
         if (!$response) {
             error_log('Could not execute getUsers() query properly!');

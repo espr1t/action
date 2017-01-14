@@ -62,7 +62,7 @@ class ProfilePage extends Page {
         }
 
         $topUsersTags = array();
-        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag) {
+        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag => $name) {
             $topUsersTags[$tag] = 0;
         }
 
@@ -90,7 +90,7 @@ class ProfilePage extends Page {
         // Evaluate how good the users is at each topic (tag).
         $totalTags = array();
         $solvedTags = array();
-        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag) {
+        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag => $name) {
             $totalTags[$tag] = 0;
             $solvedTags[$tag] = 0;
         }
@@ -109,41 +109,35 @@ class ProfilePage extends Page {
         }
 
         // Prepare the data for the radar chart
-        $skillsData = array(
-            array(
-                array('axis' => 'Data Structures', 'value' => $this->getPercentage($totalTags, $solvedTags, 'datastruct')),
-                array('axis' => 'Greedy', 'value' => $this->getPercentage($totalTags, $solvedTags, 'greedy')),
-                array('axis' => 'Graphs', 'value' => $this->getPercentage($totalTags, $solvedTags, 'graph')),
-                array('axis' => 'Flows', 'value' => $this->getPercentage($totalTags, $solvedTags, 'flow')),
-                array('axis' => 'Sorting', 'value' => $this->getPercentage($totalTags, $solvedTags, 'sorting')),
-                array('axis' => 'Search', 'value' => $this->getPercentage($totalTags, $solvedTags, 'search')),
-                array('axis' => 'Strings', 'value' => $this->getPercentage($totalTags, $solvedTags, 'strings')),
-                array('axis' => 'Geometry', 'value' => $this->getPercentage($totalTags, $solvedTags, 'geometry')),
-                array('axis' => 'Math', 'value' => $this->getPercentage($totalTags, $solvedTags, 'math')),
-                array('axis' => 'DP', 'value' => $this->getPercentage($totalTags, $solvedTags, 'dp')),
-                array('axis' => 'Ad-hoc', 'value' => $this->getPercentage($totalTags, $solvedTags, 'ad-hoc')),
-                array('axis' => 'NP-Complete', 'value' => $this->getPercentage($totalTags, $solvedTags, 'np'))
-            )
-        );
+        $skillsData = array();
+
+        // Current user
+        $skills = array();
+        $remain = 12; // Limit to 12 so the chart doesn't get overcrowded
+        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag => $name) {
+            if ($remain >= 0) {
+                $remain -= 1;
+                array_push($skills,
+                    array('axis' => $name, 'value' => $this->getPercentage($totalTags, $solvedTags, $tag))
+                );
+            }
+        }
+        array_push($skillsData, $skills);
 
         /*
-        // Evaluate the strengths of the top 10% of the users
+        // Top 10% of all users
         $topUsersTags = $this->getTopUsersSkills($problems);
-        array_push($skillsData, array(
-                array('axis' => 'Data Structures', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'datastruct')),
-                array('axis' => 'Greedy', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'greedy')),
-                array('axis' => 'Graphs', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'graph')),
-                array('axis' => 'Flows', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'flow')),
-                array('axis' => 'Sorting', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'sorting')),
-                array('axis' => 'Search', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'search')),
-                array('axis' => 'Strings', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'strings')),
-                array('axis' => 'Geometry', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'geometry')),
-                array('axis' => 'Math', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'math')),
-                array('axis' => 'DP', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'dp')),
-                array('axis' => 'Ad-hoc', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'ad-hoc')),
-                array('axis' => 'NP-Complete', 'value' => $this->getPercentage($totalTags, $topUsersTags, 'np'))
-            )
-        );
+        $skills = array();
+        $remain = 12; // Limit to 12 so the chart doesn't get overcrowded
+        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag => $name) {
+            if ($remain >= 0) {
+                $remain -= 1;
+                array_push($skills,
+                    array('axis' => $name, 'value' => $this->getPercentage($totalTags, $topUsersTags, $tag))
+                );
+            }
+        }
+        array_push($skillsData, $skills);
         */
 
         // Invoke the JS code to generate the radar chart

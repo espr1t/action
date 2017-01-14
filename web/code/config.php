@@ -78,43 +78,43 @@ $STATUS_DISPLAY_NAME = array(
 
 // Languages
 $SUPPORTED_LANGUAGES = [
-    'C++',
-    'Java',
-    'Python'
+    'cpp' => 'C++',
+    'java' => 'Java',
+    'python' => 'Python'
 ];
 
 // Problems
 $PROBLEM_TYPES = [
-    'ioi',
-    'acm',
-    'game',
-    'relative'
+    'ioi' => 'IOI',
+    'acm' => 'ACM',
+    'game' => 'Game',
+    'relative' => 'Relative'
 ];
 
 $PROBLEM_DIFFICULTIES = [
-    'trivial',
-    'easy',
-    'medium',
-    'hard',
-    'brutal'
+    'trivial' => 'Trivial',
+    'easy' => 'Easy',
+    'medium' => 'Medium',
+    'hard' => 'Hard',
+    'brutal' => 'Brutal'
 ];
 
 $PROBLEM_TAGS = [
-    'implement',
-    'search',
-    'dp',
-    'graph',
-    'math',
-    'geometry',
-    'ad-hoc',
-    'flow',
-    'divconq',
-    'strings',
-    'sorting',
-    'greedy',
-    'game',
-    'datastruct',
-    'np'
+    'datastruct' => 'Data Structures',
+    'greedy' => 'Greedy',
+    'graph' => 'Graphs',
+    'flow' => 'Flows',
+    'sorting' => 'Sorting',
+    'search' => 'Search',
+    'strings' => 'Strings',
+    'geometry' => 'Geometry',
+    'math' => 'Math',
+    'dp' => 'DP',
+    'ad-hoc' => 'Ad-Hoc',
+    'np' => 'NP-Complete',
+    'divconq' => 'Divide & Conquer',
+    'game' => 'Game Theory',
+    'implement' => 'Implementation'
 ];
 
 $PROBLEM_INFO_FILENAME = 'info.json';
