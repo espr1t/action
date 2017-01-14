@@ -148,8 +148,8 @@ class ProblemsPage extends Page {
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submitButtons . '
-                <div class="problem-stats-link""><a class="decorated" href="/problems/' . $problem->id . '/stats"><i class="fa fa-info-circle"></i></a></div>
             </div>
+            <div class="problem-stats-link""><a class="decorated" href="/problems/' . $problem->id . '/stats"><i class="fa fa-info-circle"></i></a></div>
         ';
     }
 

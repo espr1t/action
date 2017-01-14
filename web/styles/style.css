@@ -535,8 +535,8 @@ div.problem-explanation {
 
 div.problem-stats-link {
     font-size: smaller;
-    margin-bottom: -0.875rem;
-    margin-right: -3.3rem;
+    margin-top: -1.5rem;
+    margin-right: 0.25rem;
     text-align: right;
 }
 
