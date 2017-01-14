@@ -679,8 +679,9 @@ div.overlay {
 }
 
 div.action-form {
-    position: absolute;
     overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 40rem;
     width: 39rem;
     top: 50%;
     left: 50%;
@@ -690,6 +691,7 @@ div.action-form {
     border: 0.0625rem solid #ccc;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
     border-radius: 0.25rem;
+    position: fixed;
     z-index: 89;
 }
 
@@ -1047,5 +1049,26 @@ div.test-result {
     margin: 0.125rem 0.25rem;
     color: #EEEEEE;
     cursor: help;
+}
 
+.test-status-tooltip {
+    position: relative;
+    cursor: pointer;
+    overflow: visible;
+}
+
+.test-status-tooltip:hover:after {
+    content: attr(data-title);
+    background: rgba(0, 0, 0, 0.85);
+    /* background: rgba(0, 153, 255, 0.85); */
+    padding: 3px 7px;
+    color: #FFF;
+    border-radius: 3px;
+    margin-left: 7px;
+    margin-top: -3px;
+    width: 8rem;
+    white-space: pre-wrap;
+    position: fixed;
+    overflow: visible;
+    z-index: 101;
 }

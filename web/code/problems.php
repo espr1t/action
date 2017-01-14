@@ -203,7 +203,8 @@ class ProblemsPage extends Page {
                 $detailedTable .= '<br>';
             }
             $result = $submit->results[$i];
-            $title = 'Тест ' . $i . ': ' . (is_numeric($result) ? 'OK' : $result) . '\n' .
+            $title = 'Тест ' . $i . '\n' .
+                     'Статус: ' . (is_numeric($result) ? 'OK' : $result) . '\n' .
                      'Точки: ' . $scores[$i] . '\n' .
                      'Време: ' . sprintf("%.2fs", $submit->exec_time[$i]) . '\n' .
                      'Памет: ' . sprintf("%.2f MiB", $submit->exec_memory[$i]) . '\n' .
@@ -235,7 +236,7 @@ class ProblemsPage extends Page {
                 $class .= 'dull-red';
                 $icon = '<i class="fa fa-code"></i>';
             }
-            $detailedTable .= '<div class="' . $class . '" title="' . $title . '">' . $icon . '</div>';
+            $detailedTable .= '<div class="' . $class . ' test-status-tooltip" data-title="' . $title . '">' . $icon . '</div>';
         }
         $detailedTable .= '</div>';
 
