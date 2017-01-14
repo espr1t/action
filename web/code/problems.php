@@ -92,7 +92,7 @@ class ProblemsPage extends Page {
                     <div class="problem-stats-field-label">памет</div>
                 </div>
                 <div class="problem-stats-field">
-                    <div class="problem-stats-field-circle">' . $problem->difficulty . '</div>
+                    <div class="problem-stats-field-circle">' . $GLOBALS['PROBLEM_DIFFICULTIES'][$problem->difficulty] . '</div>
                     <div class="problem-stats-field-label">сложност</div>
                 </div>
                 <div class="problem-stats-field">
