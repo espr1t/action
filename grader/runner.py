@@ -62,6 +62,9 @@ class Runner:
         self.logger.info("[Submission {}]    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}".format(
                 self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name))
 
+        if result.status == TestStatus.WRONG_ANSWER:
+            self.logger.info("[Submission {}]         >> {}".format(self.evaluator.id, result_error_message))
+
         # Update the frontend once again that we the testing has been completed (along with TL, ML, and score this time)
         results = [{
             "position": test["position"],
