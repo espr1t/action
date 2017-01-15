@@ -253,6 +253,8 @@ class Runner:
                         relative_comparison_okay = False
                     else:
                         for i in range(len(out_tokens)):
+                            if out_tokens[i] == sol_tokens[i]:
+                                continue
                             try:
                                 out_num = float(out_tokens[i])
                                 sol_num = float(sol_tokens[i])
@@ -272,7 +274,7 @@ class Runner:
 
                     # If none of the checks proved the answer to be correct, return a Wrong Answer
                     if len(out_line) > 20:
-                        out_line = out_line[:20] + "..."
+                        out_line = out_line[:17] + "..."
                     if len(sol_line) > 20:
-                        sol_line = sol_line[:20] + "..."
+                        sol_line = sol_line[:17] + "..."
                     return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0

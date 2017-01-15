@@ -109,3 +109,30 @@ class TestRunner(unittest.TestCase):
         result = Runner(self.evaluator).run(self.evaluator.tests[8])
         self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
         self.assertNotEqual(result.exit_code, 0)
+
+    def test_absolute_or_relative_comparison(self):
+        runner = Runner(self.evaluator)
+
+        # Absolute difference is less than 10-9
+        message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatAbsoluteOK.out',
+                                                'unit_tests/fixtures/FloatComparison/FloatAbsolute.sol')
+        self.assertEquals('', message)
+        self.assertEquals(1.0, score)
+
+        # Absolute difference is greater than 10-9
+        message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatAbsoluteWA.out',
+                                                'unit_tests/fixtures/FloatComparison/FloatAbsolute.sol')
+        self.assertNotEquals('', message)
+        self.assertEquals(0.0, score)
+
+        # Relative difference is less than 10-9
+        message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatRelativeOK.out',
+                                                'unit_tests/fixtures/FloatComparison/FloatRelative.sol')
+        self.assertEquals('', message)
+        self.assertEquals(1.0, score)
+
+        # Relative difference is greater than 10-9
+        message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatRelativeWA.out',
+                                                'unit_tests/fixtures/FloatComparison/FloatRelative.sol')
+        self.assertNotEquals('', message)
+        self.assertEquals(0.0, score)
