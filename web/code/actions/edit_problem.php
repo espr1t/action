@@ -92,14 +92,14 @@ function validateProblem($problem) {
         return 'Въведеното ограничение по памет е невалидно!';
     $problem->memoryLimit = floatval($problem->memoryLimit);
 
-    if (!in_array($problem->type, $GLOBALS['PROBLEM_TYPES']))
+    if (!array_key_exists($problem->type, $GLOBALS['PROBLEM_TYPES']))
         return 'Въведеният тип е невалиден!';
 
-    if (!in_array($problem->difficulty, $GLOBALS['PROBLEM_DIFFICULTIES']))
+    if (!array_key_exists($problem->difficulty, $GLOBALS['PROBLEM_DIFFICULTIES']))
         return 'Въведената сложност ' . $problem->difficulty . ' е невалидна!';
 
     foreach ($problem->tags as $tag) {
-        if (!in_array($tag, $GLOBALS['PROBLEM_TAGS'])) {
+        if (!array_key_exists($tag, $GLOBALS['PROBLEM_TAGS'])) {
             return 'Въведеният таг ' . $tag . ' е невалиден!';
         }
     }
