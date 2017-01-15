@@ -64,7 +64,7 @@ class TestRunner(unittest.TestCase):
     def test_wrong_answer(self):
         result = Runner(self.evaluator).run(self.evaluator.tests[1])
         self.assertIs(result.status, TestStatus.WRONG_ANSWER)
-        self.assertEqual(result.error_message[:8], "Expected")
+        self.assertEqual("Expected", result.error_message[:8])
 
     # Test ThreeSum_03: N = 2000, the solution is too slow (TIME_LIMIT)
     def test_time_limit(self):
@@ -88,7 +88,7 @@ class TestRunner(unittest.TestCase):
     def test_killed_forking(self):
         result = Runner(self.evaluator).run(self.evaluator.tests[5])
         self.assertIs(result.status, TestStatus.WRONG_ANSWER)
-        self.assertEqual(result.error_message, "Expected \"165620\" but received \"Cannot fork!\".")
+        self.assertEqual("Expected \"165620\" but received \"Cannot fork!\".", result.error_message)
 
     # Test ThreeSum_07: N = 42, the solution is killed due to writing to file in current directory (RUNTIME_ERROR)
     def test_killed_writing_file_curr(self):
@@ -103,3 +103,9 @@ class TestRunner(unittest.TestCase):
         self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
         self.assertNotEqual(result.exit_code, 0)
     """
+
+    # Test ThreeSum_09: N = 666, the solution is killed due to exceeding output limit (RUNTIME_ERROR)
+    def test_killed_output_limit_exceeded(self):
+        result = Runner(self.evaluator).run(self.evaluator.tests[8])
+        self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
+        self.assertNotEqual(result.exit_code, 0)

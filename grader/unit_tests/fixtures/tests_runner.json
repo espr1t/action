@@ -60,6 +60,13 @@
             "inpHash": "Hash_ThreeSum_08_in",
             "solFile": "ThreeSum.08.sol",
             "solHash": "Hash_ThreeSum_08_sol"
+        },
+        {
+            "position": 9,
+            "inpFile": "ThreeSum.09.in",
+            "inpHash": "Hash_ThreeSum_09_in",
+            "solFile": "ThreeSum.09.sol",
+            "solHash": "Hash_ThreeSum_09_sol"
         }
     ],
     "updateEndpoint": "http://localhost/actions/update",

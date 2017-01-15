@@ -31,6 +31,7 @@ int main(void) {
     // RE for N = 13 (expected: 134542485) - trying to fork
     // RE for N = 42 (expected: 165620) - trying to write a file in the current directory
     // RE for N = 43 (expected: 165620) - trying to write a file in the home directory
+    // RE for N = 666 (expected: 275429814) - trying to write too much output
 
     if (n == 13) {
         // If we cannot fork, print a message so we get a wrong answer
@@ -44,6 +45,18 @@ int main(void) {
         FILE* out = fopen("foo.txt", "wt");
         fprintf(out, "boo!");
         fclose(out);
+    }
+
+    if (n == 666) {
+        // RLIMIT for file size is 16777216 bytes, so write just slightly over this bound
+        // Do it this way so we don't get time limit
+        int size = 16800000 / 16;
+        char* buff = new char[size];
+        for (int i = 0; i < size; i++)
+            buff[i] = 'a' + i % 26;
+        buff[size - 1] = '\0';
+        for (int i = 0; i < 16; i++)
+            fprintf(stdout, "%s\n", buff);
     }
 
     if (n <= 20000) {
