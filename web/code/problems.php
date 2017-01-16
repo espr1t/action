@@ -163,8 +163,10 @@ class ProblemsPage extends Page {
             return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
         }
 
-        if ($submit->userId != $this->user->id) {
-            return showMessage('ERROR', 'Нямате достъп до това решение!');
+        if ($this->user->access < $GLOBALS['ACCESS_SEE_SUBMITS']) {
+            if ($submit->userId != $this->user->id) {
+                return showMessage('ERROR', 'Нямате достъп до това решение!');
+            }
         }
 
         if ($submit->problemId != $problem->id) {
