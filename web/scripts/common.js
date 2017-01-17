@@ -274,6 +274,16 @@ function updateGraderStatus() {
 }
 
 /*
+ * Asynchronously regrade submission
+ */
+function regradeSubmission(id) {
+    var callback = function(response) {
+        showMessage('INFO', 'Събмит ' + id + ' беше пратен за ретестване.');
+    }
+    ajaxCall('/admin/regrade/' + id, {}, callback);
+}
+
+/*
  * Order ranking by various parameters
  */
 function orderRanking(orderBy) {

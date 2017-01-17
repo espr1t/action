@@ -14,6 +14,18 @@ class QueuePage extends Page {
         $list = '';
         for ($i = 0; $i < count($data); $i = $i + 1) {
             $entry = $data[$i];
+
+            $regradeSubmission = '';
+            if ($this->user->access >=  $GLOBALS['ACCESS_REGRADE_SUBMITS']) {
+                $regradeSubmission = '
+                    <td style="width: 16px;">
+                        <a onclick="regradeSubmission(' . $entry['submitId'] . ');" title="Regrade submission ' . $entry['submitId'] . '">
+                           <i class="fa fa-refresh"></i>
+                        </a>
+                    </td>
+                ';
+            }
+
             $list .= '
                 <tr>
                     <td title="' . $entry['submitId'] . '">' . ($i + 1) . '</td>
@@ -22,19 +34,26 @@ class QueuePage extends Page {
                     <td>' . explode(' ', $entry['time'])[1] . '</td>
                     <td>' . intval($entry['progress'] * 100) . '%</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$entry['status']] . '</td>
+                    ' . $regradeSubmission . '
                 </tr>
             ';
+        }
+
+        $adminExtras = '';
+        if ($this->user->access >= $GLOBALS['ACCESS_REGRADE_SUBMITS']) {
+            $adminExtras = '<th style="width: 16px;"></th>';
         }
 
         $table = '
             <table class="default">
                 <tr>
                     <th style="width: 20px;">#</th>
-                    <th style="width: 190px;">Потребител</th>
-                    <th style="width: 190px;">Задача</th>
+                    <th style="width: 170px;">Потребител</th>
+                    <th style="width: 170px;">Задача</th>
                     <th style="width: 70px;">Час</th>
                     <th style="width: 70px;">Прогрес</th>
                     <th>Статус</th>
+                    ' . $adminExtras . '
                 </tr>
                 ' . $list . '
             </table>

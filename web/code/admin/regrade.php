@@ -66,8 +66,7 @@ class AdminQueuePage extends Page {
             } else {
                 $this->regradeSubmit($_GET['submitId']);
             }
-            header('Location: /admin/regrade');
-            exit();
+            redirect('/admin/regrade');
         }
 
         $head = inBox('
