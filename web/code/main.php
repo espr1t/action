@@ -11,12 +11,8 @@ if ($user == null) {
 }
 
 $actions = '';
-if (isset($_GET['action'])) {
-    if ($_GET['action'] == 'success') {
-        $actions .= '<script>showMessage("INFO", "Successful operation!");</script>';
-    } else if ($_GET['action'] == 'unsuccess') {
-        $actions .= '<script>showMessage("ERROR", "Unsuccessful operation!");</script>';
-    }
+if (isset($_POST['messageType']) && isset($_POST['messageText'])) {
+    $actions .= '<script>showMessage("' . $_POST['messageType'] . '", "' . $_POST['messageText'] . '");</script>';
 }
 
 switch ($_GET['page']) {

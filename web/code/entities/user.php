@@ -22,8 +22,7 @@ class User {
     public function logOut() {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
         session_destroy();
-        header('Location: /login?action=success');
-        exit();
+        redirect('/login', 'INFO', 'Успешно излязохте от системата.');
     }
 
     private function update() {
@@ -78,7 +77,7 @@ class User {
         $user->country = $country;
         $user->gender = $gender;
         $user->birthdate = $birthdate;
-        $user->avatar = $avatar;
+        // $user->avatar = $avatar;
 
         $brain = new Brain();
         $user->id = $brain->addUser($user);

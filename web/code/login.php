@@ -48,8 +48,8 @@ class LoginPage extends Page {
                 $expireTime = time() + 365 * 86400; // 365 days
                 setcookie($GLOBALS['COOKIE_NAME'], $loginKey, $expireTime);
 
-                header('Location: /home?action=success');
-                exit();
+                // Redirect to home page with a success message
+                redirect('/home', 'INFO', 'Влязохте успешно в системата.');
             }
         }
 

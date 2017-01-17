@@ -4,6 +4,36 @@ function showMessage($type, $message) {
     return '<script>showMessage("' . $type . '", "' . $message . '");</script>';
 }
 
+function redirect($url, $type = null, $message = null) {
+    // Simple redirect
+    if ($type == null) {
+        header('Location: ' . $url);
+    } else {
+
+        // Redirect with arguments. Pass them using a POST form.
+        echo '
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>O(N)::Redirect</title>
+                <meta charset="utf-8">
+            </head>
+
+            <body>
+                <form id="redirectForm" action="' . $url . '" method="POST">
+                    <input type="hidden" name="messageType" value="' . htmlentities($type) . '">
+                    <input type="hidden" name="messageText" value="' . htmlentities($message) . '">
+                </form>
+                <script type="text/javascript">
+                    document.getElementById("redirectForm").submit();
+                </script>
+            </body>
+        </html>
+        ';
+    }
+    exit();
+}
+
 function getUserLink($userName) {
     return '<a href="/users/' . $userName . '"><div class="user">' . $userName . '</div></a>';
 }
