@@ -30,7 +30,6 @@
 
     <body onload="<?php echo $page->onLoad() ?>">
         <?php include_once("analytics.php") ?>
-        <?php echo $actions ?>
         <div class="wrapper" id="wrapper">
             <!-- Header with menu -->
             <div class="header" id="head">
@@ -93,5 +92,6 @@
             </div>
             <?php echo $page->getExtraCode(); ?>
         </div>
+        <?php if (isset($showMessage)) echo $showMessage; ?>
     </body>
 </html>

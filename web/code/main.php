@@ -10,9 +10,9 @@ if ($user == null) {
     $user = new User();
 }
 
-$actions = '';
+$showMessage = '';
 if (isset($_POST['messageType']) && isset($_POST['messageText'])) {
-    $actions .= '<script>showMessage("' . $_POST['messageType'] . '", "' . $_POST['messageText'] . '");</script>';
+    $showMessage .= '<script>showMessage("' . $_POST['messageType'] . '", "' . $_POST['messageText'] . '");</script>';
 }
 
 switch ($_GET['page']) {
