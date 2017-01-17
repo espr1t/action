@@ -174,7 +174,17 @@ class ProblemsPage extends Page {
         }
 
         $status = $submit->calcStatus();
-        $color = ($status == $GLOBALS['STATUS_ACCEPTED'] ? 'green' : (strlen($status) == 1 ? 'gray' : 'red'));
+        $color = 'black';
+        switch ($status) {
+            case $GLOBALS['STATUS_ACCEPTED']:
+                $color = 'green';
+                break;
+            case $GLOBALS['STATUS_INTERNAL_ERROR']:
+                $color = 'black';
+                break;
+            default:
+                $color = strlen($status) == 1 ? 'gray' : 'red';
+        }
         $problemStatus = $GLOBALS['STATUS_DISPLAY_NAME'][$status];
 
         $summaryTable = '
@@ -234,6 +244,9 @@ class ProblemsPage extends Page {
             } else if ($result == $GLOBALS['STATUS_COMPILATION_ERROR']) {
                 $class .= 'dull-red';
                 $icon = '<i class="fa fa-code"></i>';
+            } else if ($result == $GLOBALS['STATUS_INTERNAL_ERROR']) {
+                $class .= 'dull-black';
+                $icon = '<i class="fa fa-warning"></i>';
             }
             $detailedTable .= '<div class="' . $class . ' test-status-tooltip" data-title="' . $title . '">' . $icon . '</div>';
         }

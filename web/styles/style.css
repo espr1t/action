@@ -880,6 +880,10 @@ table.gray th {
     background-color: #CCCCCC;
 }
 
+table.black th {
+    background-color: #333333;
+}
+
 .red {
     color: #DD4337;
 }
@@ -894,6 +898,9 @@ table.gray th {
 }
 .gray {
     color: #CCCCCC;
+}
+.black {
+    color: #333333;
 }
 
 .background-red {
@@ -952,6 +959,9 @@ table.gray th {
 }
 .background-black {
     background-color: #111111;
+}
+.background-dull-black {
+    background-color: #333333;
 }
 
 
