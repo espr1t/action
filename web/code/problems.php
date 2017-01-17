@@ -155,22 +155,22 @@ class ProblemsPage extends Page {
 
     private function getSubmitInfoBox($problem, $submitId) {
         if (!is_numeric($submitId)) {
-            return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
+            redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Не съществува решение с този идентификатор!');
         }
 
         $submit = Submit::get($submitId);
         if ($submit == null) {
-            return showMessage('ERROR', 'Не съществува решение с този идентификатор!');
+            redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Не съществува решение с този идентификатор!');
         }
 
         if ($this->user->access < $GLOBALS['ACCESS_SEE_SUBMITS']) {
             if ($submit->userId != $this->user->id) {
-                return showMessage('ERROR', 'Нямате достъп до това решение!');
+                redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Нямате достъп до това решение!');
             }
         }
 
         if ($submit->problemId != $problem->id) {
-            return showMessage('ERROR', 'Решението не е по поисканата задача!');
+            redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Решението не е по поисканата задача!');
         }
 
         $status = $submit->calcStatus();
