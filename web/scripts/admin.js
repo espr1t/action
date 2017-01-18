@@ -36,6 +36,14 @@ function submitEditNewsForm() {
  * Create/Edit Problem
  */
 function showEditProblemForm(content, redirect) {
+    // Add a listener for Ctrl+S events (saving the task)
+    document.addEventListener("keydown", function(e) {
+        if (e.keyCode == 83 && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
+            e.preventDefault();
+            submitEditProblemForm();
+        }
+    }, false);
+
     showActionForm(content, redirect);
 }
 
