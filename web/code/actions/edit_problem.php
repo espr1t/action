@@ -81,7 +81,7 @@ function validateProblem($problem) {
     if (!preg_match('/([0-9A-Za-z_-]){1,32}$/', $problem->folder))
         return 'Въведената папка е невалидна!';
 
-    if (!preg_match('/(*UTF8)^([0-9A-Za-zА-Яа-я.,! -]){1,32}$/', $problem->origin))
+    if (!preg_match('/(*UTF8)^([0-9A-Za-zА-Яа-я.,:! -]){1,128}$/', $problem->origin))
         return 'Въведеният източник е невалиден!';
 
     if (!floatval($problem->timeLimit))
