@@ -448,13 +448,13 @@ class Brain {
         return true;
     }
 
-    function erasePending($submit) {
+    function erasePending($submitId) {
         $response = $this->db->query("
             DELETE FROM `Pending`
-            WHERE submitId = " . $submit->id . "
+            WHERE submitId = " . $submitId . "
         ");
         if (!$response) {
-            error_log('Could not erase submit ' . $submit->id . ' from pending queue!');
+            error_log('Could not erase submit ' . $submitId . ' from pending queue!');
             return null;
         }
         return true;
@@ -493,24 +493,24 @@ class Brain {
         return $this->db->lastId();
     }
 
-    function eraseLatest($submit) {
+    function eraseLatest($submitId) {
         $response = $this->db->query("
             DELETE FROM `Latest`
-            WHERE submitId = " . $submit->id . "
+            WHERE submitId = " . $submitId . "
         ");
         if (!$response) {
-            error_log('Could not erase submit ' . $submit->id . ' from latest queue!');
+            error_log('Could not erase submit ' . $submitId . ' from latest queue!');
             return null;
         }
         return true;
     }
 
-    function trimLatest($lastId) {
+    function trimLatest($submitId) {
         $response = $this->db->query("
-            DELETE FROM `Latest` WHERE id <= " . ($lastId - 10) . "
+            DELETE FROM `Latest` WHERE submitId <= " . ($submitId - 10) . "
         ");
         if (!$response) {
-            error_log('Could not trim Latest submits!!');
+            error_log('Could not trim Latest submits!');
             return null;
         }
         return true;

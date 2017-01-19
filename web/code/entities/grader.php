@@ -88,8 +88,9 @@ class Grader {
 
         // If last update, move submission from Pending to Latest
         if ($submit->message != '') {
-            $brain->erasePending($submit);
-            $brain->trimLatest($brain->addLatest($submit));
+            $brain->erasePending($submit->id);
+            $brain->addLatest($submit);
+            $brain->trimLatest($submit->id);
         }
     }
 }

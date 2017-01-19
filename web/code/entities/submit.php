@@ -70,8 +70,8 @@ class Submit {
         $this->status = $GLOBALS['STATUS_WAITING'];
         $this->message = '';
         $brain->updateSubmit($this);
-        $brain->erasePending($this);
-        $brain->eraseLatest($this);
+        $brain->erasePending($this->id);
+        $brain->eraseLatest($this->id);
     }
 
     public function write() {
