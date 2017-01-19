@@ -167,10 +167,10 @@ class ProblemsPage extends Page {
             if ($submit->userId != $this->user->id) {
                 redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Нямате достъп до това решение!');
             }
-        }
 
-        if ($submit->problemId != $problem->id) {
-            redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Решението не е по поисканата задача!');
+            if ($submit->problemId != $problem->id) {
+                redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Решението не е по поисканата задача!');
+            }
         }
 
         $status = $submit->calcStatus();
@@ -290,8 +290,13 @@ class ProblemsPage extends Page {
             $detailedTable = $message;
         }
 
+        $author = '';
+        if ($this->user->id != $submit->userId) {
+            $author = '(' . $submit->userName . ')';
+        }
+
         $content = '
-            <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение</h2>
+            <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
             <div class="right smaller">' . explode(' ', $submit->time)[0] . ' | ' . explode(' ', $submit->time)[1] . '</div>
             <br>
             ' . $summaryTable . '
