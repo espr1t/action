@@ -84,11 +84,11 @@ class ProblemsPage extends Page {
             <h2><span class="blue">' . $problem->name . '</span> :: Статистики</h2>
             <div class="centered">
                 <div class="problem-stats-field">
-                    <div class="problem-stats-field-circle">' . sprintf("%.2f", $bestTime) . 's</div>
+                    <div class="problem-stats-field-circle">' . ($acceptedSubmits == 0 ? '-' : sprintf("%.2fs", $bestTime)) . '</div>
                     <div class="problem-stats-field-label">време</div>
                 </div>
                 <div class="problem-stats-field">
-                    <div class="problem-stats-field-circle">' . sprintf("%.2f", $bestMemory) . 'MB</div>
+                    <div class="problem-stats-field-circle">' . ($acceptedSubmits == 0 ? '-' : sprintf("%.2fMB", $bestMemory)) . '</div>
                     <div class="problem-stats-field-label">памет</div>
                 </div>
                 <div class="problem-stats-field">
