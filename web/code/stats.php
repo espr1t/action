@@ -223,6 +223,9 @@ class StatsPage extends Page {
         $townChartLabels = array('Град');
         $townChartValues = array('Потребители');
         foreach ($towns as $key => $value) {
+            // Do not show empty strings (for people who haven't entered it)
+            if ($key == '')
+                continue;
             // Show top 10 only
             if (count($townChartLabels) > 10)
                 break;
