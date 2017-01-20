@@ -136,8 +136,8 @@ class Runner:
             # Set the maximum address space to 1GB (so the process cannot consume all memory before being killed)
             resource.setrlimit(resource.RLIMIT_AS, (1073741824, 1073741824))
 
-            # Set the stack to be 8MB
-            resource.setrlimit(resource.RLIMIT_STACK, (8388608, 8388608))
+            # Set the stack to be 64MB
+            resource.setrlimit(resource.RLIMIT_STACK, (67108864, 67108864))
 
             # Set the maximum output to stdout/stderr be 16MB
             resource.setrlimit(resource.RLIMIT_FSIZE, (16777216, 16777216))
