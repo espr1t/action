@@ -140,7 +140,8 @@ Table::Submits
 ==============
 {
     "id": 1,
-    "time": "2016-08-30 00:24:11",
+    "submitted": "2016-08-30 00:24:11",
+    "graded": 1484868592.086328,
     "userId": 1,
     "userName": "espr1t",
     "problemId": 1,
@@ -160,7 +161,8 @@ if ($db->tableExists('Submits')) {
     $result = $db->query("
         CREATE TABLE `Submits`(
             id INT NOT NULL AUTO_INCREMENT,
-            time DATETIME NOT NULL,
+            submitted DATETIME NOT NULL,
+            graded DOUBLE NOT NULL,
             userId INT NOT NULL,
             userName VARCHAR(32) NOT NULL,
             problemId INT NOT NULL,

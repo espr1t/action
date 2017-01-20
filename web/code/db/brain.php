@@ -266,9 +266,10 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (time, userId, userName, problemId, problemName, source, language, results, exec_time, exec_memory, status, message)
+            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, source, language, results, exec_time, exec_memory, status, message)
             VALUES (
-                '" . $submit->time . "',
+                '" . $submit->submitted . "',
+                '" . $submit->graded . "',
                 '" . $submit->userId . "',
                 '" . $submit->userName . "',
                 '" . $submit->problemId . "',
@@ -292,6 +293,7 @@ class Brain {
     function updateSubmit($submit) {
         $response = $this->db->query("
             UPDATE `Submits` SET
+                graded = '" . $submit->graded . "',
                 results = '" . implode(',', $submit->results) . "',
                 exec_time = '" . implode(',', $submit->exec_time) . "',
                 exec_memory = '" . implode(',', $submit->exec_memory) . "',
@@ -414,7 +416,7 @@ class Brain {
                 '" . $submit->userName . "',
                 '" . $submit->problemId . "',
                 '" . $submit->problemName . "',
-                '" . $submit->time . "',
+                '" . $submit->submitted . "',
                 '" . 0 . "',
                 '" . $submit->status . "'
             )
@@ -481,7 +483,7 @@ class Brain {
                 '" . $submit->userName . "',
                 '" . $submit->problemId . "',
                 '" . $submit->problemName . "',
-                '" . $submit->time . "',
+                '" . $submit->submitted . "',
                 '" . 1 . "',
                 '" . $submit->status . "'
             )

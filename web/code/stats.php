@@ -140,7 +140,7 @@ class StatsPage extends Page {
         foreach ($submits as $submit) {
             $languages[$submit['language']] += 1;
             $statuses[$submit['status']] += 1;
-            $hourHistogram[intval(substr($submit['time'], 11, 2))] += 1;
+            $hourHistogram[intval(substr($submit['submitted'], 11, 2))] += 1;
         }
 
         $content = '

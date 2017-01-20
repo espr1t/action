@@ -10,7 +10,7 @@ import json
 import logging
 
 from os import path, makedirs
-from time import perf_counter, sleep
+from time import perf_counter, sleep, time
 import config
 import shutil
 from compiler import Compiler
@@ -128,20 +128,16 @@ class Evaluator:
                 if not found:
                     self.update_results.append(result)
 
-        time_last_update = perf_counter() - self.update_timer
-        if time_last_update > config.UPDATE_INTERVAL or self.update_message != "":
-            # TODO: Consider sending the perf_counter or some sequential ID so the frontend
-            #       can ignore updates that happened before an update that was already applied.
-
-            # Sleep for a little while to reduce the chance for race condition (immediate update after another update)
-            if time_last_update < config.UPDATE_INTERVAL:
-                sleep(config.UPDATE_INTERVAL - time_last_update)
-
-            self.update_timer = perf_counter()
+        # Update every UPDATE_INTERVAL seconds so we don't spam the frontend too much
+        # We're using time() instead of perf_counter() so we get a UNIX timestamp (with parts of seconds)
+        # This info helps figure out WHEN exactly (date + hour) the solution was graded.
+        if time() - self.update_timer > config.UPDATE_INTERVAL or self.update_message != "":
+            self.update_timer = time()
             data = {
                 "id": self.id,
                 "message": self.update_message,
-                "results": json.dumps(self.update_results)
+                "results": json.dumps(self.update_results),
+                "timestamp": self.update_timer
             }
             # Make the updates asynchronous so we don't stop the execution of the tests
             Thread(target=send_request, args=["POST", self.update_url, data]).start()

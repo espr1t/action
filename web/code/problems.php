@@ -297,7 +297,7 @@ class ProblemsPage extends Page {
 
         $content = '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
-            <div class="right smaller">' . explode(' ', $submit->time)[0] . ' | ' . explode(' ', $submit->time)[1] . '</div>
+            <div class="right smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
             <br>
             ' . $summaryTable . '
             <br>
@@ -323,8 +323,8 @@ class ProblemsPage extends Page {
             $submitList .= '
                 <tr>
                     <td>' . ($i + 1) . '</td>
-                    <td>' . explode(' ', $submit->time)[0] . '</td>
-                    <td>' . explode(' ', $submit->time)[1] . '</td>
+                    <td>' . explode(' ', $submit->submitted)[0] . '</td>
+                    <td>' . explode(' ', $submit->submitted)[1] . '</td>
                     <td>' . $submitLink . '</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->calcStatus()] . '</td>
                     <td>' . round($submit->calcScore(), 3) . '</td>

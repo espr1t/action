@@ -7,7 +7,8 @@ require_once(__DIR__ . '/grader.php');
 
 class Submit {
     public $id = -1;
-    public $time = '';
+    public $submitted = '';
+    public $graded = 0.0;
     public $userId = -1;
     public $userName = '';
     public $problemId = -1;
@@ -31,7 +32,8 @@ class Submit {
         $submit->id = -1;
 
         // Mark the time of the submission
-        $submit->time = date('Y-m-d H:i:s');
+        $submit->submitted = date('Y-m-d H:i:s');
+        $submit->graded = 0.0;
 
         // Populate the remaining submission info
         $submit->userId = $user->id;
@@ -123,7 +125,8 @@ class Submit {
     private static function instanceFromArray($info) {
         $submit = new Submit();
         $submit->id = intval(getValue($info, 'id'));
-        $submit->time = getValue($info, 'time');
+        $submit->submitted = getValue($info, 'submitted');
+        $submit->graded = floatval(getValue($info, 'graded'));
         $submit->userId = intval(getValue($info, 'userId'));
         $submit->userName = getValue($info, 'userName');
         $submit->problemId = intval(getValue($info, 'problemId'));

@@ -22,8 +22,9 @@ if (sha1($GLOBALS['GRADER_PASSWORD']) != $_SERVER['PHP_AUTH_PW']) {
 $id = isset($_POST['id']) ? intval($_POST['id']) : -1;
 $message = isset($_POST['message']) ? $_POST['message'] : '';
 $results = isset($_POST['results']) ? json_decode($_POST['results'], true) : [];
+$timestamp = isset($_POST['timestamp']) ? floatval($_POST['timestamp']) : -1.0;
 
 $grader = new Grader();
-$grader->update($id, $message, $results);
+$grader->update($id, $message, $results, $timestamp);
 
 ?>

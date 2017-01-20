@@ -55,12 +55,20 @@ class Grader {
         return true;
     }
 
-    function update($submitId, $message, $results) {
+    function update($submitId, $message, $results, $timestamp) {
         $submit = Submit::get($submitId);
         if ($submit == null) {
             error_log('Received update on invalid submit: ' . $submitId);
             exit();
         }
+
+        // If already updated, skip it
+        if ($submit->graded > $timestamp) {
+            error_log(sprintf(
+                'Skipping update: requested update for %f, but already at %f.', $timestamp, $submit->graded));
+            return;
+        }
+        $submit->graded = $timestamp;
 
         // Add new information about individual tests
         $submit->message = $message;
