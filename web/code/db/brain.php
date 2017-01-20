@@ -509,7 +509,7 @@ class Brain {
 
     function trimLatest($submitId) {
         $response = $this->db->query("
-            DELETE FROM `Latest` WHERE submitId <= " . ($submitId - 10) . "
+            DELETE FROM `Latest` WHERE submitId <= " . ($submitId - 100) . "
         ");
         if (!$response) {
             error_log('Could not trim Latest submits!');

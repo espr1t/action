@@ -31,7 +31,7 @@ class QueuePage extends Page {
                     <td title="' . $entry['submitId'] . '">' . ($i + 1) . '</td>
                     <td>' . getUserLink($entry['userName']) . '</td>
                     <td>' . getProblemLink($entry['problemId'], $entry['problemName']) . '</td>
-                    <td>' . explode(' ', $entry['time'])[1] . '</td>
+                    <td title="' . $entry['time'] . '">' . explode(' ', $entry['time'])[1] . '</td>
                     <td>' . intval($entry['progress'] * 100) . '%</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$entry['status']] . '</td>
                     ' . $regradeSubmission . '
@@ -98,7 +98,7 @@ class QueuePage extends Page {
                 <a href="help#compilation">компилатори</a> и конфигурацията на <a href="help#grader">тестващата машина</a>.</div>';
 
 
-        return $head . $time . $latest . $pending . $compilers . $invokeGraderCheck;
+        return $head . $time . $pending . $latest . $compilers . $invokeGraderCheck;
     }
     
 }
