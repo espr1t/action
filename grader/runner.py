@@ -130,16 +130,16 @@ class Runner:
             except OSError:
                 pass
 
-            # Set the maximum execution time of the process to the Time Limit of the problem
-            resource.setrlimit(resource.RLIMIT_CPU, (time_limit, time_limit))
+            # Kill the solution if it exceeds twice the time limit of the problem (wall-clock)
+            resource.setrlimit(resource.RLIMIT_CPU, (time_limit * 2, time_limit * 2))
 
-            # Set the maximum address space to 1GB (so the process cannot consume all memory before being killed)
+            # Kill the solution if it exceeds 1GB of memory
             resource.setrlimit(resource.RLIMIT_AS, (1073741824, 1073741824))
 
             # Set the stack to be 64MB
             resource.setrlimit(resource.RLIMIT_STACK, (67108864, 67108864))
 
-            # Set the maximum output to stdout/stderr be 16MB
+            # Kill the solution if it writes more than 16MB of output to stdout/stderr
             resource.setrlimit(resource.RLIMIT_FSIZE, (16777216, 16777216))
 
             # Although setting a limit on the file handles doesn't quite work, it seems the programs cannot write
