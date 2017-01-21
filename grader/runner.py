@@ -71,7 +71,7 @@ class Runner:
             "status": result.status.name,
             "error_message": result.error_message,
             "exec_time": result.exec_time,
-            "exec_memory": result.exec_memory / 1048576.0,  # Convert back to megabytes
+            "exec_memory": round(result.exec_memory / 1048576.0, 2),  # Convert back to megabytes
             "score": result.score
         }]
         self.evaluator.update_frontend("", results)
