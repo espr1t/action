@@ -28,7 +28,7 @@ class QueuePage extends Page {
 
             $list .= '
                 <tr>
-                    <td title="' . $entry['submitId'] . '">' . ($i + 1) . '</td>
+                    <td>' . $entry['submitId'] . '</td>
                     <td>' . getUserLink($entry['userName']) . '</td>
                     <td>' . getProblemLink($entry['problemId'], $entry['problemName']) . '</td>
                     <td title="' . $entry['time'] . '">' . explode(' ', $entry['time'])[1] . '</td>
