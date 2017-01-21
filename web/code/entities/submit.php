@@ -176,17 +176,27 @@ class Submit {
     }
 
     public function calcStatus() {
-        $statii = $GLOBALS['STATUS_DISPLAY_NAME'];
-        while ($status = current($statii)) {
-            foreach ($this->results as $result) {
-                if ($result == key($statii)) {
-                    return $result;
-                }
-            }
-            next($statii);
-        }
-        // If all tests are numeric, thus tested and scored successfully, declare the submit ACCEPTED
-        return $GLOBALS['STATUS_ACCEPTED'];
+        // Handle the case where there are no results (i.e. no tests)
+        // This is an exceptional scenario and shouldn't happen, so return INTERNAL_ERROR
+        if (count($this->results) == 0)
+            return $GLOBALS['STATUS_INTERNAL_ERROR'];
+
+        $passedTests = array_filter($this->results, function($el) {return is_numeric($el);});
+        // If all results are numeric, then the problem has been accepted
+        if (count($passedTests) == count($this->results))
+            return $GLOBALS['STATUS_ACCEPTED'];
+
+        $failedTests = array_filter($this->results, function($el) {return !is_numeric($el) && strlen($el) == 2;});
+        // If all tests are processed (either numeric or two-letter), then the grading has been completed
+        if (count($passedTests) + count($failedTests) == count($this->results))
+            return array_values($failedTests)[0]; // Return the status code of the first error
+
+        // If none of the tests are processed (either numeric or two-letter), return the status of the first test
+        if (count($passedTests) + count($failedTests) == 0)
+            return $this->results[0];
+
+        // If none of the above, the solution is still being graded
+        return $GLOBALS['STATUS_TESTING'];
     }
 
     public function calcScores() {
