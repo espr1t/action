@@ -167,7 +167,6 @@ if ($db->tableExists('Submits')) {
             userName VARCHAR(32) NOT NULL,
             problemId INT NOT NULL,
             problemName VARCHAR(32) NOT NULL,
-            source TEXT NOT NULL,
             language ENUM('C++', 'Java', 'Python') NOT NULL,
             results TEXT NOT NULL,
             exec_time TEXT NOT NULL,
@@ -175,6 +174,36 @@ if ($db->tableExists('Submits')) {
             status VARCHAR(2) NOT NULL,
             message TEXT NOT NULL,
             PRIMARY KEY (id)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
+/*
+Table::Sources
+==============
+{
+    "submitId": 172,
+    "userId": 1,
+    "problemId": 13,
+    "language": C++,
+    "source": "#include <cstdio>..."
+}
+*/
+output('');
+output('Creating table Sources...');
+
+if ($db->tableExists('Sources')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Sources`(
+            submitId INT NOT NULL,
+            userId INT NOT NULL,
+            problemId INT NOT NULL,
+            language ENUM('C++', 'Java', 'Python') NOT NULL,
+            source TEXT NOT NULL,
+            PRIMARY KEY (submitId)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');

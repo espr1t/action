@@ -266,7 +266,7 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, source, language, results, exec_time, exec_memory, status, message)
+            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message)
             VALUES (
                 '" . $submit->submitted . "',
                 '" . $submit->graded . "',
@@ -274,7 +274,6 @@ class Brain {
                 '" . $submit->userName . "',
                 '" . $submit->problemId . "',
                 '" . $submit->problemName . "',
-                '" . $this->db->escape($submit->source) . "',
                 '" . $this->db->escape($submit->language) . "',
                 '" . implode(',', $submit->results) . "',
                 '" . implode(',', $submit->exec_time) . "',
@@ -290,6 +289,37 @@ class Brain {
         return $this->db->lastId();
     }
 
+    function addSource($submit) {
+        $response = $this->db->query("
+            INSERT INTO `Sources` (submitId, userId, problemId, language, source)
+            VALUES (
+                '" . $submit->id . "',
+                '" . $submit->userId . "',
+                '" . $submit->problemId . "',
+                '" . $this->db->escape($submit->language) . "',
+                '" . $this->db->escape($submit->source) . "'
+            )
+        ");
+        if (!$response) {
+            error_log('Could not add source for submit "' . $submit->id . '"!');
+            return null;
+        }
+        return $this->db->lastId();
+    }
+
+    function getSource($submitId) {
+        $response = $this->db->query("
+            SELECT * FROM `Sources`
+            WHERE submitId = " . $submitId . "
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getSource() query for submit = ' . $submitId . '!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
     function updateSubmit($submit) {
         $response = $this->db->query("
             UPDATE `Submits` SET
@@ -302,7 +332,7 @@ class Brain {
             WHERE id = " . $submit->id . "
         ");
         if (!$response) {
-            error_log('Could not update submit with id ' . $submit->userName . '!');
+            error_log('Could not update submit with id ' . $submit->id . '!');
             return null;
         }
         return true;
@@ -378,6 +408,25 @@ class Brain {
         }
         if (!$response) {
             error_log('Could not execute getUserSubmits() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function getUserSources($userId, $problemId = -1) {
+        if ($problemId == -1) {
+            $response = $this->db->query("
+                SELECT * FROM `Sources`
+                WHERE userId = " . $userId . "
+            ");
+        } else {
+            $response = $this->db->query("
+                SELECT * FROM `Sources`
+                WHERE userId = " . $userId . " AND problemId = " . $problemId . "
+            ");
+        }
+        if (!$response) {
+            error_log('Could not execute getUserSources() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
             return null;
         }
         return $this->getResults($response);

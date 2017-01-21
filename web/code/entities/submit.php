@@ -79,6 +79,7 @@ class Submit {
     public function write() {
         $brain = new Brain();
         $this->id = $brain->addSubmit($this);
+        $brain->addSource($this);
         return $this->id >= 0;
     }
 
@@ -122,7 +123,7 @@ class Submit {
         return $grader->evaluate($data);
     }
 
-    private static function instanceFromArray($info) {
+    private static function instanceFromArray($info, $source) {
         $submit = new Submit();
         $submit->id = intval(getValue($info, 'id'));
         $submit->submitted = getValue($info, 'submitted');
@@ -131,8 +132,8 @@ class Submit {
         $submit->userName = getValue($info, 'userName');
         $submit->problemId = intval(getValue($info, 'problemId'));
         $submit->problemName = getValue($info, 'problemName');
-        $submit->source = getValue($info, 'source');
         $submit->language = getValue($info, 'language');
+        $submit->source = getValue($source, 'source');
         $submit->results = explode(',', getValue($info, 'results'));
         $submit->exec_time = explode(',', getValue($info, 'exec_time'));
         $submit->exec_memory = explode(',', getValue($info, 'exec_memory'));
@@ -145,11 +146,12 @@ class Submit {
         $brain = new Brain();
         try {
             $info = $brain->getSubmit($id);
-            if ($info == null) {
-                error_log('Could not get submit ' . $id . '!');
+            $source = $brain->getSource($id);
+            if ($info == null || $source == null) {
+                error_log('Could not get submit or source with id ' . $id . '!');
                 return null;
             }
-            return Submit::instanceFromArray($info);
+            return Submit::instanceFromArray($info, $source);
         } catch (Exception $ex) {
             error_log('Could not get submit ' . $id . '. Exception: ' . $ex->getMessage());
         }
@@ -159,9 +161,16 @@ class Submit {
     public static function getUserSubmits($userId, $problemId) {
         $brain = new Brain();
         $submitMaps = $brain->getUserSubmits($userId, $problemId);
+        $sourcesMaps = $brain->getUserSources($userId, $problemId);
         $submits = array();
+        // This can be done better than O(N^2) if need be.
         foreach ($submitMaps as $submitMap) {
-            array_push($submits, Submit::instanceFromArray($submitMap));
+            foreach ($sourcesMaps as $sourceMap) {
+                if ($submitMap['id'] == $sourceMap['submitId']) {
+                    array_push($submits, Submit::instanceFromArray($submitMap, $sourceMap));
+                    break;
+                }
+            }
         }
         return $submits;
     }
