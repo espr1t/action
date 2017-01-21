@@ -20,9 +20,8 @@ class ProblemsPage extends Page {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
 
-        $problems = '';
-        foreach ($problemsInfo as $problemInfo) {
-            $problemSolutions = $brain->getProblemSubmits($problemInfo['id'], $GLOBALS['STATUS_ACCEPTED']);
+        for ($i = 0; $i < count($problemsInfo); $i += 1) {
+            $problemSolutions = $brain->getProblemSubmits($problemsInfo[$i]['id'], $GLOBALS['STATUS_ACCEPTED']);
             $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
             foreach ($problemSolutions as $problemSolution) {
                 if ($problemSolution['userId'] == $GLOBALS['user']->id) {
@@ -31,15 +30,40 @@ class ProblemsPage extends Page {
             }
             $solutions = '<i class="fa fa-users" title="Решена от"></i> ' . count($problemSolutions);
 
-            $problems .= '
-                <a href="problems/' . $problemInfo['id'] . '" class="decorated">
+            $problemsInfo[$i]['box'] = '
+                <a href="problems/' . $problemsInfo[$i]['id'] . '" class="decorated">
                     <div class="box narrow boxlink">
                             <div class="problem-status">' . $statusIcon . '</div>
-                            <div class="problem-name">' . $problemInfo['name'] . '</div>
+                            <div class="problem-name">' . $problemsInfo[$i]['name'] . '</div>
                             <div class="problem-solutions">' . $solutions . '</div>
                     </div>
                 </a>
             ';
+            $problemsInfo[$i]['solutions'] = count($problemSolutions);
+        }
+
+        // Order by solutions or difficulty, if requested
+        if (isset($_GET['order'])) {
+            if ($_GET['order'] == 'solutions') {
+                usort($problemsInfo, function($left, $right) {
+                    if ($left['solutions'] == $right['solutions'])
+                        return $left['id'] > $right['id'];
+                    return $left['solutions'] < $right['solutions'];
+                });
+            }
+            if ($_GET['order'] == 'difficulty') {
+                $numericDifficulty = array('trivial' => 0, 'easy' => 1, 'medium' => 2, 'hard' => 3, 'brutal' => 4);
+                usort($problemsInfo, function($left, $right) use($numericDifficulty) {
+                    if ($left['difficulty'] == $right['difficulty'])
+                        return $left['id'] > $right['id'];
+                    return $numericDifficulty[$left['difficulty']] > $numericDifficulty[$right['difficulty']];
+                });
+            }
+        }
+
+        $problems = '';
+        foreach ($problemsInfo as $problemInfo) {
+            $problems .= $problemInfo['box'];
         }
         return $problems;
     }
