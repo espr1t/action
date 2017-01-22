@@ -21,8 +21,10 @@ if (isset($_SESSION['lastPage'])) {
 }
 
 $showMessage = '';
-if (isset($_POST['messageType']) && isset($_POST['messageText'])) {
-    $showMessage .= '<script>showMessage("' . $_POST['messageType'] . '", "' . $_POST['messageText'] . '");</script>';
+if (isset($_SESSION['messageType']) && isset($_SESSION['messageText'])) {
+    $showMessage .= '<script>showMessage("' . $_SESSION['messageType'] . '", "' . $_SESSION['messageText'] . '");</script>';
+    unset($_SESSION['messageType']);
+    unset($_SESSION['messageText']);
 }
 
 switch ($_GET['page']) {

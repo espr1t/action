@@ -5,32 +5,12 @@ function showMessage($type, $message) {
 }
 
 function redirect($url, $type = null, $message = null) {
-    // Simple redirect
-    if ($type == null) {
-        header('Location: ' . $url);
-    } else {
-
-        // Redirect with arguments. Pass them using a POST form.
-        echo '
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <title>O(N)::Redirect</title>
-                <meta charset="utf-8">
-            </head>
-
-            <body>
-                <form id="redirectForm" action="' . $url . '" method="POST">
-                    <input type="hidden" name="messageType" value="' . htmlentities($type) . '">
-                    <input type="hidden" name="messageText" value="' . htmlentities($message) . '">
-                </form>
-                <script type="text/javascript">
-                    document.getElementById("redirectForm").submit();
-                </script>
-            </body>
-        </html>
-        ';
+    // Redirect with arguments (pass them using session data).
+    if ($type != null && $message != null) {
+        $_SESSION['messageType'] = $type;
+        $_SESSION['messageText'] = $message;
     }
+    header('Location: ' . $url);
     exit();
 }
 

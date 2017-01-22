@@ -22,6 +22,7 @@ class User {
     public function logOut() {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
         session_destroy();
+        session_start();
         redirect('/login', 'INFO', 'Успешно излязохте от системата.');
     }
 
