@@ -178,22 +178,27 @@ class ProblemsPage extends Page {
     }
 
     private function getSubmitInfoBox($problem, $submitId) {
+        $returnUrl = '/problems/' . $problem->id . '/submits';
+        if (isset($_SESSION['prevPage'])) {
+            $returnUrl = $_SESSION['prevPage'];
+        }
+
         if (!is_numeric($submitId)) {
-            redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Не съществува решение с този идентификатор!');
+            redirect($returnUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
         }
 
         $submit = Submit::get($submitId);
         if ($submit == null) {
-            redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Не съществува решение с този идентификатор!');
+            redirect($returnUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
         }
 
         if ($this->user->access < $GLOBALS['ACCESS_SEE_SUBMITS']) {
             if ($submit->userId != $this->user->id) {
-                redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Нямате достъп до това решение!');
+                redirect($returnUrl, 'ERROR', 'Нямате достъп до това решение!');
             }
 
             if ($submit->problemId != $problem->id) {
-                redirect('/problems/' . $problem->id . '/submits', 'ERROR', 'Решението не е по поисканата задача!');
+                redirect($returnUrl, 'ERROR', 'Решението не е по поисканата задача!');
             }
         }
 
@@ -328,11 +333,9 @@ class ProblemsPage extends Page {
             ' . $detailedTable . '
         ';
 
-        $redirect = '/problems/' . $problem->id . '/submits';
-
         return '
             <script>
-                showActionForm(`' . $content . '`, \'' . $redirect . '\');
+                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
             </script>
         ';
     }
