@@ -40,10 +40,6 @@ class TestRunner(unittest.TestCase):
             shutil.copy("unit_tests/fixtures/ThreeSum/" + test["inpFile"], config.PATH_TESTS + test["inpHash"])
             shutil.copy("unit_tests/fixtures/ThreeSum/" + test["solFile"], config.PATH_TESTS + test["solHash"])
 
-    def tearDown(self):
-        shutil.rmtree(config.PATH_SANDBOX)
-        shutil.rmtree(config.PATH_DATA)
-
     def get_evaluator(self, data_file):
         with open(data_file) as file:
             data = json.loads(file.read())
@@ -116,23 +112,32 @@ class TestRunner(unittest.TestCase):
         # Absolute difference is less than 10-9
         message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatAbsoluteOK.out',
                                                 'unit_tests/fixtures/FloatComparison/FloatAbsolute.sol')
-        self.assertEquals('', message)
-        self.assertEquals(1.0, score)
+        self.assertEqual('', message)
+        self.assertEqual(1.0, score)
 
         # Absolute difference is greater than 10-9
         message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatAbsoluteWA.out',
                                                 'unit_tests/fixtures/FloatComparison/FloatAbsolute.sol')
-        self.assertNotEquals('', message)
-        self.assertEquals(0.0, score)
+        self.assertNotEqual('', message)
+        self.assertEqual(0.0, score)
 
         # Relative difference is less than 10-9
         message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatRelativeOK.out',
                                                 'unit_tests/fixtures/FloatComparison/FloatRelative.sol')
-        self.assertEquals('', message)
-        self.assertEquals(1.0, score)
+        self.assertEqual('', message)
+        self.assertEqual(1.0, score)
 
         # Relative difference is greater than 10-9
         message, score = runner.validate_output('unit_tests/fixtures/FloatComparison/FloatRelativeWA.out',
                                                 'unit_tests/fixtures/FloatComparison/FloatRelative.sol')
-        self.assertNotEquals('', message)
-        self.assertEquals(0.0, score)
+        self.assertNotEqual('', message)
+        self.assertEqual(0.0, score)
+
+    def test_presentation_difference_comparison(self):
+        runner = Runner(self.evaluator)
+
+        # Trailing spaces at the end of the lines or after the last line are okay
+        message, score = runner.validate_output('unit_tests/fixtures/TextComparison/TextComparisonPE.out',
+                                                'unit_tests/fixtures/TextComparison/TextComparisonOK.sol')
+        self.assertEqual('', message)
+        self.assertEqual(1.0, score)

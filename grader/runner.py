@@ -194,7 +194,8 @@ class Runner:
                 exec_time = max(exec_time, process.cpu_times().user)
                 # Consider using USS instead of PSS if available (currently it returns zeroes only)
                 mem_info = process.memory_full_info()
-                exec_memory = max(exec_memory, mem_info.pss if mem_info.pss is not None else mem_info.rss)
+                # Need to check with "in" for named tuple
+                exec_memory = max(exec_memory, mem_info.pss if "pss" in mem_info else mem_info.rss)
 
                 # Spawning processes or threads
                 if process.num_threads() > 2:
