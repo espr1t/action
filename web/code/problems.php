@@ -44,19 +44,23 @@ class ProblemsPage extends Page {
 
         // Order by solutions or difficulty, if requested
         if (isset($_GET['order'])) {
+            $numericDifficulty = array('trivial' => 0, 'easy' => 1, 'medium' => 2, 'hard' => 3, 'brutal' => 4);
             if ($_GET['order'] == 'solutions') {
-                usort($problemsInfo, function($left, $right) {
-                    if ($left['solutions'] == $right['solutions'])
-                        return $left['id'] > $right['id'];
-                    return $left['solutions'] < $right['solutions'];
+                usort($problemsInfo, function($left, $right) use($numericDifficulty) {
+                    if ($left['solutions'] != $right['solutions'])
+                        return $left['solutions'] < $right['solutions'];
+                    if ($left['difficulty'] != $right['difficulty'])
+                        return $numericDifficulty[$left['difficulty']] > $numericDifficulty[$right['difficulty']];
+                    return $left['id'] > $right['id'];
                 });
             }
             if ($_GET['order'] == 'difficulty') {
-                $numericDifficulty = array('trivial' => 0, 'easy' => 1, 'medium' => 2, 'hard' => 3, 'brutal' => 4);
                 usort($problemsInfo, function($left, $right) use($numericDifficulty) {
-                    if ($left['difficulty'] == $right['difficulty'])
-                        return $left['id'] > $right['id'];
-                    return $numericDifficulty[$left['difficulty']] > $numericDifficulty[$right['difficulty']];
+                    if ($left['difficulty'] != $right['difficulty'])
+                        return $numericDifficulty[$left['difficulty']] > $numericDifficulty[$right['difficulty']];
+                    if ($left['solutions'] != $right['solutions'])
+                        return $left['solutions'] < $right['solutions'];
+                    return $left['id'] > $right['id'];
                 });
             }
         }
