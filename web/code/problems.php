@@ -324,6 +324,18 @@ class ProblemsPage extends Page {
             $author = '(' . $submit->userName . ')';
         }
 
+        if (isset($_GET['source']) && $_GET['source'] == true) {
+            $returnUrl = '/problems/' . $problem->id . '/submits';
+            $source = '
+                <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
+                <div style="border: 1px dashed #333333; padding: 0.5rem;">
+                    <code id="source">' . htmlspecialchars(addslashes($submit->source)) . '</code>
+                </div>
+            ';
+        } else {
+            $source = '<div class="centered"><a href="/problems/' . $problem->id . '/submits/' . $submit->id . '/source">Виж кода</a></div>';
+        }
+
         $content = '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
             <div class="right smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
@@ -331,6 +343,8 @@ class ProblemsPage extends Page {
             ' . $summaryTable . '
             <br>
             ' . $detailedTable . '
+            <br>
+            ' . $source . '
         ';
 
         return '

@@ -307,3 +307,17 @@ function orderRanking(orderBy) {
         tableBody.appendChild(rows[i]);
     }
 }
+
+/*
+ * Copy to clipboard
+ */
+function copyToClipboard() {
+    if (document.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById('source'));
+        var selection = document.getSelection();
+        selection.empty();
+        selection.addRange(range);
+        document.execCommand('copy');
+    }
+}
