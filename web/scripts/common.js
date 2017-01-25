@@ -294,14 +294,17 @@ function orderRanking(orderBy) {
         var townA = a.cells[3].textContent, tasksA = parseInt(a.cells[4].textContent), achievementsA = parseInt(a.cells[5].textContent);
         var townB = b.cells[3].textContent, tasksB = parseInt(b.cells[4].textContent), achievementsB = parseInt(b.cells[5].textContent);
         switch (orderBy) {
+            // You expected this to be a standard operator < ? Well - no. It is designed after the C-style qsort() function,
+            // which requires an integer result: less than 0 for "less", 0 for "equal", and greater-than 0 for "greater".
             case 'town':
-                return townA != townB ? townA > townB : (tasksA != tasksB ? tasksA < tasksB : achievementsA < achievementsB);
+                return townA != townB ? (townA < townB ? -1 : +1) : (tasksA != tasksB ? tasksA - tasksB : achievementsA - achievementsB);
             case 'achievements':
-                return achievementsA != achievementsB ? achievementsA < achievementsB : (tasksA != tasksB ? tasksA < tasksB : townA > townB);
+                return achievementsA != achievementsB ? achievementsA - achievementsB : (tasksA != tasksB ? tasksA - tasksB : (townA < townB ? -1 : +1));
             default:
-                return tasksA != tasksB ? tasksA < tasksB : (achievementsA != achievementsB ? achievementsA < achievementsB : townA > townB);
+                return tasksA != tasksB ? tasksA - tasksB : (achievementsA != achievementsB ? achievementsA - achievementsB : (townA < townB ? -1 : +1));
         }
     });
+    rows.reverse();
     for (var i = 0; i < rows.length; i++) {
         rows[i].cells[0].textContent = i + 1;
         tableBody.appendChild(rows[i]);
