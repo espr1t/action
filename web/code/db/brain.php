@@ -50,7 +50,7 @@ class Brain {
     function addNews() {
         $response = $this->db->query("
             INSERT INTO `News`(date, title, content, icon, type)
-            VALUES ('', '', '')
+            VALUES ('', '', '', '', '')
         ");
 
         if (!$response) {
