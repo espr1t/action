@@ -99,7 +99,7 @@ class AdminQueuePage extends Page {
 
         $invokeGraderCheck = '<script>updateGraderStatus();</script>';
 
-        return $head . $time . $latest . $pending . $compilers . $invokeGraderCheck;
+        return $head . $time . $pending . $latest . $compilers . $invokeGraderCheck;
     }
     
 }
