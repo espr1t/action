@@ -61,7 +61,10 @@ class RankingPage extends Page {
             <h1>Класиране</h1>
             <br>
         ';
-        return inBox($content . $table);
+        $initialOrder = '
+            <script>orderRanking(\'tasks\');</script>
+        ';
+        return inBox($content . $table . $initialOrder);
     }
     
 }
