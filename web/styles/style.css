@@ -930,25 +930,25 @@ table.black th {
 .background-purple {
     background-color: #8E44AD;
 }
-.background-purple-dull {
+.background-dull-purple {
     background-color: #9B59B6;
 }
 .background-orange {
     background-color: #E67E22;
 }
-.background-orange-dull {
+.background-dull-orange {
     background-color: #F39C12;
 }
 .background-teal {
     background-color: #16A085;
 }
-.background-teal-dull {
+.background-dull-teal {
     background-color: #1ABC9C;
 }
 .background-asphalt {
     background-color: #2C3E50;
 }
-.background-asphalt-dull {
+.background-dull-asphalt {
     background-color: #3D566E;
 }
 .background-gray {
@@ -1086,4 +1086,21 @@ div.test-result {
     position: fixed;
     overflow: visible;
     z-index: 101;
+}
+
+table.bordered {
+    margin: 0.25rem 0.5rem;
+    border: 1px solid #333333;
+    border-spacing: 0;
+    border-collapse: collapse;
+    white-space: pre-wrap;
+}
+
+table.bordered tr td {
+    font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
+    vertical-align: top;
+    padding: 0.125rem 0.25rem;
+    border: 0.0625rem solid #666666;
+    font-size: 0.8125rem;
+    page-break-inside: avoid;
 }

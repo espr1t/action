@@ -254,7 +254,7 @@ class ProblemsPage extends Page {
             $icon = 'WTF?';
             $class = 'test-result background-';
             if (is_numeric($result)) {
-                $class .= 'dull-green';
+                $class .= ($result == 1.0 ? 'dull-green' : 'dull-teal');
                 $icon = '<i class="fa fa-check"></i>';
             } else if ($result == $GLOBALS['STATUS_WAITING'] || $result == $GLOBALS['STATUS_PREPARING'] || $result == $GLOBALS['STATUS_COMPILING']) {
                 $class .= 'dull-gray';

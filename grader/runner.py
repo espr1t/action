@@ -56,11 +56,12 @@ class Runner:
         result = self.exec_solution(sandbox, executable, inp_file, out_file)
 
         # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
-        result.status, result.error_message, result.score = self.determine_status(test, result, out_file, sol_file)
+        result.status, result.error_message, result.score = self.determine_status(test, result, inp_file, out_file, sol_file)
 
         total_time = perf_counter() - start_time
-        self.logger.info("[Submission {}]    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}".format(
-                self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name))
+        score = " ({})".format(result.score) if result.score > 0.0 and result.score < 1.0 else ""
+        self.logger.info("[Submission {}]    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}{}".format(
+                self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name, score))
 
         if result.status == TestStatus.WRONG_ANSWER:
             self.logger.info("[Submission {}]         >> {}".format(self.evaluator.id, result.error_message))
@@ -98,7 +99,7 @@ class Runner:
     """
     Determines the proper execution status (OK, WA, TL, ML, RE) and score of the solution
     """
-    def determine_status(self, test, result, out_file, sol_file):
+    def determine_status(self, test, result, inp_file, out_file, sol_file):
         if result.error_message != "":
             self.logger.info("[Submission {}] Got error while executing test {}: \"{}\"".format(
                 self.evaluator.id, test["inpFile"], result.error_message))
@@ -110,11 +111,11 @@ class Runner:
         elif result.exit_code != 0:
             return TestStatus.RUNTIME_ERROR, "", 0
         else:
-            error_message, score = self.validate_output(out_file, sol_file)
+            error_message, score = self.validate_output(inp_file, out_file, sol_file)
             if error_message != "":
                 return TestStatus.WRONG_ANSWER, error_message, 0
             else:
-                return TestStatus.ACCEPTED, "", 1
+                return TestStatus.ACCEPTED, "", score
 
     # TODO:
     # Limit network usage
@@ -231,7 +232,13 @@ class Runner:
         # Leave the parent function decide what the test status will be
         return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0)
 
-    def validate_output(self, out_file, sol_file):
+    def validate_output(self, inp_file, out_file, sol_file):
+        if self.evaluator.checker == '':
+            return self.validate_output_directly(out_file, sol_file)
+        else:
+            return self.validate_output_with_checker(inp_file, out_file, sol_file)
+
+    def validate_output_directly(self, out_file, sol_file):
         with open(out_file, "rt") as out:
             with open(sol_file, "rt") as sol:
                 while True:
@@ -279,3 +286,29 @@ class Runner:
                     if len(sol_line) > 20:
                         sol_line = sol_line[:17] + "..."
                     return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0
+
+    def validate_output_with_checker(self, inp_file, out_file, sol_file):
+        checker_binary_path = config.PATH_CHECKERS + self.evaluator.checker
+        process = psutil.Popen(args=[checker_binary_path, inp_file, out_file, sol_file],
+                               executable=checker_binary_path, cwd=getcwd(), stdout=PIPE, stderr=PIPE)
+        try:
+            exit_code = process.wait(timeout=config.CHECKER_TIMEOUT)
+        except psutil.TimeoutExpired:
+            self.logger.error("Internal Error: Checker took more than the allowed {}s.".format(config.CHECKER_TIMEOUT))
+            process.terminate()
+            return "Checker Timeout", 0.0
+
+        if exit_code != 0:
+            return "Checker returned non-zero exit code: {}".format(exit_code), 0.0
+
+        result = process.communicate()[0]
+        result = result.decode("utf-8") if result is not None else "0.0"
+        lines = result.splitlines()
+
+        score = 0.0
+        message = ""
+        if len(lines) > 0:
+            score = float(lines[0])
+        if len(lines) > 1:
+            message = lines[1] if lines[1] != "OK" else ""
+        return message, score

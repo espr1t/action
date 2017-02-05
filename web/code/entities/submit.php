@@ -91,6 +91,8 @@ class Submit {
 
         $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
         $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
+        $checkerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_CHECKER'], $problem->folder);
+
         $tests = $brain->getProblemTests($this->problemId);
 
         // Remove unnecessary data
@@ -105,18 +107,29 @@ class Submit {
             $tests[$i]['position'] = intval($tests[$i]['position']);
         }
 
+        // Also add the md5 hash of the checker (if there is one)
+        $checkerHash = '';
+        $checkerPath = '';
+        if ($problem->checker != '') {
+            $checkerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
+                    $GLOBALS['PROBLEM_CHECKER_FOLDER'], $problem->checker);
+            $checkerHash = md5(file_get_contents($checkerPath));
+            $checkerPath = $checkerEndpoint . $problem->checker;
+        }
+
         // Compile all the data, required by the grader to evaluate the solution
         $data = array(
             'id' => $this->id,
             'source' => $this->source,
             'language' => $this->language,
-            'checker' => $problem->checker,
+            'checker' => $checkerHash,
             'tester' => $problem->tester,
             'timeLimit' => $problem->timeLimit,
             'memoryLimit' => $problem->memoryLimit,
             'tests' => $tests,
             'testsEndpoint' => $testsEndpoint,
-            'updateEndpoint' => $updateEndpoint
+            'updateEndpoint' => $updateEndpoint,
+            'checkerEndpoint' => $checkerPath
         );
 
         $grader = new Grader();
@@ -183,8 +196,13 @@ class Submit {
 
         $passedTests = array_filter($this->results, function($el) {return is_numeric($el);});
         // If all results are numeric, then the problem has been accepted
-        if (count($passedTests) == count($this->results))
+        if (count($passedTests) == count($this->results)) {
+            // We may, however, consider it not okay, if some of the results are not full scores
+            // In this case we'll consider the solution to be okay if it has more than half of the points
+            if (array_sum($this->results) < count($this->results) / 2.0)
+                return $GLOBALS['STATUS_WRONG_ANSWER'];
             return $GLOBALS['STATUS_ACCEPTED'];
+        }
 
         $failedTests = array_filter($this->results, function($el) {return !is_numeric($el) && strlen($el) == 2;});
         // If all tests are processed (either numeric or two-letter), then the grading has been completed

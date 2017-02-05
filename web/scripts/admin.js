@@ -294,9 +294,12 @@ function submitEditProblemForm() {
         }
     }
 
+    var checker = document.getElementById('checkerName').innerText;
+    if (checker == 'N/A')
+        checker = '';
+
     var solutions = []; // TODO
     var testgen = ''; // TODO
-    var checker = ''; // TODO
     var tester = ''; // TODO
 
     var data = {
@@ -326,4 +329,49 @@ function submitEditProblemForm() {
         }
     }
     ajaxCall('/actions/editProblem', data, callback);
+}
+
+/*
+ * Checker manipulation
+ */
+function updateChecker(action, checkerName, checkerContent) {
+    var data = {
+        'problemId': getLastUrlToken(),
+        'action': action,
+        'checkerName': checkerName,
+        'checkerContent': checkerContent
+    };
+    var callback = function(response) {
+        var exception = false;
+        try {
+            response = JSON.parse(response);
+        } catch(ex) {
+            exception = true;
+        }
+        if (exception || response['status'] !== 'OK') {
+            showMessage('ERROR', 'Възникна проблем при промяната на чекера "' + checkerName + '"!');
+        } else {
+            if (action == 'delete') {
+                showMessage('INFO', 'Чекерът беше изтрит успешно.');
+                document.getElementById('checkerName').innerText = 'N/A';
+            } else {
+                showMessage('INFO', 'Чекерът беше качен успешно.');
+                document.getElementById('checkerName').innerText = checkerName;
+            }
+        }
+    };
+    ajaxCall('/actions/updateChecker', data, callback);
+}
+
+function uploadChecker() {
+    var checkerFile = document.getElementById('checkerSelector').files[0];
+    var fileReader = new FileReader();
+    fileReader.addEventListener('load', function() {
+        updateChecker('upload', checkerFile.name, fileReader.result.match(/,(.*)$/)[1])
+    });
+    fileReader.readAsDataURL(checkerFile);
+}
+
+function deleteChecker() {
+    updateChecker('delete', '', '');
 }

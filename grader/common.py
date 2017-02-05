@@ -40,6 +40,19 @@ def send_request(method, url, data=None):
     return response
 
 
+def download_file(url, destination):
+    response = send_request("GET", url)
+    if response.status_code != 200:
+        logger = logging.getLogger("commn")
+        logger.error("Could not download file from URL: {}".format(url))
+        raise Exception("Could not download file!")
+
+    with open(destination, "wb") as file:
+        # Write 1MB chunks from the file at a time
+        for chunk in response.iter_content(config.FILE_DOWNLOAD_CHUNK_SIZE):
+            file.write(chunk)
+
+
 def authorized(auth):
     if auth is None or auth.username is None or auth.password is None:
         return False

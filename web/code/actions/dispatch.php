@@ -42,6 +42,10 @@ switch ($_GET['action']) {
         require_once('delete_test.php');
         break;
 
+    case 'updateChecker':
+        require_once('update_checker.php');
+        break;
+
     default:
         printAjaxResponse(array(
             'status' => 'WARNING',

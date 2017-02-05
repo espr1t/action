@@ -14,7 +14,7 @@ from time import perf_counter, sleep, time
 import config
 import shutil
 from compiler import Compiler
-from common import executor, send_request
+from common import executor, send_request, download_file
 from status import TestStatus
 from runner import Runner
 from threading import Thread
@@ -33,6 +33,7 @@ class Evaluator:
         # Server endpoints
         self.update_url = data["updateEndpoint"]
         self.tests_url = data["testsEndpoint"]
+        self.checker_url = data["checkerEndpoint"]
 
         # Submit information
         self.id = data["id"]
@@ -82,6 +83,21 @@ class Evaluator:
             self.logger.error("[Submission {}] Could not download tests properly. Aborting...".format(self.id))
             self.update_frontend(download_tests_status, self.set_results(TestStatus.INTERNAL_ERROR))
             return
+
+        # Download and compile the checker (if not downloaded already)
+        if self.checker != '' and not path.exists(config.PATH_CHECKERS + self.checker):
+            self.logger.info("[Submission {}]   >> downloading checker...".format(self.id))
+            download_checker_status = self.download_checker()
+            if download_checker_status != "":
+                self.logger.error("[Submission {}] Could not download checker. Aborting...".format(self.id))
+                self.update_frontend(download_checker_status, self.set_results(TestStatus.INTERNAL_ERROR))
+                return
+            self.logger.info("[Submission {}]   >> compiling checker...".format(self.id))
+            compile_checker_status = self.compile_checker()
+            if compile_checker_status != "":
+                self.logger.error("[Submission {}] Could not compile checker. Aborting...".format(self.id))
+                self.update_frontend(compile_checker_status, self.set_results(TestStatus.INTERNAL_ERROR))
+                return
 
         # Save the source to a file so we can compile it later
         self.logger.info("[Submission {}]   >> writing source code to file...".format(self.id))
@@ -167,25 +183,13 @@ class Evaluator:
 
     def download_test(self, test_name, test_hash):
         test_path = config.PATH_TESTS + test_hash
-
         # Check if file already exists
         if path.exists(test_path):
             return
 
-        # If not, we should download it
-        url = self.tests_url + test_name
         self.logger.info("[Submission {}] Downloading file {} with hash {} from URL: {}".format(
-            self.id, test_name, test_hash, url))
-        response = send_request("GET", url)
-        if response.status_code != 200:
-            self.logger.error("[Submission {}] Could not download test {} with hash {} using URL: {}".format(
-                self.id, test_name, test_hash, url))
-            raise Exception("Could not download test file!")
-
-        with open(test_path, "wb") as file:
-            # Write 1MB chunks from the file at a time
-            for chunk in response.iter_content(config.FILE_DOWNLOAD_CHUNK_SIZE):
-                file.write(chunk)
+            self.id, test_name, test_hash, self.tests_url + test_name))
+        download_file(self.tests_url + test_name, test_path)
 
     def download_tests(self):
         # In case the directory for the tests does not exist, create it
@@ -201,6 +205,28 @@ class Evaluator:
                 self.download_test(test["solFile"], test["solHash"])
         except Exception as ex:
             status = str(ex)
+            self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
+        return status
+
+    def download_checker(self):
+        checker_source_path = config.PATH_CHECKERS + self.checker + ".cpp"
+
+        self.logger.info("[Submission {}] Downloading file {} with hash {} from URL: {}".format(
+            self.id, self.checker_url.split('/')[-1], self.checker, self.checker_url))
+        try:
+            download_file(self.checker_url, checker_source_path)
+        except Exception as ex:
+            return "Internal error: " + str(ex)
+        return ""
+
+    def compile_checker(self):
+        checker_binary_path = config.PATH_CHECKERS + self.checker
+        checker_source_path = config.PATH_CHECKERS + self.checker + ".cpp"
+        try:
+            status = executor.submit(Compiler.compile, "C++", checker_source_path, checker_binary_path).result()
+        except ValueError as ex:
+            # If a non-compiler error occurred, log the message in addition to sending it to the user
+            status = "Internal error: " + str(ex)
             self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
         return status
 

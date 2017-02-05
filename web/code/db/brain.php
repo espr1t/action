@@ -142,6 +142,19 @@ class Brain {
         return true;
     }
 
+    function updateChecker($problem) {
+        $response = $this->db->query("
+            UPDATE `Problems` SET
+                checker = '" . $problem->checker . "'
+            WHERE id = " . $problem->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update checker of problem "' . $problem->name . '"!');
+            return null;
+        }
+        return true;
+    }
+
     function getProblem($problemId) {
         $response = $this->db->query("
             SELECT * FROM `Problems`
