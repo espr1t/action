@@ -119,23 +119,12 @@ class AdminProblemsPage extends Page {
                 <h2>' . $headerText . '</h2>
             </div>
             <div class="edit-problem-tab">
-                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button underline" id="statementTab">Условие</div> |
-                <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button" id="optionsTab">Настройки</div> |
+                <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button underline" id="optionsTab">Настройки</div> |
+                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button" id="statementTab">Условие</div> |
                 <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div>
             </div>
 
-            <div id="statementTabContent">
-                <div class="edit-problem-section" style="margin-bottom: 4px;">
-                    <div class="right" onclick="toggleStatementHTML();"><a>edit html</a>&nbsp;</div>
-                </div>
-                <div>
-                    <div contenteditable id="statement">
-                    ' . $problem->statement . '
-                    </div>
-                </div>
-            </div>
-
-            <div class="edit-problem-section" id="optionsTabContent" style="display: none;">
+            <div class="edit-problem-section" id="optionsTabContent">
                 <div class="edit-problem-section-field">
                     <b>Заглавие:</b>
                     <input type="text" class="edit-problem-text-field" id="problemName" value="' . $problem->name . '" size="' . (mb_strlen($problem->name, 'UTF-8') + 1) . '">
@@ -206,6 +195,17 @@ class AdminProblemsPage extends Page {
                 <div class="edit-problem-section-field">
                     <b>Тестер:</b>
                     <input type="file" id="testerSelector" onchange="updateTester();">
+                </div>
+            </div>
+
+            <div id="statementTabContent" style="display: none;">
+                <div class="edit-problem-section" style="margin-bottom: 4px;">
+                    <div class="right" onclick="toggleStatementHTML();"><a>edit html</a>&nbsp;</div>
+                </div>
+                <div>
+                    <div contenteditable id="statement">
+                    ' . $problem->statement . '
+                    </div>
                 </div>
             </div>
 
