@@ -178,7 +178,7 @@ class ProfilePage extends Page {
                     $color = 'yellow';
                     break;
                 case $GLOBALS['STATUS_MEMORY_LIMIT']:
-                    $color = 'purple-dull';
+                    $color = 'dull-purple';
                     break;
                 case $GLOBALS['STATUS_RUNTIME_ERROR']:
                     $color = 'asphalt';
