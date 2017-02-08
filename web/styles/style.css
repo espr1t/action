@@ -647,6 +647,7 @@ input.button {
     border: 0.0625rem solid #FFFFFF;
     border-radius: 0.25rem;
     font-weight: bold;
+    -webkit-appearance: none;
 }
 
 input.button-large {
