@@ -755,10 +755,9 @@ textarea.news-form-content {
 
 div.message {
     position: fixed;
-    width: 31rem;
+    min-width: 16rem;
     top: 7rem;
     left: 50%;
-    margin-left: -15.5rem;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
     border-radius: 1rem;
     z-index: 100;
@@ -794,6 +793,7 @@ div.message-close {
     display: inline-block;
     float: right;
     color: #FFFFFF;
+    margin-left: 0.5rem;
     cursor: pointer;
 }
 

@@ -90,6 +90,10 @@ function showMessage(type, message) {
 
     document.body.appendChild(messageEl);
 
+    // Center the message horizontally
+    // Please note that this has to be done after it is appended to the DOM, since otherwise its width will be 0 (it is not visible)
+    messageEl.style.marginLeft = -messageEl.offsetWidth / 2 + 'px';
+
     // Hide the message after several seconds
     setTimeout(function() {
         hideMessage(className, id);
