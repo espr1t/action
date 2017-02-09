@@ -410,6 +410,9 @@ class ProblemsPage extends Page {
 
             $content = $this->getStatement($problem);
             if (isset($_GET['submits'])) {
+                if ($this->user->id == -1) {
+                    redirect('/problems/' . $problem->id, 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
+                }
                 if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
