@@ -11,6 +11,7 @@ class User {
     public $registered = '1970-01-01';
     public $username = 'anonymous';
     public $password = 'abracadabra';
+    public $loginKey = '';
     public $name = '';
     public $email = '';
     public $town = '';
@@ -26,7 +27,7 @@ class User {
         redirect('/login', 'INFO', 'Успешно излязохте от системата.');
     }
 
-    private function update() {
+    public function update() {
         $brain = new Brain();
         return $brain->updateUser($this);
     }
@@ -38,6 +39,7 @@ class User {
         $user->registered = getValue($info, 'registered');
         $user->username = getValue($info, 'username');
         $user->password = getValue($info, 'password');
+        $user->loginKey = getValue($info, 'loginKey');
         $user->name = getValue($info, 'name');
         $user->email = getValue($info, 'email');
         $user->town = getValue($info, 'town');
@@ -48,17 +50,20 @@ class User {
         return $user;
     }
 
-    public static function get($userId) {
+    public static function get($userKey) {
         $brain = new Brain();
-        if (is_numeric($userId)) {
-            $result = $brain->getUser($userId);
+        if (is_numeric($userKey)) {
+            $result = $brain->getUser($userKey);
         } else {
-            $result = $brain->getUserByUsername($userId);
+            $result = $brain->getUserByUsername($userKey);
         }
-        if (!$result) {
-            return null;
-        }
-        return User::instanceFromArray($result);
+        return !$result ? null : User::instanceFromArray($result);
+    }
+
+    public static function getByLoginKey($loginKey) {
+        $brain = new Brain();
+        $result = $brain->getUserByLoginKey($loginKey);
+        return !$result ? null : User::instanceFromArray($result);
     }
 
     public static function createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender) {
@@ -72,6 +77,7 @@ class User {
         $user->registered = date('Y-m-d');
         $user->username = $username;
         $user->password = $password;
+        $user->loginKey = '';
         $user->name = $name . ' ' . $surname;
         $user->email = $email;
         $user->town = $town;

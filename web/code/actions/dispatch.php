@@ -4,7 +4,7 @@ require_once(__DIR__ . '/../entities/widgets.php');
 
 session_start();
 
-$user = User::get($_SESSION['userId']);
+$user = isset($_SESSION['userId']) ? User::get($_SESSION['userId']) : null;
 if ($user == null) {
     printAjaxResponse(array(
         'status' => 'ERROR',

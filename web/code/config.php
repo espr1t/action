@@ -16,7 +16,7 @@ $DB_PASSWORD = 'password';
 $DB_DATABASE = 'action';
 
 // Session and cookie
-$COOKIE_NAME = 'action.informatika.bg';
+$COOKIE_NAME = 'action_informatika_bg';
 
 // Grader
 $GRADER_URL = 'localhost:5000';

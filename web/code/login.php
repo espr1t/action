@@ -28,12 +28,13 @@ class LoginPage extends Page {
 
         // Check if user just entered valid credentials
         if (isset($_POST['username']) && isset($_POST['password'])) {
+            $saltedPassword = saltHashPassword($_POST['password']);
+
             $user = User::get($_POST['username']);
             if ($user == null) {
                 $error = 'Не съществува акаунт с това потребителско име!';
             } else {
-                $salthashed = saltHashPassword($_POST['password']);
-                if ($user->password != $salthashed) {
+                if ($user->password != $saltedPassword) {
                     $error = 'Въведената парола е невалидна!';
                 }
             }
@@ -44,9 +45,15 @@ class LoginPage extends Page {
                 $_SESSION['userId'] = $user->id;
 
                 // Set cookie (avoid logging in again until cookie expires)
-                $loginKey = str_shuffle(md5(microtime()));
+                if ($user->loginKey == '') {
+                    $user->loginKey = str_shuffle(md5(microtime()));
+                    $user->update();
+                }
+                # Sign the login key with the user's IP so it cannot be used on another computer even if stolen
+                # Note that this wouldn't work for two computers on the same subnet (behind a router)
+                $signedLoginKey = $user->loginKey . ':' . hash_hmac('md5', $user->loginKey, $_SERVER['REMOTE_ADDR']);
                 $expireTime = time() + 365 * 86400; // 365 days
-                setcookie($GLOBALS['COOKIE_NAME'], $loginKey, $expireTime);
+                setcookie($GLOBALS['COOKIE_NAME'], $signedLoginKey, $expireTime);
 
                 // Redirect to home page with a success message
                 redirect('/home', 'INFO', 'Влязохте успешно в системата.');
