@@ -583,12 +583,13 @@ class Brain {
     // Users
     function addUser($user) {
         $response = $this->db->query("
-            INSERT INTO `Users`(access, registered, username, password, name, email, town, country, gender, birthdate, avatar)
+            INSERT INTO `Users`(access, registered, username, password, loginKey, name, email, town, country, gender, birthdate, avatar)
             VALUES (
                 '" . $user->access . "',
                 '" . $user->registered . "',
                 '" . $user->username . "',
                 '" . $user->password . "',
+                '" . $user->loginKey . "',
                 '" . $user->name . "',
                 '" . $user->email . "',
                 '" . $user->town . "',
@@ -612,6 +613,7 @@ class Brain {
                 registered = '" . $user->registered . "',
                 username = '" . $user->username . "',
                 password = '" . $user->password . "',
+                loginKey = '" . $user->loginKey . "',
                 name = '" . $user->name . "',
                 email = '" . $user->email . "',
                 town = '" . $user->town . "',
@@ -660,6 +662,19 @@ class Brain {
         ");
         if (!$response) {
             error_log('Could not execute getUserByUsername() query with username = "' . $username . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getUserByLoginKey($loginKey) {
+        $response = $this->db->query("
+            SELECT * FROM `Users`
+            WHERE loginKey = '" . $loginKey . "'
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getUserByLoginKey() query with loginKey = "' . $loginKey . '"!');
             return null;
         }
         return $this->getResult($response);

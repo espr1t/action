@@ -755,7 +755,7 @@ textarea.news-form-content {
 
 div.message {
     position: fixed;
-    min-width: 16rem;
+    min-width: 20rem;
     top: 7rem;
     left: 50%;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
