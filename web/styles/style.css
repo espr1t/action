@@ -17,9 +17,35 @@ body {
 /***********************
           Fonts
 ************************/
+/* Ruthie */
 @font-face {
     font-family: "Ruthie";
     src: url(/fonts/ruthie_regular.ttf);
+}
+
+/* Poiret One - Cyrillic */
+@font-face {
+  font-family: 'Poiret One';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Poiret One'), local('PoiretOne-Regular'), url(/fonts/poiret_one_cyrillic.woff2) format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* Poiret One - Latin */
+@font-face {
+  font-family: 'Poiret One';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Poiret One'), local('PoiretOne-Regular'), url(/fonts/poiret_one_latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+}
+/* Poiret One - Extended Latin */
+@font-face {
+  font-family: 'Poiret One';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Poiret One'), local('PoiretOne-Regular'), url(/fonts/poiret_one_extended_latin.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
 }
 
 body, td, th, input {
@@ -195,7 +221,7 @@ div.main {
 
 div.footer {
     width: 100%;
-    height: 1.875rem;
+    line-height: 1.875rem;
     overflow: hidden;
     color: #EEEEEE;
     background: #0099FF;
@@ -207,7 +233,6 @@ div.footer-left {
     display: inline-block;
     float: left;
     width: 6.25rem;
-    line-height: 1.875rem;
     text-align: left;
 }
 
@@ -215,7 +240,6 @@ div.footer-middle {
     display: inline-block;
     float: left;
     font-size: 0.6875rem;
-    line-height: 1.875rem;
     width: 37.5rem;
     text-align: center;
 }
@@ -224,7 +248,6 @@ div.footer-right {
     display: inline-block;
     float: left;
     width: 6.25rem;
-    line-height: 1.875rem;
     text-align: right;
 }
 
@@ -307,7 +330,6 @@ div.login {
     padding: 1rem 3rem;
 }
 
-
 div.menu {
     width: 50rem;
     height: 5.625rem;
@@ -323,9 +345,11 @@ table.menu {
 table.menu .button {
     padding: 0;
     width: 6.25rem;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     text-align: center;
     vertical-align: middle;
+    font-weight: bold;
+    font-family: 'Poiret One', cursive;
 }
 
 table.menu .logo {

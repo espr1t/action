@@ -36,9 +36,9 @@
                 <div class="menu" id="menu">
                     <table class="menu" id="menuTable">
                         <tr>
-                            <td class="button"><a href="/home"><div class="button">HOME</div></a></td>
-                            <td class="button"><a href="/training"><div class="button">TRAINING</div></a></td>
-                            <td class="button"><a href="/problems"><div class="button">PROBLEMS</div></a></td>
+                            <td class="button"><a href="/home"><div class="button">НОВИНИ</div></a></td>
+                            <td class="button"><a href="/problems"><div class="button">ЗАДАЧИ</div></a></td>
+                            <td class="button"><a href="/games"><div class="button">ИГРИ</div></a></td>
                             <td class="logo">
                                 <div class="logo noselect">
                                     <!--
@@ -47,13 +47,13 @@
                                     act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span>
                                 </div>
                             </td>
-                            <td class="button"><a href="/queue"><div class="button">QUEUE</div></a></td>
-                            <td class="button"><a href="/ranking"><div class="button">RANKING</div></a></td>
+                            <td class="button"><a href="/queue"><div class="button">СТАТУС</div></a></td>
+                            <td class="button"><a href="/ranking"><div class="button">КЛАСИРАНЕ</div></a></td>
                             <td class="button"><?php
                                     if ($user->id == -1) {
-                                        echo '<a href="/login"><div class="button">LOGIN</div></a>';
+                                        echo '<a href="/login"><div class="button">ВХОД</div></a>';
                                     } else {
-                                        echo '<a href="/logout"><div class="button">LOGOUT</div></a>';
+                                        echo '<a href="/logout"><div class="button">ИЗХОД</div></a>';
                                     }
                                 ?></td>
                         </tr>
@@ -78,10 +78,10 @@
                     &nbsp;
                     </div>
                     <div class="footer-middle">
-                        <a href="/help" class="white">help</a> |
-                        <a href="/about" class="white">about</a> |
-                        <a href="/stats" class="white">stats</a> |
-                        <div class="link white" onclick="reportProblem();">report a bug</div>
+                        <a href="/help" class="white">помощ</a> |
+                        <a href="/about" class="white">за сайта</a> |
+                        <a href="/stats" class="white">статистики</a> |
+                        <div class="link white" onclick="reportProblem();">съобщи за проблем</div>
                     </div>
                     <div class="footer-right">
                         <a class="white" href="https://www.facebook.com/informatika.bg/" target="_blank"><i class="fa fa-facebook fa-fw"></i></a>
