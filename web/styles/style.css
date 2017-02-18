@@ -345,7 +345,7 @@ table.menu {
 table.menu .button {
     padding: 0;
     width: 6.25rem;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     text-align: center;
     vertical-align: middle;
     font-weight: bold;
@@ -364,7 +364,6 @@ div.logo {
     font-size: 4rem;
     font-family: "Ruthie", cursive;
     color: #FFFFFF;
-    cursor: default;
 }
 
 div.userInfo {
