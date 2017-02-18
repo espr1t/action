@@ -24,16 +24,6 @@ if ($user == null) {
     $user = new User();
 }
 
-// Update the last page and the one before it
-if (isset($_SESSION['lastPage'])) {
-    if ($_SESSION['lastPage'] != $_SERVER['REQUEST_URI']) {
-        $_SESSION['prevPage'] = $_SESSION['lastPage'];
-        $_SESSION['lastPage'] = $_SERVER['REQUEST_URI'];
-    }
-} else {
-    $_SESSION['lastPage'] = $_SERVER['REQUEST_URI'];
-}
-
 $showMessage = '';
 if (isset($_SESSION['messageType']) && isset($_SESSION['messageText'])) {
     $showMessage .= '<script>showMessage("' . $_SESSION['messageType'] . '", "' . $_SESSION['messageText'] . '");</script>';

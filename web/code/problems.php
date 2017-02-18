@@ -183,9 +183,8 @@ class ProblemsPage extends Page {
 
     private function getSubmitInfoBox($problem, $submitId) {
         $returnUrl = '/problems/' . $problem->id . '/submits';
-        if (isset($_SESSION['prevPage'])) {
-            $returnUrl = $_SESSION['prevPage'];
-        }
+        if (isset($_SESSION['queueShortcut']))
+            $returnUrl = '/queue';
 
         if (!is_numeric($submitId)) {
             redirect($returnUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
@@ -329,7 +328,6 @@ class ProblemsPage extends Page {
         }
 
         if (isset($_GET['source']) && $_GET['source'] == true) {
-            $returnUrl = '/problems/' . $problem->id . '/submits';
             $source = '
                 <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
                 <div style="border: 1px dashed #333333; padding: 0.5rem;">
@@ -392,16 +390,22 @@ class ProblemsPage extends Page {
             </table>
         ';
 
-        $redirect = '/problems/' . $problem->id;
+        $returnUrl = '/problems/' . $problem->id;
 
         return '
             <script>
-                showActionForm(`' . $content . '`, \'' . $redirect . '\');
+                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
             </script>
         ';
     }
 
     public function getContent() {
+        $queueShortcut = false;
+        if (isset($_SESSION['queueShortcut'])) {
+            $queueShortcut = true;
+            unset($_SESSION['queueShortcut']);
+        }
+
         if (isset($_GET['problemId'])) {
             $problem = Problem::get($_GET['problemId']);
             if ($problem == null) {
@@ -416,6 +420,8 @@ class ProblemsPage extends Page {
                 if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
+                    if ($queueShortcut)
+                        $_SESSION['queueShortcut'] = true;
                     $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
                 }
             } else if (isset($_GET['stats'])) {

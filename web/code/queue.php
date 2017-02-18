@@ -11,6 +11,9 @@ class QueuePage extends Page {
     }
     
     private function getQueueTable($data) {
+        // Return links for submit shortcuts
+        $_SESSION['queueShortcut'] = true;
+
         $list = '';
         for ($i = 0; $i < count($data); $i = $i + 1) {
             $entry = $data[$i];
