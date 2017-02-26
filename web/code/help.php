@@ -10,7 +10,7 @@ class HelpPage extends Page {
     public function getContent() {
         $version = '
             <div class="help-version">
-                Версия на системата: <a href="https://github.com/espr1t/action/commit/6bd27e1f611c0683f8f4d5733b9b85fab1303a36" target="_blank">v.170124.6bd27e1</a>
+                Версия на системата: <a href="https://github.com/espr1t/action/commit/7efd36ef7e8e811d826ea5a862b96f1d8a86921a" target="_blank">v.170226.7efd36e</a>
             </div>
         ';
 
@@ -62,9 +62,9 @@ class HelpPage extends Page {
             <h2 id="compilation"><a href="#compilation">Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -o &lt;source&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>Java (OpenJDK 8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
                 <!--
-                <li><b>Java (OpenJDK 8):</b> <pre>-Xmx=ML</pre></li>
                 <li><b>Python (3.5):</b> <pre>python &lt;source&gt;</pre></li>
                 -->
             </ul>
