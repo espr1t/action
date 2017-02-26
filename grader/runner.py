@@ -124,7 +124,7 @@ class Runner:
     # Use the resource library to limit process resources when on UNIX
     if name != "nt":
         @staticmethod
-        def set_restrictions(time_limit):
+        def set_restrictions(time_limit, java):
             # Set the user to a low-privileged one, if we have the privileges for this
             try:
                 setuid(1001)
@@ -135,7 +135,8 @@ class Runner:
             resource.setrlimit(resource.RLIMIT_CPU, (time_limit * 2, time_limit * 2))
 
             # Kill the solution if it exceeds 1GB of memory
-            resource.setrlimit(resource.RLIMIT_AS, (1073741824, 1073741824))
+            if not java:
+                resource.setrlimit(resource.RLIMIT_AS, (1073741824, 1073741824))
 
             # Set the stack to be 64MB
             resource.setrlimit(resource.RLIMIT_STACK, (67108864, 67108864))
@@ -147,10 +148,14 @@ class Runner:
             # to files anyway. We create the sandbox dir with the user running the grader (typically root),
             # and since they are owned by a more privileged user, the program cannot write in it. It can, however,
             # write in its own home directory, so we should chroot the process.
-            resource.setrlimit(resource.RLIMIT_NOFILE, (4, 4))
+            if not java:
+                resource.setrlimit(resource.RLIMIT_NOFILE, (4, 4))
 
             # Deny creation of new processes and threads
-            resource.setrlimit(resource.RLIMIT_NPROC, (1, 1))
+            if not java:
+                resource.setrlimit(resource.RLIMIT_NPROC, (1, 1))
+            else:
+                resource.setrlimit(resource.RLIMIT_NPROC, (99, 99))
 
             # Deny creation of core dump files
             resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
@@ -163,12 +168,20 @@ class Runner:
         exec_memory = 0.0
         exit_code = None
 
+        children_limit = 0
+        thread_limit = 99 if self.evaluator.language == "Java" else 2
+        time_offset = 0.1 if self.evaluator.language == "Java" else 0
+        memory_offset = 26214400 if self.evaluator.language == "Java" else 0
+        execution_time_limit = max(1.0, self.evaluator.time_limit * 2)
+
         inp_file_handle = open(inp_file, "rt")
         out_file_handle = open(out_file, "wt")
 
         args = []
         if self.evaluator.language == "Java":
-            args = ["java", "-XX:-UseSerialGC", "-jar", executable]
+            xms = "-Xms{}k".format(1024)
+            xmx = "-Xmx{}k".format(self.evaluator.memory_limit // 1024)
+            args = ["java", "-XX:-UseSerialGC", xms, xmx, "-jar", executable]
             executable = None
 
         start_time = perf_counter()
@@ -178,12 +191,8 @@ class Runner:
         else:
             process = psutil.Popen(args=args, executable=executable, cwd=sandbox,
                                    stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE,
-                                   preexec_fn=(lambda: Runner.set_restrictions(self.evaluator.time_limit)))
-
-        children_limit = 0
-        thread_limit = 20 if self.evaluator.language == "Java" else 2
-        time_offset = 0.1 if self.evaluator.language == "Java" else 0
-        execution_time_limit = max(1.0, self.evaluator.time_limit * 2)
+                                   preexec_fn=(lambda: Runner.set_restrictions(
+                                       self.evaluator.time_limit, self.evaluator.language == "Java")))
 
         while True:
             sleep(config.EXECUTION_CHECK_INTERVAL)
@@ -203,7 +212,7 @@ class Runner:
             try:
                 # Update statistics
                 exec_time = max(0, max(exec_time, process.cpu_times().user) - time_offset)
-                exec_memory = max(exec_memory, process.memory_info().rss)
+                exec_memory = max(0, max(exec_memory, process.memory_info().rss) - memory_offset)
                 """
                 # Consider using USS instead of PSS if available (currently it returns zeroes only)
                 mem_info = process.memory_full_info()
