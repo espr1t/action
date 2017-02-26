@@ -43,7 +43,6 @@ class Evaluator:
         self.memory_limit = data["memoryLimit"] * 1048576  # Given in MiB, convert to bytes
         self.tests = data["tests"]
         self.checker = data["checker"] if "checker" in data else ""
-        self.tester = data["tester"] if "tester" in data else ""
 
         # Path to sandbox and files inside
         self.path_sandbox = config.PATH_SANDBOX + "submit_{:06d}/".format(self.id)
@@ -61,7 +60,7 @@ class Evaluator:
         return ".cpp" if self.language == "C++" else ".java" if self.language == "Java" else ".py"
 
     def get_executable_extension(self):
-        return ".o" if self.language == "C++" else ".class" if self.language == "Java" else ".py"
+        return ".o" if self.language == "C++" else ".jar" if self.language == "Java" else ".py"
 
     def evaluate(self):
         # Send an update that preparation has been started for executing this submission
@@ -175,7 +174,8 @@ class Evaluator:
             if path.exists(self.path_sandbox):
                 shutil.rmtree(self.path_sandbox)
             # Create the submit testing directory
-            makedirs(self.path_sandbox)
+            if not path.exists(self.path_sandbox):
+                makedirs(self.path_sandbox)
         except OSError as ex:
             status = str(ex)
             self.logger.error("[Submission {}] {}".format(self.id, str(ex)))

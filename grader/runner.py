@@ -166,14 +166,24 @@ class Runner:
         inp_file_handle = open(inp_file, "rt")
         out_file_handle = open(out_file, "wt")
 
+        args = []
+        if self.evaluator.language == "Java":
+            args = ["java", "-XX:-UseSerialGC", "-jar", executable]
+            executable = None
+
         start_time = perf_counter()
         if name == "nt":
-            process = psutil.Popen(args=[], executable=executable, cwd=sandbox,
+            process = psutil.Popen(args=args, executable=executable, cwd=sandbox,
                                    stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE)
         else:
-            process = psutil.Popen(args=[], executable=executable, cwd=sandbox,
+            process = psutil.Popen(args=args, executable=executable, cwd=sandbox,
                                    stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE,
                                    preexec_fn=(lambda: Runner.set_restrictions(self.evaluator.time_limit)))
+
+        children_limit = 0
+        thread_limit = 20 if self.evaluator.language == "Java" else 2
+        time_offset = 0.1 if self.evaluator.language == "Java" else 0
+        execution_time_limit = max(1.0, self.evaluator.time_limit * 2)
 
         while True:
             sleep(config.EXECUTION_CHECK_INTERVAL)
@@ -185,21 +195,26 @@ class Runner:
                 break
 
             # Process has hung up
-            if perf_counter() - start_time > self.evaluator.time_limit * 2:
+            if perf_counter() - start_time > execution_time_limit:
                 exit_code = Runner.KILLED_RUNTIME_ERROR
                 process.kill()
                 break
 
             try:
                 # Update statistics
-                exec_time = max(exec_time, process.cpu_times().user)
+                exec_time = max(0, max(exec_time, process.cpu_times().user) - time_offset)
+                exec_memory = max(exec_memory, process.memory_info().rss)
+                """
                 # Consider using USS instead of PSS if available (currently it returns zeroes only)
                 mem_info = process.memory_full_info()
                 # Need to check with "in" for named tuple
                 exec_memory = max(exec_memory, mem_info.pss if "pss" in mem_info else mem_info.rss)
+                """
 
                 # Spawning processes or threads
-                if process.num_threads() > 2:
+                #print("Running for {} seconds ({} children and {} threads)...".format(
+                #    exec_time, len(process.children()), process.num_threads()))
+                if len(process.children()) > children_limit or process.num_threads() > thread_limit:
                     exit_code = Runner.KILLED_RUNTIME_ERROR
                     process.kill()
                     break
@@ -273,7 +288,7 @@ class Runner:
                                         relative_comparison_okay = False
                                         break
                             except ValueError:
-                                self.logger.warning("[Submission {}] Parsing failed!".format(self.evaluator.id))
+                                self.logger.info("[Submission {}] Double parsing failed!".format(self.evaluator.id))
                                 relative_comparison_okay = False
                                 break
 
