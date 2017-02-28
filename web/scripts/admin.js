@@ -226,7 +226,7 @@ function addTests() {
         var name = testSelector.files[i].name;
         // New test, add it to tests[] first
         if (findTest(name) == -1) {
-            if (!name.match(/^[A-Za-z0-9]+(\.\d{2,3})?\.(in|inp|out|sol)$/)) {
+            if (!name.match(/^[A-Za-z0-9_]+(\.\d{2,3})?\.(in|inp|out|sol)$/)) {
                 showMessage('ERROR', 'Невалидно име на тест "' + name + '"!');
                 continue;
             }
@@ -298,9 +298,12 @@ function submitEditProblemForm() {
     if (checker == 'N/A')
         checker = '';
 
+    var tester = document.getElementById('testerName').innerText;
+    if (tester == 'N/A')
+        tester = '';
+
     var solutions = []; // TODO
     var testgen = ''; // TODO
-    var tester = ''; // TODO
 
     var data = {
         'id': id,
@@ -374,4 +377,49 @@ function uploadChecker() {
 
 function deleteChecker() {
     updateChecker('delete', '', '');
+}
+
+/*
+ * Tester manipulation
+ */
+function updateTester(action, testerName, testerContent) {
+    var data = {
+        'problemId': getLastUrlToken(),
+        'action': action,
+        'testerName': testerName,
+        'testerContent': testerContent
+    };
+    var callback = function(response) {
+        var exception = false;
+        try {
+            response = JSON.parse(response);
+        } catch(ex) {
+            exception = true;
+        }
+        if (exception || response['status'] !== 'OK') {
+            showMessage('ERROR', 'Възникна проблем при промяната на тестера "' + testerName + '"!');
+        } else {
+            if (action == 'delete') {
+                showMessage('INFO', 'Тестерът беше изтрит успешно.');
+                document.getElementById('testerName').innerText = 'N/A';
+            } else {
+                showMessage('INFO', 'Тестерът беше качен успешно.');
+                document.getElementById('testerName').innerText = testerName;
+            }
+        }
+    };
+    ajaxCall('/actions/updateTester', data, callback);
+}
+
+function uploadTester() {
+    var testerFile = document.getElementById('testerSelector').files[0];
+    var fileReader = new FileReader();
+    fileReader.addEventListener('load', function() {
+        updateTester('upload', testerFile.name, fileReader.result.match(/,(.*)$/)[1])
+    });
+    fileReader.readAsDataURL(testerFile);
+}
+
+function deleteTester() {
+    updateTester('delete', '', '');
 }

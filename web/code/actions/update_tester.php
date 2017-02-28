@@ -19,35 +19,35 @@ if ($problem == null) {
     ));
 }
 
-$checkerDir = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder,
-                                  $GLOBALS['PROBLEM_CHECKER_FOLDER']);
+$testerDir = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder,
+                                 $GLOBALS['PROBLEM_TESTER_FOLDER']);
 
-// Delete current checker if present
-if ($problem->checker != '') {
-    $oldChecker = sprintf("%s/%s", $checkerDir, $problem->checker);
-    unlink($oldChecker);
-    $problem->checker = '';
+// Delete current tester if present
+if ($problem->tester != '') {
+    $oldTester = sprintf("%s/%s", $testerDir, $problem->tester);
+    unlink($oldTester);
+    $problem->tester = '';
 }
-if (file_exists($checkerDir)) {
-    rmdir($checkerDir);
+if (file_exists($testerDir)) {
+    rmdir($testerDir);
 }
 
 if ($_POST['action'] == 'upload') {
-    $problem->checker = $_POST['checkerName'];
+    $problem->tester = $_POST['testerName'];
 
-    // Create the Checker directory if it doesn't already exist
-    if (!file_exists($checkerDir)) {
-        mkdir($checkerDir, 0777, true);
+    // Create the Tester directory if it doesn't already exist
+    if (!file_exists($testerDir)) {
+        mkdir($testerDir, 0777, true);
     }
 
     // TODO: Maybe replace CRLF only if Linux is detected?
-    $checkerContent = base64_decode($_POST['checkerContent']);
-    $checkerContent = preg_replace('~\R~u', "\n", $checkerContent);
-    file_put_contents($checkerDir . '/' . $problem->checker, $checkerContent);
+    $testerContent = base64_decode($_POST['testerContent']);
+    $testerContent = preg_replace('~\R~u', "\n", $testerContent);
+    file_put_contents($testerDir . '/' . $problem->tester, $testerContent);
 }
 
 $brain = new Brain();
-$brain->updateChecker($problem);
+$brain->updateTester($problem);
 
 // Everything seems okay
 printAjaxResponse(array(

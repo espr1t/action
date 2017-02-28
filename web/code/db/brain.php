@@ -155,6 +155,19 @@ class Brain {
         return true;
     }
 
+    function updateTester($problem) {
+        $response = $this->db->query("
+            UPDATE `Problems` SET
+                tester = '" . $problem->tester . "'
+            WHERE id = " . $problem->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update tester of problem "' . $problem->name . '"!');
+            return null;
+        }
+        return true;
+    }
+
     function getProblem($problemId) {
         $response = $this->db->query("
             SELECT * FROM `Problems`

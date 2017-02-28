@@ -110,6 +110,7 @@ class AdminProblemsPage extends Page {
 
         // Checker (if any)
         $checker = $problem->checker == '' ? 'N/A' : $problem->checker;
+        $tester = $problem->tester == '' ? 'N/A' : $problem->tester;
 
         // Tags
         $tagsTable = $this->getTagsTable($problem);
@@ -194,7 +195,14 @@ class AdminProblemsPage extends Page {
                 <br>
                 <div class="edit-problem-section-field">
                     <b>Тестер:</b>
-                    <input type="file" id="testerSelector" onchange="updateTester();">
+                    <span id="testerName">' . $tester . '</span>
+                    <span style="position: relative; top: 1px;">
+                        <label class="custom-file-upload">
+                            <input type="file" id="testerSelector" onchange="uploadTester();" style="display:none;">
+                            <i class="fa fa-plus-circle green"></i>
+                        </label>
+                        ' . ($tester == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteTester();"></i>') . '
+                    </span>
                 </div>
             </div>
 

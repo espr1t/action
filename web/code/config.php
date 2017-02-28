@@ -34,6 +34,7 @@ $GRADER_ENDPOINT_EVALUATE = '/evaluate';
 $WEB_ENDPOINT_UPDATE = sprintf('http://%s/actions/update', $_SERVER['HTTP_HOST']);
 $WEB_ENDPOINT_TESTS = sprintf('http://%s/data/problems/%%s/Tests/', $_SERVER['HTTP_HOST']);
 $WEB_ENDPOINT_CHECKER = sprintf('http://%s/data/problems/%%s/Tests/Checker/', $_SERVER['HTTP_HOST']);
+$WEB_ENDPOINT_TESTER = sprintf('http://%s/data/problems/%%s/Tests/Tester/', $_SERVER['HTTP_HOST']);
 
 // User access
 $ADMIN_USER_ACCESS = 100;
@@ -125,6 +126,7 @@ $PROBLEM_STATEMENT_FILENAME = 'statement.html';
 $PROBLEM_TESTS_FOLDER = 'Tests';
 $PROBLEM_SOLUTIONS_FOLDER = 'Solutions';
 $PROBLEM_CHECKER_FOLDER = $PROBLEM_TESTS_FOLDER . '/Checker';
+$PROBLEM_TESTER_FOLDER = $PROBLEM_TESTS_FOLDER . '/Tester';
 
 // Spam protection
 $SPAM_INTERVAL = 86400; // Seconds in 24 hours
