@@ -16,6 +16,8 @@ class RankingPage extends Page {
 
         $place = 0;
         foreach ($usersInfo as $info) {
+            if ($info['id'] == 1)
+                continue;
             $place = $place + 1;
 
             $info['solved'] = count($brain->getSolved($info['id']));
