@@ -27,7 +27,7 @@ switch ($_GET['action']) {
         break;
 
     case 'submitSolution':
-        require_once('submit_solution.php');
+        require_once('submit_submission.php');
         break;
 
     case 'editProblem':
@@ -40,6 +40,14 @@ switch ($_GET['action']) {
 
     case 'deleteTest':
         require_once('delete_test.php');
+        break;
+
+    case 'uploadSolution':
+        require_once('upload_solution.php');
+        break;
+
+    case 'deleteSolution':
+        require_once('delete_solution.php');
         break;
 
     case 'updateChecker':

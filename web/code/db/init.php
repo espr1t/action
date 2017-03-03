@@ -138,6 +138,34 @@ if ($db->tableExists('Tests')) {
 }
 
 /*
+Table::Solutions
+==============
+{
+    "problemId": 1,
+    "name": "InputOutputSlow.cpp",
+    "submitId": 42,
+    "source": "#include..."
+}
+*/
+output('');
+output('Creating table Solutions...');
+
+if ($db->tableExists('Solutions')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Solutions`(
+            problemId INT NOT NULL,
+            name VARCHAR(32) NOT NULL,
+            submitId INT NOT NULL,
+            source TEXT NOT NULL,
+            PRIMARY KEY (problemId, name)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
+/*
 Table::Submits
 ==============
 {

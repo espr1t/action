@@ -193,6 +193,48 @@ class Brain {
         return $this->getResults($response);
     }
 
+    // Solutions
+    function getProblemSolutions($problemId) {
+        $response = $this->db->query("
+            SELECT * FROM `Solutions`
+            WHERE problemId = " . $problemId . "
+        ");
+        if (!$response) {
+            error_log('Could not execute getProblemSolutions() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function addSolution($problemId, $name, $submitId, $source) {
+        $response = $this->db->query("
+            INSERT INTO `Solutions` (problemId, name, submitId, source)
+            VALUES (
+                '" . $problemId . "',
+                '" . $name . "',
+                '" . $submitId . "',
+                '" . $this->db->escape($source) . "'
+            )
+        ");
+        if (!$response) {
+            error_log('Could not add solution with name "' . $name . '"!');
+            return null;
+        }
+        return $this->db->lastId();
+    }
+
+    function deleteSolution($problemId, $name) {
+        $response = $this->db->query("
+            DELETE FROM `Solutions`
+            WHERE problemId = " . $problemId . " AND name = '" . $name . "'
+        ");
+        if (!$response) {
+            error_log('Could not delete solution with name "' . $name . '"!');
+            return null;
+        }
+        return true;
+    }
+
     // Tests
     function getProblemTests($problemId) {
         $response = $this->db->query("

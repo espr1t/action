@@ -2,6 +2,7 @@
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../page.php');
 require_once(__DIR__ . '/../entities/problem.php');
+require_once(__DIR__ . '/../entities/submit.php');
 
 class AdminProblemsPage extends Page {
     public function getTitle() {
@@ -72,16 +73,17 @@ class AdminProblemsPage extends Page {
 
     private function getEditProblemScript($problem) {
         $brain = new Brain();
-        $tests = $brain->getProblemTests($problem->id);
-
         $editProblemScript = '<script>';
+
+        // Tests
+        $tests = $brain->getProblemTests($problem->id);
         for ($i = 0; $i < count($tests); $i = $i + 1) {
             $inpPath = sprintf("%s/%s/%s/%s",
                     $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_TESTS_FOLDER'], $tests[$i]['inpFile']);
             $solPath = sprintf("%s/%s/%s/%s",
                     $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_TESTS_FOLDER'], $tests[$i]['solFile']);
 
-            # Since this is a link, make it only a relative path (do not include /home/user/...)
+            // Since this is a link, make it only a relative path (do not include /home/user/...)
             $inpPath = explode($_SERVER['DOCUMENT_ROOT'], $inpPath)[1];
             $solPath = explode($_SERVER['DOCUMENT_ROOT'], $solPath)[1];
 
@@ -99,15 +101,36 @@ class AdminProblemsPage extends Page {
             ';
         }
         $editProblemScript .= 'updateTestTable();';
+
+        // Solutions
+        $solutions = $brain->getProblemSolutions($problem->id);
+
+        for ($i = 0; $i < count($solutions); $i = $i + 1) {
+            $submit = Submit::get(intval($solutions[$i]['submitId']));
+
+            $sourcePath = sprintf("%s/%s/%s/%s",
+                    $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_SOLUTIONS_FOLDER'], $solutions[$i]['name']);
+            // Since this is a link, make it only a relative path (do not include /home/user/...)
+            $sourcePath = explode($_SERVER['DOCUMENT_ROOT'], $sourcePath)[1];
+            $editProblemScript .= '
+                solutions.push({
+                    \'name\': \'' . $solutions[$i]['name'] . '\',
+                    \'submitId\': ' . $solutions[$i]['submitId'] . ',
+                    \'path\': \'' . $sourcePath . '\',
+                    \'time\': \'' . sprintf("%.2fs", max($submit->exec_time)) . '\',
+                    \'memory\': \'' . sprintf("%.2f MiB", max($submit->exec_memory)) . '\',
+                    \'score\': ' . $submit->calcScore() . ',
+                    \'status\': \'' . $submit->calcStatus() . '\'
+                });
+            ';
+        }
+        $editProblemScript .= 'updateSolutionsTable();';
+
         $editProblemScript .= '</script>';
         return $editProblemScript;
     }
 
-    private function getEditProblemForm($problem) {
-        // Header and Footer
-        $headerText = $problem->id == -1 ? 'Нова задача' : '<span class="blue">' . $problem->name . '</span> :: Промяна';
-        $buttonText = $problem->id == -1 ? 'Създай' : 'Запази';
-
+    private function getOptionsTab($problem) {
         // Checker (if any)
         $checker = $problem->checker == '' ? 'N/A' : $problem->checker;
         $tester = $problem->tester == '' ? 'N/A' : $problem->tester;
@@ -115,16 +138,7 @@ class AdminProblemsPage extends Page {
         // Tags
         $tagsTable = $this->getTagsTable($problem);
 
-        $content = '
-            <div class="left">
-                <h2>' . $headerText . '</h2>
-            </div>
-            <div class="edit-problem-tab">
-                <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button underline" id="optionsTab">Настройки</div> |
-                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button" id="statementTab">Условие</div> |
-                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div>
-            </div>
-
+        return '
             <div class="edit-problem-section" id="optionsTabContent">
                 <div class="edit-problem-section-field">
                     <b>Заглавие:</b>
@@ -205,7 +219,11 @@ class AdminProblemsPage extends Page {
                     </span>
                 </div>
             </div>
+        ';
+    }
 
+    private function getStatementTab($problem) {
+        return '
             <div id="statementTabContent" style="display: none;">
                 <div class="edit-problem-section" style="margin-bottom: 4px;">
                     <div class="right" onclick="toggleStatementHTML();"><a>edit html</a>&nbsp;</div>
@@ -216,7 +234,11 @@ class AdminProblemsPage extends Page {
                     </div>
                 </div>
             </div>
+        ';
+    }
 
+    private function getTestsTab($problem) {
+        return '
             <div class="edit-problem-section" id="testsTabContent" style="display: none;">
                 <div class="center" style="padding: 0px 8px 4px 8px;">
                     <table class="default" id="testList">
@@ -236,6 +258,60 @@ class AdminProblemsPage extends Page {
                     </label>
                 </div>
             </div>
+        ';
+    }
+
+    private function getSolutionsTab($problem) {
+        return '
+            <div class="edit-problem-section" id="solutionsTabContent" style="display: none;">
+                <div class="center" style="padding: 0px 8px 4px 8px;">
+                    <table class="default" id="solutionsList">
+                        <thead>
+                            <tr>
+                                <th>Име</th>
+                                <th>id</th>
+                                <th>Време</th>
+                                <th>Памет</th>
+                                <th>Точки</th>
+                                <th>Статус</th>
+                                <th><i class="fa fa-refresh"></i></th>
+                                <th><i class="fa fa-trash"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="center">
+                    <label class="custom-file-upload">
+                        <input type="file" id="solutionSelector" onchange="addSolutions();" style="display:none;" multiple>
+                        <i class="fa fa-plus-circle fa-2x green"></i>
+                    </label>
+                </div>
+            </div>
+        ';
+    }
+
+    private function getEditProblemForm($problem) {
+        // Header and Footer
+        $headerText = $problem->id == -1 ? 'Нова задача' : '<span class="blue">' . $problem->name . '</span> :: Промяна';
+        $buttonText = $problem->id == -1 ? 'Създай' : 'Запази';
+
+        $content = '
+            <div class="left">
+                <h2>' . $headerText . '</h2>
+            </div>
+            <div class="edit-problem-tab">
+                <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button underline" id="optionsTab">Настройки</div> |
+                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button" id="statementTab">Условие</div> |
+                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div> |
+                <div onclick="changeTab(\'solutionsTab\');" class="edit-problem-tab-button" id="solutionsTab">Решения</div>
+            </div>
+
+            ' . $this->getOptionsTab($problem) . '
+            ' . $this->getStatementTab($problem) . '
+            ' . $this->getTestsTab($problem) . '
+            ' . $this->getSolutionsTab($problem) . '
 
             <div class="center">
                 <input type="submit" value="' . $buttonText . '" onclick="submitEditProblemForm();" class="button button-large button-color-red">
