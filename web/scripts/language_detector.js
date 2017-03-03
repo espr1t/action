@@ -12,6 +12,26 @@ function readFile(fileName, type) {
     xhttp.send();
 }
 
+/* Removes spaces after # */
+function removeSpaces(code) {
+    var curIndex = 0;
+
+    while (curIndex < code.length) {
+        if (code[curIndex] == '#') {
+            ++curIndex;
+            if (curIndex < code.length && code[curIndex] == ' ') {
+                var endIndex = curIndex;
+                while (endIndex < code.length && code[endIndex] == ' ') ++endIndex;
+                code = code.substring(0, curIndex) + code.substring(endIndex);
+                curIndex = endIndex - 1;
+            }
+        }
+        ++curIndex;
+     }
+
+     return code;
+}
+
 /* Removes C style comments and strings from code */
 function removeCStyleComments(code) {
     var states = {
@@ -104,6 +124,7 @@ function removeCStyleComments(code) {
                 break;
         }
     }
+    code = removeSpaces(code);
 
     return code;
 }
