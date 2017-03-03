@@ -299,7 +299,7 @@ class ProblemsPage extends Page {
                 foreach (explode('source.cpp', $errors) as $error) {
                     $error = ltrim($error, ':');
                     if (strlen($error) > 1) {
-                        $errorsList .= '<li><code>' . htmlspecialchars(trim($error)) . '</code></li>';
+                        $errorsList .= '<li><code>' . str_replace('\\', '\\\\', htmlspecialchars(trim($error))) . '</code></li>';
                     }
                     if ($first) {
                         $errorsList .= '<ul>';
