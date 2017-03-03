@@ -292,7 +292,7 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message)
+            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, hidden)
             VALUES (
                 '" . $submit->submitted . "',
                 '" . $submit->graded . "',
@@ -305,7 +305,8 @@ class Brain {
                 '" . implode(',', $submit->exec_time) . "',
                 '" . implode(',', $submit->exec_memory) . "',
                 '" . $submit->status . "',
-                '" . $this->db->escape($submit->message) . "'
+                '" . $this->db->escape($submit->message) . "',
+                '" . ($submit->hidden ? 1 : 0) . "'
             )
         ");
         if (!$response) {
@@ -388,13 +389,14 @@ class Brain {
         return $this->getResults($response);
     }
 
+    // TODO: Check if used anywhere?
     function getPendingSubmits() {
         $response = $this->db->query("
             SELECT * FROM `Submits`
             WHERE status in ('W', 'P', 'C', 'T')
         ");
         if (!$response) {
-            error_log('Could not execute getProblemSubmits() query properly!');
+            error_log('Could not execute getPendingSubmits() query properly!');
             return null;
         }
         return $this->getResults($response);

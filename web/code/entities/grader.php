@@ -92,14 +92,19 @@ class Grader {
 
         $brain = new Brain();
         $brain->updateSubmit($submit);
-        $brain->updatePending($submit);
 
-        // If last update, move submission from Pending to Latest
-        if ($submit->message != '') {
-            $brain->erasePending($submit->id);
-            $brain->addLatest($submit);
-            $brain->trimLatest($submit->id);
+        // Update Pending and Latest lists if the submission is not hidden
+        if (!$submit->hidden) {
+            $brain->updatePending($submit);
+
+            // If last update, move submission from Pending to Latest
+            if ($submit->message != '') {
+                $brain->erasePending($submit->id);
+                $brain->addLatest($submit);
+                $brain->trimLatest($submit->id);
+            }
         }
+
     }
 }
 

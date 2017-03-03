@@ -21,8 +21,9 @@ class Submit {
     public $progress = 0;
     public $status = -1;
     public $message = '';
+    public $hidden = false;
 
-    public static function newSubmit($user, $problemId, $language, $source) {
+    public static function newSubmit($user, $problemId, $language, $source, $hidden = false) {
         $brain = new Brain();
         $submit = new Submit();
 
@@ -54,6 +55,7 @@ class Submit {
         $submit->progress = 0;
         $submit->status = $GLOBALS['STATUS_WAITING'];
         $submit->message = '';
+        $submit->hidden = $hidden;
         return $submit;
     }
 
@@ -84,9 +86,12 @@ class Submit {
     }
 
     public function send() {
-        // Record the request in the submission queue
-        $brain = new Brain();
-        $brain->addPending($this);
+        // Record the request in the submission queue, if not hidden
+        if (!$this->hidden) {
+            $brain = new Brain();
+            $brain->addPending($this);
+        }
+
         $problem = Problem::get($this->problemId);
 
         $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
@@ -152,6 +157,7 @@ class Submit {
         $submit->exec_memory = explode(',', getValue($info, 'exec_memory'));
         $submit->status = getValue($info, 'status');
         $submit->message = getValue($info, 'message');
+        $submit->hidden = intval(getValue($info, 'hidden')) == 1;
         return $submit;
     }
 

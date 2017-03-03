@@ -151,7 +151,8 @@ Table::Submits
     "language": java,
     "results": "1,1,TL,0.42,WA",
     "status": "T",
-    "message": "Undefined variable 'foo'"
+    "message": "Undefined variable 'foo'",
+    "hidden": false
 }
 */
 output('');
@@ -175,6 +176,7 @@ if ($db->tableExists('Submits')) {
             exec_memory TEXT NOT NULL,
             status VARCHAR(2) NOT NULL,
             message TEXT NOT NULL,
+            hidden BOOLEAN NOT NULL DEFAULT FALSE,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
