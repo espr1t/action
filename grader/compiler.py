@@ -114,19 +114,24 @@ class Compiler:
 
         # Create a jar with the compiled class file
         class_file = class_name + ".class"
-        manifest_file = "manifest.mf"
-        jar_file = name_executable
 
-        with open(manifest_file, "wt") as manifest:
-            manifest.write("Manifest-version: 1.0\n")
-            manifest.write("Main-Class: {}\n".format(class_name))
+        # If there is no class file, there was some problem with the compilation (e.g. empty source)
+        if os.path.exists(class_file):
+            manifest_file = "manifest.mf"
+            jar_file = name_executable
 
-        command = "jar cfm {} {} {}".format(jar_file, manifest_file, class_file)
-        exit_code, error_message, compilation_time = Compiler.run_command(command)
+            with open(manifest_file, "wt") as manifest:
+                manifest.write("Manifest-version: 1.0\n")
+                manifest.write("Main-Class: {}\n".format(class_name))
 
-        # Remove left-over files
-        os.remove(class_file)
-        os.remove(manifest_file)
+            command = "jar cfm {} {} {}".format(jar_file, manifest_file, class_file)
+            exit_code, error_message, compilation_time = Compiler.run_command(command)
+
+            # Remove left-over files
+            os.remove(class_file)
+            os.remove(manifest_file)
+        else:
+            error_message = "Empty or buggy file provided."
 
         # Revert to original working dir
         os.chdir(working_dir)
