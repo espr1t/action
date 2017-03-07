@@ -210,17 +210,25 @@ class Evaluator:
 
     def download_checker(self):
         checker_source_path = config.PATH_CHECKERS + self.checker + ".cpp"
+        # Already downloaded
+        if path.exists(checker_source_path):
+            return ""
 
         self.logger.info("[Submission {}] Downloading file {} with hash {} from URL: {}".format(
             self.id, self.checker_url.split('/')[-1], self.checker, self.checker_url))
         try:
             download_file(self.checker_url, checker_source_path)
         except Exception as ex:
+            self.logger.error("[Submission {}] Internal Error: {}".format(self.id, str(ex)))
             return "Internal error: " + str(ex)
         return ""
 
     def compile_checker(self):
         checker_binary_path = config.PATH_CHECKERS + self.checker
+        # Already compiled
+        if path.exists(checker_binary_path):
+            return ""
+
         checker_source_path = config.PATH_CHECKERS + self.checker + ".cpp"
         try:
             status = executor.submit(Compiler.compile, "C++", checker_source_path, checker_binary_path).result()
