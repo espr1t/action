@@ -7,9 +7,13 @@ require_once('common.php');
 require_once('page.php');
 
 class ProblemsPage extends Page {
+    private $problem;
 
     public function getTitle() {
-        return 'O(N)::Problems';
+        if ($this->problem == null) {
+            return 'O(N)::Problems';
+        }
+        return 'O(N)::' . $this->problem->name;
     }
     
     public function getExtraScripts() {
@@ -292,6 +296,7 @@ class ProblemsPage extends Page {
             $submit->message = str_replace($pathToSandbox, '', $submit->message);
             $submit->message = str_replace('Compilation error: ', '', $submit->message);
             $submit->message = str_replace('source.cpp: ', '', $submit->message);
+            $submit->message = str_replace('source.java:', 'Line ', $submit->message);
 
             $errorsList = '';
             foreach (explode('^', $submit->message) as $errors) {
@@ -406,26 +411,27 @@ class ProblemsPage extends Page {
             unset($_SESSION['queueShortcut']);
         }
 
+        $this->problem = null;
         if (isset($_GET['problemId'])) {
-            $problem = Problem::get($_GET['problemId']);
-            if ($problem == null) {
+            $this->problem = Problem::get($_GET['problemId']);
+            if ($this->problem == null) {
                 return $this->getMainPage();
             }
 
-            $content = $this->getStatement($problem);
+            $content = $this->getStatement($this->problem);
             if (isset($_GET['submits'])) {
                 if ($this->user->id == -1) {
-                    redirect('/problems/' . $problem->id, 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
+                    redirect('/problems/' . $this->problem->id, 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
                 }
                 if (!isset($_GET['submitId'])) {
-                    $content .= $this->getAllSubmitsBox($problem);
+                    $content .= $this->getAllSubmitsBox($pthis->roblem);
                 } else {
                     if ($queueShortcut)
                         $_SESSION['queueShortcut'] = true;
-                    $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
+                    $content .= $this->getSubmitInfoBox($this->problem, $_GET['submitId']);
                 }
             } else if (isset($_GET['stats'])) {
-                $content .= $this->getStatsBox($problem);
+                $content .= $this->getStatsBox($this->problem);
             }
             return $content;
         }
