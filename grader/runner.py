@@ -155,7 +155,7 @@ class Runner:
             if not java:
                 resource.setrlimit(resource.RLIMIT_NPROC, (1, 1))
             else:
-                resource.setrlimit(resource.RLIMIT_NPROC, (99, 99))
+                resource.setrlimit(resource.RLIMIT_NPROC, (999, 999))
 
             # Deny creation of core dump files
             resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
