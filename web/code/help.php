@@ -62,7 +62,7 @@ class HelpPage extends Page {
             <h2 id="compilation"><a href="#compilation">Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -s -static -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
                 <li><b>Java (OpenJDK 8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
                 <!--
                 <li><b>Python (3.5):</b> <pre>python &lt;source&gt;</pre></li>
