@@ -35,7 +35,7 @@ class Compiler:
         start_time = perf_counter()
         process = psutil.Popen(args=command, stderr=PIPE, shell=True)
         while True:
-            sleep(config.EXECUTION_CHECK_INTERVAL)
+            sleep(config.EXECUTION_MAX_CHECK_INTERVAL)
 
             # Process already terminated
             exit_code = process.poll()

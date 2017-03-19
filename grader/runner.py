@@ -126,7 +126,6 @@ class Runner:
     if not platform.startswith("win32"):
         @staticmethod
         def set_restrictions(time_limit, java):
-            return
             # Set the user to a low-privileged one, if we have the privileges for this
             try:
                 setuid(1001)
@@ -202,8 +201,13 @@ class Runner:
                                    preexec_fn=(lambda: Runner.set_restrictions(
                                        self.evaluator.time_limit, self.evaluator.language == "Java")))
 
+        check_interval = config.EXECUTION_MIN_CHECK_INTERVAL
+
         while True:
-            sleep(config.EXECUTION_CHECK_INTERVAL)
+            sleep(check_interval)
+            # Exponentially increase the check interval, until a certain max time gap
+            # This works fine for very short-lived programs as well as long-lived ones
+            check_interval = min(config.EXECUTION_MAX_CHECK_INTERVAL, check_interval * 2)
 
             # Process already terminated
             if process.poll() is not None:

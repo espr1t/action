@@ -9,7 +9,8 @@ UPDATE_INTERVAL = 0.5  # Seconds
 FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 
 # Execution
-EXECUTION_CHECK_INTERVAL = 0.01  # Seconds
+EXECUTION_MIN_CHECK_INTERVAL = 0.0001  # Seconds
+EXECUTION_MAX_CHECK_INTERVAL = 0.01  # Seconds
 
 # Start time taken by non-user actions
 TIME_OFFSET_CPP = 0.0  # Seconds
