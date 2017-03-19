@@ -11,6 +11,18 @@ FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 # Execution
 EXECUTION_CHECK_INTERVAL = 0.01  # Seconds
 
+# Start time taken by non-user actions
+TIME_OFFSET_CPP = 0.0  # Seconds
+TIME_OFFSET_JAVA = 0.1  # Seconds
+
+# Memory used by non-user code
+MEMORY_OFFSET_CPP = 1800000  # Bytes
+MEMORY_OFFSET_JAVA = 26000000  # Bytes
+
+# Maximum number of threads
+THREAD_LIMIT_CPP = 2  # Threads
+THREAD_LIMIT_JAVA = 99  # Threads
+
 # Compilation
 MAX_COMPILATION_TIME = 3.0  # Seconds
 

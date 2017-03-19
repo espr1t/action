@@ -4,7 +4,8 @@ Runs the executable in a sandbox and returns the result for a single test case
 
 import logging
 from subprocess import PIPE
-from os import name, getcwd
+from os import getcwd
+from sys import platform
 from time import sleep, perf_counter
 import psutil
 from math import fabs
@@ -12,7 +13,7 @@ from math import fabs
 import config
 from status import TestStatus
 
-if name != "nt":
+if not platform.startswith("win32"):
     import resource
     from os import setuid
 
@@ -90,7 +91,7 @@ class Runner:
         executable = getcwd() + "/" + self.evaluator.path_executable
 
         # Change slashes with backslashes for Windows paths (grr)
-        if name == "nt":
+        if platform.startswith("win32"):
             sandbox = sandbox.replace("/", "\\")
             executable = executable.replace("/", "\\")
 
@@ -122,9 +123,10 @@ class Runner:
     # Use checker if provided
 
     # Use the resource library to limit process resources when on UNIX
-    if name != "nt":
+    if not platform.startswith("win32"):
         @staticmethod
         def set_restrictions(time_limit, java):
+            return
             # Set the user to a low-privileged one, if we have the privileges for this
             try:
                 setuid(1001)
@@ -169,9 +171,15 @@ class Runner:
         exit_code = None
 
         children_limit = 0
-        thread_limit = 99 if self.evaluator.language == "Java" else 2
-        time_offset = 0.1 if self.evaluator.language == "Java" else 0
-        memory_offset = 26214400 if self.evaluator.language == "Java" else 0
+        thread_limit = config.THREAD_LIMIT_CPP
+        time_offset = config.TIME_OFFSET_CPP
+        memory_offset = config.MEMORY_OFFSET_CPP
+
+        if self.evaluator.language == "Java":
+            thread_limit = config.THREAD_LIMIT_JAVA
+            time_offset = config.TIME_OFFSET_JAVA
+            memory_offset = config.MEMORY_OFFSET_JAVA
+
         execution_time_limit = max(1.0, self.evaluator.time_limit * 2)
 
         inp_file_handle = open(inp_file, "rt")
@@ -185,7 +193,7 @@ class Runner:
             executable = None
 
         start_time = perf_counter()
-        if name == "nt":
+        if platform.startswith("win32"):
             process = psutil.Popen(args=args, executable=executable, cwd=sandbox,
                                    stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE)
         else:
@@ -212,7 +220,9 @@ class Runner:
             try:
                 # Update statistics
                 exec_time = max(0, max(exec_time, process.cpu_times().user) - time_offset)
+                # RSS should be available on both Windows and Unix
                 exec_memory = max(0, max(exec_memory, process.memory_info().rss) - memory_offset)
+
                 """
                 # Consider using USS instead of PSS if available (currently it returns zeroes only)
                 mem_info = process.memory_full_info()
@@ -243,7 +253,10 @@ class Runner:
             except psutil.NoSuchProcess:
                 break
 
-        exit_code = process.poll() if exit_code is None else exit_code
+        if exit_code is None:
+            exit_code = process.wait(timeout=0.5)
+            if exit_code is None:
+                exit_code = Runner.KILLED_RUNTIME_ERROR
 
         #error_message = process.communicate()[1]
         #error_message = error_message.decode("utf-8") if error_message is not None else ""
