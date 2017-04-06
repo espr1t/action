@@ -32,7 +32,6 @@ RewriteRule    ^problems/(\d+)$                         /code/main.php?page=prob
 RewriteRule    ^problems/(\d+)/stats$                   /code/main.php?page=problems&problemId=$1&stats=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits$                 /code/main.php?page=problems&problemId=$1&submits=true                              [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)$           /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2                  [NC,L,QSA]
-RewriteRule    ^problems/(\d+)/submits/(\d+)/source$    /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2&source=true      [NC,L,QSA]
 
 # User profile page
 RewriteRule    ^users/(\w[\w.]{1,15})$                  /code/main.php?page=profile&user=$1                                                 [NC,L,QSA]

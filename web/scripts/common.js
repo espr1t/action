@@ -133,6 +133,14 @@ function hideOverlay() {
 /*
  * Form actions (show/hide/submit)
  */
+function reposition() {
+    // Position the box in the center of the screen (well, kind of)
+    var el = document.getElementsByClassName('action-form')[0];
+    var screenHeight = window.innerHeight || document.documentElement.clientHeight;
+    var offset = Math.min(el.clientHeight / 2 + 20, screenHeight / 2 - 20);
+    el.style.marginTop = -offset + 'px';
+}
+
 function showActionForm(content, redirect) {
     // Create an overlay shadowing the rest of the page
     showOverlay();
@@ -146,10 +154,8 @@ function showActionForm(content, redirect) {
     document.body.appendChild(form);
     form.className = 'action-form fade-in';
 
-    // Position the box in the center of the screen (well, kind of)
-    var screenHeight = window.innerHeight || document.documentElement.clientHeight;
-    var offset = Math.min(form.clientHeight / 2 + 20, screenHeight / 2 - 20);
-    form.style.marginTop = -offset + 'px';
+    // Set the vertical position of the box
+    reposition();
 
     // Bind escape button for closing it
     keyDownEventStack.push(document.onkeydown);
@@ -313,6 +319,15 @@ function orderRanking(orderBy) {
         rows[i].cells[0].textContent = i + 1;
         tableBody.appendChild(rows[i]);
     }
+}
+
+/*
+ * Source-code
+ */
+function displaySource() {
+    document.getElementById('sourceLink').style.display = 'none';
+    document.getElementById('sourceField').style.display = 'block';
+    reposition();
 }
 
 /*

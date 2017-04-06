@@ -332,16 +332,17 @@ class ProblemsPage extends Page {
             $author = '(' . $submit->userName . ')';
         }
 
-        if (isset($_GET['source']) && $_GET['source'] == true) {
-            $source = '
+        $source = '
+            <div class="centered" id="sourceLink">
+                <a onclick="displaySource();">Виж кода</a>
+            </div>
+            <div style="display: none;" id="sourceField">
                 <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
-                <div style="border: 1px dashed #333333; padding: 0.5rem;">
+                <div class="show-source-box">
                     <code id="source">' . htmlspecialchars(addslashes($submit->source)) . '</code>
                 </div>
-            ';
-        } else {
-            $source = '<div class="centered"><a href="/problems/' . $problem->id . '/submits/' . $submit->id . '/source">Виж кода</a></div>';
-        }
+            </div>
+        ';
 
         $content = '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
