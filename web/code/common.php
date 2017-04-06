@@ -63,4 +63,35 @@ function createHead($page) {
     ';
 }
 
+// TODO: Handle properly Python errors once supported
+function prettyPrintCompilationErrors($submit) {
+    $pathToSandbox = sprintf('sandbox/submit_%06d/', $submit->id);
+    $submit->message = str_replace($pathToSandbox, '', $submit->message);
+    $submit->message = str_replace('Compilation error: ', '', $submit->message);
+    $submit->message = str_replace('source.cpp: ', '', $submit->message);
+    $submit->message = str_replace('source.java:', 'Line ', $submit->message);
+
+    $errorsList = '';
+    foreach (explode('^', $submit->message) as $errors) {
+        $first = true;
+        foreach (explode('source.cpp', $errors) as $error) {
+            $error = ltrim($error, ':');
+            if (strlen($error) > 1) {
+                $errorsList .= '<li><code>' . str_replace('\\', '\\\\', htmlspecialchars(trim($error))) . '</code></li>';
+            }
+            if ($first) {
+                $errorsList .= '<ul>';
+                $first = false;
+            }
+        }
+        $errorsList .= '</ul>';
+    }
+    return '
+        <div style="border: 1px dashed #333333; padding: 0.5rem;">
+            <ul>
+            ' . $errorsList . '
+            </ul>
+        </div>
+    ';
+}
 ?>

@@ -289,37 +289,9 @@ class ProblemsPage extends Page {
         $detailedTable .= '</div>';
 
         // If compilation error, pretty-print it so the user has an idea what is happening
-        // TODO: extract to a function and handle properly Java and Python errors once supported
         $message = '';
         if ($problemStatus == $GLOBALS['STATUS_DISPLAY_NAME'][$GLOBALS['STATUS_COMPILATION_ERROR']]) {
-            $pathToSandbox = sprintf('sandbox/submit_%06d/', $submit->id);
-            $submit->message = str_replace($pathToSandbox, '', $submit->message);
-            $submit->message = str_replace('Compilation error: ', '', $submit->message);
-            $submit->message = str_replace('source.cpp: ', '', $submit->message);
-            $submit->message = str_replace('source.java:', 'Line ', $submit->message);
-
-            $errorsList = '';
-            foreach (explode('^', $submit->message) as $errors) {
-                $first = true;
-                foreach (explode('source.cpp', $errors) as $error) {
-                    $error = ltrim($error, ':');
-                    if (strlen($error) > 1) {
-                        $errorsList .= '<li><code>' . str_replace('\\', '\\\\', htmlspecialchars(trim($error))) . '</code></li>';
-                    }
-                    if ($first) {
-                        $errorsList .= '<ul>';
-                        $first = false;
-                    }
-                }
-                $errorsList .= '</ul>';
-            }
-            $message = '
-                <div style="border: 1px dashed #333333; padding: 0.5rem;">
-                    <ul>
-                    ' . $errorsList . '
-                    </ul>
-                </div>
-            ';
+            $message = prettyPrintCompilationErrors($submit);
         }
 
         // Don't display the per-test circles if compilation error, display the error instead
