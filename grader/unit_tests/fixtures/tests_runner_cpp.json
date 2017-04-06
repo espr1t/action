@@ -70,6 +70,6 @@
         }
     ],
     "updateEndpoint": "http://localhost/actions/update",
-    "testsEndpoint": "http://localhost/data/problems/ABProblem/Tests/",
+    "testsEndpoint": "http://localhost/data/problems/Trivial.ABProblem/Tests/",
     "checkerEndpoint": ""
 }

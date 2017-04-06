@@ -11,6 +11,7 @@ FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 # Execution
 EXECUTION_MIN_CHECK_INTERVAL = 0.0001  # Seconds
 EXECUTION_MAX_CHECK_INTERVAL = 0.01  # Seconds
+MAX_GAME_LENGTH = 300.0  # Seconds = 5 minutes
 
 # Start time taken by non-user actions
 TIME_OFFSET_CPP = 0.0  # Seconds
@@ -38,11 +39,14 @@ AUTH_PASSWORD = "password"
 PATH_DATA = "data/"
 PATH_TESTS = "data/tests/"
 PATH_CHECKERS = "data/checkers/"
+PATH_TESTERS = "data/testers/"
 PATH_SANDBOX = "sandbox/"
 PATH_LOG_FILE = "logs/grader.log"
 
 SOURCE_NAME = "source"
 EXECUTABLE_NAME = "executable"
+OPPONENT_SOURCE_NAME = "opponent_source"
+OPPONENT_EXECUTABLE_NAME = "opponent_executable"
 
 # Output Validation
 FLOAT_PRECISION = 1e-9

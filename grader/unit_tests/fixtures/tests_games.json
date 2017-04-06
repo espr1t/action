@@ -1,0 +1,30 @@
+{
+    "id": 666,
+    "source": "Snakes.cpp",
+    "language": "C++",
+    "timeLimit": 0.2,
+    "memoryLimit": 128,
+    "tester": "SnakesTesterHash",
+    "tests": [
+        {
+            "position": 0,
+            "inpFile": "Snakes.00.in",
+            "inpHash": "Hash_Snakes_00_in",
+            "solFile": "Snakes.00.sol",
+            "solHash": "Hash_Snakes_00_sol"
+        }
+    ],
+    "matches": [
+        {
+            "player_one_id": 1,
+            "player_one_name": "espr1t",
+            "player_two_id": 2,
+            "player_two_name": "ThinkCreative",
+            "language": "C++",
+            "source": "Opponent.cpp"
+        }
+    ],
+    "updateEndpoint": "http://localhost/actions/update",
+    "testsEndpoint": "http://localhost/data/problems/Games.Snakes/Tests/",
+    "testerEndpoint": "http://localhost/data/problems/Games.Snakes/Tests/Tester/SnakesTester.cpp"
+}

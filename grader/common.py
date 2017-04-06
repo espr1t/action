@@ -15,6 +15,14 @@ scheduler = ThreadPoolExecutor(config.WORKER_COUNT)
 executor = ThreadPoolExecutor(config.WORKER_COUNT)
 
 
+def get_source_extension(language):
+    return ".cpp" if language == "C++" else ".java" if language == "Java" else ".py"
+
+
+def get_executable_extension(language):
+    return ".o" if language == "C++" else ".jar" if language == "Java" else ".py"
+
+
 def create_response(status, message, data=None):
     if data is None:
         data = {}
@@ -36,7 +44,7 @@ def send_request(method, url, data=None):
         response = requests.post(url, data, auth=(username, password))
     else:
         logger = logging.getLogger("commn")
-        logger.error("Unsupported request method '{}'!".format(method))
+        logger.error("Could not send request: unsupported request method '{}'!".format(method))
     return response
 
 
@@ -44,13 +52,16 @@ def download_file(url, destination):
     response = send_request("GET", url)
     if response.status_code != 200:
         logger = logging.getLogger("commn")
-        logger.error("Could not download file from URL: {}".format(url))
-        raise Exception("Could not download file!")
+        logger.error("Could not download file from URL {}: got response code '{}'!".format(url, response.status_code))
+        raise RuntimeError("Got response code different than 200!")
 
-    with open(destination, "wb") as file:
-        # Write 1MB chunks from the file at a time
-        for chunk in response.iter_content(config.FILE_DOWNLOAD_CHUNK_SIZE):
-            file.write(chunk)
+    try:
+        with open(destination, "wb") as file:
+            # Write 1MB chunks from the file at a time
+            for chunk in response.iter_content(config.FILE_DOWNLOAD_CHUNK_SIZE):
+                file.write(chunk)
+    except EnvironmentError:
+        raise RuntimeError("Could not write downloaded data to file!")
 
 
 def authorized(auth):

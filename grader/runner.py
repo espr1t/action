@@ -4,14 +4,16 @@ Runs the executable in a sandbox and returns the result for a single test case
 
 import logging
 from subprocess import PIPE
-from os import getcwd
+from os import getcwd, path
 from sys import platform
+from tempfile import TemporaryFile
 from time import sleep, perf_counter
 import psutil
 from math import fabs
-
 import config
 from status import TestStatus
+from queue import Queue
+from threading import Thread
 
 if not platform.startswith("win32"):
     import resource
@@ -39,6 +41,165 @@ class Runner:
         # Configure logger
         self.logger = logging.getLogger("runnr")
 
+    @staticmethod
+    def enqueue_output(out, queue):
+        for line in out:
+            queue.put(line)
+        out.close()
+
+    @staticmethod
+    def get_output(queue):
+        output = ""
+        while not queue.empty() or output == "":
+            while not queue.empty():
+                output += queue.get()
+            sleep(0.01)
+        output.replace("\r", "")
+        return output
+
+    def play(self, test, tester, player_one_id, player_one_name, player_one_executable,
+                                 player_two_id, player_two_name, player_two_executable):
+        # Prepare the run input and output data
+        self.logger.info("[Submission {}]       ++ test {}: {} vs {}...".format(
+                self.evaluator.id, test['position'], player_one_name, player_two_name))
+
+        inp_file_name, _, _, sandbox, _ = self.prepare_run(test)
+
+        # Read input data
+        with open(inp_file_name, "rt") as input_file:
+            input_content = input_file.read()
+
+        # Start the tester's process
+        tester_executable = getcwd() + "/" + config.PATH_TESTERS + tester + ".o"
+        process = psutil.Popen(args=[], cwd=sandbox, executable=tester_executable,
+                               stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+
+        # Listen to tester's output asynchronously
+        tester_queue = Queue()
+        Thread(target=Runner.enqueue_output, args=[process.stdout, tester_queue], daemon=True).start()
+
+        # Write the input file to the tester
+        process.stdin.write(input_content)
+        process.stdin.flush()
+
+        player_one_score = 0
+        player_two_score = 0
+        player_one_exec_time = 0
+        player_one_exec_memory = 0
+        player_two_exec_time = 0
+        player_two_exec_memory = 0
+        message = "The game has not yet completed."
+
+        # Start the game loop
+        cur_move = 0
+        killed = False
+        start_time = perf_counter()
+
+        while True:
+            sleep(0.01)
+            # Process already terminated
+            if process.poll() is not None:
+                break
+            if not process.is_running():
+                break
+
+            # The game is taking too long
+            if perf_counter() - start_time > config.MAX_GAME_LENGTH:
+                message = "Game execution exceeded limit of {} seconds.".format(config.MAX_GAME_LENGTH)
+                process.kill()
+                killed = True
+                break
+
+            cur_move += 1
+
+            # Prepare AI's environment
+            ai_input_text = Runner.get_output(tester_queue)
+
+            ai_input = TemporaryFile()
+            ai_input.write(ai_input_text.encode())
+            ai_input.seek(0)
+            ai_output = TemporaryFile()
+
+            # Run the AI (alternating players every turn)
+            player = player_one_name if cur_move % 2 == 1 else player_two_name
+            executable = player_one_executable if cur_move % 2 == 1 else player_two_executable
+            result = self.exec_solution(sandbox, executable, ai_input, ai_output)
+            if cur_move % 2 == 1:
+                player_one_exec_time = max(player_one_exec_time, result.exec_time)
+                player_one_exec_memory = max(player_one_exec_memory, result.exec_memory)
+            else:
+                player_two_exec_time = max(player_two_exec_time, result.exec_time)
+                player_two_exec_memory = max(player_two_exec_memory, result.exec_memory)
+
+            # RE, TL, or ML - stop the game and declare the other player as a winner
+            if result.exit_code != 0 or result.exec_time > self.evaluator.time_limit \
+                    or result.exec_memory > self.evaluator.memory_limit:
+                if result.exec_time > self.evaluator.time_limit:
+                    message = "{}'s solution used more than the allowed {:.2f} seconds.".format(
+                            player, self.evaluator.time_limit)
+                elif result.exec_memory > self.evaluator.memory_limit:
+                    message = "{}'s solution used more than the allowed {:.0f} megabytes.".format(
+                            player, self.evaluator.memory_limit / 1048576)
+                elif result.exit_code != 0:
+                    message = "{}'s solution crashed.".format(player)
+                    self.logger.info("Exit code: {}".format(result.exit_code))
+                    self.logger.info("Input was:\n{}".format(ai_input_text))
+
+                player_one_score = 0.0 if player == player_one_name else 1.0
+                player_two_score = 0.0 if player == player_two_name else 1.0
+
+                process.kill()
+                killed = True
+                break
+
+            # Pass the output to the tester
+            ai_output.flush()
+            ai_output.seek(0)
+            direction = ai_output.read().decode().replace("\r", "")
+            process.stdin.write(direction)
+            process.stdin.flush()
+
+            ai_input.close()
+            ai_output.close()
+
+        """
+        If the game ended properly the tester should have printed the results in the format:
+            >> line 1: score player one
+            >> line 2: score player two
+            >> line 3: message
+        """
+        if not killed:
+            final_message = Runner.get_output(tester_queue)
+            player_one_score = float(final_message.split("\n")[0])
+            player_two_score = float(final_message.split("\n")[1])
+            message = final_message.split("\n")[2]
+            message = message.replace("First player", player_one_name)
+            message = message.replace("first player", player_one_name)
+            message = message.replace("Second player", player_two_name)
+            message = message.replace("second player", player_two_name)
+
+        match_log = ""
+        for line in process.stderr:
+            match_log += line
+
+        # Update the frontend
+        results = [{
+            "position": test["position"],
+            "status": TestStatus.ACCEPTED.name,
+            "message": message,
+            "player_one_id": player_one_id,
+            "player_one_score": player_one_score,
+            "player_one_exec_time": player_one_exec_time,
+            "player_one_exec_memory": round(player_one_exec_memory / 1048576.0, 2),  # Convert back to megabytes
+            "player_two_id": player_two_id,
+            "player_two_score": player_two_score,
+            "player_two_exec_time": player_two_exec_time,
+            "player_two_exec_memory": round(player_two_exec_memory / 1048576.0, 2),  # Convert back to megabytes
+            "match_log": match_log
+        }]
+        self.evaluator.update_frontend("", results)
+        return
+
     def run(self, test):
         # Update the frontend that we are running this test
         results = [{
@@ -51,21 +212,30 @@ class Runner:
         start_time = perf_counter()
 
         # Prepare the run input and output data
-        inp_file, out_file, sol_file, sandbox, executable = self.prepare_run(test)
+        inp_file_path, out_file_path, sol_file_path, sandbox, executable = self.prepare_run(test)
+
+        # Open the input and output files
+        inp_file = open(inp_file_path, "rt")
+        out_file = open(out_file_path, "wt")
 
         # Execute the solution
         result = self.exec_solution(sandbox, executable, inp_file, out_file)
 
+        # Close the input and output files
+        inp_file.close()
+        out_file.close()
+
         # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
-        result.status, result.error_message, result.score = self.determine_status(test, result, inp_file, out_file, sol_file)
+        result.status, result.error_message, result.score =\
+            self.determine_status(test, result, inp_file_path, out_file_path, sol_file_path)
 
         total_time = perf_counter() - start_time
-        score = " ({})".format(result.score) if result.score > 0.0 and result.score < 1.0 else ""
+        score = " ({})".format(result.score) if 0.0 < result.score < 1.0 else ""
         self.logger.info("[Submission {}]    -- executed {}: Time: {:.3f}s. Memory: {:.2f}MB. Testing time: {:.3f}s :: {}{}".format(
                 self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name, score))
 
         if result.status == TestStatus.WRONG_ANSWER:
-            self.logger.info("[Submission {}]         >> {}".format(self.evaluator.id, result.error_message))
+            self.logger.info("[Submission {}]      == {}".format(self.evaluator.id, result.error_message))
 
         # Update the frontend once again that we the testing has been completed (along with TL, ML, and score this time)
         results = [{
@@ -118,9 +288,7 @@ class Runner:
             else:
                 return TestStatus.ACCEPTED, "", score
 
-    # TODO:
-    # Limit network usage
-    # Use checker if provided
+    # TODO: Limit network usage
 
     # Use the resource library to limit process resources when on UNIX
     if not platform.startswith("win32"):
@@ -181,8 +349,8 @@ class Runner:
 
         execution_time_limit = max(1.0, self.evaluator.time_limit * 2)
 
-        inp_file_handle = open(inp_file, "rt")
-        out_file_handle = open(out_file, "wt")
+        # Calling the executable doesn't work on Windows 10 Ubuntu Bash if we don't provide the full path
+        executable = path.join(getcwd(), executable)
 
         args = []
         if self.evaluator.language == "Java":
@@ -193,11 +361,9 @@ class Runner:
 
         start_time = perf_counter()
         if platform.startswith("win32"):
-            process = psutil.Popen(args=args, executable=executable, cwd=sandbox,
-                                   stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE)
+            process = psutil.Popen(args=args, executable=executable, cwd=sandbox, stdin=inp_file, stdout=out_file)
         else:
-            process = psutil.Popen(args=args, executable=executable, cwd=sandbox,
-                                   stdin=inp_file_handle, stdout=out_file_handle, stderr=PIPE,
+            process = psutil.Popen(args=args, executable=executable, cwd=sandbox, stdin=inp_file, stdout=out_file,
                                    preexec_fn=(lambda: Runner.set_restrictions(
                                        self.evaluator.time_limit, self.evaluator.language == "Java")))
 
@@ -262,19 +428,14 @@ class Runner:
             if exit_code is None:
                 exit_code = Runner.KILLED_RUNTIME_ERROR
 
-        #error_message = process.communicate()[1]
-        #error_message = error_message.decode("utf-8") if error_message is not None else ""
         error_message = ""
-
-        # Close the files
-        inp_file_handle.close()
-        out_file_handle.close()
 
         # Leave the parent function decide what the test status will be
         return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0)
 
+    # TODO: Take this to a separate file (validator.py)
     def validate_output(self, inp_file, out_file, sol_file):
-        if self.evaluator.checker == '':
+        if self.evaluator.checker is None:
             return self.validate_output_directly(out_file, sol_file)
         else:
             return self.validate_output_with_checker(inp_file, out_file, sol_file)
