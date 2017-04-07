@@ -70,7 +70,7 @@ class RegisterPage extends Page {
                             <tr>
                                 <td class="left"><b>Парола:</b></td>
                                 <td class="right">
-                                    <input type="password" name="password1" placeholder="Password" class="text" minlength=1 maxlength=32 required
+                                    <input type="password" name="password1" placeholder="Password" class="text" minlength=1 maxlength=33 required
                                         title="Password must be between 1 and 32 characters long."
                                         onkeyup="validatePassword1()">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconPassword1"></i>

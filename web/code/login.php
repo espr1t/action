@@ -72,7 +72,7 @@ class LoginPage extends Page {
                         <form class="login" name="login" action="login" onsubmit="return saltHashLoginPassword()" method="post" accept-charset="utf-8">
                             <div style="display: relative; margin-left: -1rem;">
                                 <i class="fa fa-user fa-fw"></i><input class="text" name="username" type="text" placeholder="Username" required><br>
-                                <i class="fa fa-key fa-fw"></i><input class="text" name="password" type="password" placeholder="Password" required><br>
+                                <i class="fa fa-key fa-fw"></i><input class="text" name="password" type="password" placeholder="Password" minlength=1 maxlength=32 required><br>
                             </div>
                             <input type="submit" class="button button-color-blue" value="Вход">
                             <div class="center" style="font-size: 0.75rem;"><a href="register">Регистрация</a></div>
