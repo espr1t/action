@@ -1,5 +1,11 @@
 <?php
 
+function swap(&$var1, &$var2) {
+    $temp = $var1;
+    $var1 = $var2;
+    $var2 = $temp;
+}
+
 function showMessage($type, $message) {
     return '<script>showMessage("' . $type . '", "' . $message . '");</script>';
 }
@@ -12,6 +18,16 @@ function redirect($url, $type = null, $message = null) {
     }
     header('Location: ' . $url);
     exit();
+}
+
+function getGameUrlName($problemName) {
+    $urlName = strtolower($problemName);
+    $urlName = str_replace(' ', '-', $urlName);
+    return $urlName;
+}
+
+function getGameLink($problemName) {
+    return '/games/' . getGameUrlName($problemName);
 }
 
 function getUserLink($userName) {
@@ -45,7 +61,7 @@ function createHead($page) {
         <meta name="author" content="Alexander Georgiev">
         <meta name="keywords" content="Програмиране,Информатика,Алгоритми,Структури Данни,Задачи,' .
                                       'Programming,Informatics,Algorithms,Data Structures,Problems">
-        <link rel="shortcut icon" type="image/x-icon" href="images/favicon_128.png">
+        <link rel="shortcut icon" type="image/x-icon" href="/images/favicon_128.png">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="stylesheet" type="text/css" href="/styles/style.css">
         <link rel="stylesheet" type="text/css" href="/styles/icons/css/font-awesome.css">
@@ -94,4 +110,5 @@ function prettyPrintCompilationErrors($submit) {
         </div>
     ';
 }
+
 ?>

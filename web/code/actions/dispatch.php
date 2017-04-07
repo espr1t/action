@@ -26,8 +26,8 @@ switch ($_GET['action']) {
         require_once('publish_news.php');
         break;
 
-    case 'submitSolution':
-        require_once('submit_submission.php');
+    case 'sendSubmission':
+        require_once('send_submission.php');
         break;
 
     case 'editProblem':

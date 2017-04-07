@@ -1,0 +1,47 @@
+/***********************
+       Snakes
+************************/
+div.snakes-content {
+    width: 100%;
+    text-align: center;
+}
+
+table.snakes-board {
+    margin: auto;
+}
+
+table.snakes-board tr td {
+    width: 0.875rem;
+    min-width: 0.875rem;
+    height: 0.875rem;
+    min-height: 0.875rem;
+    border: 1px dotted;
+    border-color: #666666;
+    border-radius: 0.25rem;
+    text-align: center;
+    font-weight: bold;
+    color: #FEFEFE;
+    font-size: 0.8125rem;
+    line-height: 0.8125rem;
+}
+
+table.snakes-board td.player-one {
+    background-color: #0099FF;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
+    opacity: 1;
+    border: 0;
+}
+
+table.snakes-board td.player-two {
+    background-color: #DD4337;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
+    opacity: 1;
+    border: 0;
+}
+
+table.snakes-board td.apple {
+    background-color: #129D5A;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
+    opacity: 0.85;
+    border: 0;
+}

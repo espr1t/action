@@ -40,13 +40,17 @@ switch ($_GET['page']) {
         require_once('problems.php');
         $page = new ProblemsPage($user);
         break;
-    case 'queue':
-        require_once('queue.php');
-        $page = new QueuePage($user);
+    case 'games':
+        require_once('games.php');
+        $page = new GamesPage($user);
         break;
     case 'training':
         require_once('training.php');
         $page = new TrainingPage($user);
+        break;
+    case 'queue':
+        require_once('queue.php');
+        $page = new QueuePage($user);
         break;
     case 'ranking':
         require_once('ranking.php');

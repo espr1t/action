@@ -65,6 +65,8 @@ Table::Problems
     "memoryLimit": 16,
     "type": "standard",
     "difficulty": "trivial",
+    "logo": "http://action.informatika.bg/images/games/snakes.png",
+    "description": "...",
     "statement": "...",
     "origin": "informatika.bg training",
     "checker": "",
@@ -89,6 +91,8 @@ if ($db->tableExists('Problems')) {
             memoryLimit FLOAT NOT NULL,
             type ENUM('ioi', 'acm', 'relative', 'game') NOT NULL,
             difficulty ENUM('trivial', 'easy', 'medium', 'hard', 'brutal') NOT NULL,
+            logo TEXT NOT NULL,
+            description TEXT NOT NULL,
             statement TEXT NOT NULL,
             origin VARCHAR(128) NOT NULL,
             checker VARCHAR(32) NOT NULL,
@@ -138,6 +142,49 @@ if ($db->tableExists('Tests')) {
 }
 
 /*
+Table::Matches
+============
+{
+    "id": 42,
+    "problemId": 1,
+    "test": 2,
+    "userOne": 7,
+    "userTwo": 3,
+    "submitOne": 61,
+    "submitTwo": 55,
+    "scoreOne": 7.2,
+    "scoreTwo": 9.3,
+    "message": "Player One's solution timed out.",
+    "log": "RUUDLLRLLRRD(5,3)...RL"
+}
+*/
+output('');
+output('Creating table Matches...');
+
+if ($db->tableExists('Matches')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Matches`(
+            id INT NOT NULL AUTO_INCREMENT,
+            problemId INT NOT NULL,
+            test INT NOT NULL,
+            userOne INT NOT NULL,
+            userTwo INT NOT NULL,
+            submitOne INT NOT NULL,
+            submitTwo INT NOT NULL,
+            scoreOne FLOAT NOT NULL,
+            scoreTwo FLOAT NOT NULL,
+            message TINYTEXT NOT NULL,
+            log TEXT NOT NULL,
+            PRIMARY KEY (problemId, test, userOne, userTwo),
+            KEY `id` (`id`)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
+/*
 Table::Solutions
 ==============
 {
@@ -145,6 +192,7 @@ Table::Solutions
     "name": "InputOutputSlow.cpp",
     "submitId": 42,
     "source": "#include..."
+    "language": "C++",
 }
 */
 output('');
@@ -159,6 +207,7 @@ if ($db->tableExists('Solutions')) {
             name VARCHAR(32) NOT NULL,
             submitId INT NOT NULL,
             source TEXT NOT NULL,
+            language ENUM('C++', 'Java', 'Python') NOT NULL,
             PRIMARY KEY (problemId, name)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
@@ -176,10 +225,11 @@ Table::Submits
     "userName": "espr1t",
     "problemId": 1,
     "problemName": "Input/Output",
-    "language": java,
+    "language": "Java",
     "results": "1,1,TL,0.42,WA",
     "status": "T",
     "message": "Undefined variable 'foo'",
+    "full": true,
     "hidden": false
 }
 */
@@ -204,6 +254,7 @@ if ($db->tableExists('Submits')) {
             exec_memory TEXT NOT NULL,
             status VARCHAR(2) NOT NULL,
             message TEXT NOT NULL,
+            full BOOLEAN NOT NULL DEFAULT FALSE,
             hidden BOOLEAN NOT NULL DEFAULT FALSE,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;

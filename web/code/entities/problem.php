@@ -12,6 +12,7 @@ class Problem {
     public $memoryLimit = -1;
     public $type = '';
     public $difficulty = '';
+    public $description = '';
     public $statement = '';
     public $tags = array();
     public $origin = '';
@@ -28,10 +29,11 @@ class Problem {
         $this->type = 'ioi';
         $this->difficulty = 'medium';
         $this->origin = 'Problem Origin';
-        $this->addedBy = $GLOBALS['user']->username;
+        $this->addedBy = 'unknown';
 
         $emptyStatementPath = sprintf("%s/%s", $GLOBALS['PATH_PROBLEMS'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $this->statement = file_get_contents($emptyStatementPath);
+        $this->description = '';
     }
 
     private function arrayFromInstance() {
@@ -44,6 +46,7 @@ class Problem {
             'memoryLimit' => $this->memoryLimit,
             'type' => $this->type,
             'difficulty' => $this->difficulty,
+            'description' => $this->description,
             'tags' => $this->tags,
             'origin' => $this->origin,
             'checker' => $this->checker,
@@ -62,6 +65,7 @@ class Problem {
         $problem->memoryLimit = floatval(getValue($info, 'memoryLimit'));
         $problem->type = getValue($info, 'type');
         $problem->difficulty = getValue($info, 'difficulty');
+        $problem->description = getValue($info, 'description');
         $problem->statement = getValue($info, 'statement');
         $problem->tags = explode(',', getValue($info, 'tags'));
         $problem->origin = getValue($info, 'origin');

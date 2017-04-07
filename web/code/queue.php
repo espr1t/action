@@ -14,6 +14,15 @@ class QueuePage extends Page {
         // Return links for submit shortcuts
         $_SESSION['queueShortcut'] = true;
 
+        $brain = new Brain();
+        $allProblems = $brain->getAllProblems();
+        $games = array();
+        foreach ($allProblems as $problem) {
+            if ($problem['type'] == 'game') {
+                array_push($games, intval($problem['id']));
+            }
+        }
+
         $list = '';
         for ($i = 0; $i < count($data); $i = $i + 1) {
             $entry = $data[$i];
@@ -29,9 +38,13 @@ class QueuePage extends Page {
                 ';
             }
 
+            $submitLink = '/problems/' . $entry['problemId'] . '/submits/' . $entry['submitId'];
+            if (in_array(intval($entry['problemId']), $games)) {
+                $submitLink = getGameLink($entry['problemName']) . '/submits/' . $entry['submitId'];
+            }
             $list .= '
                 <tr>
-                    <td><a href="/problems/' . $entry['problemId'] . '/submits/' . $entry['submitId'] . '">' . $entry['submitId'] . '</a></td>
+                    <td><a href="' . $submitLink . '">' . $entry['submitId'] . '</a></td>
                     <td>' . getUserLink($entry['userName']) . '</td>
                     <td>' . getProblemLink($entry['problemId'], $entry['problemName']) . '</td>
                     <td title="' . $entry['time'] . '">' . explode(' ', $entry['time'])[1] . '</td>

@@ -16,7 +16,7 @@ class RankingPage extends Page {
 
         $place = 0;
         foreach ($usersInfo as $info) {
-            if ($info['id'] == 1)
+            if ($info['id'] <= 1)
                 continue;
             $place = $place + 1;
 

@@ -107,8 +107,8 @@ class Brain {
     // Problems
     function addProblem() {
         $response = $this->db->query("
-            INSERT INTO `Problems` (name, author, folder, timeLimit, memoryLimit, type, difficulty, statement, tags, origin, checker, tester, addedBy)
-            VALUES ('', '', '', 0, 0, 'ioi', 'trivial', '', '', '', '', '', '')
+            INSERT INTO `Problems` (name, author, folder, timeLimit, memoryLimit, type, difficulty, statement, description, tags, origin, checker, tester, addedBy)
+            VALUES ('', '', '', 0, 0, 'ioi', 'trivial', '', '', '', '', '', '', '')
         ");
         if (!$response) {
             error_log('Could not add new problem!');
@@ -206,14 +206,15 @@ class Brain {
         return $this->getResults($response);
     }
 
-    function addSolution($problemId, $name, $submitId, $source) {
+    function addSolution($problemId, $name, $submitId, $source, $language) {
         $response = $this->db->query("
-            INSERT INTO `Solutions` (problemId, name, submitId, source)
+            INSERT INTO `Solutions` (problemId, name, submitId, source, language)
             VALUES (
                 '" . $problemId . "',
                 '" . $name . "',
                 '" . $submitId . "',
-                '" . $this->db->escape($source) . "'
+                '" . $this->db->escape($source) . "',
+                '" . $this->db->escape($language) . "'
             )
         ");
         if (!$response) {
@@ -334,7 +335,7 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, hidden)
+            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, full, hidden)
             VALUES (
                 '" . $submit->submitted . "',
                 '" . $submit->graded . "',
@@ -348,6 +349,7 @@ class Brain {
                 '" . implode(',', $submit->exec_memory) . "',
                 '" . $submit->status . "',
                 '" . $this->db->escape($submit->message) . "',
+                '" . ($submit->full ? 1 : 0) . "',
                 '" . ($submit->hidden ? 1 : 0) . "'
             )
         ");
@@ -426,19 +428,6 @@ class Brain {
         ");
         if (!$response) {
             error_log('Could not execute getAllSubmits() query!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
-    // TODO: Check if used anywhere?
-    function getPendingSubmits() {
-        $response = $this->db->query("
-            SELECT * FROM `Submits`
-            WHERE status in ('W', 'P', 'C', 'T')
-        ");
-        if (!$response) {
-            error_log('Could not execute getPendingSubmits() query properly!');
             return null;
         }
         return $this->getResults($response);
@@ -788,6 +777,81 @@ class Brain {
         return true;
     }
 
+    // Games
+    function getMatch($problemId, $test, $userOne, $userTwo) {
+        $response = $this->db->query("
+            SELECT * FROM `Matches`
+            WHERE problemId = " . $problemId . " AND test = " . $test . " AND userOne = " . $userOne . " AND userTwo = " . $userTwo . "
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getMatch() query properly!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getMatchById($matchId) {
+        $response = $this->db->query("
+            SELECT * FROM `Matches`
+            WHERE id = " . $matchId . "
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getMatchById() query properly!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getGameMatches($problemId, $userId='all') {
+        if ($userId == 'all') {
+            $response = $this->db->query("
+                SELECT * FROM `Matches`
+                WHERE problemId = " . $problemId . "
+            ");
+        } else {
+            $response = $this->db->query("
+                SELECT * FROM `Matches`
+                WHERE problemId = " . $problemId . " AND (userOne = " . $userId . " OR userTwo = " . $userId . ")
+            ");
+        }
+        if (!$response) {
+            error_log('Could not execute getGameMatches() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function updateMatch($match) {
+        $response = $this->db->query("
+            INSERT INTO `Matches` (problemId, test, userOne, userTwo, submitOne, submitTwo, scoreOne, scoreTwo, message, log)
+                VALUES (
+                    '" . $match->problemId . "',
+                    '" . $match->test . "',
+                    '" . $match->userOne . "',
+                    '" . $match->userTwo . "',
+                    '" . $match->submitOne . "',
+                    '" . $match->submitTwo . "',
+                    '" . $match->scoreOne . "',
+                    '" . $match->scoreTwo . "',
+                    '" . $this->db->escape($match->message) . "',
+                    '" . $this->db->escape($match->log) . "'
+                )
+            ON DUPLICATE KEY UPDATE
+                submitOne = '" . $match->submitOne . "',
+                submitTwo = '" . $match->submitTwo . "',
+                scoreOne = '" . $match->scoreOne . "',
+                scoreTwo = '" . $match->scoreTwo . "',
+                message = '" . $this->db->escape($match->message) . "',
+                log = '" . $this->db->escape($match->log) . "'
+        ");
+        if (!$response) {
+            error_log('Could not add or update match on problem ' . $match->problemId . '!');
+            return null;
+        }
+        return true;
+    }
 }
 
 ?>

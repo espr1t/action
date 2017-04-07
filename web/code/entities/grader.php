@@ -3,6 +3,7 @@ require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/problem.php');
 require_once(__DIR__ . '/submit.php');
+require_once(__DIR__ . '/match.php');
 
 class Grader {
     private static $METHOD_GET = 'GET';
@@ -55,6 +56,49 @@ class Grader {
         return true;
     }
 
+    function updateGameTest(&$submit, $result) {
+        // Update the information about this match
+        $test = intval($result['position']);
+        $userOne = intval($result['player_one_id']);
+        $userTwo = intval($result['player_two_id']);
+        $match = Match::get($submit->problemId, $test, $userOne, $userTwo);
+        $match->scoreOne = floatval($result['player_one_score']);
+        $match->scoreTwo = floatval($result['player_two_score']);
+        $match->message = $result['message'];
+        $match->log = $result['match_log'];
+        $match->update();
+
+        // Update the submit info
+        if (!is_numeric($submit->results[$test]))
+            $submit->results[$test] = 0;
+        $submit->results[$test] += $submit->userId == $userOne ? $match->scoreOne : $match->scoreTwo;
+
+        // Update the execution time (we've already checked that the match has ended, so it should be set)
+        $exec_time = $submit->userId == $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time'];
+        $submit->exec_time[$test] = max($submit->exec_time[$test], floatval($exec_time));
+
+        // Update the execution memory (we've already checked that the match has ended, so it should be set)
+        $exec_memory = $submit->userId == $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory'];
+        $submit->exec_memory[$test] = max($submit->exec_memory[$test], floatval($exec_memory));
+    }
+
+    function updateTaskTest(&$submit, $result) {
+        // Update the status of a single test
+        if ($result['status'] == 'ACCEPTED') {
+            $submit->results[$result['position']] = floatval($result['score']);
+        } else {
+            $submit->results[$result['position']] = $GLOBALS['STATUS_' . $result['status']];
+        }
+        // Update the execution time (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
+        if (array_key_exists('exec_time', $result)) {
+            $submit->exec_time[$result['position']] = floatval($result['exec_time']);
+        }
+        // Update the execution memory (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
+        if (array_key_exists('exec_memory', $result)) {
+            $submit->exec_memory[$result['position']] = floatval($result['exec_memory']);
+        }
+    }
+
     function update($submitId, $message, $results, $timestamp) {
         $submit = Submit::get($submitId);
         if ($submit == null) {
@@ -64,32 +108,27 @@ class Grader {
 
         // If already updated, skip it
         if ($submit->graded > $timestamp) {
-            error_log(sprintf(
-                'Skipping update: requested update for %f, but already at %f.', $timestamp, $submit->graded));
+            error_log(sprintf('Skipping update: requested update for %f, but already at %f.',
+                    $timestamp, $submit->graded));
             return;
         }
         $submit->graded = $timestamp;
-
-        // Add new information about individual tests
         $submit->message = $message;
-        for ($i = 0; $i < count($results); $i = $i + 1) {
-            // Update the status of the test
-            if ($results[$i]['status'] == 'ACCEPTED') {
-                $submit->results[$results[$i]['position']] = floatval($results[$i]['score']);
-            } else {
-                $submit->results[$results[$i]['position']] = $GLOBALS['STATUS_' . $results[$i]['status']];
+
+        $problem = Problem::get($submit->problemId);
+        foreach ($results as $result) {
+            // If a game and the match is already played, update the scoreboard and its info in the database
+            if ($problem->type == 'game' && array_key_exists('player_one_id', $result)) {
+                $this->updateGameTest($submit, $result);
             }
-            // Update the execution time (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
-            if (array_key_exists('exec_time', $results[$i])) {
-                $submit->exec_time[$results[$i]['position']] = floatval($results[$i]['exec_time']);
-            }
-            // Update the execution memory (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
-            if (array_key_exists('exec_memory', $results[$i])) {
-                $submit->exec_memory[$results[$i]['position']] = floatval($results[$i]['exec_memory']);
+            // If a standard task or a match which has not yet been played, just update the test status
+            else {
+                $this->updateTaskTest($submit, $result);
             }
         }
         $submit->status = $submit->calcStatus();
 
+        // Save the updated submit info in the database
         $brain = new Brain();
         $brain->updateSubmit($submit);
 
@@ -104,7 +143,6 @@ class Grader {
                 $brain->trimLatest($submit->id);
             }
         }
-
     }
 }
 

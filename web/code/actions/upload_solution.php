@@ -3,8 +3,9 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/problem.php');
 require_once(__DIR__ . '/../entities/submit.php');
+require_once(__DIR__ . '/../entities/user.php');
 
-// User doesn't have access level needed for adding testcases
+// User doesn't have access level needed for uploading solutions
 if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
         'status' => 'ERROR',
@@ -41,8 +42,11 @@ $solutionSource = base64_decode($_POST['solutionSource']);
 $solutionSource = preg_replace('~\R~u', "\n", $solutionSource);
 file_put_contents($solutionPath, $solutionSource);
 
+// Solutions should be uploaded with System's user
+$user = User::get(0);
+
 // Create a hidden judge submit
-$submit = Submit::newSubmit($user, $problemId, $language, $solutionSource, true);
+$submit = Submit::newSubmit($user, $problemId, $language, $solutionSource, false /* full */, true /* hidden */);
 
 // In case the solution cannot be written to the database, return an error
 // so the user knows something is wrong
@@ -55,7 +59,7 @@ if (!$submit->write()) {
 
 // Record that this is an author's solution in the correct table
 $brain = new Brain();
-$brain->addSolution($problemId, $solutionName, $submit->id, $solutionSource);
+$brain->addSolution($problemId, $solutionName, $submit->id, $solutionSource, $language);
 
 // Return the relative path to the solution so it is displayed properly on the frontend
 $solutionPath = explode($_SERVER['DOCUMENT_ROOT'], $solutionPath)[1];

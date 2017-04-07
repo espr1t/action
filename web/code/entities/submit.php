@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/problem.php');
 require_once(__DIR__ . '/widgets.php');
@@ -21,9 +22,10 @@ class Submit {
     public $progress = 0;
     public $status = -1;
     public $message = '';
+    public $full = true;
     public $hidden = false;
 
-    public static function newSubmit($user, $problemId, $language, $source, $hidden = false) {
+    public static function newSubmit($user, $problemId, $language, $source, $full, $hidden = false) {
         $brain = new Brain();
         $submit = new Submit();
 
@@ -55,6 +57,8 @@ class Submit {
         $submit->progress = 0;
         $submit->status = $GLOBALS['STATUS_WAITING'];
         $submit->message = '';
+
+        $submit->full = $full;
         $submit->hidden = $hidden;
         return $submit;
     }
@@ -93,11 +97,19 @@ class Submit {
         }
 
         $problem = Problem::get($this->problemId);
+        if ($problem->type != 'game') {
+            return $this->sendTask($problem);
+        } else {
+            return $this->sendGame($problem);
+        }
+    }
 
+    private function sendTask($problem) {
         $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
         $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
         $checkerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_CHECKER'], $problem->folder);
 
+        $brain = new Brain();
         $tests = $brain->getProblemTests($this->problemId);
 
         // Remove unnecessary data
@@ -119,7 +131,7 @@ class Submit {
             $checkerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
                     $GLOBALS['PROBLEM_CHECKER_FOLDER'], $problem->checker);
             $checkerHash = md5(file_get_contents($checkerPath));
-            $checkerPath = $checkerEndpoint . $problem->checker;
+            $checkerEndpoint .= $problem->checker;
         }
 
         // Compile all the data, required by the grader to evaluate the solution
@@ -128,13 +140,92 @@ class Submit {
             'source' => $this->source,
             'language' => $this->language,
             'checker' => $checkerHash,
-            'tester' => $problem->tester,
             'timeLimit' => $problem->timeLimit,
             'memoryLimit' => $problem->memoryLimit,
             'tests' => $tests,
             'testsEndpoint' => $testsEndpoint,
             'updateEndpoint' => $updateEndpoint,
-            'checkerEndpoint' => $checkerPath
+            'checkerEndpoint' => $checkerEndpoint
+        );
+
+        $grader = new Grader();
+        return $grader->evaluate($data);
+    }
+
+    private function sendGame($problem) {
+        $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
+        $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
+        $testerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTER'], $problem->folder);
+
+        // Also add the md5 hash of the tester (there should be one)
+        assert($problem->tester != '');
+
+        $testerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
+                $GLOBALS['PROBLEM_TESTER_FOLDER'], $problem->tester);
+        $testerHash = md5(file_get_contents($testerPath));
+        $testerEndpoint .= $problem->tester;
+
+        // Find all submitted solutions so far
+        $brain = new Brain();
+
+        $tests = $brain->getProblemTests($this->problemId);
+
+        // Remove unnecessary data
+        for ($i = 0; $i < count($tests); $i = $i + 1) {
+            unset($tests[$i]['id']);
+            unset($tests[$i]['problem']);
+            unset($tests[$i]['score']);
+        }
+
+        // Now create a set of matches to be played (depending on whether the submit is full or not)
+        $matches = array();
+
+        // Partial submission - run only against author's solutions.
+        if (!$this->full) {
+            // Solutions
+            $solutions = $brain->getProblemSolutions($problem->id);
+            $solutionId = 0;
+            foreach ($solutions as $solution) {
+                $solutionId += 1;
+
+                // Update match info (add if a new match)
+                foreach ($tests as $test) {
+                    $match = new Match($problem->id, $test['position'],
+                            $this->userId, -$solutionId, $this->id, $solution['submitId']);
+                    $match->update();
+                    swap($match->userOne, $match->userTwo);
+                    swap($match->submitOne, $match->submitTwo);
+                    $match->update();
+                }
+
+                // Add in match queue for testing
+                array_push($matches, array(
+                    'player_one_id' => $this->userId,
+                    'player_one_name' => $this->userName,
+                    'player_two_id' => -$solutionId,
+                    'player_two_name' => 'author',
+                    'language' => $solution['language'],
+                    'source' => $solution['source']
+                ));
+            }
+        }
+        // Full submission - run a game against every other competitor
+        else {
+        }
+
+        // Compile all the data, required by the grader to evaluate the game
+        $data = array(
+            'id' => $this->id,
+            'source' => $this->source,
+            'language' => $this->language,
+            'matches' => $matches,
+            'tester' => $testerHash,
+            'timeLimit' => $problem->timeLimit,
+            'memoryLimit' => $problem->memoryLimit,
+            'tests' => $tests,
+            'testsEndpoint' => $testsEndpoint,
+            'updateEndpoint' => $updateEndpoint,
+            'testerEndpoint' => $testerEndpoint
         );
 
         $grader = new Grader();
@@ -157,7 +248,8 @@ class Submit {
         $submit->exec_memory = explode(',', getValue($info, 'exec_memory'));
         $submit->status = getValue($info, 'status');
         $submit->message = getValue($info, 'message');
-        $submit->hidden = intval(getValue($info, 'hidden')) == 1;
+        $submit->full = boolval(getValue($info, 'full'));
+        $submit->hidden = boolval(getValue($info, 'hidden'));
         return $submit;
     }
 

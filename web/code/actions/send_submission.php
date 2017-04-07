@@ -19,11 +19,17 @@ if (!passSpamProtection($user, $GLOBALS['SPAM_SUBMIT_ID'], $GLOBALS['SPAM_SUBMIT
     ));
 }
 
-// User has rights to submit and has not exceeded the limit for the day
-$submit = Submit::newSubmit($user, $_POST['problemId'], $_POST['language'], $_POST['source']);
+// Transform data from strings to proper types
+$problemId = intval($_POST['problemId']);
+$language = $_POST['language'];
+$source = $_POST['source'];
+$full = boolval($_POST['full']);
 
-// In case the solution cannot be written to the database, return an error
-// so the user knows something is wrong
+// User has rights to submit and has not exceeded the limit for the day
+$submit = Submit::newSubmit($user, $problemId, $language, $source, $full, false /* hidden */);
+
+// In case the solution cannot be written to the database,
+// return an error so the user knows something is wrong
 if (!$submit->write()) {
     printAjaxResponse(array(
         'status' => 'ERROR',

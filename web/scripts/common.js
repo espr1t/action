@@ -72,7 +72,9 @@ function showMessage(type, message) {
         '<div class="message-content">' +
         '    <div class="message-icon">' + icon + '</div>' +
         '    <div class="message-text">' + message + '</div>' +
-        '    <div class="message-close" onclick="hideMessage(\'' + className + '\', \'' + id + '\');"><i class="fa fa-close fa-fw"></i></div>' +
+        '    <div class="message-close" onclick="hideMessage(\'' + className + '\', \'' + id + '\');">' +
+        '        <i class="fa fa-close fa-fw" style="line-height: 2rem;"></i>'+
+        '    </div>' +
         '</div>' +
     '';
 
@@ -214,14 +216,14 @@ function showSubmitForm(content) {
     }
 }
 
-function submitSubmitForm() {
+function submitSubmitForm(problemId, full=true) {
     var source = document.getElementById('source').value;
     var language = detectLanguage(source);
-    var problemId = getLastUrlToken();
     var data = {
         'problemId': problemId,
         'source' : source,
-        'language' : language
+        'language' : language,
+        'full': full ? 1 : 0
     };
 
     var callback = function(response) {
@@ -230,7 +232,7 @@ function submitSubmitForm() {
             redirect(window.location.href + '/submits/' + response.id);
         }
     }
-    ajaxCall('/actions/submitSolution', data, callback);
+    ajaxCall('/actions/sendSubmission', data, callback);
 }
 
 /*

@@ -24,6 +24,9 @@ class ProblemsPage extends Page {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
 
+        // Skip games, show them on the Games page instead
+        $problemsInfo = array_values(array_filter($problemsInfo, function($el) {return $el['type'] != 'game';}));
+
         for ($i = 0; $i < count($problemsInfo); $i += 1) {
             $problemSolutions = $brain->getProblemSubmits($problemsInfo[$i]['id'], $GLOBALS['STATUS_ACCEPTED']);
             $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
@@ -156,7 +159,7 @@ class ProblemsPage extends Page {
                 <textarea name="source" class="submit-source" cols=80 rows=24 id="source"></textarea>
             </div>
             <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
-            <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm();" class="button button-color-red"></div>
+            <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ');" class="button button-color-red"></div>
         ';
 
         $submitButtons = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
@@ -390,6 +393,9 @@ class ProblemsPage extends Page {
             if ($this->problem == null) {
                 return $this->getMainPage();
             }
+            if ($this->problem->type == 'game') {
+                redirect('/games', 'ERROR', 'Поисканата задача всъщност е игра. Моля съобщете на администратор за проблема.');
+            }
 
             $content = $this->getStatement($this->problem);
             if (isset($_GET['submits'])) {
@@ -397,7 +403,7 @@ class ProblemsPage extends Page {
                     redirect('/problems/' . $this->problem->id, 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
                 }
                 if (!isset($_GET['submitId'])) {
-                    $content .= $this->getAllSubmitsBox($pthis->roblem);
+                    $content .= $this->getAllSubmitsBox($this->problem);
                 } else {
                     if ($queueShortcut)
                         $_SESSION['queueShortcut'] = true;
