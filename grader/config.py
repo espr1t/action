@@ -10,7 +10,7 @@ FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 
 # Execution
 EXECUTION_MIN_CHECK_INTERVAL = 0.0001  # Seconds
-EXECUTION_MAX_CHECK_INTERVAL = 0.01  # Seconds
+EXECUTION_MAX_CHECK_INTERVAL = 0.001  # Seconds
 MAX_GAME_LENGTH = 300.0  # Seconds = 5 minutes
 
 # Start time taken by non-user actions

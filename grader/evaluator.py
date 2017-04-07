@@ -17,7 +17,7 @@ from compiler import Compiler
 import common
 from status import TestStatus
 from runner import Runner
-from threading import Thread
+from threading import Thread, Lock
 
 
 class Evaluator:
@@ -60,6 +60,9 @@ class Evaluator:
 
         # Configure logger
         self.logger = logging.getLogger("evltr")
+
+        # Configure locking mechanism
+        self.lock = Lock()
 
     def __del__(self):
         # Clean up remaining files
@@ -122,18 +125,20 @@ class Evaluator:
 
         # Finished with this submission
         # Sleep a bit so we decrease chance of overwriting last update (due to network race condition)
+        # TODO: Fix this by requiring the update to be acknowledged (response code from the POST)
         sleep(config.UPDATE_INTERVAL)
         self.logger.info("[Submission {}]   >> done with {}!".format(self.id, self.id))
         self.update_frontend("DONE")
 
     def update_frontend(self, message="", results=None):
+        self.lock.acquire()
         # Merge current message and results with previous ones
         self.update_message = message
         if results is not None:
             for result in results:
                 found = False
                 for i in range(len(self.update_results)):
-                    if self.update_results[i]["position"] == result["position"]:
+                    if self.update_results[i]["id"] == result["id"]:
                         self.update_results[i] = result
                         found = True
                         break
@@ -155,15 +160,19 @@ class Evaluator:
             Thread(target=common.send_request, args=["POST", self.update_url, data]).start()
             # Clear update_results so we don't send them with every update
             self.update_results = []
+        self.lock.release()
 
     def set_results(self, status):
         results = []
+        next_id = 0
         for test in self.tests:
             results.append({
+                "id": next_id,
                 "position": test["position"],
                 "status": status.name,
                 "score": 0
             })
+            next_id += 1
         return results
 
     def create_sandbox_dir(self):
@@ -253,9 +262,11 @@ class Evaluator:
         runner = Runner(self)
         errors = ""
 
+        next_id = 0
         test_futures = []
         for test in self.tests:
-            test_futures.append([test, common.executor.submit(runner.run, test)])
+            test_futures.append([test, common.executor.submit(runner.run, next_id, test)])
+            next_id += 1
 
         for test_future in test_futures:
             test, future = test_future
@@ -278,6 +289,7 @@ class Evaluator:
         runner = Runner(self)
         errors = ""
 
+        next_id = 0
         for match in self.matches:
             self.logger.info("[Submission {}]     -- running game {} vs {}...".format(
                 self.id, match["player_one_name"], match["player_two_name"]))
@@ -302,16 +314,18 @@ class Evaluator:
             test_futures = []
             for test in self.tests:
                 # Play forward game
-                future = common.executor.submit(runner.play, test, self.tester,
+                future = common.executor.submit(runner.play, next_id, test, self.tester,
                         match["player_one_id"], match["player_one_name"], self.path_executable,
                         match["player_two_id"], match["player_two_name"], opponent_path_executable)
                 test_futures.append([test, future])
+                next_id += 1
 
                 # Play also reversed game (first player as second) so it is fair
-                future = common.executor.submit(runner.play, test, self.tester,
+                future = common.executor.submit(runner.play, next_id, test, self.tester,
                         match["player_two_id"], match["player_two_name"], opponent_path_executable,
                         match["player_one_id"], match["player_one_name"], self.path_executable)
                 test_futures.append([test, future])
+                next_id += 1
 
             for test_future in test_futures:
                 test, future = test_future

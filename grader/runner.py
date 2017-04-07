@@ -14,6 +14,7 @@ import config
 from status import TestStatus
 from queue import Queue
 from threading import Thread
+from string import printable
 
 if not platform.startswith("win32"):
     import resource
@@ -57,8 +58,8 @@ class Runner:
         output.replace("\r", "")
         return output
 
-    def play(self, test, tester, player_one_id, player_one_name, player_one_executable,
-                                 player_two_id, player_two_name, player_two_executable):
+    def play(self, run_id, test, tester, player_one_id, player_one_name, player_one_executable,
+                                         player_two_id, player_two_name, player_two_executable):
         # Prepare the run input and output data
         self.logger.info("[Submission {}]       ++ test {}: {} vs {}...".format(
                 self.evaluator.id, test['position'], player_one_name, player_two_name))
@@ -131,9 +132,17 @@ class Runner:
                 player_two_exec_time = max(player_two_exec_time, result.exec_time)
                 player_two_exec_memory = max(player_two_exec_memory, result.exec_memory)
 
-            # RE, TL, or ML - stop the game and declare the other player as a winner
+            # Pass the output to the tester
+            ai_output.flush()
+            ai_output.seek(0)
+
+            # Check if the output contains at least one printable character
+            ai_output_text = ai_output.read().decode().replace("\r", "")
+            ai_output_empty = not any(ch in printable for ch in ai_output_text)
+
+            # RE, TL, ML, or no output - stop the game and declare the other player as a winner
             if result.exit_code != 0 or result.exec_time > self.evaluator.time_limit \
-                    or result.exec_memory > self.evaluator.memory_limit:
+                    or result.exec_memory > self.evaluator.memory_limit or ai_output_empty:
                 if result.exec_time > self.evaluator.time_limit:
                     message = "{}'s solution used more than the allowed {:.2f} seconds.".format(
                             player, self.evaluator.time_limit)
@@ -144,6 +153,8 @@ class Runner:
                     message = "{}'s solution crashed.".format(player)
                     self.logger.info("Exit code: {}".format(result.exit_code))
                     self.logger.info("Input was:\n{}".format(ai_input_text))
+                elif ai_output_empty:
+                    message = "{}'s solution did not print any output.".format(player)
 
                 player_one_score = 0.0 if player == player_one_name else 1.0
                 player_two_score = 0.0 if player == player_two_name else 1.0
@@ -152,11 +163,7 @@ class Runner:
                 killed = True
                 break
 
-            # Pass the output to the tester
-            ai_output.flush()
-            ai_output.seek(0)
-            direction = ai_output.read().decode().replace("\r", "")
-            process.stdin.write(direction)
+            process.stdin.write(ai_output_text)
             process.stdin.flush()
 
             ai_input.close()
@@ -184,6 +191,7 @@ class Runner:
 
         # Update the frontend
         results = [{
+            "id": run_id,
             "position": test["position"],
             "status": TestStatus.ACCEPTED.name,
             "message": message,
@@ -200,9 +208,10 @@ class Runner:
         self.evaluator.update_frontend("", results)
         return
 
-    def run(self, test):
+    def run(self, run_id, test):
         # Update the frontend that we are running this test
         results = [{
+            "id": run_id,
             "position": test["position"],
             "status": TestStatus.TESTING.name,
             "score": 0
@@ -239,6 +248,7 @@ class Runner:
 
         # Update the frontend once again that we the testing has been completed (along with TL, ML, and score this time)
         results = [{
+            "id": run_id,
             "position": test["position"],
             "status": result.status.name,
             "error_message": result.error_message,
