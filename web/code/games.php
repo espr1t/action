@@ -401,6 +401,12 @@ class GamesPage extends Page {
     private function getAllSubmitsBox($problem) {
         $submits = Submit::getUserSubmits($this->user->id, $problem->id);
 
+        $finalFull = -1;
+        foreach ($submits as $submit) {
+            if ($submit->full && $submit->id > $finalFull)
+                $finalFull = $submit->id;
+        }
+
         $submitList = '';
         for ($i = 0; $i < count($submits); $i = $i + 1) {
             $submit = $submits[$i];
@@ -412,7 +418,7 @@ class GamesPage extends Page {
                     <td>' . explode(' ', $submit->submitted)[1] . '</td>
                     <td>' . $submitLink . '</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->calcStatus()] . '</td>
-                    <td>' . round($submit->calcScore(), 3) . '</td>
+                    <td>' . ($finalFull == $submit->id ? '<i class="fa fa-check green"></i>' : '') . '</td>
                 </tr>
             ';
         }
@@ -426,7 +432,7 @@ class GamesPage extends Page {
                     <th>Час</th>
                     <th>Идентификатор</th>
                     <th>Статус</th>
-                    <th>Точки</th>
+                    <th>Финално</th>
                 </tr>
                 ' . $submitList . '
             </table>
