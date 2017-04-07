@@ -256,7 +256,10 @@ function runSnakesGame() {
 
 function snakesReplayCycle(idx, log) {
     if (snakesReplayRunning || idx == 0) {
-        if (log[idx] == '(') {
+        if (idx >= log.length) {
+            endSnakesGame('Reached end of game log.');
+            return;
+        } else if (log[idx] == '(') {
             idx++;
             var appleCoords = '';
             while (log[idx] != ')')

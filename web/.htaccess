@@ -40,6 +40,7 @@ RewriteRule    ^games/(\w+)/submits$                            /code/main.php?p
 RewriteRule    ^games/(\w+)/submits/(\d+)$                      /code/main.php?page=games&game=$1&submits=true&submitId=$2                          [NC,L,QSA]
 RewriteRule    ^games/(\w+)/submits/(\d+)/replays/(\d+)$        /code/main.php?page=games&game=$1&submits=true&submitId=$2&matchId=$3               [NC,L,QSA]
 RewriteRule    ^games/(\w+)/visualizer$                         /code/main.php?page=games&game=$1&visualizer=true                                   [NC,L,QSA]
+RewriteRule    ^games/(\w+)/scoreboard$                         /code/main.php?page=games&game=$1&scoreboard=true                                   [NC,L,QSA]
 
 # User profile page
 RewriteRule    ^users/(\w[\w.]{1,15})$                          /code/main.php?page=profile&user=$1                                                 [NC,L,QSA]

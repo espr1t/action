@@ -135,7 +135,7 @@ class GamesPage extends Page {
         $partialSubmitFormContent = sprintf($submitFormContent, 'Частично Решение', $partialSubmitInfo, 'false');
         $fullSubmitFormContent = sprintf($submitFormContent, 'Пълно Решение', $fullSubmitInfo, 'true');
 
-        $submitButtons = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
+        $controlButtons = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
             <script>
                 function showPartialForm() {
                     showSubmitForm(`' . $partialSubmitFormContent . '`);
@@ -147,11 +147,15 @@ class GamesPage extends Page {
             <div class="center">
                 <input type="submit" onclick="showPartialForm();" value="Частично решение" class="button button-large button-color-blue" title="' . $partialSubmitInfo . '">
                 <a href="' . getGameLink($problem->name) . '/visualizer">
-                    <input type="submit" value="Визуализатор"class="button button-color-blue button-large" title="Визуализатор на играта">
+                    <input type="submit" value="Визуализатор" class="button button-color-blue button-large" title="Визуализатор на играта">
                 </a>
                 <input type="submit" onclick="showFullForm();" value="Пълно решение" class="button button-large button-color-blue" title="' . $fullSubmitInfo . '">
                 <br>
                 <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
+                <br>
+                <a href="' . getGameLink($problem->name) . '/scoreboard">
+                    <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на всички участници">
+                </a>
             </div>
         ';
 
@@ -162,7 +166,7 @@ class GamesPage extends Page {
                 <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
-                ' . $submitButtons . '
+                ' . $controlButtons . '
             </div>
         ';
     }
@@ -483,6 +487,117 @@ class GamesPage extends Page {
         return $content;
     }
 
+    private function getScoreboard($problem) {
+        $returnUrl = getGameLink($problem->name);
+
+        $brain = new Brain();
+        $matches = $brain->getGameMatches($problem->id);
+
+        $found = false;
+        $wins = array();
+        $losses = array();
+        $submit = array();
+
+        $games = array();
+        foreach ($matches as $match) {
+            // If one of the users is negative, this means this is a partial submission match
+            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
+                continue;
+
+            $userOneKey = 'User_' . $match['userOne'];
+            if (!array_key_exists($userOneKey, $wins))
+                $wins[$userOneKey] = 0;
+            if (!array_key_exists($userOneKey, $losses))
+                $losses[$userOneKey] = 0;
+            if (!array_key_exists($userOneKey, $submit))
+                $submit[$userOneKey] = intval($match['submitOne']);
+            $userTwoKey = 'User_' . $match['userTwo'];
+            if (!array_key_exists($userTwoKey, $wins))
+                $wins[$userTwoKey] = 0;
+            if (!array_key_exists($userTwoKey, $losses))
+                $losses[$userTwoKey] = 0;
+            if (!array_key_exists($userTwoKey, $submit))
+                $submit[$userTwoKey] = intval($match['submitTwo']);
+
+            if (floatval($match['scoreOne']) == floatval($match['scoreTwo'])) {
+                // Nothing, but this shouldn't happen for this problem
+            } else if (floatval($match['scoreOne']) < floatval($match['scoreTwo'])) {
+                $wins[$userTwoKey]++;
+                $losses[$userOneKey]++;
+            } else if (floatval($match['scoreOne']) > floatval($match['scoreTwo'])) {
+                $wins[$userOneKey]++;
+                $losses[$userTwoKey]++;
+            }
+        }
+
+        $numPlayers = count($wins);
+
+        $ranking = '';
+        for ($pos = 1; $pos <= $numPlayers; $pos++) {
+            $maxWins = -1;
+            $minLosses = 1e100;
+            $bestUser = '';
+
+            foreach ($wins as $userKey => $cnt) {
+                if ($maxWins < $cnt) {
+                    $bestUser = $userKey;
+                    $maxWins = $wins[$userKey];
+                    $minLosses = $losses[$userKey];
+                } else if ($maxWins == $cnt && $minLosses > $losses[$userKey]) {
+                    $bestUser = $userKey;
+                    $maxWins = $wins[$userKey];
+                    $minLosses = $losses[$userKey];
+                } else if ($maxWins == $cnt && $minLosses == $losses[$userKey]) {
+                    if ($submit[$userKey] < $submit[$bestUser]) {
+                        $bestUser = $userKey;
+                        $maxWins = $wins[$userKey];
+                        $minLosses = $losses[$userKey];
+                    }
+                }
+            }
+
+            $user = User::get(intval(split('_', $bestUser)[1]));
+            $submitId = $submit[$bestUser];
+            if ($bestUser == 'User_' . $this->user->id ||
+                    $this->user->access > $GLOBALS['ACCESS_SEE_SUBMITS']) {
+                $submitId = '<a href="' . getGameLink($problem->name) . '/submits/' . $submit[$bestUser] . '">' . $submit[$bestUser] . '</a>';
+            }
+            $ranking .= '
+                <tr>
+                    <td>' . $pos . '</td>
+                    <td>' . getUserLink($user->username) . '</td>
+                    <td>' . $user->name . '</td>
+                    <td>' . $submitId . '</td>
+                    <td>' . $maxWins . ':' . $minLosses . '</td>
+                </tr>
+            ';
+
+            unset($wins[$bestUser]);
+            unset($losses[$bestUser]);
+            unset($submit[$bestUser]);
+        }
+
+        $content = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Класиране</h2>
+            <table class="default">
+                <tr>
+                    <th>#</th>
+                    <th>Потребител</th>
+                    <th>Име</th>
+                    <th>Събмит</th>
+                    <th>Резултат</th>
+                </tr>
+                ' . $ranking . '
+            </table>
+        ';
+
+        return '
+            <script>
+                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
+            </script>
+        ';
+    }
+
     public function getContent() {
         $queueShortcut = false;
         if (isset($_SESSION['queueShortcut'])) {
@@ -501,12 +616,12 @@ class GamesPage extends Page {
                 if ($_GET['game'] == 'snakes') {
                     $content .= '<script>showSnakesVisualizer("'. $this->user->username . '");</script>';
                 }
-            }
-            if (isset($_GET['submits'])) {
+            } else if (isset($_GET['scoreboard'])) {
+                $content .= $this->getScoreboard($problem);
+            } else if (isset($_GET['submits'])) {
                 if ($this->user->id == -1) {
                     redirect(getGameLink($problem->name), 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
-                }
-                if (!isset($_GET['submitId'])) {
+                } else if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
                     if ($queueShortcut)
