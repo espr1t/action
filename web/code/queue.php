@@ -39,14 +39,16 @@ class QueuePage extends Page {
             }
 
             $submitLink = '/problems/' . $entry['problemId'] . '/submits/' . $entry['submitId'];
+            $problemLink = getProblemLink($entry['problemId'], $entry['problemName']);
             if (in_array(intval($entry['problemId']), $games)) {
                 $submitLink = getGameLink($entry['problemName']) . '/submits/' . $entry['submitId'];
+                $problemLink = '<a href="' . getGameLink($entry['problemName']) . '"><div class="problem">' . $entry['problemName'] . '</div></a>';
             }
             $list .= '
                 <tr>
                     <td><a href="' . $submitLink . '">' . $entry['submitId'] . '</a></td>
                     <td>' . getUserLink($entry['userName']) . '</td>
-                    <td>' . getProblemLink($entry['problemId'], $entry['problemName']) . '</td>
+                    <td>' . $problemLink . '</td>
                     <td title="' . $entry['time'] . '">' . explode(' ', $entry['time'])[1] . '</td>
                     <td>' . intval($entry['progress'] * 100) . '%</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$entry['status']] . '</td>
