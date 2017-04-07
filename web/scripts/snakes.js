@@ -18,10 +18,6 @@ snakesReplayRunning = false;
 snakesPlayerOne = '';
 snakesPlayerTwo = '';
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function identifySnakeArrowEvent(event) {
     if (event.keyCode >= SNAKES_ARROW_LEFT && event.keyCode <= SNAKES_ARROW_DOWN) {
         event.preventDefault();
@@ -127,10 +123,9 @@ function addSnakesApple() {
     snakesCells[appleRow][appleCol] = '@';
 }
 
-async function endSnakesGame(message) {
+function endSnakesGame(message) {
     // Wait a little so the board is updated
-    await sleep(20);
-    alert(message);
+    window.setTimeout(function() {alert(message);}, 20);
     clearTimeout(snakesGameLoop);
     document.removeEventListener('keydown', identifySnakeArrowEvent, false);
 }
@@ -259,7 +254,44 @@ function runSnakesGame() {
     }, SNAKES_MOVE_INTERVAL);
 }
 
-async function runSnakesReplay(log) {
+function snakesReplayCycle(idx, log) {
+    if (snakesReplayRunning || idx == 0) {
+        if (log[idx] == '(') {
+            idx++;
+            var appleCoords = '';
+            while (log[idx] != ')')
+                appleCoords += log[idx++];
+            idx++;
+            var appleRow = parseInt(appleCoords.split(',')[0]);
+            var appleCol = parseInt(appleCoords.split(',')[1]);
+            snakesCells[appleRow][appleCol] = '@';
+            updateSnakesBoard();
+        } else {
+            if (log[idx] == 'L') snakesSnakeDir = SNAKES_ARROW_LEFT;
+            else if (log[idx] == 'U') snakesSnakeDir = SNAKES_ARROW_UP;
+            else if (log[idx] == 'R') snakesSnakeDir = SNAKES_ARROW_RIGHT;
+            else if (log[idx] == 'D') snakesSnakeDir = SNAKES_ARROW_DOWN;
+            else {
+                alert('Error in the game log: found invalid character \'' + log[idx] + '\'!');
+                return;
+            }
+            idx++;
+
+            var message = updateSnakesGame();
+            if (message != '') {
+                endSnakesGame(message);
+                if (idx < log.length) {
+                    alert('Game log claims there are more moves?');
+                }
+                return;
+            }
+            aiTurn = !aiTurn;
+        }
+    }
+    window.setTimeout(function() {snakesReplayCycle(idx, log);}, SNAKES_MOVE_INTERVAL);
+}
+
+function runSnakesReplay(log) {
     SNAKES_MOVE_INTERVAL = 80; // Milliseconds
 
     // Create the board
@@ -290,44 +322,8 @@ async function runSnakesReplay(log) {
     updateSnakesBoard();
 
     log = log.split('|')[1];
-    var idx = 0;
-    while (idx < log.length) {
-        if (snakesReplayRunning || idx == 0) {
-            if (log[idx] == '(') {
-                idx++;
-                var appleCoords = '';
-                while (log[idx] != ')')
-                    appleCoords += log[idx++];
-                idx++;
-                var appleRow = parseInt(appleCoords.split(',')[0]);
-                var appleCol = parseInt(appleCoords.split(',')[1]);
-                snakesCells[appleRow][appleCol] = '@';
-                updateSnakesBoard();
-                continue;
-            } else {
-                if (log[idx] == 'L') snakesSnakeDir = SNAKES_ARROW_LEFT;
-                else if (log[idx] == 'U') snakesSnakeDir = SNAKES_ARROW_UP;
-                else if (log[idx] == 'R') snakesSnakeDir = SNAKES_ARROW_RIGHT;
-                else if (log[idx] == 'D') snakesSnakeDir = SNAKES_ARROW_DOWN;
-                else {
-                    alert('Error in the game log: found invalid character \'' + log[idx] + '\'!');
-                    break;
-                }
-                idx++;
-
-                var message = updateSnakesGame();
-                if (message != '') {
-                    endSnakesGame(message);
-                    if (idx < log.length) {
-                        alert('Game log claims there are more moves?');
-                    }
-                    break;
-                }
-                aiTurn = !aiTurn;
-            }
-        }
-        await sleep(SNAKES_MOVE_INTERVAL);
-    }
+    // Start the update process
+    snakesReplayCycle(0, log);
 }
 
 function createSnakesGame() {
