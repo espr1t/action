@@ -121,6 +121,8 @@ class Evaluator:
             return
 
         # Finished with this submission
+        # Sleep a bit so we decrease chance of overwriting last update (due to network race condition)
+        sleep(config.UPDATE_INTERVAL)
         self.logger.info("[Submission {}]   >> done with {}!".format(self.id, self.id))
         self.update_frontend("DONE")
 
