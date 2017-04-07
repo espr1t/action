@@ -56,7 +56,19 @@ class Grader {
         return true;
     }
 
-    function updateGameTest(&$submit, $result) {
+    private function updateTest(&$submit, $test, $score, $exec_time, $exec_memory) {
+        // Update the test score
+        if (!is_numeric($submit->results[$test]))
+            $submit->results[$test] = 0;
+        $submit->results[$test] += $score;
+        // Update the test execution time (we've already checked that the match has ended, so it should be set)
+        $submit->exec_time[$test] = max($submit->exec_time[$test], $exec_time);
+        // Update the test execution memory (we've already checked that the match has ended, so it should be set)
+        $submit->exec_memory[$test] = max($submit->exec_memory[$test], $exec_memory);
+        $submit->update();
+    }
+
+    private function updateGameTest(&$submit, $result) {
         // Update the information about this match
         $test = intval($result['position']);
         $userOne = intval($result['player_one_id']);
@@ -68,21 +80,28 @@ class Grader {
         $match->log = $result['match_log'];
         $match->update();
 
-        // Update the submit info
-        if (!is_numeric($submit->results[$test]))
-            $submit->results[$test] = 0;
-        $submit->results[$test] += $submit->userId == $userOne ? $match->scoreOne : $match->scoreTwo;
+        // Update the information about this test in the user's submit
+        $score = $submit->userId == $userOne ? $match->scoreOne : $match->scoreTwo;
+        $exec_time = floatval($submit->userId == $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time']);
+        $exec_memory = floatval($submit->userId == $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory']);
+        $this->updateTest($submit, $test, $score, $exec_time, $exec_memory);
 
-        // Update the execution time (we've already checked that the match has ended, so it should be set)
-        $exec_time = $submit->userId == $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time'];
-        $submit->exec_time[$test] = max($submit->exec_time[$test], floatval($exec_time));
-
-        // Update the execution memory (we've already checked that the match has ended, so it should be set)
-        $exec_memory = $submit->userId == $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory'];
-        $submit->exec_memory[$test] = max($submit->exec_memory[$test], floatval($exec_memory));
+        // Update the information about this test in the opponent's submit
+        $opponentSubmitId = $submit->userId == $userOne ? $match->submitTwo : $match->submitOne;
+        if ($opponentSubmitId > 0) {
+            $opponentSubmit = Submit::get($opponentSubmitId);
+            if ($opponentSubmit == null) {
+                error_log('Couldn\'t find opponent\'s submit with id ' . $opponentSubmitId . ', although should be present!');
+            } else {
+                $score = $submit->userId != $userOne ? $match->scoreOne : $match->scoreTwo;
+                $exec_time = floatval($submit->userId != $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time']);
+                $exec_memory = floatval($submit->userId != $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory']);
+                $this->updateTest($opponentSubmit, $test, $score, $exec_time, $exec_memory);
+            }
+        }
     }
 
-    function updateTaskTest(&$submit, $result) {
+    private function updateTaskTest(&$submit, $result) {
         // Update the status of a single test
         if ($result['status'] == 'ACCEPTED') {
             $submit->results[$result['position']] = floatval($result['score']);

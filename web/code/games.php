@@ -149,7 +149,7 @@ class GamesPage extends Page {
                 <a href="' . getGameLink($problem->name) . '/visualizer">
                     <input type="submit" value="Визуализатор"class="button button-color-blue button-large" title="Визуализатор на играта">
                 </a>
-                <input type="submit" onclick="' . /*showFullForm();*/ '" value="Пълно решение" class="button button-large button-color-gray" title="' . $fullSubmitInfo . '">
+                <input type="submit" onclick="showFullForm();" value="Пълно решение" class="button button-large button-color-blue" title="' . $fullSubmitInfo . '">
                 <br>
                 <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
             </div>
@@ -306,7 +306,7 @@ class GamesPage extends Page {
                     $opponentName = sprintf('Author%d', -$opponentId);
                 } else {
                     $opponent = User::get($opponentId);
-                    $opponentName = $opponent['username'];
+                    $opponentName = $opponent->username;
                 }
 
                 $scoreUser = 0;

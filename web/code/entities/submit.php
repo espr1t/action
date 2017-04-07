@@ -82,6 +82,11 @@ class Submit {
         $brain->eraseLatest($this->id);
     }
 
+    public function update() {
+        $brain = new Brain();
+        $brain->updateSubmit($this);
+    }
+
     public function write() {
         $brain = new Brain();
         $this->id = $brain->addSubmit($this);
@@ -211,6 +216,48 @@ class Submit {
         }
         // Full submission - run a game against every other competitor
         else {
+            $submits = $brain->getProblemSubmits($problem->id);
+            // Choose only the latest full submissions of each competitor
+            $latest = array();
+            foreach ($submits as $submit) {
+                // Skip partial submits
+                if (!boolval($submit['full']))
+                    continue;
+                // Skip submits by the current user
+                if (intval($submit['userId']) == $this->userId)
+                    continue;
+
+                $key = 'User_' . $submit['userId'];
+                if (!array_key_exists($key, $latest)) {
+                    $latest[$key] = intval($submit['id']);
+                } else {
+                    if ($latest[$key] < intval($submit['id']))
+                        $latest[$key] = intval($submit['id']);
+                }
+            }
+
+            foreach ($latest as $key => $submitId) {
+                $submit = Submit::get($submitId);
+                // Update match info (add if a new match)
+                foreach ($tests as $test) {
+                    $match = new Match($problem->id, $test['position'],
+                            $this->userId, $submit->userId, $this->id, $submit->id);
+                    $match->update();
+                    swap($match->userOne, $match->userTwo);
+                    swap($match->submitOne, $match->submitTwo);
+                    $match->update();
+                }
+
+                // Add in match queue for testing
+                array_push($matches, array(
+                    'player_one_id' => $this->userId,
+                    'player_one_name' => $this->userName,
+                    'player_two_id' => $submit->userId,
+                    'player_two_name' => $submit->userName,
+                    'language' => $submit->language,
+                    'source' => $submit->source
+                ));
+            }
         }
 
         // Compile all the data, required by the grader to evaluate the game

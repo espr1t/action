@@ -433,10 +433,10 @@ class Brain {
         return $this->getResults($response);
     }
 
-    function getProblemSubmits($problemId, $status) {
+    function getProblemSubmits($problemId, $status = 'all') {
         if ($status == 'all') {
             $response = $this->db->query("
-                SELECT status, exec_time, exec_memory FROM `Submits`
+                SELECT * FROM `Submits`
                 WHERE problemId = " . $problemId . "
             ");
         } else {
