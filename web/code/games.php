@@ -342,7 +342,7 @@ class GamesPage extends Page {
                 }
                 $detailedTable .= '
                     <tr>
-                        <td>' . $opponentName . '</td>
+                        <td>' . getUserLink($opponentName) . '</td>
                         <td>' . sprintf('%.0f:%.0f', $scoreUser, $scoreOpponent) . '</td>
                         ' . $perTestStatus . '
                     </tr>
