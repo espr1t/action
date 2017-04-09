@@ -310,7 +310,7 @@ class GamesPage extends Page {
                     $opponentName = sprintf('Author%d', -$opponentId);
                 } else {
                     $opponent = User::get($opponentId);
-                    $opponentName = $opponent->username;
+                    $opponentName = getUserLink($opponent->username);
                 }
 
                 $scoreUser = 0;
@@ -342,7 +342,7 @@ class GamesPage extends Page {
                 }
                 $detailedTable .= '
                     <tr>
-                        <td>' . getUserLink($opponentName) . '</td>
+                        <td>' . $opponentName . '</td>
                         <td>' . sprintf('%.0f:%.0f', $scoreUser, $scoreOpponent) . '</td>
                         ' . $perTestStatus . '
                     </tr>
