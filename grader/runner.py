@@ -163,8 +163,8 @@ class Runner:
                 killed = True
                 break
 
-            # Ensure there is a new line at the end of the output
-            process.stdin.write(ai_output_text + "\n")
+            # Print only the first line of output and ensure there is a new line at the end
+            process.stdin.write(ai_output_text.splitlines()[0] + "\n")
             process.stdin.flush()
 
             ai_input.close()
