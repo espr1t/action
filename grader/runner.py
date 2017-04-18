@@ -353,7 +353,9 @@ class Runner:
         time_offset = config.TIME_OFFSET_CPP
         memory_offset = config.MEMORY_OFFSET_CPP
 
-        if self.evaluator.language == "Java":
+        language = "C++" if executable.endswith(".o") else "Java"
+
+        if language == "Java":
             thread_limit = config.THREAD_LIMIT_JAVA
             time_offset = config.TIME_OFFSET_JAVA
             memory_offset = config.MEMORY_OFFSET_JAVA
@@ -364,7 +366,7 @@ class Runner:
         executable = path.join(getcwd(), executable)
 
         args = []
-        if self.evaluator.language == "Java":
+        if language == "Java":
             xms = "-Xms{}k".format(1024)
             xmx = "-Xmx{}k".format(self.evaluator.memory_limit // 1024)
             args = ["java", "-XX:-UseSerialGC", xms, xmx, "-jar", executable]
@@ -376,7 +378,7 @@ class Runner:
         else:
             process = psutil.Popen(args=args, executable=executable, cwd=sandbox, stdin=inp_file, stdout=out_file,
                                    preexec_fn=(lambda: Runner.set_restrictions(
-                                       self.evaluator.time_limit, self.evaluator.language == "Java")))
+                                       self.evaluator.time_limit, language == "Java")))
 
         check_interval = config.EXECUTION_MIN_CHECK_INTERVAL
 

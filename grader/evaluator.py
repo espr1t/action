@@ -131,7 +131,7 @@ class Evaluator:
         self.update_frontend("DONE")
 
     def update_frontend(self, message="", results=None):
-        self.lock.acquire()
+        #self.lock.acquire()
         # Merge current message and results with previous ones
         self.update_message = message
         if results is not None:
@@ -160,7 +160,7 @@ class Evaluator:
             Thread(target=common.send_request, args=["POST", self.update_url, data]).start()
             # Clear update_results so we don't send them with every update
             self.update_results = []
-        self.lock.release()
+        #self.lock.release()
 
     def set_results(self, status):
         results = []
