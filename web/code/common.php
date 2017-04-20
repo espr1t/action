@@ -1,4 +1,5 @@
 <?php
+require_once('config.php');
 
 function swap(&$var1, &$var2) {
     $temp = $var1;
@@ -109,6 +110,24 @@ function prettyPrintCompilationErrors($submit) {
             </ul>
         </div>
     ';
+}
+
+function getWaitingTimes($user, $problem, &$remainPartial, &$remainFull) {
+    $brain = new Brain();
+    $submits = $brain->getUserSubmits($user->id, $problem->id);
+    $lastPartial = 0;
+    $lastFull = 0;
+    foreach ($submits as $submit) {
+        if ($submit['status'] != $GLOBALS['STATUS_COMPILATION_ERROR']) {
+            if ($submit['full'] == '1') {
+                $lastFull = max(array($lastFull, strtotime($submit['submitted'])));
+            } else {
+                $lastPartial = max(array($lastPartial, strtotime($submit['submitted'])));
+            }
+        }
+    }
+    $remainPartial = $problem->waitPartial * 60 - (time() - $lastPartial);
+    $remainFull = $problem->waitFull * 60 - (time() - $lastFull);
 }
 
 ?>

@@ -117,10 +117,16 @@ class GamesPage extends Page {
         $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
 
-        $partialSubmitInfo = "Частичното решение се тества срещу няколко авторски решения с различна сложност и не се запазва като финално.
-Можете да предавате такова решение веднъж на всеки 15 минути.";
-        $fullSubmitInfo = "Пълното решение се тества срещу всички решения и се запазва като финално (дори да сте предали по-добро по-рано).
-Можете да предавате такова решение веднъж на всеки 3 часа.";
+        $partialSubmitInfo = "Частичното решение се тества срещу няколко авторски решения с различна сложност и не се запазва като финално.";
+        if ($problem->waitPartial > 0) {
+            $partialSubmitInfo .= "
+Можете да предавате такова решение веднъж на всеки " . $problem->waitPartial . " минути.";
+        }
+        $fullSubmitInfo = "Пълното решение се тества срещу всички решения и се запазва като финално (дори да сте предали по-добро по-рано).";
+        if ($problem->waitFull > 0) {
+            $fullSubmitInfo .= "
+Можете да предавате такова решение веднъж на всеки " . $problem->waitFull . " минути.";
+        }
 
         $submitFormContent = '
             <h2><span class="blue">' . $problem->name . '</span> :: %s</h2>
@@ -135,28 +141,67 @@ class GamesPage extends Page {
         $partialSubmitFormContent = sprintf($submitFormContent, 'Частично Решение', $partialSubmitInfo, 'false');
         $fullSubmitFormContent = sprintf($submitFormContent, 'Пълно Решение', $fullSubmitInfo, 'true');
 
-        $controlButtons = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
-            <script>
-                function showPartialForm() {
-                    showSubmitForm(`' . $partialSubmitFormContent . '`);
-                }
-                function showFullForm() {
-                    showSubmitForm(`' . $fullSubmitFormContent . '`);
-                }
-            </script>
-            <div class="center">
-                <input type="submit" onclick="showPartialForm();" value="Частично решение" class="button button-large button-color-blue" title="' . $partialSubmitInfo . '">
-                <a href="' . getGameLink($problem->name) . '/visualizer">
-                    <input type="submit" value="Визуализатор" class="button button-color-blue button-large" title="Визуализатор на играта">
-                </a>
-                <input type="submit" onclick="showFullForm();" value="Пълно решение" class="button button-large button-color-blue" title="' . $fullSubmitInfo . '">
-                <br>
-                <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
-                <br>
-                <a href="' . getGameLink($problem->name) . '/scoreboard">
-                    <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на всички участници">
-                </a>
-            </div>
+        $partSubmitButton = '';
+        $fullSubmitButton = '';
+        $seeSubmissionsLink = '';
+        $visualizerButton = '
+                    <a href="' . getGameLink($problem->name) . '/visualizer">
+                        <input type="submit" value="Визуализатор" class="button button-color-blue button-large" title="Визуализатор на играта">
+                    </a>
+        ';
+        $scoreboardButton = '
+                    <br>
+                    <a href="' . getGameLink($problem->name) . '/scoreboard">
+                        <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на всички участници">
+                    </a>
+        ';
+
+        if ($this->user->access >= $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
+            $remainPartial = 0;
+            $remainFull = 0;
+            getWaitingTimes($this->user, $problem, $remainPartial, $remainFull);
+
+            // Partial submit button
+            if ($remainPartial <= 0) {
+                $partSubmitButton = '
+                        <script>function showPartialForm() {showSubmitForm(`' . $partialSubmitFormContent . '`);}</script>
+                        <input type="submit" onclick="showPartialForm();" value="Частично решение" class="button button-large button-color-blue"
+                                title="' . $partialSubmitInfo . '">
+                ';
+            } else {
+                $partSubmitButton = '
+                        <input type="submit" value="Частично решение" class="button button-large button-color-gray"
+                                title="Ще можете да предадете отново след ' . $remainPartial . ' секунди.">
+                ';
+            }
+            // Full submit button
+            if ($remainFull <= 0) {
+                $fullSubmitButton = '
+                        <script>function showFullForm() {showSubmitForm(`' . $fullSubmitFormContent . '`);}</script>
+                        <input type="submit" onclick="showFullForm();" value="Пълно решение" class="button button-large button-color-blue"
+                                title="' . $fullSubmitInfo . '">
+                ';
+            } else {
+                $fullSubmitButton = '
+                        <input type="submit" value="Пълно решение" class="button button-large button-color-gray"
+                                title="Ще можете да предадете отново след ' . $remainFull . ' секунди.">
+                ';
+            }
+            // See previous submissions link
+            $seeSubmissionsLink = '
+                    <br>
+                    <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
+            ';
+        }
+
+        $controlButtons = '
+                <div class="center">
+                    ' . $partSubmitButton . '
+                    ' . $visualizerButton . '
+                    ' . $fullSubmitButton . '
+                    ' . $seeSubmissionsLink . '
+                    ' . $scoreboardButton . '
+                </div>
         ';
 
         return '

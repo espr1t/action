@@ -1,5 +1,7 @@
 <?php
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
+require_once(__DIR__ . '/../entities/problem.php');
 require_once(__DIR__ . '/../entities/submit.php');
 require_once(__DIR__ . '/../entities/widgets.php');
 
@@ -24,6 +26,20 @@ $problemId = intval($_POST['problemId']);
 $language = $_POST['language'];
 $source = $_POST['source'];
 $full = boolval($_POST['full']);
+
+// Check if submission is allowed (may be too soon after latest submit)
+$problem = Problem::get($problemId);
+$remainPartial = 0;
+$remainFull = 0;
+getWaitingTimes($user, $problem, $remainPartial, $remainFull);
+
+$remainingTime = $full ? $remainFull : $remainPartial;
+if (($full && $remainFull > 0) || (!$full && $remainPartial > 0)) {
+    printAjaxResponse(array(
+        'status' => 'ERROR',
+        'message' => 'Остават още ' . $remainingTime . ' секунди преди да можете да предадете.'
+    ));
+}
 
 // User has rights to submit and has not exceeded the limit for the day
 $submit = Submit::newSubmit($user, $problemId, $language, $source, $full, false /* hidden */);

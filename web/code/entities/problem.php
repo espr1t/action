@@ -18,6 +18,8 @@ class Problem {
     public $origin = '';
     public $checker = '';
     public $tester = '';
+    public $waitPartial = 0;
+    public $waitFull = 0;
     public $addedBy = '';
 
     public function __construct() {
@@ -29,6 +31,8 @@ class Problem {
         $this->type = 'ioi';
         $this->difficulty = 'medium';
         $this->origin = 'Problem Origin';
+        $this->waitPartial = 0;
+        $this->waitFull = 0;
         $this->addedBy = 'unknown';
 
         $emptyStatementPath = sprintf("%s/%s", $GLOBALS['PATH_PROBLEMS'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
@@ -51,6 +55,8 @@ class Problem {
             'origin' => $this->origin,
             'checker' => $this->checker,
             'tester' => $this->tester,
+            'waitPartial' => $this->waitPartial,
+            'waitFull' => $this->waitFull,
             'addedBy' => $this->addedBy
         );
     }
@@ -71,6 +77,8 @@ class Problem {
         $problem->origin = getValue($info, 'origin');
         $problem->checker = getValue($info, 'checker');
         $problem->tester = getValue($info, 'tester');
+        $problem->waitPartial = intval(getValue($info, 'waitPartial'));
+        $problem->waitFull = intval(getValue($info, 'waitFull'));
         $problem->addedBy = getValue($info, 'addedBy');
         return $problem;
     }

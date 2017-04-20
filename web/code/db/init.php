@@ -72,6 +72,8 @@ Table::Problems
     "checker": "",
     "tester": "",
     "tags": ["implementation"],
+    "waitPartial": 5,
+    "waitFull": 180,
     "addedBy": "espr1t"
 }
 */
@@ -98,6 +100,8 @@ if ($db->tableExists('Problems')) {
             checker VARCHAR(32) NOT NULL,
             tester VARCHAR(32) NOT NULL,
             tags TINYTEXT NOT NULL,
+            waitPartial INT NOT NULL,
+            waitFull INT NOT NULL,
             addedBy VARCHAR(32) NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
