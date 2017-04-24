@@ -25,7 +25,8 @@ $testPath = sprintf("%s/%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder,
 
 // TODO: Maybe replace CRLF only if Linux is detected?
 $testContent = base64_decode($_POST['testContent']);
-$testContent = preg_replace('~\R~u', "\n", $testContent);
+
+//$testContent = preg_replace('~\R~u', "\n", $testContent);
 file_put_contents($testPath, $testContent);
 
 $testHash = md5($testContent);

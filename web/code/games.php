@@ -45,10 +45,6 @@ class GamesPage extends Page {
 
             $userPoints = array();
             foreach ($gameMatches as $match) {
-                // Skip test 0
-                if ($match['test'] == '0')
-                    continue;
-
                 // Partial submission, skip it
                 if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
                     continue;
