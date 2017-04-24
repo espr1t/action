@@ -152,7 +152,6 @@ class Runner:
                 elif result.exit_code != 0:
                     message = "{}'s solution crashed.".format(player)
                     self.logger.info("Exit code: {}".format(result.exit_code))
-                    self.logger.info("Input was:\n{}".format(ai_input_text))
                 elif ai_output_empty:
                     message = "{}'s solution did not print any output.".format(player)
 
