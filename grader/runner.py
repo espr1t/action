@@ -454,8 +454,8 @@ class Runner:
             return self.validate_output_with_checker(inp_file, out_file, sol_file)
 
     def validate_output_directly(self, out_file, sol_file):
-        with open(out_file, "rt") as out:
-            with open(sol_file, "rt") as sol:
+        with open(out_file, "rt", encoding="cp866") as out:
+            with open(sol_file, "rt", encoding="cp866") as sol:
                 while True:
                     out_line = out.readline()
                     sol_line = sol.readline()
