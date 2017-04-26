@@ -86,14 +86,14 @@ class Evaluator:
             return
 
         # Download and compile the checker (if not already available)
-        if self.checker is not None:
+        if self.checker is not None and not path.exists(config.PATH_CHECKERS + self.checker):
             self.logger.info("[Submission {}]   >> updating checker file...".format(self.id))
             if not self.download_and_compile_utility_file(config.PATH_CHECKERS, self.checker, self.checker_url):
                 self.update_frontend("Error while setting up checker!", self.set_results(TestStatus.INTERNAL_ERROR))
             return
 
         # Download and compile the tester (if not already available)
-        if self.tester is not None:
+        if self.tester is not None and not path.exists(config.PATH_TESTERS + self.tester):
             self.logger.info("[Submission {}]   >> updating tester file...".format(self.id))
             if not self.download_and_compile_utility_file(config.PATH_TESTERS, self.tester, self.tester_url):
                 self.update_frontend("Error while setting up tester!", self.set_results(TestStatus.INTERNAL_ERROR))
