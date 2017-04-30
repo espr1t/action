@@ -131,7 +131,7 @@ class Evaluator:
         self.update_frontend("DONE")
 
     def update_frontend(self, message="", results=None):
-        #self.lock.acquire()
+        self.lock.acquire()
         # Merge current message and results with previous ones
         self.update_message = message
         if results is not None:
@@ -149,18 +149,20 @@ class Evaluator:
         # We're using time() instead of perf_counter() so we get a UNIX timestamp (with parts of seconds)
         # This info helps figure out WHEN exactly (date + hour) the solution was graded.
         if time() - self.update_timer > config.UPDATE_INTERVAL or self.update_message != "":
-            self.update_timer = time()
             data = {
                 "id": self.id,
                 "message": self.update_message,
                 "results": json.dumps(self.update_results),
-                "timestamp": self.update_timer
+                "timestamp": time()
             }
-            # Make the updates asynchronous so we don't stop the execution of the tests
-            Thread(target=common.send_request, args=["POST", self.update_url, data]).start()
+            # We intentionally make the update synchronous so we're absolutely sure it is processed
+            # before we send the next one (the lock ensures this).
+            common.send_request("POST", self.update_url, data)
             # Clear update_results so we don't send them with every update
             self.update_results = []
-        #self.lock.release()
+            # Finally update the timer until next update
+            self.update_timer = time()
+        self.lock.release()
 
     def set_results(self, status):
         results = []

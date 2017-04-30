@@ -5,7 +5,7 @@
 WORKER_COUNT = 3  # Threads
 
 # Evaluation
-UPDATE_INTERVAL = 0.5  # Seconds
+UPDATE_INTERVAL = 1.0  # Seconds
 FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 
 # Execution

@@ -45,6 +45,9 @@ def send_request(method, url, data=None):
     else:
         logger = logging.getLogger("commn")
         logger.error("Could not send request: unsupported request method '{}'!".format(method))
+    if response.status_code != requests.codes.ok:
+        logger = logging.getLogger("commn")
+        logger.error("Could not complete request to {}: got response code {}!".format(url, response.status_code))
     return response
 
 
