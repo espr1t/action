@@ -124,7 +124,7 @@ class Compiler:
                 manifest.write("Manifest-version: 1.0\n")
                 manifest.write("Main-Class: {}\n".format(class_name))
 
-            command = "jar cfm {} {} {}".format(jar_file, manifest_file, class_file)
+            command = "jar cfm {} {} *.class".format(jar_file, manifest_file)
             exit_code, error_message, compilation_time = Compiler.run_command(command)
 
             # Remove left-over files
