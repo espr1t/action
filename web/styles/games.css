@@ -1,3 +1,103 @@
+/* Cezanne */
+@font-face {
+    font-family: "Cezanne";
+    src: url(/fonts/cezanne_regular.ttf);
+}
+
+/***********************
+  Ultimate Tic-Tac-Toe
+************************/
+div.uttt-content {
+    width: 100%;
+    text-align: center;
+}
+
+table.uttt-board {
+    margin: auto;
+	border-collapse: collapse;
+}
+
+table.uttt-board tr td {
+	width: 7rem;
+	min-width: 7rem;
+	height: 7rem;
+	min-height: 7rem;
+
+    border: 1px solid;
+    border-color: #000000;
+    text-align: center;
+}
+
+table.uttt-board tr:first-child td {
+  border-top: 0;
+}
+table.uttt-board tr:last-child td {
+  border-bottom: 0;
+}
+table.uttt-board tr td:first-child,
+table.uttt-board tr th:first-child {
+  border-left: 0;
+}
+table.uttt-board tr td:last-child,
+table.uttt-board tr th:last-child {
+  border-right: 0;
+}
+
+div.uttt-small-board-won {
+	font-size: 5rem;
+	padding-bottom: 1rem;
+    font-family: "Cezanne", monospace;
+}
+
+table.uttt-small-board {
+    margin: auto;
+	border-collapse: collapse;
+}
+
+table.uttt-small-board tr td {
+	width: 2rem;
+	min-width: 2rem;
+	height: 2rem;
+	min-height: 2rem;
+
+    border: 1px dotted;
+    border-color: #666666;
+    text-align: center;
+	font-size: 1.75rem;
+    font-family: "Cezanne", monospace;
+}
+
+table.uttt-small-board tr:first-child td {
+  border-top: 0;
+}
+table.uttt-small-board tr:last-child td {
+  border-bottom: 0;
+}
+table.uttt-small-board tr td:first-child,
+table.uttt-small-board tr th:first-child {
+  border-left: 0;
+}
+table.uttt-small-board tr td:last-child,
+table.uttt-small-board tr th:last-child {
+  border-right: 0;
+}
+
+table.uttt-small-board td.cell-normal {
+	cursor: default;
+}
+
+table.uttt-small-board td.cell-clickable {
+	cursor: pointer;
+}
+
+div.uttt-small-board-hidden-text {
+	opacity: 0.0;
+}
+
+div.uttt-small-board-hidden-text:hover {
+	opacity: 0.5;
+}
+
 /***********************
        Snakes
 ************************/

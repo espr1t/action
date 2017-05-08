@@ -14,7 +14,7 @@ class GamesPage extends Page {
     }
     
     public function getExtraScripts() {
-        return array('/scripts/language_detector.js', '/scripts/snakes.js');
+        return array('/scripts/language_detector.js', '/scripts/snakes.js', '/scripts/uttt.js');
     }
 
     public function getExtraStyles() {
@@ -25,7 +25,7 @@ class GamesPage extends Page {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
         foreach ($problemsInfo as $problemInfo) {
-            if (getGameUrlName($problemInfo['name']) == $name)
+            if ($problemInfo['type'] == 'game' && getGameUrlName($problemInfo['name']) == $name)
                 return Problem::get($problemInfo['id']);
         }
         return null;
@@ -364,13 +364,19 @@ class GamesPage extends Page {
                     $log = $result['log'];
 
                     if ($result['scoreUser'] > $result['scoreOpponent']) {
+                        // Win
                         $classes = 'fa fa-check-circle-o green';
                     } else if ($result['scoreUser'] < $result['scoreOpponent']) {
+                        // Loss
                         $classes = 'fa fa-times-circle-o red';
                     } else {
                         if ($result['scoreUser'] == 0 && $result['scoreOpponent'] == 0) {
+                            // Not played
                             $classes = 'fa fa-question-circle-o gray';
                             $message = 'Мачът още не е изигран.';
+                        } else {
+                            // Draw
+                            $classes = 'fa fa-pause-circle-o yellow';
                         }
                     }
                     $perTestStatus .= '
@@ -517,14 +523,13 @@ class GamesPage extends Page {
         $playerTwo = User::get($match->userTwo);
         $playerTwo = $playerTwo != null ? $playerTwo->username : sprintf('Author%d', -$match->userTwo);
 
-        $content = '';
-        if ($_GET['game'] == 'snakes') {
-            $content = '
-                <script>
-                    showSnakesReplay("'. $playerOne . '", "' . $playerTwo .'", "' . $match->log . '");
-                </script>
-            ';
-        }
+        $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' : 'showUtttReplay';
+        $content = '
+            <script>
+                ' . $functionName . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->log . '");
+            </script>
+        ';
+
         return $content;
     }
 
@@ -656,6 +661,8 @@ class GamesPage extends Page {
             if (isset($_GET['visualizer'])) {
                 if ($_GET['game'] == 'snakes') {
                     $content .= '<script>showSnakesVisualizer("'. $this->user->username . '");</script>';
+                } else if ($_GET['game'] == 'ultimate-ttt') {
+                    $content .= '<script>showUtttVisualizer("'. $this->user->username . '");</script>';
                 }
             } else if (isset($_GET['scoreboard'])) {
                 $content .= $this->getScoreboard($problem);

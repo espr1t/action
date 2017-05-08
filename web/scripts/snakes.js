@@ -11,7 +11,7 @@ snakesNumCols = 15;
 snakesDesiredLength = 10;
 snakesSnakeDir = null;
 
-aiTurn = false;
+snakesAiTurn = false;
 snakesGameLoop = null;
 showLetters = true;
 snakesReplayRunning = false;
@@ -36,7 +36,7 @@ function identifySnakeReplayEvent(event) {
     }
 }
 
-function aiLogic() {
+function snakesAiLogic() {
     // BFS to find shortest paths, originated at the apple
     var INF = 1000000001;
     var dir = [ [-1, 0], [0, 1], [1, 0], [0, -1] ];
@@ -135,8 +135,8 @@ function changeSnakesChar(ch, add) {
 }
 
 function updateSnakesGame() {
-    var headChar = aiTurn ? 'a' : 'A';
-    var tailChar = aiTurn ? 'z' : 'Z';
+    var headChar = snakesAiTurn ? 'a' : 'A';
+    var tailChar = snakesAiTurn ? 'z' : 'Z';
 
     var snake = {};
     var currentLength = 0;
@@ -158,7 +158,7 @@ function updateSnakesGame() {
     else if (snakesSnakeDir == SNAKES_ARROW_RIGHT) nextCol++;
     else if (snakesSnakeDir == SNAKES_ARROW_DOWN) nextRow++;
 
-    var currentPlayer = !aiTurn ? snakesPlayerOne : snakesPlayerTwo;
+    var currentPlayer = !snakesAiTurn ? snakesPlayerOne : snakesPlayerTwo;
 
     // Outside the board
     if (nextRow < 0 || nextRow >= snakesNumRows || nextCol < 0 || nextCol >= snakesNumCols) {
@@ -184,7 +184,7 @@ function updateSnakesGame() {
         snakesCells[nextRow][nextCol] = headChar;
 
         currentLength++;
-        document.getElementById(!aiTurn ? 'p1score' : 'p2score').innerHTML = (currentLength - 1) + '/' + snakesDesiredLength;
+        document.getElementById(!snakesAiTurn ? 'p1score' : 'p2score').innerHTML = (currentLength - 1) + '/' + snakesDesiredLength;
 
         // Add an apple if the game doesn't end now
         if (currentLength < snakesDesiredLength + 1)
@@ -223,7 +223,7 @@ function userMove() {
 }
 
 function aiMove() {
-    message = aiLogic();
+    message = snakesAiLogic();
     if (message != '') {
         if (message == 'You win!')
             endSnakesGame('You lost. Opponent ate ' + snakesDesiredLength + ' apples first!');
@@ -236,7 +236,7 @@ function aiMove() {
 
 function runSnakesGame() {
     // User's move
-    if (!aiTurn) {
+    if (!snakesAiTurn) {
         if (!userMove()) {
             return false;
         }
@@ -248,7 +248,7 @@ function runSnakesGame() {
         }
     }
     // Continue self-update loop
-    aiTurn = !aiTurn;
+    snakesAiTurn = !snakesAiTurn;
     snakesGameLoop = setTimeout(function() {
         runSnakesGame();
     }, SNAKES_MOVE_INTERVAL);
@@ -288,7 +288,7 @@ function snakesReplayCycle(idx, log) {
                 }
                 return;
             }
-            aiTurn = !aiTurn;
+            snakesAiTurn = !snakesAiTurn;
         }
     }
     window.setTimeout(function() {snakesReplayCycle(idx, log);}, SNAKES_MOVE_INTERVAL);
@@ -423,13 +423,7 @@ function getSnakesContent() {
     player2.innerHTML += '<div style="font-size: smaller;" id="p2score">0/' + snakesDesiredLength + '</div>';
     content.appendChild(player2);
 
-    var instructions = document.createElement('div');
-    instructions.style.textAlign = 'center';
-    instructions.style.fontStyle = 'italic';
-    instructions.innerHTML = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
-    content.appendChild(instructions);
-
-    return content.outerHTML;
+    return content;
 }
 
 function showSnakesReplay(playerOne, playerTwo, log) {
@@ -439,9 +433,15 @@ function showSnakesReplay(playerOne, playerTwo, log) {
     // Create and show the initial board
     var content = getSnakesContent();
 
+    var instructions = document.createElement('div');
+    instructions.style.textAlign = 'center';
+    instructions.style.fontStyle = 'italic';
+    instructions.innerHTML = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
+    content.appendChild(instructions);
+
     // Make pressing escape return back to the game
     var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
-    showActionForm(content, gameUrl);
+    showActionForm(content.outerHTML, gameUrl);
 
     // Add action event listeners
     document.addEventListener('keydown', identifySnakeReplayEvent, false);
@@ -465,5 +465,5 @@ function showSnakesVisualizer(username) {
 
     // Make pressing escape return back to the game
     var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/'));
-    showActionForm(content, gameUrl);
+    showActionForm(content.outerHTML, gameUrl);
 }
