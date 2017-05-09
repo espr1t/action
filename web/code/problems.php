@@ -30,12 +30,15 @@ class ProblemsPage extends Page {
         for ($i = 0; $i < count($problemsInfo); $i += 1) {
             $problemSolutions = $brain->getProblemSubmits($problemsInfo[$i]['id'], $GLOBALS['STATUS_ACCEPTED']);
             $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
+            $serviceUserSolutions = 0;
             foreach ($problemSolutions as $problemSolution) {
                 if ($problemSolution['userId'] == $GLOBALS['user']->id) {
                     $statusIcon = '<i class="fa fa-check green" title="Вече сте решили успешно тази задача!."></i>';
+                } else if ($problemSolution['userId'] == 0) {
+                    $serviceUserSolutions = 1;
                 }
             }
-            $solutions = '<i class="fa fa-users" title="Решена от"></i> ' . count($problemSolutions);
+            $solutions = '<i class="fa fa-users" title="Решена от"></i> ' . (count($problemSolutions) - $serviceUserSolutions);
 
             $problemsInfo[$i]['box'] = '
                 <a href="problems/' . $problemsInfo[$i]['id'] . '" class="decorated">
