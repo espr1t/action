@@ -10,7 +10,7 @@ class HelpPage extends Page {
     public function getContent() {
         $version = '
             <div class="help-version">
-                Версия на системата: <a href="https://github.com/espr1t/action/commit/5b16f69736956f48f11640d4cb28a4b456cbc9e1" target="_blank">v.170421.5b16f69</a>
+                Версия на системата: <a href="https://github.com/espr1t/action/commit/b64671b1599b5e441a33a35c42b35cd10c5e05a7" target="_blank">v.170509.b64671b</a>
             </div>
         ';
 
@@ -63,10 +63,8 @@ class HelpPage extends Page {
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
                 <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -s -static -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
-                <li><b>Java (OpenJDK 8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
-                <!--
-                <li><b>Python (3.5):</b> <pre>python &lt;source&gt;</pre></li>
-                -->
+                <li><b>Java (Oracle 1.8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
+                <li><b>Python (Python 3.5.2):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
             Максималното време за компилация е 3 секунди.<br>
             Максималният размер на стека е 64 мегабайта.

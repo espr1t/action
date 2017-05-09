@@ -15,6 +15,7 @@ from status import TestStatus
 from queue import Queue
 from threading import Thread
 from string import printable
+import common
 
 if not platform.startswith("win32"):
     import resource
@@ -61,8 +62,8 @@ class Runner:
     def play(self, run_id, test, tester, player_one_id, player_one_name, player_one_executable,
                                          player_two_id, player_two_name, player_two_executable):
         # Prepare the run input and output data
-        self.logger.info("[Submission {}]       ++ test {}: {} vs {}...".format(
-                self.evaluator.id, test['position'], player_one_name, player_two_name))
+        self.logger.info("[Submission {}]       ++ test {}: {} vs {} (run_id = {})...".format(
+                self.evaluator.id, test['position'], player_one_name, player_two_name, run_id))
 
         inp_file_name, _, _, sandbox, _ = self.prepare_run(test)
 
@@ -352,13 +353,14 @@ class Runner:
         time_offset = config.TIME_OFFSET_CPP
         memory_offset = config.MEMORY_OFFSET_CPP
 
-        language = "C++" if executable.endswith(".o") else "Java"
+        language = common.get_language_by_exec_name(executable)
 
         if language == "Java":
             thread_limit = config.THREAD_LIMIT_JAVA
             time_offset = config.TIME_OFFSET_JAVA
             memory_offset = config.MEMORY_OFFSET_JAVA
 
+        # TODO: Figure out if this is still needed
         execution_time_limit = max(1.0, self.evaluator.time_limit * 2)
 
         # Calling the executable doesn't work on Windows 10 Ubuntu Bash if we don't provide the full path
@@ -369,6 +371,9 @@ class Runner:
             xms = "-Xms{}k".format(1024)
             xmx = "-Xmx{}k".format(self.evaluator.memory_limit // 1024)
             args = ["java", "-XX:-UseSerialGC", xms, xmx, "-jar", executable]
+            executable = None
+        elif language == "Python":
+            args = ["python3", executable]
             executable = None
 
         start_time = perf_counter()

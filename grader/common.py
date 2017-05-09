@@ -15,12 +15,43 @@ scheduler = ThreadPoolExecutor(config.WORKER_COUNT)
 executor = ThreadPoolExecutor(config.WORKER_COUNT)
 
 
+def get_language_by_exec_name(executable):
+    if executable.endswith(config.EXECUTABLE_EXTENSION_CPP):
+        return "C++"
+    elif executable.endswith(config.EXECUTABLE_EXTENSION_JAVA):
+        return "Java"
+    elif executable.endswith(config.EXECUTABLE_EXTENSION_PYTHON):
+        return "Python"
+    else:
+        logger = logging.getLogger("commn")
+        logger.error("Could not determine language by executable name: '{}'!".format(executable))
+        return "Unknown"
+
+
 def get_source_extension(language):
-    return ".cpp" if language == "C++" else ".java" if language == "Java" else ".py"
+    if language == "C++":
+        return config.SOURCE_EXTENSION_CPP
+    elif language == "Java":
+        return config.SOURCE_EXTENSION_JAVA
+    elif language == "Python":
+        return config.SOURCE_EXTENSION_PYTHON
+    else:
+        logger = logging.getLogger("commn")
+        logger.error("Requested source extension for unknown language: '{}'!".format(language))
+        return ".unk"
 
 
 def get_executable_extension(language):
-    return ".o" if language == "C++" else ".jar" if language == "Java" else ".py"
+    if language == "C++":
+        return config.EXECUTABLE_EXTENSION_CPP
+    elif language == "Java":
+        return config.EXECUTABLE_EXTENSION_JAVA
+    elif language == "Python":
+        return config.EXECUTABLE_EXTENSION_PYTHON
+    else:
+        logger = logging.getLogger("commn")
+        logger.error("Requested executable extension for unknown language: '{}'!".format(language))
+        return ".unk"
 
 
 def create_response(status, message, data=None):

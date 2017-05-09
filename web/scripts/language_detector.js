@@ -233,7 +233,7 @@ function removePyStyleComments(code) {
 }
 
 function scoreByKeyword(code, scores, index, multiplier, keyword) {
-    var re = new RegExp("(^|\\s)" + keyword + "(\\s|$)", 'g');
+    var re = new RegExp("(^|\\s)" + keyword + "(\\s|\\(|$)", 'g');
     scores[index] += (code.match(re) || []).length * multiplier;
 }
 
@@ -294,9 +294,15 @@ function detectLanguage(code) {
     var javaScore   = scores[1];
     var pythonScore = scores[2];
 
-    cppScore    /= codeWithoutCStyleComments.length;  // ccp score
+    cppScore    /= codeWithoutCStyleComments.length;  // cpp score
     javaScore   /= codeWithoutCStyleComments.length;  // java score
     pythonScore /= codeWithoutPyStyleComments.length; // python score
+
+    /*
+    console.log("C++ score: " + cppScore)
+    console.log("Java score: " + javaScore)
+    console.log("Python score: " + pythonScore)
+    */
 
     return (javaScore < cppScore) ? ((pythonScore < cppScore) ? "C++" : "Python") : ((javaScore < pythonScore) ? "Python" : "Java");
 }
