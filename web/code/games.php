@@ -539,66 +539,74 @@ class GamesPage extends Page {
         $brain = new Brain();
         $matches = $brain->getGameMatches($problem->id);
 
-        $found = false;
         $wins = array();
+        $draws = array();
         $losses = array();
         $submit = array();
+        $playerScore = array();
+        $opponentScore = array();
 
+        // Initialize all arrays with zeroes
+        foreach ($matches as $match) {
+            // If one of the users is negative, this means this is a partial submission match.
+            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
+                continue;
+            for ($player = 0; $player < 2; $player += 1) {
+                $userKey = ($player == 0 ? 'User_' . $match['userOne'] : 'User_' . $match['userTwo']);
+                $wins[$userKey] = $draws[$userKey] = $losses[$userKey] = 0;
+                $submit[$userKey] = $playerScore[$userKey] = $opponentScore[$userKey] = 0;
+            }
+        }
+
+        // Get the scores, wins, draws, and losses for each player
         $games = array();
         foreach ($matches as $match) {
-            // If one of the users is negative, this means this is a partial submission match
+            // If one of the users is negative, this means this is a partial submission match.
             if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
                 continue;
 
             $userOneKey = 'User_' . $match['userOne'];
-            if (!array_key_exists($userOneKey, $wins))
-                $wins[$userOneKey] = 0;
-            if (!array_key_exists($userOneKey, $losses))
-                $losses[$userOneKey] = 0;
-            if (!array_key_exists($userOneKey, $submit))
-                $submit[$userOneKey] = intval($match['submitOne']);
             $userTwoKey = 'User_' . $match['userTwo'];
-            if (!array_key_exists($userTwoKey, $wins))
-                $wins[$userTwoKey] = 0;
-            if (!array_key_exists($userTwoKey, $losses))
-                $losses[$userTwoKey] = 0;
-            if (!array_key_exists($userTwoKey, $submit))
-                $submit[$userTwoKey] = intval($match['submitTwo']);
 
-            if (floatval($match['scoreOne']) == floatval($match['scoreTwo'])) {
-                // Nothing, but this shouldn't happen for this problem
-            } else if (floatval($match['scoreOne']) < floatval($match['scoreTwo'])) {
-                $wins[$userTwoKey]++;
-                $losses[$userOneKey]++;
-            } else if (floatval($match['scoreOne']) > floatval($match['scoreTwo'])) {
-                $wins[$userOneKey]++;
-                $losses[$userTwoKey]++;
+            // Player one scores
+            $submit[$userOneKey] = intval($match['submitOne']);
+            $playerScore[$userOneKey] += floatval($match['scoreOne']);
+            $opponentScore[$userOneKey] += floatval($match['scoreTwo']);
+
+            // Player two scores
+            $submit[$userTwoKey] = intval($match['submitTwo']);
+            $playerScore[$userTwoKey] += floatval($match['scoreTwo']);
+            $opponentScore[$userTwoKey] += floatval($match['scoreOne']);
+
+            // Wins and losses
+            if ($match['scoreOne'] > $match['scoreTwo']) {
+                $wins[$userOneKey] += 1;
+                $losses[$userTwoKey] += 1;
+            } else if ($match['scoreOne'] == $match['scoreTwo']) {
+                $draws[$userOneKey] += 1;
+                $draws[$userTwoKey] += 1;
+            } else {
+                $losses[$userOneKey] += 1;
+                $wins[$userTwoKey] += 1;
             }
         }
 
-        $numPlayers = count($wins);
+        $numPlayers = count($playerScore);
 
         $ranking = '';
         for ($pos = 1; $pos <= $numPlayers; $pos++) {
-            $maxWins = -1;
-            $minLosses = 1e100;
             $bestUser = '';
+            $maxPlayerScore = -1;
+            $minOpponentScore = 1e100;
 
-            foreach ($wins as $userKey => $cnt) {
-                if ($maxWins < $cnt) {
+            foreach ($playerScore as $userKey => $score) {
+                $isBetter = ($maxPlayerScore < $playerScore[$userKey]) ||
+                            ($maxPlayerScore == $playerScore[$userKey] && $minOpponentScore > $opponentScore[$userKey]) ||
+                            ($maxPlayerScore == $playerScore[$userKey] && $minOpponentScore == $opponentScore[$userKey] && $submit[$userKey] < $submit[$bestUser]);
+                if ($isBetter) {
                     $bestUser = $userKey;
-                    $maxWins = $wins[$userKey];
-                    $minLosses = $losses[$userKey];
-                } else if ($maxWins == $cnt && $minLosses > $losses[$userKey]) {
-                    $bestUser = $userKey;
-                    $maxWins = $wins[$userKey];
-                    $minLosses = $losses[$userKey];
-                } else if ($maxWins == $cnt && $minLosses == $losses[$userKey]) {
-                    if ($submit[$userKey] < $submit[$bestUser]) {
-                        $bestUser = $userKey;
-                        $maxWins = $wins[$userKey];
-                        $minLosses = $losses[$userKey];
-                    }
+                    $maxPlayerScore = $playerScore[$userKey];
+                    $minOpponentScore = $opponentScore[$userKey];
                 }
             }
 
@@ -608,19 +616,18 @@ class GamesPage extends Page {
                     $this->user->access > $GLOBALS['ACCESS_SEE_SUBMITS']) {
                 $submitId = '<a href="' . getGameLink($problem->name) . '/submits/' . $submit[$bestUser] . '">' . $submit[$bestUser] . '</a>';
             }
+            $title = '' . $wins[$bestUser] . '/' . $draws[$bestUser] . '/' . $losses[$bestUser];
             $ranking .= '
                 <tr>
                     <td>' . $pos . '</td>
                     <td>' . getUserLink($user->username) . '</td>
                     <td>' . $user->name . '</td>
                     <td>' . $submitId . '</td>
-                    <td>' . $maxWins . ':' . $minLosses . '</td>
+                    <td title="' . $title . '">' . $maxPlayerScore . '</td>
                 </tr>
             ';
 
-            unset($wins[$bestUser]);
-            unset($losses[$bestUser]);
-            unset($submit[$bestUser]);
+            unset($playerScore[$bestUser]);
         }
 
         $content = '
@@ -631,7 +638,7 @@ class GamesPage extends Page {
                     <th>Потребител</th>
                     <th>Име</th>
                     <th>Събмит</th>
-                    <th>Резултат</th>
+                    <th>Точки</th>
                 </tr>
                 ' . $ranking . '
             </table>
