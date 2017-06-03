@@ -90,7 +90,7 @@ class Evaluator:
             self.logger.info("[Submission {}]   >> updating checker file...".format(self.id))
             if not self.download_and_compile_utility_file(config.PATH_CHECKERS, self.checker, self.checker_url):
                 self.update_frontend("Error while setting up checker!", self.set_results(TestStatus.INTERNAL_ERROR))
-            return
+                return
 
         # Download and compile the tester (if not already available)
         if self.tester is not None and not path.exists(config.PATH_TESTERS + self.tester):
@@ -242,8 +242,8 @@ class Evaluator:
         return True
 
     def download_and_compile_utility_file(self, directory, file_hash, url):
-        path_source = directory + file_hash + ".cpp"
-        path_executable = directory + file_hash + ".o"
+        path_source = directory + file_hash + config.SOURCE_EXTENSION_CPP
+        path_executable = directory + file_hash + config.EXECUTABLE_EXTENSION_CPP
         if not self.download_utility_file(url, path_source):
             return False
         if not self.compile_utility_file(path_source, path_executable):

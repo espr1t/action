@@ -72,7 +72,7 @@ class Runner:
             input_content = input_file.read()
 
         # Start the tester's process
-        tester_executable = getcwd() + "/" + config.PATH_TESTERS + tester + ".o"
+        tester_executable = getcwd() + "/" + config.PATH_TESTERS + tester + config.EXECUTABLE_EXTENSION_CPP
         process = psutil.Popen(args=[], cwd=sandbox, executable=tester_executable,
                                stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
 
@@ -507,7 +507,7 @@ class Runner:
                     return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0
 
     def validate_output_with_checker(self, inp_file, out_file, sol_file):
-        checker_binary_path = config.PATH_CHECKERS + self.evaluator.checker
+        checker_binary_path = config.PATH_CHECKERS + self.evaluator.checker + config.EXECUTABLE_EXTENSION_CPP
         process = psutil.Popen(args=[checker_binary_path, inp_file, out_file, sol_file],
                                executable=checker_binary_path, cwd=getcwd(), stdout=PIPE, stderr=PIPE)
         try:
