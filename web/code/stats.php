@@ -32,7 +32,7 @@ class StatsPage extends Page {
         return '
             <div id="' . $id . '" style="display: inline-block;"></div>
             <script>
-                google.charts.load("current");
+                google.charts.load("current", {"packages":["corechart"]});
                 google.charts.setOnLoadCallback(drawVisualization);
 
                 function drawVisualization() {
