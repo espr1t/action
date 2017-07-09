@@ -62,8 +62,8 @@ function createHead($page) {
         <meta name="author" content="Alexander Georgiev">
         <meta name="keywords" content="Програмиране,Информатика,Алгоритми,Структури Данни,Задачи,' .
                                       'Programming,Informatics,Algorithms,Data Structures,Problems">
-        <link rel="shortcut icon" type="image/x-icon" href="/images/favicon_128.png">
-        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" type="image/x-icon" href="/images/favicon_blue_128.png">
+        <link rel="icon" href="/favicon_blue.ico" type="image/x-icon">
         <link rel="stylesheet" type="text/css" href="/styles/style.css">
         <link rel="stylesheet" type="text/css" href="/styles/icons/css/font-awesome.css">
         <script src="/scripts/common.js"></script>
