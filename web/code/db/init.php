@@ -88,7 +88,7 @@ if ($db->tableExists('Problems')) {
             id INT NOT NULL AUTO_INCREMENT,
             name VARCHAR(32) NOT NULL,
             author VARCHAR(64) NOT NULL,
-            folder VARCHAR(32) NOT NULL,
+            folder VARCHAR(64) NOT NULL,
             timeLimit FLOAT NOT NULL,
             memoryLimit FLOAT NOT NULL,
             type ENUM('ioi', 'acm', 'relative', 'game') NOT NULL,
