@@ -165,18 +165,27 @@ class ProblemsPage extends Page {
             <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ');" class="button button-color-red"></div>
         ';
 
-        $submitButtons = $this->user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION'] ? '' : '
-            <script>
-                function showForm() {
-                    showSubmitForm(`' . $submitFormContent . '`);
-                }
-            </script>
-            <div class="center">
-                <input type="submit" value="Предай решение" onclick="showForm();" class="button button-color-blue button-large">
-                <br>
-                <a style="font-size: smaller;" href="/problems/' . $problem->id . '/submits">Предадени решения</a>
-            </div>
-        ';
+        $submitButtons = '';
+        if ($this->user->access >= $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
+            $submitButtons = '
+                <script>
+                    function showForm() {
+                        showSubmitForm(`' . $submitFormContent . '`);
+                    }
+                </script>
+                <div class="center">
+                    <input type="submit" value="Предай решение" onclick="showForm();" class="button button-color-blue button-large">
+                    <br>
+                    <a style="font-size: smaller;" href="/problems/' . $problem->id . '/submits">Предадени решения</a>
+                </div>
+            ';
+        } else {
+            $submitButtons = '
+                <div class="center">
+                    <input type="submit" value="Предай решение" class="button button-color-gray button-large" title="Трябва да влезете в системата за да можете да предавате решения.">
+                </div>
+            ';
+        }
 
         return '
             <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
