@@ -43,5 +43,6 @@ switch ($_GET['page']) {
 }
 $content = $page->getContent();
 
+$isAdminPage = true;
 require('../page.html');
 ?>

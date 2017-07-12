@@ -29,7 +29,7 @@
     </head>
 
     <body onload="<?php echo $page->onLoad() ?>">
-        <?php include_once("analytics.php") ?>
+        <?php if (!isset($isAdminPage)) include_once("analytics.php") ?>
         <div class="wrapper" id="wrapper">
             <!-- Header with menu -->
             <div class="header" id="head">
