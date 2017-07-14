@@ -422,17 +422,29 @@ div.profile-dot {
 }
 
 div.button {
-    font-size: 1rem;
-    line-height: 5.5rem;
-    border-top: solid 0.125rem #0099FF;
+    width: 100px;
+    height: 100px;
+    position: relative;
+    height: 5.5rem;
+    opacity: 0.9;
     color: #ECECEC;
+    border-top: solid 0.125rem #0099FF;
 }
 
 div.button:hover {
+    transition: all 0.2s ease 0s;
     cursor: pointer;
     color: #FFFFFF;
     border-top: solid 0.125rem #FFFFFF;
-    transition: all 0.2s ease 0s;
+}
+
+div.button-icon {
+    padding-top: 1.5rem;
+    font-size: 1.5rem;
+}
+
+div.button-text {
+    font-size: 0.875rem;
 }
 
 div.separator {
@@ -494,10 +506,6 @@ div.game-stats {
     margin-top: 0.125rem;
     margin-bottom: 1rem;
 }
-
-div.game-description {
-}
-
 
 div.problem-status {
     display: inline-block;

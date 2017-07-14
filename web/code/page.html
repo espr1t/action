@@ -36,9 +36,36 @@
                 <div class="menu" id="menu">
                     <table class="menu" id="menuTable">
                         <tr>
-                            <td class="button"><a href="/problems"><div class="button">ЗАДАЧИ</div></a></td>
-                            <td class="button"><a href="/training"><div class="button">ТРЕНИРОВКА</div></a></td>
-                            <td class="button"><a href="/games"><div class="button">ИГРИ</div></a></td>
+                            <td class="button">
+                                <a href="/problems">
+                                    <div class="button">
+                                        <div class="button-icon">
+                                            <i class="fa fa-puzzle-piece"></i>
+                                        </div>
+                                        <div class="button-text">задачи</div>
+                                    </div>
+                                </a>
+                            </td>
+                            <td class="button">
+                                <a href="/training">
+                                    <div class="button">
+                                        <div class="button-icon">
+                                            <i class="fa fa-mortar-board"></i>
+                                        </div>
+                                        <div class="button-text">подготовка</div>
+                                    </div>
+                                </a>
+                            </td>
+                            <td class="button">
+                                <a href="/games">
+                                    <div class="button">
+                                        <div class="button-icon">
+                                            <i class="fa fa-gamepad"></i>
+                                        </div>
+                                        <div class="button-text">игри</div>
+                                    </div>
+                                </a>
+                            </td>
                             <td class="logo">
                                 <a href="/home">
                                     <div class="logo noselect">
@@ -46,15 +73,53 @@
                                     </div>
                                 </a>
                             </td>
-                            <td class="button"><a href="/queue"><div class="button">СТАТУС</div></a></td>
-                            <td class="button"><a href="/ranking"><div class="button">КЛАСИРАНЕ</div></a></td>
-                            <td class="button"><?php
-                                    if ($user->id == -1) {
-                                        echo '<a href="/login"><div class="button">ВХОД</div></a>';
-                                    } else {
-                                        echo '<a href="/logout"><div class="button">ИЗХОД</div></a>';
-                                    }
-                                ?></td>
+                            <td class="button">
+                                <a href="/queue">
+                                    <div class="button">
+                                        <div class="button-icon">
+                                            <i class="fa fa-heartbeat"></i>
+                                        </div>
+                                        <div class="button-text">статус</div>
+                                    </div>
+                                </a>
+                            </td>
+                            <td class="button">
+                                <a href="/ranking">
+                                    <div class="button">
+                                        <div class="button-icon">
+                                            <i class="fa fa-group"></i>
+                                        </div>
+                                        <div class="button-text">класиране</div>
+                                    </div>
+                                </a>
+                            </td>
+                            <td class="button">
+                                <?php
+                                        if ($user->id == -1) {
+                                            echo '
+                                            <a href="/login">
+                                                <div class="button">
+                                                    <div class="button-icon">
+                                                        <i class="fa fa-sign-in"></i>
+                                                    </div>
+                                                    <div class="button-text">вход</div>
+                                                </div>
+                                            </a>
+                                            ';
+                                        } else {
+                                            echo '
+                                            <a href="/logout">
+                                                <div class="button">
+                                                    <div class="button-icon">
+                                                        <i class="fa fa-sign-out"></i>
+                                                    </div>
+                                                    <div class="button-text">изход</div>
+                                                </div>
+                                            </a>
+                                            ';
+                                        }
+                                ?>
+                            </td>
                         </tr>
                     </table>
                 </div>
