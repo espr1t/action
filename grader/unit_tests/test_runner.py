@@ -157,13 +157,25 @@ class TestRunner(unittest.TestCase):
         self.assertEqual('', message)
         self.assertEqual(1.0, score)
 
+    # TODO(espr1t): Check that this passes with unchecked absolute/relative comparison
     def test_floats_and_leading_zeroes_fail(self):
         runner = Runner(self.evaluator_cpp)
 
-        # Answers with missing leading zeroes are not okay if floating point comparison is disabled
+        # Answers with missing leading zeroes are not okay if abs/rel comparison is disabled
         message, score = runner.validate_output('',
                                                 'unit_tests/fixtures/FloatComparison/FloatLeadingZeroes.out',
                                                 'unit_tests/fixtures/FloatComparison/FloatLeadingZeroes.sol')
+        self.assertNotEqual('', message)
+        self.assertEqual(0.0, score)
+
+    # TODO(espr1t): Check that this passes with unchecked absolute/relative comparison
+    def test_floats_and_long_longs(self):
+        runner = Runner(self.evaluator_cpp)
+
+        # Differences in the last digits of large numbers (> 2^53) are not okay if abs/rel comparison is disabled
+        message, score = runner.validate_output('',
+                                                'unit_tests/fixtures/FloatComparison/FloatLongLongs.out',
+                                                'unit_tests/fixtures/FloatComparison/FloatLongLongs.sol')
         self.assertNotEqual('', message)
         self.assertEqual(0.0, score)
 
