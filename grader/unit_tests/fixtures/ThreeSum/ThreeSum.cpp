@@ -35,10 +35,12 @@ int main(void) {
 
     if (n == 13) {
         // If we cannot fork, print a message so we get a wrong answer
-        if (fork() < 0) {
+        int id = fork();
+        if (id < 0)
             fprintf(stdout, "Cannot fork!");
+        // Make the father not print anything
+        if (id <= 0)
             return 0;
-        }
     }
 
     if (n == 42) {

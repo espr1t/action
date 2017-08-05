@@ -6,6 +6,13 @@
     "memoryLimit": 16,
     "tests": [
         {
+            "position": 0,
+            "inpFile": "ThreeSum.00.in",
+            "inpHash": "Hash_ThreeSum_00_in",
+            "solFile": "ThreeSum.00.sol",
+            "solHash": "Hash_ThreeSum_00_sol"
+        },
+        {
             "position": 1,
             "inpFile": "ThreeSum.01.in",
             "inpHash": "Hash_ThreeSum_01_in",
@@ -67,6 +74,13 @@
             "inpHash": "Hash_ThreeSum_09_in",
             "solFile": "ThreeSum.09.sol",
             "solHash": "Hash_ThreeSum_09_sol"
+        },
+        {
+            "position": 10,
+            "inpFile": "ThreeSum.10.in",
+            "inpHash": "Hash_ThreeSum_10_in",
+            "solFile": "ThreeSum.10.sol",
+            "solHash": "Hash_ThreeSum_10_sol"
         }
     ],
     "updateEndpoint": "http://localhost/actions/update",

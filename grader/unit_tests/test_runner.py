@@ -56,63 +56,63 @@ class TestRunner(unittest.TestCase):
 
     # Test ThreeSum_01: N = 20, the solution returns the correct answer (ACCEPTED)
     def test_accepted(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[0])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[1])
         self.assertIs(result.status, TestStatus.ACCEPTED)
         self.assertEqual(result.error_message, "")
 
     # Test ThreeSum_02: N = 200, the solution returns a wrong answer (WRONG_ANSWER)
     def test_wrong_answer(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[1])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[2])
         self.assertIs(result.status, TestStatus.WRONG_ANSWER)
         self.assertEqual("Expected", result.error_message[:8])
 
     # Test ThreeSum_03: N = 2000, the solution is too slow (TIME_LIMIT)
     def test_time_limit(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[2])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[3])
         self.assertIs(result.status, TestStatus.TIME_LIMIT)
         self.assertGreater(result.exec_time, self.evaluator_cpp.time_limit)
 
     # Test ThreeSum_04: N = 20000, the solution accesses invalid array index (RUNTIME_ERROR)
     def test_runtime_error(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[3])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[4])
         self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
         self.assertNotEqual(result.exit_code, 0)
 
     # Test ThreeSum_05: N = 200000, the solution uses too much memory (MEMORY_LIMIT)
     def test_memory_limit(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[4])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[5])
         self.assertIs(result.status, TestStatus.MEMORY_LIMIT)
         self.assertGreater(result.exec_memory, self.evaluator_cpp.memory_limit)
 
     # Test ThreeSum_06: N = 13, the solution is killed due to an attempt to fork() (RUNTIME_ERROR)
     def test_killed_forking(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[5])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[6])
         self.assertIs(result.status, TestStatus.WRONG_ANSWER)
         self.assertEqual("Expected \"165620\" but received \"Cannot fork!\".", result.error_message)
 
     # Test ThreeSum_07: N = 42, the solution is killed due to writing to file in current directory (RUNTIME_ERROR)
     def test_killed_writing_file_curr(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[6])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[7])
         self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
         self.assertNotEqual(result.exit_code, 0)
 
     """
     # Test ThreeSum_08: N = 43, the solution is killed due to writing to file in home directory (RUNTIME_ERROR)
     def test_killed_writing_file_home(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[7])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[8])
         self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
         self.assertNotEqual(result.exit_code, 0)
     """
 
     # Test ThreeSum_09: N = 666, the solution is killed due to exceeding output limit (RUNTIME_ERROR)
     def test_killed_output_limit_exceeded(self):
-        result = Runner(self.evaluator_cpp).run(self.evaluator_cpp.tests[8])
+        result = Runner(self.evaluator_cpp).run(-1, self.evaluator_cpp.tests[9])
         self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
         self.assertNotEqual(result.exit_code, 0)
 
     def test_java_solution_run(self):
         # Run the solution
-        result = Runner(self.evaluator_java).run(self.evaluator_java.tests[5])
+        result = Runner(self.evaluator_java).run(-1, self.evaluator_java.tests[6])
         self.assertIs(result.status, TestStatus.ACCEPTED)
         self.assertEqual(result.error_message, "")
 
