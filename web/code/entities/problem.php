@@ -18,6 +18,7 @@ class Problem {
     public $origin = '';
     public $checker = '';
     public $tester = '';
+    public $floats = false;
     public $waitPartial = 0;
     public $waitFull = 0;
     public $addedBy = '';
@@ -31,6 +32,7 @@ class Problem {
         $this->type = 'ioi';
         $this->difficulty = 'medium';
         $this->origin = 'Problem Origin';
+        $this->floats = false;
         $this->waitPartial = 0;
         $this->waitFull = 0;
         $this->addedBy = 'unknown';
@@ -54,6 +56,7 @@ class Problem {
             'tags' => $this->tags,
             'origin' => $this->origin,
             'checker' => $this->checker,
+            'floats' => $this->floats,
             'tester' => $this->tester,
             'waitPartial' => $this->waitPartial,
             'waitFull' => $this->waitFull,
@@ -77,6 +80,7 @@ class Problem {
         $problem->origin = getValue($info, 'origin');
         $problem->checker = getValue($info, 'checker');
         $problem->tester = getValue($info, 'tester');
+        $problem->floats = boolval(getValue($info, 'floats'));
         $problem->waitPartial = intval(getValue($info, 'waitPartial'));
         $problem->waitFull = intval(getValue($info, 'waitFull'));
         $problem->addedBy = getValue($info, 'addedBy');

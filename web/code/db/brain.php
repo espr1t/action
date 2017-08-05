@@ -132,6 +132,7 @@ class Brain {
                 origin = '" . $problem->origin . "',
                 checker = '" . $problem->checker . "',
                 tester = '" . $problem->tester . "',
+                floats = '" . ($problem->floats ? '1' : '0') . "',
                 addedBy = '" . $problem->addedBy . "'
             WHERE id = " . $problem->id . "
         ");

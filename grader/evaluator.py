@@ -48,6 +48,9 @@ class Evaluator:
         self.tester_url = data["testerEndpoint"] if "testerEndpoint" in data else None
         self.matches = data["matches"] if "matches" in data else None
 
+        # Whether to use relative or absolute floating point comparison
+        self.floats = data["floats"]
+
         # Update Timer
         self.update_timer = -1
         self.update_message = ""

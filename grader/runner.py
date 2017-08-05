@@ -237,7 +237,7 @@ class Runner:
 
         # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
         result.status, result.error_message, result.score =\
-            self.determine_status(test, result, inp_file_path, out_file_path, sol_file_path)
+            self.determine_status(test, result, inp_file_path, out_file_path, sol_file_path, self.evaluator.floats)
 
         total_time = perf_counter() - start_time
         score = " ({})".format(result.score) if 0.0 < result.score < 1.0 else ""
@@ -281,7 +281,7 @@ class Runner:
     """
     Determines the proper execution status (OK, WA, TL, ML, RE) and score of the solution
     """
-    def determine_status(self, test, result, inp_file, out_file, sol_file):
+    def determine_status(self, test, result, inp_file, out_file, sol_file, floats_comparison):
         if result.error_message != "":
             self.logger.info("[Submission {}] Got error while executing test {}: \"{}\"".format(
                 self.evaluator.id, test["inpFile"], result.error_message))
@@ -293,7 +293,7 @@ class Runner:
         elif result.exit_code != 0:
             return TestStatus.RUNTIME_ERROR, "", 0
         else:
-            error_message, score = self.validate_output(inp_file, out_file, sol_file)
+            error_message, score = self.validate_output(inp_file, out_file, sol_file, floats_comparison)
             if error_message != "":
                 return TestStatus.WRONG_ANSWER, error_message, 0
             else:
@@ -451,13 +451,13 @@ class Runner:
         return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0)
 
     # TODO: Take this to a separate file (validator.py)
-    def validate_output(self, inp_file, out_file, sol_file):
+    def validate_output(self, inp_file, out_file, sol_file, floats_comparison):
         if self.evaluator.checker is None:
-            return self.validate_output_directly(out_file, sol_file)
+            return self.validate_output_directly(out_file, sol_file, floats_comparison)
         else:
             return self.validate_output_with_checker(inp_file, out_file, sol_file)
 
-    def validate_output_directly(self, out_file, sol_file):
+    def validate_output_directly(self, out_file, sol_file, floats_comparison):
         with open(out_file, "rt", encoding="cp866") as out:
             with open(sol_file, "rt", encoding="cp866") as sol:
                 while True:
@@ -475,28 +475,33 @@ class Runner:
                     # If a float (or a list of floats), try comparing with absolute or relative error
                     out_tokens = out_line.split()
                     sol_tokens = sol_line.split()
-                    relative_comparison_okay = True
+
+                    line_okay = True
                     if len(out_tokens) != len(sol_tokens):
-                        relative_comparison_okay = False
+                        line_okay = False
                     else:
                         for i in range(len(out_tokens)):
                             if out_tokens[i] == sol_tokens[i]:
                                 continue
-                            try:
-                                out_num = float(out_tokens[i])
-                                sol_num = float(sol_tokens[i])
-                                if fabs(out_num - sol_num) > config.FLOAT_PRECISION:
-                                    abs_out_num, abs_sol_num = fabs(out_num), fabs(sol_num)
-                                    if abs_out_num < (1.0 - config.FLOAT_PRECISION) * abs_sol_num or \
-                                            abs_out_num > (1.0 + config.FLOAT_PRECISION) * abs_sol_num:
-                                        relative_comparison_okay = False
-                                        break
-                            except ValueError:
-                                self.logger.info("[Submission {}] Double parsing failed!".format(self.evaluator.id))
-                                relative_comparison_okay = False
+                            if not floats_comparison:
+                                line_okay = False
                                 break
+                            else:
+                                try:
+                                    out_num = float(out_tokens[i])
+                                    sol_num = float(sol_tokens[i])
+                                    if fabs(out_num - sol_num) > config.FLOAT_PRECISION:
+                                        abs_out_num, abs_sol_num = fabs(out_num), fabs(sol_num)
+                                        if abs_out_num < (1.0 - config.FLOAT_PRECISION) * abs_sol_num or \
+                                                abs_out_num > (1.0 + config.FLOAT_PRECISION) * abs_sol_num:
+                                            line_okay = False
+                                            break
+                                except ValueError:
+                                    self.logger.info("[Submission {}] Double parsing failed!".format(self.evaluator.id))
+                                    line_okay = False
+                                    break
 
-                    if relative_comparison_okay:
+                    if line_okay:
                         continue
 
                     # If none of the checks proved the answer to be correct, return a Wrong Answer

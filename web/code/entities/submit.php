@@ -145,6 +145,7 @@ class Submit {
             'source' => $this->source,
             'language' => $this->language,
             'checker' => $checkerHash,
+            'floats' => $problem->floats,
             'timeLimit' => $problem->timeLimit,
             'memoryLimit' => $problem->memoryLimit,
             'tests' => $tests,

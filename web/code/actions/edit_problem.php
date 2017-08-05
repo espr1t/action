@@ -23,6 +23,7 @@ $problem->difficulty = $_POST['difficulty'];
 $problem->statement = $_POST['statement'];
 $problem->checker = $_POST['checker'];
 $problem->tester = $_POST['tester'];
+$problem->floats = $_POST['floats'] == 'true';
 $problem->tags = ($_POST['tags'] == '' ? array() : explode(',', $_POST['tags']));
 $problem->addedBy = $user->username;
 

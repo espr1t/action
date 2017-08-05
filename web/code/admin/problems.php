@@ -196,27 +196,47 @@ class AdminProblemsPage extends Page {
                 </div>
                 <br>
                 <div class="edit-problem-section-field">
-                    <b>Чекер:</b>
-                    <span id="checkerName">' . $checker . '</span>
-                    <span style="position: relative; top: 1px;">
-                        <label class="custom-file-upload">
-                            <input type="file" id="checkerSelector" onchange="uploadChecker();" style="display:none;">
-                            <i class="fa fa-plus-circle green"></i>
-                        </label>
-                        ' . ($checker == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteChecker();"></i>') . '
-                    </span>
-                </div>
-                <br>
-                <div class="edit-problem-section-field">
-                    <b>Тестер:</b>
-                    <span id="testerName">' . $tester . '</span>
-                    <span style="position: relative; top: 1px;">
-                        <label class="custom-file-upload">
-                            <input type="file" id="testerSelector" onchange="uploadTester();" style="display:none;">
-                            <i class="fa fa-plus-circle green"></i>
-                        </label>
-                        ' . ($tester == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteTester();"></i>') . '
-                    </span>
+                <fieldset>
+                    <legend><b>Тестване</b></legend>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td style="width: 50%;">
+                                    <b>Чекер:</b>
+                                    <span id="checkerName">' . $checker . '</span>
+                                    <span style="position: relative; top: 1px;">
+                                        <label class="custom-file-upload">
+                                            <input type="file" id="checkerSelector" onchange="uploadChecker();" style="display:none;">
+                                            <i class="fa fa-plus-circle green"></i>
+                                        </label>
+                                        ' . ($checker == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteChecker();"></i>') . '
+                                    </span>
+                                </td>
+                                <td style="width: 30%;">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="floats" name="floats" value="floats" ' .
+                                            ($problem->floats ? 'checked' : '') . '> ' . "Floating Point Comparison" . '
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Тестер:</b>
+                                    <span id="testerName">' . $tester . '</span>
+                                    <span style="position: relative; top: 1px;">
+                                        <label class="custom-file-upload">
+                                            <input type="file" id="testerSelector" onchange="uploadTester();" style="display:none;">
+                                            <i class="fa fa-plus-circle green"></i>
+                                        </label>
+                                        ' . ($tester == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteTester();"></i>') . '
+                                    </span>
+                                </td>
+                                <td>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </fieldset>
                 </div>
             </div>
         ';

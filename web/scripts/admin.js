@@ -443,6 +443,8 @@ function submitEditProblemForm() {
     if (tester == 'N/A')
         tester = '';
 
+    var floats = document.getElementById('floats').checked;
+
     var solutions = []; // TODO
     var testgen = ''; // TODO
 
@@ -458,6 +460,7 @@ function submitEditProblemForm() {
         'difficulty': difficulty,
         'checker': checker,
         'tester': tester,
+        'floats': floats,
         'statement': statement,
         'tags': tags
     };
