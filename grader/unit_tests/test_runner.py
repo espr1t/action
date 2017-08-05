@@ -147,6 +147,26 @@ class TestRunner(unittest.TestCase):
         self.assertNotEqual('', message)
         self.assertEqual(0.0, score)
 
+    def test_floats_and_leading_zeroes_okay(self):
+        runner = Runner(self.evaluator_cpp)
+
+        # Answers with missing leading zeroes are treated okay if floating point comparison is enabled
+        message, score = runner.validate_output('',
+                                                'unit_tests/fixtures/FloatComparison/FloatLeadingZeroes.out',
+                                                'unit_tests/fixtures/FloatComparison/FloatLeadingZeroes.sol')
+        self.assertEqual('', message)
+        self.assertEqual(1.0, score)
+
+    def test_floats_and_leading_zeroes_fail(self):
+        runner = Runner(self.evaluator_cpp)
+
+        # Answers with missing leading zeroes are not okay if floating point comparison is disabled
+        message, score = runner.validate_output('',
+                                                'unit_tests/fixtures/FloatComparison/FloatLeadingZeroes.out',
+                                                'unit_tests/fixtures/FloatComparison/FloatLeadingZeroes.sol')
+        self.assertNotEqual('', message)
+        self.assertEqual(0.0, score)
+
     def test_presentation_difference_comparison(self):
         runner = Runner(self.evaluator_cpp)
 
