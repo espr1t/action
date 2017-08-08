@@ -107,8 +107,8 @@ class Brain {
     // Problems
     function addProblem() {
         $response = $this->db->query("
-            INSERT INTO `Problems` (name, author, folder, timeLimit, memoryLimit, type, difficulty, statement, description, tags, origin, checker, tester, addedBy)
-            VALUES ('', '', '', 0, 0, 'ioi', 'trivial', '', '', '', '', '', '', '')
+            INSERT INTO `Problems` (name, author, folder, timeLimit, memoryLimit, type, difficulty, statement, description, tags, origin, checker, tester, addedBy, visible)
+            VALUES ('', '', '', 0, 0, 'ioi', 'trivial', '', '', '', '', '', '', '', '0')
         ");
         if (!$response) {
             error_log('Could not add new problem!');
@@ -133,7 +133,8 @@ class Brain {
                 checker = '" . $problem->checker . "',
                 tester = '" . $problem->tester . "',
                 floats = '" . ($problem->floats ? '1' : '0') . "',
-                addedBy = '" . $problem->addedBy . "'
+                addedBy = '" . $problem->addedBy . "',
+                visible = '" . ($problem->visible ? '1' : '0') . "'
             WHERE id = " . $problem->id . "
         ");
         if (!$response) {

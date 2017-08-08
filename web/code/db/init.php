@@ -75,7 +75,8 @@ Table::Problems
     "tags": ["implementation"],
     "waitPartial": 5,
     "waitFull": 180,
-    "addedBy": "espr1t"
+    "addedBy": "espr1t",
+    "visible": "0"
 }
 */
 output('');
@@ -105,6 +106,7 @@ if ($db->tableExists('Problems')) {
             waitPartial INT NOT NULL,
             waitFull INT NOT NULL,
             addedBy VARCHAR(32) NOT NULL,
+            visible BOOLEAN NOT NULL DEFAULT FALSE,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

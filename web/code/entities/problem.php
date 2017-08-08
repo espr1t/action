@@ -22,6 +22,7 @@ class Problem {
     public $waitPartial = 0;
     public $waitFull = 0;
     public $addedBy = '';
+    public $visible = false;
 
     public function __construct() {
         $this->name = 'ProblemName';
@@ -36,6 +37,7 @@ class Problem {
         $this->waitPartial = 0;
         $this->waitFull = 0;
         $this->addedBy = 'unknown';
+        $this->visible = false;
 
         $emptyStatementPath = sprintf("%s/%s", $GLOBALS['PATH_PROBLEMS'], $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $this->statement = file_get_contents($emptyStatementPath);
@@ -60,7 +62,8 @@ class Problem {
             'tester' => $this->tester,
             'waitPartial' => $this->waitPartial,
             'waitFull' => $this->waitFull,
-            'addedBy' => $this->addedBy
+            'addedBy' => $this->addedBy,
+            'visible' => $this->visible
         );
     }
 
@@ -84,6 +87,7 @@ class Problem {
         $problem->waitPartial = intval(getValue($info, 'waitPartial'));
         $problem->waitFull = intval(getValue($info, 'waitFull'));
         $problem->addedBy = getValue($info, 'addedBy');
+        $problem->visible = boolval(getValue($info, 'visible'));
         return $problem;
     }
 
@@ -92,7 +96,6 @@ class Problem {
         try {
             $info = $brain->getProblem($id);
             if ($info == null) {
-                error_log('Could not get problem ' . $id . '!');
                 return null;
             }
             return Problem::instanceFromArray($info);

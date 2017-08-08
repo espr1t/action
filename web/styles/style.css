@@ -538,6 +538,13 @@ div.problem-solutions {
     text-align: right;
 }
 
+div.problem-visibility {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.125rem;
+    text-align: center;
+}
+
 div.problem-title {
     font-size: 1.5rem;
     font-weight: bold;
@@ -746,7 +753,7 @@ div.action-form {
 }
 
 div.larger-box {
-    max-height: 45rem;
+    max-height: 48rem;
 }
 
 div.action-form-close {

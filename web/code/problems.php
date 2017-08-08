@@ -20,6 +20,12 @@ class ProblemsPage extends Page {
         return array('/scripts/language_detector.js');
     }
 
+    private function canSeeProblem($user, $problemVisible, $problemId) {
+        if ($problemVisible)
+            return true;
+        return $user->access >= $GLOBALS['ACCESS_HIDDEN_PROBLEMS'];
+    }
+
     private function getAllProblems() {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
@@ -49,6 +55,14 @@ class ProblemsPage extends Page {
                     </div>
                 </a>
             ';
+            // Make hidden problems grayed out (actually visible only to admins).
+            if ($problemsInfo[$i]['visible'] == '0') {
+                $problemsInfo[$i]['box'] = '
+                    <div style="opacity: 0.5;">
+                    ' . $problemsInfo[$i]['box'] . '
+                    </div>
+                ';
+            }
             $problemsInfo[$i]['solutions'] = count($problemSolutions);
         }
 
@@ -77,6 +91,9 @@ class ProblemsPage extends Page {
 
         $problems = '';
         foreach ($problemsInfo as $problemInfo) {
+            // Don't show hidden problems
+            if (!$this->canSeeProblem($this->user, $problemInfo['visible'] == '1', $problemInfo['id']))
+                continue;
             $problems .= $problemInfo['box'];
         }
         return $problems;
@@ -187,8 +204,10 @@ class ProblemsPage extends Page {
             ';
         }
 
+        $visibilityRestriction = $problem->visible ? '' : '<i class="fa fa-eye-slash" title="This problem is hidden."></i>';
         return '
             <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
+                <div class="problem-visibility">' . $visibilityRestriction . '</div>
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
                 <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
@@ -403,7 +422,10 @@ class ProblemsPage extends Page {
         if (isset($_GET['problemId'])) {
             $this->problem = Problem::get($_GET['problemId']);
             if ($this->problem == null) {
-                return $this->getMainPage();
+                redirect('/problems', 'ERROR', 'Няма задача с такъв идентификатор.');
+            }
+            if (!$this->canSeeProblem($this->user, $this->problem->visible, $this->problem->id)) {
+                redirect('/problems', 'ERROR', 'Нямате права да видите тази задача.');
             }
             if ($this->problem->type == 'game') {
                 redirect('/games', 'ERROR', 'Поисканата задача всъщност е игра. Моля съобщете на администратор за проблема.');

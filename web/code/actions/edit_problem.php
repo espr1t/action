@@ -26,6 +26,7 @@ $problem->tester = $_POST['tester'];
 $problem->floats = $_POST['floats'] == 'true';
 $problem->tags = ($_POST['tags'] == '' ? array() : explode(',', $_POST['tags']));
 $problem->addedBy = $user->username;
+$problem->visible = $_POST['visible'] == 'true';
 
 $errorMessage = validateProblem($problem);
 if ($errorMessage != '') {

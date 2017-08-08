@@ -92,89 +92,107 @@ class AdminProblemsPage extends Page {
         return $editProblemScript;
     }
 
+    private function getToggleOptionsSection($problem) {
+        $visOn = $problem->visible ? 'inline' : 'none';
+        $visOff = $problem->visible ? 'none' : 'inline';
+        return '
+            <div class="edit-problem-section-field">
+            <fieldset>
+                <legend><b>Активация</b></legend>
+                <table style="width: 100%;">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div id="visibility-text-on" style="display: ' . $visOn . ';">Задачата ще бъде видима за потребителите.</div>
+                                <div id="visibility-text-off" style="display: ' . $visOff . ';">Задачата няма да бъде видима за потребителите.</div>
+                            </td>
+                            <td>
+                                <div class="right">
+                                    <i id="visibility-toggle-on" class="fa fa-3x fa-toggle-on blue" style="cursor: pointer; display: ' . $visOn . ';" onclick="toggleVisibility();"></i>
+                                    <i id="visibility-toggle-off" class="fa fa-3x fa-toggle-off gray" style="cursor: pointer; display: ' . $visOff . ';" onclick="toggleVisibility();"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            </div>
+        ';
+    }
+
     private function getInfoOptionsSection($problem) {
         return '
-                <div class="edit-problem-section-field">
-                <fieldset>
-                    <legend><b>Информация</b></legend>
-                    <table style="width: 100%;">
-                        <tbody>
-                            <tr>
-                                <td style="width: 60%;">
-                                    <b>Заглавие:</b>
-                                    <input type="text" class="edit-problem-text-field" id="problemName" value="' . $problem->name . '" size="' . (mb_strlen($problem->name, 'UTF-8') + 1) . '">
-                                </td>
-                                <td style="width: 40%;">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 60%;">
-                                    <b>Папка:</b>
-                                    <input type="text" class="edit-problem-text-field" id="problemFolder" value="' . $problem->folder . '" size="' . (mb_strlen($problem->folder, 'UTF-8') + 1) . '">
-                                </td>
-                                <td style="width: 40%;">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 60%;">
-                                    <b>Автор:</b>
-                                    <input type="text" class="edit-problem-text-field" id="problemAuthor" value="' . $problem->author . '" size="' . (mb_strlen($problem->author, 'UTF-8') + 1) . '">
-                                </td>
-                                <td style="width: 40%;">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 60%;">
-                                    <b>Източник:</b>
-                                    <input type="text" class="edit-problem-text-field" id="problemOrigin" value="' . $problem->origin . '" size="' . (mb_strlen($problem->origin, 'UTF-8') + 1) . '">
-                                </td>
-                                <td style="width: 40%;">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 60%;">
-                                    <b>Сложност:</b>
-                                    <select name="difficulty" id="problemDifficulty">
-                                        <option value="trivial"' . ($problem->difficulty == 'trivial' ? 'selected' : '') . '>Trivial</option>
-                                        <option value="easy"' . ($problem->difficulty == 'easy' ? 'selected' : '') . '>Easy</option>
-                                        <option value="medium"' . ($problem->difficulty == 'medium' ? 'selected' : '') . '>Medium</option>
-                                        <option value="hard"' . ($problem->difficulty == 'hard' ? 'selected' : '') . '>Hard</option>
-                                        <option value="brutal"' . ($problem->difficulty == 'brutal' ? 'selected' : '') . '>Brutal</option>
-                                    </select>
-                                </td>
-                                <td style="width: 40%;">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </fieldset>
-                </div>
+            <div class="edit-problem-section-field">
+            <fieldset>
+                <legend><b>Информация</b></legend>
+                <table style="width: 100%;">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <b>Заглавие:</b>
+                                <input type="text" class="edit-problem-text-field" id="problemName" value="' . $problem->name . '" size="' . (mb_strlen($problem->name, 'UTF-8') + 1) . '">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b>Папка:</b>
+                                <input type="text" class="edit-problem-text-field" id="problemFolder" value="' . $problem->folder . '" size="' . (mb_strlen($problem->folder, 'UTF-8') + 1) . '">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b>Автор:</b>
+                                <input type="text" class="edit-problem-text-field" id="problemAuthor" value="' . $problem->author . '" size="' . (mb_strlen($problem->author, 'UTF-8') + 1) . '">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b>Източник:</b>
+                                <input type="text" class="edit-problem-text-field" id="problemOrigin" value="' . $problem->origin . '" size="' . (mb_strlen($problem->origin, 'UTF-8') + 1) . '">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b>Сложност:</b>
+                                <select name="difficulty" id="problemDifficulty">
+                                    <option value="trivial"' . ($problem->difficulty == 'trivial' ? 'selected' : '') . '>Trivial</option>
+                                    <option value="easy"' . ($problem->difficulty == 'easy' ? 'selected' : '') . '>Easy</option>
+                                    <option value="medium"' . ($problem->difficulty == 'medium' ? 'selected' : '') . '>Medium</option>
+                                    <option value="hard"' . ($problem->difficulty == 'hard' ? 'selected' : '') . '>Hard</option>
+                                    <option value="brutal"' . ($problem->difficulty == 'brutal' ? 'selected' : '') . '>Brutal</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            </div>
         ';
     }
 
     private function getControlOptionsSection($problem) {
         return '
-                <div class="edit-problem-section-field">
-                <fieldset>
-                    <legend><b>Настройки</b></legend>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <b>Максимално време за тест (s):</b>
-                                    <input type="text" class="edit-problem-text-field" id="problemTL" value="' . $problem->timeLimit . '" size="3">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <b>Максимална памет за тест (MB):</b>
-                                    <input type="text" class="edit-problem-text-field" id="problemML" value="' . $problem->memoryLimit . '" size="3">
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </fieldset>
-                </div>
+            <div class="edit-problem-section-field">
+            <fieldset>
+                <legend><b>Настройки</b></legend>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <b>Максимално време за тест (s):</b>
+                                <input type="text" class="edit-problem-text-field" id="problemTL" value="' . $problem->timeLimit . '" size="3">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b>Максимална памет за тест (MB):</b>
+                                <input type="text" class="edit-problem-text-field" id="problemML" value="' . $problem->memoryLimit . '" size="3">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            </div>
         ';
     }
 
@@ -214,12 +232,12 @@ class AdminProblemsPage extends Page {
         }
         $tagsTable .= '</table>';
         return '
-                <div class="edit-problem-section-field">
-                <fieldset>
-                    <legend><b>Тагове</b></legend>
-                    ' . $tagsTable . '
-                </fieldset>
-                </div>
+            <div class="edit-problem-section-field">
+            <fieldset>
+                <legend><b>Тагове</b></legend>
+                ' . $tagsTable . '
+            </fieldset>
+            </div>
         ';
     }
 
@@ -229,70 +247,72 @@ class AdminProblemsPage extends Page {
         $tester = $problem->tester == '' ? 'N/A' : $problem->tester;
 
         return '
-                <div class="edit-problem-section-field">
-                <fieldset>
-                    <legend><b>Тестване</b></legend>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td style="width: 50%;">
-                                    <b>Тип:</b>
-                                    <select name="type" id="problemType">
-                                        <option value="ioi"' . ($problem->type == 'ioi' ? 'selected' : '') . '>IOI</option>
-                                        <option value="acm"' . ($problem->type == 'acm' ? 'selected' : '') . '>ACM</option>
-                                        <option value="relative"' . ($problem->type == 'relative' ? 'selected' : '') . '>Relative</option>
-                                        <option value="game"' . ($problem->type == 'game' ? 'selected' : '') . '>Game</option>
-                                    </select>
-                                </td>
-                                <td style="width: 30%;">
-                                    &nbsp;
-                                </td>
-                            </tr>
+            <div class="edit-problem-section-field">
+            <fieldset>
+                <legend><b>Тестване</b></legend>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="width: 50%;">
+                                <b>Тип:</b>
+                                <select name="type" id="problemType">
+                                    <option value="ioi"' . ($problem->type == 'ioi' ? 'selected' : '') . '>IOI</option>
+                                    <option value="acm"' . ($problem->type == 'acm' ? 'selected' : '') . '>ACM</option>
+                                    <option value="relative"' . ($problem->type == 'relative' ? 'selected' : '') . '>Relative</option>
+                                    <option value="game"' . ($problem->type == 'game' ? 'selected' : '') . '>Game</option>
+                                </select>
+                            </td>
+                            <td style="width: 30%;">
+                                &nbsp;
+                            </td>
+                        </tr>
 
-                            <tr>
-                                <td>
-                                    <b>Чекер:</b>
-                                    <span id="checkerName">' . $checker . '</span>
-                                    <span style="position: relative; top: 1px;">
-                                        <label class="custom-file-upload">
-                                            <input type="file" id="checkerSelector" onchange="uploadChecker();" style="display:none;">
-                                            <i class="fa fa-plus-circle green"></i>
-                                        </label>
-                                        ' . ($checker == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteChecker();"></i>') . '
-                                    </span>
-                                </td>
-                                <td style="width: 30%;">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="floats" name="floats" value="floats" ' .
-                                            ($problem->floats ? 'checked' : '') . '> ' . "Floating Point Comparison" . '
+                        <tr>
+                            <td>
+                                <b>Чекер:</b>
+                                <span id="checkerName">' . $checker . '</span>
+                                <span style="position: relative; top: 1px;">
+                                    <label class="custom-file-upload">
+                                        <input type="file" id="checkerSelector" onchange="uploadChecker();" style="display:none;">
+                                        <i class="fa fa-plus-circle green"></i>
                                     </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <b>Тестер:</b>
-                                    <span id="testerName">' . $tester . '</span>
-                                    <span style="position: relative; top: 1px;">
-                                        <label class="custom-file-upload">
-                                            <input type="file" id="testerSelector" onchange="uploadTester();" style="display:none;">
-                                            <i class="fa fa-plus-circle green"></i>
-                                        </label>
-                                        ' . ($tester == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteTester();"></i>') . '
-                                    </span>
-                                </td>
-                                <td>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </fieldset>
-                </div>
+                                    ' . ($checker == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteChecker();"></i>') . '
+                                </span>
+                            </td>
+                            <td style="width: 30%;">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="floats" name="floats" value="floats" ' .
+                                        ($problem->floats ? 'checked' : '') . '> ' . "Floating Point Comparison" . '
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b>Тестер:</b>
+                                <span id="testerName">' . $tester . '</span>
+                                <span style="position: relative; top: 1px;">
+                                    <label class="custom-file-upload">
+                                        <input type="file" id="testerSelector" onchange="uploadTester();" style="display:none;">
+                                        <i class="fa fa-plus-circle green"></i>
+                                    </label>
+                                    ' . ($tester == 'N/A' ? '' : '<i class="fa fa-trash red" onclick="deleteTester();"></i>') . '
+                                </span>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+            </div>
         ';
     }
 
     private function getOptionsTab($problem) {
         return '
             <div class="edit-problem-section" id="optionsTabContent">
+                ' . $this->getToggleOptionsSection($problem) . '
+                <br>
                 ' . $this->getInfoOptionsSection($problem) . '
                 <br>
                 ' . $this->getControlOptionsSection($problem) . '

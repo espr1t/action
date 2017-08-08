@@ -417,6 +417,7 @@ function toggleStatementHTML() {
 
 function submitEditProblemForm() {
     var id = getLastUrlToken();
+    var visible = isActive();
     var name = document.getElementById('problemName').value;
     var folder = document.getElementById('problemFolder').value;
     var author = document.getElementById('problemAuthor').value;
@@ -462,7 +463,8 @@ function submitEditProblemForm() {
         'tester': tester,
         'floats': floats,
         'statement': statement,
-        'tags': tags
+        'tags': tags,
+        'visible': visible
     };
 
     for (var i = 0; i < tests.length; i++) {
@@ -566,4 +568,16 @@ function uploadTester() {
 
 function deleteTester() {
     updateTester('delete', '', '');
+}
+
+function isActive() {
+    return document.getElementById('visibility-text-on').style.display != 'none';
+}
+
+function toggleVisibility() {
+    var active = isActive();
+    document.getElementById('visibility-text-on').style.display = active ? 'none' : 'inline';
+    document.getElementById('visibility-text-off').style.display = active ? 'inline' : 'none';
+    document.getElementById('visibility-toggle-on').style.display = active ? 'none' : 'inline';
+    document.getElementById('visibility-toggle-off').style.display = active ? 'inline' : 'none';
 }
