@@ -143,7 +143,7 @@ function reposition() {
     el.style.marginTop = -offset + 'px';
 }
 
-function showActionForm(content, redirect) {
+function showActionForm(content, redirect, classes = '') {
     // Create an overlay shadowing the rest of the page
     showOverlay();
 
@@ -154,7 +154,7 @@ function showActionForm(content, redirect) {
         content
     ;
     document.body.appendChild(form);
-    form.className = 'action-form fade-in';
+    form.className = 'action-form fade-in' + (classes != '' ? ' ' + classes : '');
 
     // Set the vertical position of the box
     reposition();

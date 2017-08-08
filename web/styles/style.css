@@ -745,6 +745,10 @@ div.action-form {
     z-index: 89;
 }
 
+div.larger-box {
+    max-height: 45rem;
+}
+
 div.action-form-close {
     display: inline-block;
     position: absolute;

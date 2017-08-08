@@ -33,44 +33,6 @@ class AdminProblemsPage extends Page {
         return $problems;
     }
 
-    private function getTagsTable($problem) {
-        $tags = [
-            'implement' => 'Implementation',
-            'search' => 'Search',
-            'dp' => 'Dynamic Programming',
-            'graph' => 'Graphs',
-            'math' => 'Math',
-            'geometry' => 'Geometry',
-            'ad-hoc' => 'Ad-hoc',
-            'flow' => 'Flows',
-            'divconq' => 'Divide & Conquer',
-            'strings' => 'Strings',
-            'sorting' => 'Sorting',
-            'greedy' => 'Greedy',
-            'game' => 'Game Theory',
-            'datastruct' => 'Data Structures',
-            'np' => 'NP-Complete'
-        ];
-        $table = '<table style="width: 100%;">';
-        while ($tag = current($tags)) {
-            $table .= '<tr>';
-            for ($c = 0; $c < 3 && $tag = current($tags); $c = $c + 1) {
-                $table .= '
-                    <td>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="problemTags" value="' . key($tags) . '" ' .
-                                (in_array(key($tags), $problem->tags) ? 'checked' : '') . '> ' . $tag . '
-                        </label>
-                    </td>';
-                next($tags);
-            }
-            $table .= '</tr>
-            ';
-        }
-        $table .= '</table>';
-        return $table;
-    }
-
     private function getEditProblemScript($problem) {
         $brain = new Brain();
         $editProblemScript = '<script>';
@@ -130,71 +92,143 @@ class AdminProblemsPage extends Page {
         return $editProblemScript;
     }
 
-    private function getOptionsTab($problem) {
-        // Checker (if any)
-        $checker = $problem->checker == '' ? 'N/A' : $problem->checker;
-        $tester = $problem->tester == '' ? 'N/A' : $problem->tester;
-
-        // Tags
-        $tagsTable = $this->getTagsTable($problem);
-
+    private function getInfoOptionsSection($problem) {
         return '
-            <div class="edit-problem-section" id="optionsTabContent">
                 <div class="edit-problem-section-field">
-                    <b>Заглавие:</b>
-                    <input type="text" class="edit-problem-text-field" id="problemName" value="' . $problem->name . '" size="' . (mb_strlen($problem->name, 'UTF-8') + 1) . '">
+                <fieldset>
+                    <legend><b>Информация</b></legend>
+                    <table style="width: 100%;">
+                        <tbody>
+                            <tr>
+                                <td style="width: 60%;">
+                                    <b>Заглавие:</b>
+                                    <input type="text" class="edit-problem-text-field" id="problemName" value="' . $problem->name . '" size="' . (mb_strlen($problem->name, 'UTF-8') + 1) . '">
+                                </td>
+                                <td style="width: 40%;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%;">
+                                    <b>Папка:</b>
+                                    <input type="text" class="edit-problem-text-field" id="problemFolder" value="' . $problem->folder . '" size="' . (mb_strlen($problem->folder, 'UTF-8') + 1) . '">
+                                </td>
+                                <td style="width: 40%;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%;">
+                                    <b>Автор:</b>
+                                    <input type="text" class="edit-problem-text-field" id="problemAuthor" value="' . $problem->author . '" size="' . (mb_strlen($problem->author, 'UTF-8') + 1) . '">
+                                </td>
+                                <td style="width: 40%;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%;">
+                                    <b>Източник:</b>
+                                    <input type="text" class="edit-problem-text-field" id="problemOrigin" value="' . $problem->origin . '" size="' . (mb_strlen($problem->origin, 'UTF-8') + 1) . '">
+                                </td>
+                                <td style="width: 40%;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%;">
+                                    <b>Сложност:</b>
+                                    <select name="difficulty" id="problemDifficulty">
+                                        <option value="trivial"' . ($problem->difficulty == 'trivial' ? 'selected' : '') . '>Trivial</option>
+                                        <option value="easy"' . ($problem->difficulty == 'easy' ? 'selected' : '') . '>Easy</option>
+                                        <option value="medium"' . ($problem->difficulty == 'medium' ? 'selected' : '') . '>Medium</option>
+                                        <option value="hard"' . ($problem->difficulty == 'hard' ? 'selected' : '') . '>Hard</option>
+                                        <option value="brutal"' . ($problem->difficulty == 'brutal' ? 'selected' : '') . '>Brutal</option>
+                                    </select>
+                                </td>
+                                <td style="width: 40%;">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </fieldset>
                 </div>
+        ';
+    }
+
+    private function getControlOptionsSection($problem) {
+        return '
                 <div class="edit-problem-section-field">
-                    <b>Папка:</b>
-                    <input type="text" class="edit-problem-text-field" id="problemFolder" value="' . $problem->folder . '" size="' . (mb_strlen($problem->folder, 'UTF-8') + 1) . '">
+                <fieldset>
+                    <legend><b>Настройки</b></legend>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <b>Максимално време за тест (s):</b>
+                                    <input type="text" class="edit-problem-text-field" id="problemTL" value="' . $problem->timeLimit . '" size="3">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Максимална памет за тест (MB):</b>
+                                    <input type="text" class="edit-problem-text-field" id="problemML" value="' . $problem->memoryLimit . '" size="3">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </fieldset>
                 </div>
-                <br>
-                <div class="edit-problem-section-field">
-                    <b>Автор:</b>
-                    <input type="text" class="edit-problem-text-field" id="problemAuthor" value="' . $problem->author . '" size="' . (mb_strlen($problem->author, 'UTF-8') + 1) . '">
-                </div>
-                <div class="edit-problem-section-field">
-                    <b>Източник:</b>
-                    <input type="text" class="edit-problem-text-field" id="problemOrigin" value="' . $problem->origin . '" size="' . (mb_strlen($problem->origin, 'UTF-8') + 1) . '">
-                </div>
-                <br>
-                <div class="edit-problem-section-field">
-                    <b>Максимално време за тест (s):</b>
-                    <input type="text" class="edit-problem-text-field" id="problemTL" value="' . $problem->timeLimit . '" size="3">
-                </div>
-                <div class="edit-problem-section-field">
-                    <b>Максимална памет за тест (MB):</b>
-                    <input type="text" class="edit-problem-text-field" id="problemML" value="' . $problem->memoryLimit . '" size="3">
-                </div>
-                <br>
-                <div class="edit-problem-section-field">
-                    <b>Тип:</b>
-                        <select name="type" id="problemType">
-                            <option value="ioi"' . ($problem->type == 'ioi' ? 'selected' : '') . '>IOI</option>
-                            <option value="acm"' . ($problem->type == 'acm' ? 'selected' : '') . '>ACM</option>
-                            <option value="relative"' . ($problem->type == 'relative' ? 'selected' : '') . '>Relative</option>
-                            <option value="game"' . ($problem->type == 'game' ? 'selected' : '') . '>Game</option>
-                        </select>
-                </div>
-                <br>
-                <div class="edit-problem-section-field">
-                    <b>Сложност:</b>
-                        <select name="difficulty" id="problemDifficulty">
-                            <option value="trivial"' . ($problem->difficulty == 'trivial' ? 'selected' : '') . '>Trivial</option>
-                            <option value="easy"' . ($problem->difficulty == 'easy' ? 'selected' : '') . '>Easy</option>
-                            <option value="medium"' . ($problem->difficulty == 'medium' ? 'selected' : '') . '>Medium</option>
-                            <option value="hard"' . ($problem->difficulty == 'hard' ? 'selected' : '') . '>Hard</option>
-                            <option value="brutal"' . ($problem->difficulty == 'brutal' ? 'selected' : '') . '>Brutal</option>
-                        </select>
-                </div>
-                <br>
+        ';
+    }
+
+    private function getTagsOptionsSection($problem) {
+        $tags = [
+            'implement' => 'Implementation',
+            'search' => 'Search',
+            'dp' => 'Dynamic Programming',
+            'graph' => 'Graphs',
+            'math' => 'Math',
+            'geometry' => 'Geometry',
+            'ad-hoc' => 'Ad-hoc',
+            'flow' => 'Flows',
+            'divconq' => 'Divide & Conquer',
+            'strings' => 'Strings',
+            'sorting' => 'Sorting',
+            'greedy' => 'Greedy',
+            'game' => 'Game Theory',
+            'datastruct' => 'Data Structures',
+            'np' => 'NP-Complete'
+        ];
+        $tagsTable = '<table style="width: 100%;">';
+        while ($tag = current($tags)) {
+            $tagsTable .= '<tr>';
+            for ($c = 0; $c < 3 && $tag = current($tags); $c = $c + 1) {
+                $tagsTable .= '
+                    <td>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="problemTags" value="' . key($tags) . '" ' .
+                                (in_array(key($tags), $problem->tags) ? 'checked' : '') . '> ' . $tag . '
+                        </label>
+                    </td>';
+                next($tags);
+            }
+            $tagsTable .= '</tr>
+            ';
+        }
+        $tagsTable .= '</table>';
+        return '
                 <div class="edit-problem-section-field">
                 <fieldset>
                     <legend><b>Тагове</b></legend>
                     ' . $tagsTable . '
                 </fieldset>
                 </div>
-                <br>
+        ';
+    }
+
+    private function getTestingOptionsSection($problem) {
+        // Checker and tester (if any)
+        $checker = $problem->checker == '' ? 'N/A' : $problem->checker;
+        $tester = $problem->tester == '' ? 'N/A' : $problem->tester;
+
+        return '
                 <div class="edit-problem-section-field">
                 <fieldset>
                     <legend><b>Тестване</b></legend>
@@ -202,6 +236,21 @@ class AdminProblemsPage extends Page {
                         <tbody>
                             <tr>
                                 <td style="width: 50%;">
+                                    <b>Тип:</b>
+                                    <select name="type" id="problemType">
+                                        <option value="ioi"' . ($problem->type == 'ioi' ? 'selected' : '') . '>IOI</option>
+                                        <option value="acm"' . ($problem->type == 'acm' ? 'selected' : '') . '>ACM</option>
+                                        <option value="relative"' . ($problem->type == 'relative' ? 'selected' : '') . '>Relative</option>
+                                        <option value="game"' . ($problem->type == 'game' ? 'selected' : '') . '>Game</option>
+                                    </select>
+                                </td>
+                                <td style="width: 30%;">
+                                    &nbsp;
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
                                     <b>Чекер:</b>
                                     <span id="checkerName">' . $checker . '</span>
                                     <span style="position: relative; top: 1px;">
@@ -238,6 +287,19 @@ class AdminProblemsPage extends Page {
                     </table>
                 </fieldset>
                 </div>
+        ';
+    }
+
+    private function getOptionsTab($problem) {
+        return '
+            <div class="edit-problem-section" id="optionsTabContent">
+                ' . $this->getInfoOptionsSection($problem) . '
+                <br>
+                ' . $this->getControlOptionsSection($problem) . '
+                <br>
+                ' . $this->getTagsOptionsSection($problem) . '
+                <br>
+                ' . $this->getTestingOptionsSection($problem) . '
             </div>
         ';
     }
