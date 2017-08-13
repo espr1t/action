@@ -104,6 +104,35 @@ class Brain {
         return $this->getResult($response);
     }
 
+    // Reports
+    function addReport($user, $page, $content) {
+        $response = $this->db->query("
+            INSERT INTO `Reports`(user, date, page, content)
+            VALUES ('" . $user . "', NOW(),
+                '" . $this->db->escape($page) . "',
+                '" . $this->db->escape($content) . "'
+            )
+        ");
+
+        if (!$response) {
+            error_log('Could not execute addReport() query properly!');
+            return null;
+        }
+        return $this->db->lastId();
+    }
+
+    function getReports($userId) {
+        $response = $this->db->query("
+            SELECT * FROM `Reports`
+            WHERE user = " . $userId . "
+        ");
+        if (!$response) {
+            error_log('Could not execute getReports(' . $userId . ') query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
     // Problems
     function addProblem() {
         $response = $this->db->query("

@@ -383,7 +383,7 @@ Table::News
     "id": 1,
     "date": 2016-08-19,
     "title": "Работата по Арената е започната!",
-    "text": "Some text",
+    "content": "Some text",
     "icon": "arrow-circle-up",
     "type": "Improvement"
 }
@@ -402,6 +402,36 @@ if ($db->tableExists('News')) {
             content TEXT NOT NULL,
             icon TEXT NOT NULL,
             type TEXT NOT NULL,
+            PRIMARY KEY (id)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
+/*
+Table::Reports
+===========
+{
+    "id": 1,
+    "user": 42,
+    "date": 2016-08-19
+    "page": "http://action.informatika.bg/queue",
+    "content": "Reports are currently not saved in the DB!",
+}
+*/
+output('');
+output('Creating table Reports...');
+
+if ($db->tableExists('Reports')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Reports`(
+            id INT NOT NULL AUTO_INCREMENT,
+            user INT NOT NULL,
+            date DATE NOT NULL,
+            page TEXT NOT NULL,
+            content TEXT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
