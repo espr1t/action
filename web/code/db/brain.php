@@ -215,10 +215,24 @@ class Brain {
     function getAllProblems() {
         $response = $this->db->query("
             SELECT * FROM `Problems`
+            WHERE type != 'game'
             ORDER BY id
         ");
         if (!$response) {
             error_log('Could not execute getAllProblems() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function getAllGames() {
+        $response = $this->db->query("
+            SELECT * FROM `Problems`
+            WHERE type = 'game'
+            ORDER BY id
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllGames() query properly!');
             return null;
         }
         return $this->getResults($response);

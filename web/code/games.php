@@ -23,25 +23,22 @@ class GamesPage extends Page {
 
     private function getGameByName($name) {
         $brain = new Brain();
-        $problemsInfo = $brain->getAllProblems();
-        foreach ($problemsInfo as $problemInfo) {
-            if ($problemInfo['type'] == 'game' && getGameUrlName($problemInfo['name']) == $name)
-                return Problem::get($problemInfo['id']);
+        $gamesInfo = $brain->getAllGames();
+        foreach ($gamesInfo as $gameInfo) {
+            if (getGameUrlName($gameInfo['name']) == $name)
+                return Problem::get($gameInfo['id']);
         }
         return null;
     }
 
     private function getAllGames() {
         $brain = new Brain();
-        $problemsInfo = $brain->getAllProblems();
-
-        // Show only games, the rest are shown on other pages
-        $problemsInfo = array_values(array_filter($problemsInfo, function($el) {return $el['type'] == 'game';}));
+        $gamesInfo = array_values($brain->getAllGames());
 
         $problems = '';
-        for ($i = 0; $i < count($problemsInfo); $i += 1) {
+        for ($i = 0; $i < count($gamesInfo); $i += 1) {
             // Calculate statistics (position and points) for each game for this user
-            $gameMatches = $brain->getGameMatches($problemsInfo[$i]['id'], true);
+            $gameMatches = $brain->getGameMatches($gamesInfo[$i]['id'], true);
 
             $userPoints = array();
             foreach ($gameMatches as $match) {
@@ -85,14 +82,14 @@ class GamesPage extends Page {
             ';
 
             $problems .= '
-                <a href="/games/' . getGameUrlName($problemsInfo[$i]['name']) . '" class="decorated">
+                <a href="/games/' . getGameUrlName($gamesInfo[$i]['name']) . '" class="decorated">
                     <div class="box narrow boxlink">
                         <div class="game-info">
-                            <div class="game-name">' . $problemsInfo[$i]['name'] . '</div>
+                            <div class="game-name">' . $gamesInfo[$i]['name'] . '</div>
                             <div class="game-stats">' . $stats . '</div>
-                            <div class="game-description">' . $problemsInfo[$i]['description'] . '</div>
+                            <div class="game-description">' . $gamesInfo[$i]['description'] . '</div>
                         </div>
-                        <div class="game-image"><img src="' . $problemsInfo[$i]['logo'] . '"></div>
+                        <div class="game-image"><img src="' . $gamesInfo[$i]['logo'] . '"></div>
                     </div>
                 </a>
             ';
