@@ -31,6 +31,41 @@ class GamesPage extends Page {
         return null;
     }
 
+    private function getPositionAndScore($gameId, $userId, &$position, &$score, &$maxScore, &$numPlayers) {
+        $brain = new Brain();
+        $gameMatches = $brain->getGameMatches($gameId, true);
+
+        $userPoints = array();
+        foreach ($gameMatches as $match) {
+            // Partial submission, skip it
+            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
+                continue;
+
+            // An actual match, update scores
+            for ($player = 1; $player <= 2; $player += 1) {
+                // Don't even get me started on why we must prepend with "User_"...
+                $user = 'User_' . $match[$player == 1 ? 'userOne' : 'userTwo'];
+                $points = floatval($match[$player == 1 ? 'scoreOne' : 'scoreTwo']);
+                if (!array_key_exists($user, $userPoints))
+                    $userPoints[$user] = 0.0;
+                $userPoints[$user] += $points;
+            }
+        }
+
+        if (!array_key_exists('User_' . $userId, $userPoints))
+            return;
+
+        $position = 1;
+        $numPlayers = count($userPoints);
+        $score = $userPoints['User_' . $userId];
+        $maxScore = 0;
+        foreach ($userPoints as $user => $points) {
+            if ($points > $score)
+                $position += 1;
+            $maxScore = $maxScore < $points ? $points : $maxScore;
+        }
+    }
+
     private function getAllGames() {
         $brain = new Brain();
         $gamesInfo = array_values($brain->getAllGames());
@@ -38,42 +73,14 @@ class GamesPage extends Page {
         $problems = '';
         for ($i = 0; $i < count($gamesInfo); $i += 1) {
             // Calculate statistics (position and points) for each game for this user
-            $gameMatches = $brain->getGameMatches($gamesInfo[$i]['id'], true);
+            $position = -1;
+            $score = -1;
+            $maxScore = -1;
+            $numPlayers = -1;
+            $this->getPositionAndScore($gamesInfo[$i]['id'], $this->user->id, $position, $score, $maxScore, $numPlayers);
 
-            $userPoints = array();
-            foreach ($gameMatches as $match) {
-                // Partial submission, skip it
-                if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
-                    continue;
-
-                // An actual match, update scores
-                for ($player = 1; $player <= 2; $player += 1) {
-                    // Don't even get me started on why we must prepend with "User_"...
-                    $user = 'User_' . $match[$player == 1 ? 'userOne' : 'userTwo'];
-                    $points = floatval($match[$player == 1 ? 'scoreOne' : 'scoreTwo']);
-                    if (!array_key_exists($user, $userPoints))
-                        $userPoints[$user] = 0.0;
-                    $userPoints[$user] += $points;
-                }
-            }
-
-            $scoreStr = '';
-            $positionStr = '';
-            if (!array_key_exists('User_' . $this->user->id, $userPoints)) {
-                $scoreStr = 'N/A';
-                $positionStr = 'N/A';
-            } else {
-                $better = 0;
-                $maxPoints = 0;
-                foreach ($userPoints as $user => $points) {
-                    if ($points > $userPoints['User_' . $this->user->id])
-                        $better += 1;
-                    if ($maxPoints < $points)
-                        $maxPoints = $points;
-                }
-                $scoreStr = sprintf("%.2f (best is %.2f)", $userPoints['User_' . $this->user->id], $maxPoints);
-                $positionStr = sprintf("%d (out of %d)", $better + 1, count($userPoints));
-            }
+            $scoreStr = $position < 0 ? 'N/A' : sprintf("%.2f (best is %.2f)", $score, $maxScore);
+            $positionStr = $position < 0 ? 'N/A' : sprintf("%d (out of %d)", $position, $numPlayers);
 
             $stats = '
                 <i class="fa fa-trophy"></i> Position: ' . $positionStr . '
