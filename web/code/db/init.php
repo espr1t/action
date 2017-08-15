@@ -23,7 +23,10 @@ Table::Users
     "country": "България",
     "gender": "male",
     "birthdate": "1987-04-12",
-    "avatar": "espr1t_square.jpg"
+    "avatar": "espr1t_square.jpg",
+    "actions": 1337,
+    "totalTime": 42666, // Seconds
+    "lastSeen": "2016-05-23T21:29:13"
 }
 */
 output('');
@@ -47,6 +50,9 @@ if ($db->tableExists('Users')) {
             gender VARCHAR(8) NOT NULL,
             birthdate DATE NOT NULL,
             avatar VARCHAR(255) NOT NULL,
+            actions INT NOT NULL,
+            totalTime INT NOT NULL,
+            lastSeen DATETIME NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
@@ -413,10 +419,10 @@ Table::Reports
 ===========
 {
     "id": 1,
-    "user": 42,
-    "date": 2016-08-19
     "page": "http://action.informatika.bg/queue",
     "content": "Reports are currently not saved in the DB!",
+    "user": 42,
+    "date": 2016-08-19
 }
 */
 output('');
@@ -448,7 +454,6 @@ Table::Achievements
     "date": 2016-07-23
 }
 */
-
 output('');
 output('Creating table Achievements...');
 

@@ -24,6 +24,9 @@ if ($user == null) {
     $user = new User();
 }
 
+// Update activity statistics
+$user->updateStats();
+
 $showMessage = '';
 if (isset($_SESSION['messageType']) && isset($_SESSION['messageText'])) {
     $showMessage .= '<script>showMessage("' . $_SESSION['messageType'] . '", "' . $_SESSION['messageText'] . '");</script>';

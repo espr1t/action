@@ -19,6 +19,9 @@ class User {
     public $gender = '';
     public $birthdate = '';
     public $avatar = '';
+    public $actions = 0;
+    public $totalTime = 0;
+    public $lastSeen = '2017-01-01 00:00:00';
     
     public function logOut() {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
@@ -30,6 +33,19 @@ class User {
     public function update() {
         $brain = new Brain();
         return $brain->updateUser($this);
+    }
+
+    public function updateStats() {
+        if ($this->id >= 1) {
+            $this->actions += 1;
+
+            // If last seen more than 15 minutes ago, count 15 minutes of
+            // activity, otherwise add the difference between now and then.
+            $this->totalTime += min(array(time() - strtotime($this->lastSeen), 15 * 60));
+            $this->lastSeen = date('Y-m-d H:i:s', time());
+            $brain = new Brain();
+            $brain->updateUserActivity($this);
+        }
     }
 
     private static function instanceFromArray($info) {
@@ -47,6 +63,9 @@ class User {
         $user->gender = getValue($info, 'gender');
         $user->birthdate = getValue($info, 'birthdate');
         $user->avatar = getValue($info, 'avatar');
+        $user->actions = intval(getValue($info, 'actions'));
+        $user->totalTime = intval(getValue($info, 'totalTime'));
+        $user->lastSeen = getValue($info, 'lastSeen');
         return $user;
     }
 

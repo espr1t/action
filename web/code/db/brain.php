@@ -721,6 +721,21 @@ class Brain {
         return true;
     }
 
+    function updateUserActivity($user) {
+        $response = $this->db->query("
+            UPDATE `Users` SET
+                actions = '" . $user->actions . "',
+                totalTime = '" . $user->totalTime . "',
+                lastSeen = '" . $user->lastSeen . "'
+            WHERE id = " . $user->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update activity info for user "' . $user->username . '"!');
+            return null;
+        }
+        return true;
+    }
+
     function getUsers() {
         $response = $this->db->query("
             SELECT * FROM `Users` ORDER BY id
