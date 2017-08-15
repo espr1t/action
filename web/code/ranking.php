@@ -7,25 +7,41 @@ class RankingPage extends Page {
     public function getTitle() {
         return 'O(N)::Ranking';
     }
-    
-    private function getRanking() {
-        $ranking = '';
 
+    private static function userCmp($user1, $user2) {
+        if ($user1['solved'] != $user2['solved'])
+            return $user2['solved'] - $user1['solved'];
+        if ($user1['achievements'] != $user2['achievements'])
+            return $user2['achievements'] - $user1['achievements'];
+        return strcmp($user2['town'], $user1['town']);
+    }
+
+    public static function getRanking() {
         $brain = new Brain();
         $usersInfo = $brain->getUsers();
 
+        // Remove system and admin accounts from ranking
+        $usersInfo = array_splice($usersInfo, 2);
+
+        for ($i = 0; $i < count($usersInfo); $i += 1) {
+            $usersInfo[$i]['solved'] = count($brain->getSolved($usersInfo[$i]['id']));
+            $usersInfo[$i]['achievements'] = count($brain->getAchievements($usersInfo[$i]['id']));
+            $usersInfo[$i]['link'] = getUserLink($usersInfo[$i]['username']);
+        }
+        usort($usersInfo, array('RankingPage', 'userCmp'));
+        return $usersInfo;
+    }
+
+    private function getRankingTable() {
+        $ranking = '';
+        $usersInfo = $this->getRanking();
+
         $place = 0;
         foreach ($usersInfo as $info) {
-            if ($info['id'] <= 1)
-                continue;
             $place = $place + 1;
 
-            $info['solved'] = count($brain->getSolved($info['id']));
-            $info['achievements'] = count($brain->getAchievements($info['id']));
-            $info['link'] = getUserLink($info['username']);
-            if ($info['town'] == '') {
+            if ($info['town'] == '')
                 $info['town'] = '-';
-            }
 
             $ranking .= '
                 <tr>
@@ -43,7 +59,7 @@ class RankingPage extends Page {
     }
 
     public function getContent() {
-        $ranking = $this->getRanking();
+        $rankingTableContent = $this->getRankingTable();
         $table = '
             <table class="default" id="rankingTable">
                 <tr>
@@ -55,7 +71,7 @@ class RankingPage extends Page {
                     <th onclick="orderRanking(\'achievements\');" style="cursor: pointer; width: 120px;">Постижения <i class="fa fa-sort" style="font-size: 0.625rem;"></i></th>
                 </tr>
                 <tbody>
-                ' . $ranking . '
+                ' . $rankingTableContent . '
                 </tbody>
             </table>
         ';
@@ -63,10 +79,7 @@ class RankingPage extends Page {
             <h1>Класиране</h1>
             <br>
         ';
-        $initialOrder = '
-            <script>orderRanking(\'tasks\');</script>
-        ';
-        return inBox($content . $table . $initialOrder);
+        return inBox($content . $table);
     }
     
 }
