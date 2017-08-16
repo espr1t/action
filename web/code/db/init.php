@@ -241,10 +241,13 @@ Table::Submits
     "problemName": "Input/Output",
     "language": "Java",
     "results": "1,1,TL,0.42,WA",
+    "exec_time": "0,0.11,0.08,0.13,0.20",
+    "exec_memory": "2.90234375,2.83203125,2.9140625,2.90234375,2.94140",
     "status": "T",
     "message": "Undefined variable 'foo'",
     "full": true,
-    "hidden": false
+    "hidden": false,
+    "ip": "2001:db8:0:0:0:ff00:42:8329"
 }
 */
 output('');
@@ -270,6 +273,7 @@ if ($db->tableExists('Submits')) {
             message TEXT NOT NULL,
             full BOOLEAN NOT NULL DEFAULT FALSE,
             hidden BOOLEAN NOT NULL DEFAULT FALSE,
+            ip VARCHAR(40) NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

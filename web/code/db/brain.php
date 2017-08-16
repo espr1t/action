@@ -380,7 +380,7 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, full, hidden)
+            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, full, hidden, ip)
             VALUES (
                 '" . $submit->submitted . "',
                 '" . $submit->graded . "',
@@ -395,7 +395,8 @@ class Brain {
                 '" . $submit->status . "',
                 '" . $this->db->escape($submit->message) . "',
                 '" . ($submit->full ? 1 : 0) . "',
-                '" . ($submit->hidden ? 1 : 0) . "'
+                '" . ($submit->hidden ? 1 : 0) . "',
+                '" . $this->db->escape($submit->ip) . "'
             )
         ");
         if (!$response) {

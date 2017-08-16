@@ -24,6 +24,7 @@ class Submit {
     public $message = '';
     public $full = true;
     public $hidden = false;
+    public $ip = '';
 
     public static function newSubmit($user, $problemId, $language, $source, $full, $hidden = false) {
         $brain = new Brain();
@@ -60,6 +61,8 @@ class Submit {
 
         $submit->full = $full;
         $submit->hidden = $hidden;
+
+        $submit->ip = $_SERVER['REMOTE_ADDR'];
         return $submit;
     }
 
@@ -239,6 +242,10 @@ class Submit {
 
             foreach ($latest as $key => $submitId) {
                 $submit = Submit::get($submitId);
+                if ($submit == null) {
+                    error_log('Could not get submit with ID ' . $submitId);
+                    continue;
+                }
                 // Update match info (add if a new match)
                 foreach ($tests as $test) {
                     $match = new Match($problem->id, $test['position'],
@@ -268,6 +275,7 @@ class Submit {
             'language' => $this->language,
             'matches' => $matches,
             'tester' => $testerHash,
+            'floats' => false,
             'timeLimit' => $problem->timeLimit,
             'memoryLimit' => $problem->memoryLimit,
             'tests' => $tests,
