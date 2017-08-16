@@ -1,604 +1,524 @@
 [
   {
-    "id": 1,
-	"key": "RGSTRD",
-    "title": "Registered",
-    "description": "Регистриран потребител",
-    "icon": "registered"
-  },
-  {
-    "id": 2,
-	"key": "SUBMIT",
+    "key": "SUB1E0",
     "title": "Submitted",
     "description": "1 предадено решение",
     "icon": "upload"
   },
   {
-    "id": 3,
-	"key": "10SUBM",
+    "key": "SUB1E1",
     "title": "Testing the system",
     "description": "10 предадени решения",
     "icon": "cloud-upload"
   },
   {
-    "id": 4,
-	"key": "100SUB",
-    "title": "Spammer",
+    "key": "SUB1E2",
+    "title": "More and more",
     "description": "100 предадени решения",
     "icon": "commenting"
   },
   {
-    "id": 5,
-	"key": "SOLVED",
+    "key": "SUB1E3",
+    "title": "Spammer",
+    "description": "1000 предадени решения",
+    "icon": "spinner"
+  },
+  {
+    "key": "SOL1E0",
     "title": "Solved",
     "description": "1 решена задача",
     "icon": "terminal"
   },
   {
-    "id": 6,
-	"key": "10SLVD",
+    "key": "SOL1E1",
     "title": "Smart is the new sexy",
     "description": "10 решени задачи",
     "icon": "code"
   },
   {
-    "id": 7,
-	"key": "100SLV",
+    "key": "SOL1E2",
     "title": "Bring it on",
     "description": "100 решени задачи",
     "icon": "heartbeat"
   },
   {
-    "id": 8,
-	"key": "REPORT",
-    "title": "I spotted it first",
-    "description": "Докладван проблем",
-    "icon": "bug"
-  },
-  {
-    "id": 9,
-	"key": "1TRIVL",
-    "title": "Light as a leaf",
+    "key": "1TRIVL",
+    "title": "Trivial",
     "description": "Решена задача със сложност trivial",
     "icon": "leaf"
   },
   {
-    "id": 10,
-	"key": "1EASYY",
-    "title": "That was easy!",
+    "key": "1EASYY",
+    "title": "Easy",
     "description": "Решена задача със сложност easy",
     "icon": "child"
   },
   {
-    "id": 11,
-	"key": "1MEDIU",
-    "title": "The code is my medium",
+    "key": "1MEDIU",
+    "title": "Medium",
     "description": "Решена задача със сложност medium",
     "icon": "balance-scale"
   },
   {
-    "id": 12,
-	"key": "1HARDD",
-    "title": "Getting harder",
+    "key": "1HARDD",
+    "title": "Hard",
     "description": "Решена задача със сложност hard",
     "icon": "tint"
   },
   {
-    "id": 13,
-	"key": "1BRUTL",
-    "title": "Kitty's got claws",
+    "key": "1BRUTL",
+    "title": "Brutal",
     "description": "Решена задача със сложност brutal",
     "icon": "paw"
   },
   {
-    "id": 14,
-	"key": "ALLTRV",
-    "title": "Everything's trivial",
+    "key": "ALLTRV",
+    "title": "Light as a leaf",
     "description": "Решени всички задачи със сложност trivial",
     "icon": "leaf"
   },
   {
-    "id": 15,
-	"key": "ALLEAS",
+    "key": "ALLESY",
     "title": "Easy peasy",
     "description": "Решени всички задачи със сложност easy",
     "icon": "child"
   },
   {
-    "id": 16,
-	"key": "ALLMED",
-    "title": "It ain't easy",
+    "key": "ALLMED",
+    "title": "Being balanced",
     "description": "Решени всички задачи със сложност medium",
     "icon": "balance-scale"
   },
   {
-    "id": 17,
-	"key": "ALLHRD",
+    "key": "ALLHRD",
     "title": "Working hard",
     "description": "Решени всички задачи със сложност hard",
     "icon": "tint"
   },
   {
-    "id": 18,
-	"key": "ALLBRU",
+    "key": "ALLBRL",
     "title": "Animal",
     "description": "Решени всички задачи със сложност brutal",
     "icon": "paw"
   },
   {
-    "id": 19,
-	"key": "ALLTSK",
-    "title": "I've seen it all",
-    "description": "Решени всички задачи",
-    "icon": "check"
+    "key": "ALLDIF",
+    "title": "Difficulty is irrelevant",
+    "description": "Решени задачи от всички трудности",
+    "icon": "sort-amount-asc"
   },
   {
-    "id": 20,
-	"key": "TRSEIT",
+    "key": "ALLIMP",
+    "title": "Give me a keyboard",
+    "description": "Решени всички задачи с таг implement",
+    "icon": "keyboard-o"
+  },
+  {
+    "key": "ALLSRC",
     "title": "Needle in a haystack",
-    "description": "Завършена тема Търсене и итерация",
-    "icon": "university"
-  },
-  {
-    "id": 21,
-	"key": "TRDYNP",
-    "title": "Optimised",
-    "description": "Завършена тема Динамично оптимиране",
-    "icon": "university"
-  },
-  {
-    "id": 22,
-	"key": "TRGRAF",
-    "title": "Dracula",
-    "description": "Завършена тема Графи",
-    "icon": "university"
-  },
-  {
-    "id": 23,
-	"key": "TRMATH",
-    "title": "Two plus two",
-    "description": "Завършена тема Математика",
-    "icon": "university"
-  },
-  {
-    "id": 24,
-	"key": "TRGEOM",
-    "title": "Picasso",
-    "description": "Завършена тема Геометрия",
-    "icon": "university"
-  },
-  {
-    "id": 25,
-	"key": "TRFLOW",
-    "title": "Orinoco",
-    "description": "Завършена тема Потоци",
-    "icon": "university"
-  },
-  {
-    "id": 26,
-	"key": "TRDIVC",
-    "title": "Divide et impera",
-    "description": "Завършена тема Разделяй и владей",
-    "icon": "university"
-  },
-  {
-    "id": 27,
-	"key": "TRBINS",
-    "title": "Half are useless",
-    "description": "Завършена тема Двоично търсене",
-    "icon": "university"
-  },
-  {
-    "id": 28,
-	"key": "TRHASH",
-    "title": "Charming",
-    "description": "Завършена тема Стрингове и хеширане",
-    "icon": "university"
-  },
-  {
-    "id": 29,
-	"key": "TRSORT",
-    "title": "ORDER BY",
-    "description": "Завършена тема Сортиране",
-    "icon": "university"
-  },
-  {
-    "id": 30,
-	"key": "TRGRDY",
-    "title": "Gheed",
-    "description": "Завършена тема Алчни алгоритми",
-    "icon": "university"
-  },
-  {
-    "id": 31,
-	"key": "TRGAME",
-    "title": "NIMoa",
-    "description": "Завършена тема Теория на игрите",
-    "icon": "university"
-  },
-  {
-    "id": 32,
-	"key": "TRMITM",
-    "title": "We meet again",
-    "description": "Завършена тема Срещане в средата",
-    "icon": "university"
-  },
-  {
-    "id": 33,
-	"key": "GRADU8",
-    "title": "Graduated",
-    "description": "Завършени всички части от трейнинга",
-    "icon": "graduation-cap"
-  },
-  {
-    "id": 34,
-	"key": "ALLSRC",
-    "title": "Finding Nemo",
     "description": "Решени всички задачи с таг search",
     "icon": "search"
   },
   {
-    "id": 35,
-	"key": "ALLDPR",
-    "title": "Like an Elephant",
+    "key": "ALLDPR",
+    "title": "Like an elephant",
     "description": "Решени всички задачи с таг dp",
     "icon": "database"
   },
   {
-    "id": 36,
-	"key": "ALLGRF",
+    "key": "ALLGRF",
     "title": "I know the way",
     "description": "Решени всички задачи с таг graph",
     "icon": "map-signs"
   },
   {
-    "id": 37,
-	"key": "ALLMAT",
-    "title": "Call me Euler",
+    "key": "ALLMAT",
+    "title": "Two plus two",
     "description": "Решени всички задачи с таг math",
     "icon": "calculator"
   },
   {
-    "id": 38,
-	"key": "ALLGEO",
-    "title": "I'm not obtuse",
+    "key": "ALLGEO",
+    "title": "Radian(t)",
     "description": "Решени всички задачи с таг geometry",
     "icon": "object-group"
   },
   {
-    "id": 39,
-	"key": "ALLADH",
-    "title": "I like to improvise",
+    "key": "ALLADH",
+    "title": "Improviser",
     "description": "Решени всички задачи с таг ad-hoc",
     "icon": "lightbulb-o"
   },
   {
-    "id": 40,
-	"key": "ALLFLW",
+    "key": "ALLFLW",
     "title": "Go with the flow",
     "description": "Решени всички задачи с таг flow",
     "icon": "ship"
   },
   {
-    "id": 41,
-	"key": "ALLDAC",
-    "title": "Machiavelli",
+    "key": "ALLDAC",
+    "title": "Divide et impera",
     "description": "Решени всички задачи с таг divconq",
-    "icon": "flag"
+    "icon": "unlink"
   },
   {
-    "id": 42,
-	"key":"ALLBSR",
-    "title": "BS is not bullshit",
-    "description": "Решени всички задачи с таг binsearch",
-    "icon": "sort"
-  },
-  {
-    "id": 43,
-	"key": "ALLHSH",
-    "title": "Hashcode",
-    "description": "Решени всички задачи с таг hashing",
-    "icon": "hashtag"
-  },
-  {
-    "id": 44,
-	"key": "ALLSTR",
+    "key": "ALLSTR",
     "title": "No strings attached",
     "description": "Решени всички задачи с таг strings",
     "icon": "quote-right"
   },
   {
-    "id": 45,
-	"key": "ALLSOR",
-    "title": "I want order",
+    "key": "ALLSOR",
+    "title": "ORDER BY",
     "description": "Решени всички задачи с таг sorting",
     "icon": "sort-alpha-asc"
   },
   {
-    "id": 46,
-	"key": "ALLGRD",
+    "key": "ALLGRD",
     "title": "Greedy is good",
     "description": "Решени всички задачи с таг greedy",
     "icon": "dollar"
   },
   {
-    "id": 47,
-	"key": "ALLSGG",
+    "key": "ALLGAM",
     "title": "Playing optimal",
-    "description": "Решени всички задачи с таг sg",
-    "icon": "magic"
+    "description": "Решени всички задачи с таг game",
+    "icon": "futbol-o"
   },
   {
-    "id": 48,
-	"key": "ALLMTM",
-    "title": "The Middle",
-    "description": "Решени всички задачи с таг mitm",
-    "icon": "map-marker"
-  },
-  {
-    "id": 49,
-	"key": "ALLDST",
+    "key": "ALLDST",
     "title": "Data is everything",
     "description": "Решени всички задачи с таг datastruct",
     "icon": "tree"
   },
   {
-    "id": 50,
-	"key": "ALLSTL",
-    "title": "Library rat",
-    "description": "Решени всички задачи с таг stl",
-    "icon": "book"
+    "key": "ALLPNP",
+    "title": "P = NP",
+    "description": "Решени всички задачи с таг np",
+    "icon": "edit"
   },
   {
-    "id": 51,
-	"key": "1COMPN",
-    "title": "Competitor",
-    "description": "Първо състезание",
-    "icon": "dot-circle-o"
-  },
-  {
-    "id": 52,
-	"key": "GOLDDD",
-    "title": "Gold",
-    "description": "Първо място на състезание",
-    "icon": "user"
-  },
-  {
-    "id": 53,
-	"key": "SILVER",
-    "title": "Silver",
-    "description": "Второ място на състезание",
-    "icon": "user-plus"
-  },
-  {
-    "id": 54,
-	"key": "BRONZE",
-    "title": "Bronze",
-    "description": "Трето място на състезание",
-    "icon": "group"
-  },
-  {
-    "id": 55,
-	"key": "RANK_1",
-    "title": "Rockstar",
-    "description": "Първи в ранклистата",
-    "icon": "rocket"
-  },
-  {
-    "id": 56,
-	"key": "RANK10",
-    "title": "Among the chosen few",
-    "description": "Сред първите 10 в ранклистата",
-    "icon": "line-chart"
-  },
-  {
-    "id": 57,
-	"key": "VIRGIN",
-    "title": "I was there first",
-    "description": "Първo решeние на задача",
-    "icon": "flag-o"
-  },
-  {
-    "id": 58,
-	"key": "MORNIN",
-    "title": "Early bird",
-    "description": "Решена задача между 8:00 и 12:00 сутринта",
-    "icon": "coffee"
-  },
-  {
-    "id": 59,
-	"key": "NIGHTY",
-    "title": "Night owl",
-    "description": "Решена задача между 2:00 и 6:00 през нощта",
-    "icon": "moon-o"
-  },
-  {
-    "id": 60,
-	"key": "PLAYED",
-    "title": "Let's play",
-    "description": "Предадено решение на игра",
-    "icon": "puzzle-piece"
-  },
-  {
-    "id": 61,
-	"key": "GAMERR",
-    "title": "Gamer",
-    "description": "Предадено решение на всички игри",
-    "icon": "gamepad"
-  },
-  {
-    "id": 62,
-	"key": "WINNER",
-    "title": "Winner",
-    "description": "Първо място на игра",
-    "icon": "trophy"
-  },
-  {
-    "id": 63,
-	"key": "3LANGS",
-    "title": "Rainbow coder",
-    "description": "По една решена задача на всеки език",
-    "icon": "arrows"
-  },
-  {
-    "id": 64,
-	"key": "OLDREG",
-    "title": "Getting older",
-    "description": "Регистриран преди повече от година",
-    "icon": "child"
-  },
-  {
-    "id": 65,
-	"key": "BIRDAY",
-    "title": "Happy birthday!",
-    "description": "Действие на сайта на рождения си ден",
-    "icon": "birthday-cake"
-  },
-  {
-    "id": 66,
-	"key": "3IN24H",
-    "title": "Three in a row",
-    "description": "Три решени задачи в рамките на 24 часа",
-    "icon": "thermometer-1"
-  },
-  {
-    "id": 67,
-	"key": "5IN24H",
-    "title": "Five in a row",
-    "description": "Пет решени задачи в рамките на 24 часа",
-    "icon": "thermometer-2"
-  },
-  {
-    "id": 68,
-	"key": "10IN24",
-    "title": "Ten in a row",
-    "description": "Десет решени задачи в рамките на 24 часа",
-    "icon": "thermometer-3"
-  },
-  {
-    "id": 69,
-	"key": "20IN24",
-    "title": "Twenty in a row",
-    "description": "Двадесет решени задачи в рамките на 24 часа",
-    "icon": "thermometer-4"
-  },
-  {
-    "id": 70,
-	"key": "TLREWA",
-    "title": "What is wrong NOW?!",
-    "description": "Три различни типа грешки на една задача",
-    "icon": "times"
-  },
-  {
-    "id": 71,
-	"key": "TWOTEN",
-    "title": "Be quick or be dead",
-    "description": "Две решени задачи в рамките на десет минути",
-    "icon": "flash"
-  },
-  {
-    "id": 72,
-	"key": "20FRST",
-    "title": "Vasily Zaytsev",
-    "description": "Двадесет задачи, решени от първи събмит",
-    "icon": "bullseye"
-  },
-  {
-    "id": 73,
-	"key": "AVATAR",
-    "title": "Now you see me",
-    "description": "Качена снимка/аватар",
-    "icon": "id-badge"
-  },
-  {
-    "id": 74,
-	"key": "PROFIL",
-    "title": "Hi, my name is...",
-    "description": "Пълна информация в профила",
-    "icon": "address-card-o"
-  },
-  {
-    "id": 75,
-	"key": "ACCAGN",
-    "title": "Let's do that again",
-    "description": "Решена повторно задача",
-    "icon": "recycle"
-  },
-  {
-    "id": 76,
-	"key": "ALLTYP",
+    "key": "ALLTAG",
     "title": "Diversity is key",
     "description": "Решени задачи от всички типове",
     "icon": "tags"
   },
   {
-    "id": 77,
-	"key": "3TRCKY",
-    "title": "Pedantic",
-    "description": "Три трики задачи, решени от първи път",
-    "icon": "eye"
+    "key": "TWOTEN",
+    "title": "Be quick or be dead",
+    "description": "Две решени задачи в рамките на десет минути",
+    "icon": "flash"
   },
   {
-    "id": 78,
-	"key": "OFFBY1",
-    "title": "Off by one",
-    "description": "Едносимволен фикс на решение",
-    "icon": "edit"
+    "key": "03IN24",
+    "title": "Three in a row",
+    "description": "Три решени задачи в рамките на 24 часа",
+    "icon": "thermometer-empty"
   },
   {
-    "id": 79,
-	"key": "CHRSTM",
+    "key": "05IN24",
+    "title": "Five in a row",
+    "description": "Пет решени задачи в рамките на 24 часа",
+    "icon": "thermometer-half"
+  },
+  {
+    "key": "10IN24",
+    "title": "Ten in a row",
+    "description": "Десет решени задачи в рамките на 24 часа",
+    "icon": "thermometer-full"
+  },
+  {
+    "key": "TRSEIT",
+    "title": "Nemo",
+    "description": "Завършена тема Търсене и итерация",
+    "icon": "university"
+  },
+  {
+    "key": "TRDYNP",
+    "title": "Rainman",
+    "description": "Завършена тема Динамично оптимиране",
+    "icon": "university"
+  },
+  {
+    "key": "TRGRAF",
+    "title": "Dracula",
+    "description": "Завършена тема Графи",
+    "icon": "university"
+  },
+  {
+    "key": "TRMATH",
+    "title": "Euler",
+    "description": "Завършена тема Математика",
+    "icon": "university"
+  },
+  {
+    "key": "TRGEOM",
+    "title": "Picasso",
+    "description": "Завършена тема Геометрия",
+    "icon": "university"
+  },
+  {
+    "key": "TRFLOW",
+    "title": "Orinoco",
+    "description": "Завършена тема Потоци",
+    "icon": "university"
+  },
+  {
+    "key": "TRDIVC",
+    "title": "Machiavelli",
+    "description": "Завършена тема Разделяй и владей",
+    "icon": "university"
+  },
+  {
+    "key": "TRHASH",
+    "title": "Charming",
+    "description": "Завършена тема Стрингове и хеширане",
+    "icon": "university"
+  },
+  {
+    "key": "TRSORT",
+    "title": "Tim",
+    "description": "Завършена тема Сортиране",
+    "icon": "university"
+  },
+  {
+    "key": "TRGRDY",
+    "title": "Gheed",
+    "description": "Завършена тема Алчни алгоритми",
+    "icon": "university"
+  },
+  {
+    "key": "TRGAME",
+    "title": "Grundy",
+    "description": "Завършена тема Теория на игрите",
+    "icon": "university"
+  },
+  {
+    "key": "TRMITM",
+    "title": "Meetyou",
+    "description": "Завършена тема Срещане в средата",
+    "icon": "university"
+  },
+  {
+    "key": "GRADU8",
+    "title": "Graduated",
+    "description": "Завършени всички части от трейнинга",
+    "icon": "graduation-cap"
+  },
+  {
+    "key": "PLAYED",
+    "title": "Let's play",
+    "description": "Предадено решение на игра",
+    "icon": "puzzle-piece"
+  },
+  {
+    "key": "GAMERR",
+    "title": "Gamer",
+    "description": "Предадено решение на всички игри",
+    "icon": "gamepad"
+  },
+  {
+    "key": "WINNER",
+    "title": "Winner",
+    "description": "Първо място на игра",
+    "icon": "trophy"
+  },
+  {
+    "key": "1COMPN",
+    "title": "Competitor",
+    "description": "Първо състезание",
+    "icon": "dot-circle-o"
+  },
+  {
+    "key": "GOLDDD",
+    "title": "Gold",
+    "description": "Първо място на състезание",
+    "icon": "user"
+  },
+  {
+    "key": "SILVER",
+    "title": "Silver",
+    "description": "Второ място на състезание",
+    "icon": "user-plus"
+  },
+  {
+    "key": "BRONZE",
+    "title": "Bronze",
+    "description": "Трето място на състезание",
+    "icon": "group"
+  },
+  {
+    "key": "ALLTSK",
+    "title": "I've seen it all",
+    "description": "Решени всички задачи",
+    "icon": "check"
+  },
+  {
+    "key": "RGSTRD",
+    "title": "Registered",
+    "description": "Регистриран потребител",
+    "icon": "registered"
+  },
+  {
+    "key": "REPORT",
+    "title": "I spotted it first",
+    "description": "Докладван проблем",
+    "icon": "bug"
+  },
+  {
+    "key": "ACTIVE",
+    "title": "Ready, set, action!",
+    "description": "Направени 1000 действия на сайта",
+    "icon": "adn"
+  },
+  {
+    "key": "TESTED",
+    "title": "Processor",
+    "description": "Изтествани 10000 теста",
+    "icon": "microchip"
+  },
+  {
+    "key": "RANK01",
+    "title": "Rockstar",
+    "description": "Първи в ранклистата",
+    "icon": "rocket"
+  },
+  {
+    "key": "RANK10",
+    "title": "Skyhigh",
+    "description": "Сред първите 10 в ранклистата",
+    "icon": "line-chart"
+  },
+  {
+    "key": "VIRGIN",
+    "title": "I was there first",
+    "description": "Първo решeние на задача",
+    "icon": "flag"
+  },
+  {
+    "key": "MORNIN",
+    "title": "Early bird",
+    "description": "Пратено решение между 6:00 и 10:00 сутринта",
+    "icon": "coffee"
+  },
+  {
+    "key": "NIGHTY",
+    "title": "Night owl",
+    "description": "Пратено решение между 2:00 и 6:00 през нощта",
+    "icon": "moon-o"
+  },
+  {
+    "key": "3LANGS",
+    "title": "Rosetta Stone",
+    "description": "По една решена задача на всеки език",
+    "icon": "language"
+  },
+  {
+    "key": "OLDREG",
+    "title": "Anniversary",
+    "description": "Регистриран преди повече от година",
+    "icon": "child"
+  },
+  {
+    "key": "BIRTHD",
+    "title": "Happy birthday!",
+    "description": "Предадена задача на рождения си ден",
+    "icon": "birthday-cake"
+  },
+  {
+    "key": "CHRSTM",
     "title": "Santa's here",
-    "description": "Решена задача на Коледа",
+    "description": "Предадена задача на Коледа",
     "icon": "gift"
   },
   {
-    "id": 80,
-	"key": "3DIFIP",
-    "title": "On the road",
-    "description": "Изпратени решения от три различни места",
-    "icon": "road"
+    "key": "NUYEAR",
+    "title": "Happy New Year!",
+    "description": "Предадена задача на Нова Година",
+    "icon": "calendar"
   },
   {
-    "id": 81,
-	"key": "10FAIL",
+    "key": "WARETL",
+    "title": "What is wrong NOW?!",
+    "description": "Три различни типа грешки на една задача",
+    "icon": "times"
+  },
+  {
+    "key": "10FAIL",
     "title": "Oh, well",
     "description": "Десет неуспешни събмита по задача",
     "icon": "meh-o"
   },
   {
-    "id": 82,
-	"key": "SHEEPS",
+    "key": "30FRST",
+    "title": "Vasily Zaytsev",
+    "description": "Тридесет задачи, решени от първи събмит",
+    "icon": "crosshairs"
+  },
+  {
+    "key": "TRICKY",
+    "title": "Pedantic",
+    "description": "Три подвеждащи задачи, решени от първи път",
+    "icon": "eye"
+  },
+  {
+    "key": "AVATAR",
+    "title": "Now you see me",
+    "description": "Качена снимка/аватар",
+    "icon": "id-badge"
+  },
+  {
+    "key": "PROFIL",
+    "title": "Hi, my name is...",
+    "description": "Пълна информация в профила",
+    "icon": "address-card-o"
+  },
+  {
+    "key": "ACCAGN",
+    "title": "Let's do that again",
+    "description": "Решена повторно задача с друго решение",
+    "icon": "recycle"
+  },
+  {
+    "key": "OFFBY1",
+    "title": "Off by one",
+    "description": "Едносимволен фикс на решение",
+    "icon": "magic"
+  },
+  {
+    "key": "3DIFIP",
+    "title": "On the road",
+    "description": "Изпратени решения от три различни места",
+    "icon": "road"
+  },
+  {
+    "key": "SHEEPS",
     "title": "Draw me a sheep",
     "description": "Решена задачата Sheep",
     "icon": "ship"
   },
   {
-    "id": 83,
-	"key": "TOWERS",
+    "key": "TOWERS",
     "title": "Do you hear me, over?",
     "description": "Решена задачата Radio Towers",
-    "icon": "signal"
+    "icon": "wifi"
   },
   {
-    "id": 84,
-	"key": "DTHSTR",
+    "key": "DTHSTR",
     "title": "May the force be with you",
     "description": "Решена задачата Deathstars",
     "icon": "star"
   },
   {
-    "id": 85,
-	"key": "SNWCLN",
+    "key": "SNWCLN",
     "title": "You know something, Jon Snow",
     "description": "Решена задачата Snow Cleaning",
     "icon": "snowflake-o"
   },
   {
-    "id": 86,
-	"key": "SHADES",
+    "key": "SHADES",
     "title": "Fifty% shades of gray",
     "description": "Решена задачата Shades",
-    "icon": "sun-o"
+    "icon": "barcode"
   }
 ]
