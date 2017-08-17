@@ -1020,7 +1020,6 @@ table.black th {
     background-color: #333333;
 }
 
-
 .underline {
     border-bottom: 0.0625rem dotted #CCCCCC;
 }
@@ -1028,16 +1027,16 @@ table.black th {
 div.achievement {
     cursor: default;
     display: inline-block;
-    height: 1.5rem;
+    height: 2rem;
     margin-right: 0.25rem;
     margin-bottom: 0.25rem;
-    padding-left: 0.25rem;
+    padding-left: 0.5rem;
     padding-right: 0.5rem;
-    line-height: 1.5rem;
+    line-height: 2rem;
     font-size: 0.75rem;
     color: #FFFFFF;
     background-color: #0099FF;
-    border-radius: 0.75rem 0.125rem 0.125rem 0.75rem;
+    border-radius: 1rem 0.125rem 0.125rem 1rem;
     box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
 }
 
