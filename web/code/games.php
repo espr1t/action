@@ -31,11 +31,12 @@ class GamesPage extends Page {
         return null;
     }
 
-    public function getPositionAndScore($gameId, $userId, &$position, &$score, &$maxScore, &$numPlayers) {
+    public function getGameRanking($gameId) {
         $brain = new Brain();
-        $gameMatches = $brain->getGameMatches($gameId, true);
+        $gameMatches = $brain->getGameMatches($gameId, 'all');
 
         $userPoints = array();
+        $userSubmit = array();
         foreach ($gameMatches as $match) {
             // Partial submission, skip it
             if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
@@ -45,42 +46,44 @@ class GamesPage extends Page {
             for ($player = 1; $player <= 2; $player += 1) {
                 // Don't even get me started on why we must prepend with "User_"...
                 $user = 'User_' . $match[$player == 1 ? 'userOne' : 'userTwo'];
-                $points = floatval($match[$player == 1 ? 'scoreOne' : 'scoreTwo']);
+                $score = floatval($match[$player == 1 ? 'scoreOne' : 'scoreTwo']);
+                $submit = intval($match[$player == 1 ? 'submitOne' : 'submitTwo']);
                 if (!array_key_exists($user, $userPoints))
                     $userPoints[$user] = 0.0;
-                $userPoints[$user] += $points;
+                $userPoints[$user] += $score;
+                $userSubmit[$user] = $submit;
             }
         }
-
-        if (!array_key_exists('User_' . $userId, $userPoints))
-            return;
-
-        $position = 1;
-        $numPlayers = count($userPoints);
-        $score = $userPoints['User_' . $userId];
-        $maxScore = 0;
+        arsort($userPoints);
+        $ranking = array();
         foreach ($userPoints as $user => $points) {
-            if ($points > $score)
-                $position += 1;
-            $maxScore = $maxScore < $points ? $points : $maxScore;
+            array_push($ranking, array(
+                'user' => intval(substr($user, 5)),
+                'points' => $points,
+                'submit' => $userSubmit[$user]
+            ));
         }
+        return $ranking;
     }
 
     private function getAllGames() {
         $brain = new Brain();
-        $gamesInfo = array_values($brain->getAllGames());
+        $games = $brain->getAllGames();
 
         $problems = '';
-        for ($i = 0; $i < count($gamesInfo); $i += 1) {
-            // Calculate statistics (position and points) for each game for this user
-            $position = -1;
-            $score = -1;
-            $maxScore = -1;
-            $numPlayers = -1;
-            $this->getPositionAndScore($gamesInfo[$i]['id'], $this->user->id, $position, $score, $maxScore, $numPlayers);
+        // Calculate statistics (position and points) for each game for this user
+        foreach ($games as $game) {
+            $ranking = $this->getGameRanking($game['id']);
 
-            $scoreStr = $position < 0 ? 'N/A' : sprintf("%.2f (best is %.2f)", $score, $maxScore);
-            $positionStr = $position < 0 ? 'N/A' : sprintf("%d (out of %d)", $position, $numPlayers);
+            $position = 0;
+            for (; $position < count($ranking); $position += 1)
+                if ($ranking[$position]['user'] == $this->user->id)
+                    break;
+            $scoreStr = $positionStr = 'N/A';
+            if ($position < count($ranking)) {
+                $scoreStr = sprintf("%.2f (best is %.2f)", $ranking[$position]['points'], $ranking[0]['points']);
+                $positionStr = sprintf("%d (out of %d)", $position, count($ranking));
+            }
 
             $stats = '
                 <i class="fa fa-trophy"></i> Position: ' . $positionStr . '
@@ -89,14 +92,14 @@ class GamesPage extends Page {
             ';
 
             $problems .= '
-                <a href="/games/' . getGameUrlName($gamesInfo[$i]['name']) . '" class="decorated">
+                <a href="/games/' . getGameUrlName($game['name']) . '" class="decorated">
                     <div class="box narrow boxlink">
                         <div class="game-info">
-                            <div class="game-name">' . $gamesInfo[$i]['name'] . '</div>
+                            <div class="game-name">' . $game['name'] . '</div>
                             <div class="game-stats">' . $stats . '</div>
-                            <div class="game-description">' . $gamesInfo[$i]['description'] . '</div>
+                            <div class="game-description">' . $game['description'] . '</div>
                         </div>
-                        <div class="game-image"><img src="' . $gamesInfo[$i]['logo'] . '"></div>
+                        <div class="game-image"><img src="' . $game['logo'] . '"></div>
                     </div>
                 </a>
             ';

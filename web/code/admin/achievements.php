@@ -81,7 +81,8 @@ class AdminAchievementsPage extends Page {
     public function achievementSpeed($brain, $achieved, $user, $solved, $key, $count, $limit) {
         if (!in_array($key, $achieved)) {
             $date = '';
-            for ($i = 0; $i + $count <= count($solved); $i += 1) {
+            $solvedCount = count($solved);
+            for ($i = 0; $i + $count <= $solvedCount; $i += 1) {
                 $ts1 = strtotime($solved[$i]['submitted']);
                 $ts2 = strtotime($solved[$i + $count - 1]['submitted']);
                 if ($ts2 - $ts1 <= $limit) {
@@ -105,27 +106,39 @@ class AdminAchievementsPage extends Page {
     }
 
     // Has played X games
-    public function achievementPlayedGame($brain, $achieved, $user, $submits, $key, $limit) {
+    public function achievementPlayedGame($brain, $achieved, $user, $standings, $submits, $key, $limit) {
         if (!in_array($key, $achieved)) {
-            if (count($submits) >= $limit) {
-                $brain->addAchievement($user->id, $key, $submits[$limit - 1]['submitted']);
+            $played = 0;
+            $submitId = -1;
+            foreach ($standings as $game => $ranking) {
+                foreach ($ranking as $player) {
+                    if ($player['user'] == $user->id) {
+                        $played += 1;
+                        $submitId = max(array($submitId, $player['submit']));
+                        if ($played >= $limit)
+                            break;
+                    }
+                }
+            }
+            if ($played >= $limit) {
+                foreach ($submits as $submit) {
+                    if ($submit['id'] == $submitId) {
+                        $brain->addAchievement($user->id, $key, $submit['submitted']);
+                        return;
+                    }
+                }
             }
         }
     }
 
     // Has won a game
-    public function achievementWonGame($brain, $achieved, $user, $games, $submits, $key) {
-        if (!in_array($key, $achieved)) {
-            foreach ($games as $game) {
-                $position = $score = $maxScore = $numPlayers = -1;
-                GamesPage::getPositionAndScore(
-                    $game['id'], $user->id, $position, $score, $maxScore, $numPlayers);
-                if ($position == 1) {
+    public function achievementWonGame($brain, $achieved, $user, $standings, $submits) {
+        if (!in_array('WINNER', $achieved)) {
+            foreach ($standings as $game => $ranking) {
+                if ($ranking[0]['user'] == $user->id) {
                     foreach ($submits as $submit) {
-                        // This sets the achievement date to the one of the first full submit on this
-                        // game, instead of the winning one, but it is too complex to do it properly.
-                        if ($submit['problemId'] == $game['id']) {
-                            $brain->addAchievement($user->id, $key, $submit['submitted']);
+                        if ($submit['id'] == $ranking[0]['submit']) {
+                            $brain->addAchievement($user->id, 'WINNER', $submit['submitted']);
                             return;
                         }
                     }
@@ -163,7 +176,8 @@ class AdminAchievementsPage extends Page {
     public function achievementTested($brain, $achieved, $user, $submits) {
         if (!in_array('TESTED', $achieved)) {
             $total = $idx = 0;
-            while ($idx < count($submits)) {
+            $submitCount = count($submits);
+            while ($idx < $submitCount) {
                 $total += count(explode(',', $submits[$idx]['results']));
                 if ($total >= 10000)
                     break;
@@ -179,9 +193,10 @@ class AdminAchievementsPage extends Page {
     public function achievementRanked($brain, $achieved, $user, $ranking, $key, $limit) {
         if (!in_array($key, $achieved)) {
             $pos = 0;
-            while ($pos < count($ranking) && $ranking[$pos]['id'] != $user->id)
+            $rankingCount = count($ranking);
+            while ($pos < $rankingCount && $ranking[$pos]['id'] != $user->id)
                 $pos++;
-            if ($pos < count($ranking) && $pos < $limit) {
+            if ($pos < $rankingCount && $pos < $limit) {
                 $brain->addAchievement($user->id, $key, date('Y-m-d H:i:s'));
             }
         }
@@ -197,8 +212,8 @@ class AdminAchievementsPage extends Page {
                 if ($submit['userId'] < 2 || $submit['status'] != 'AC')
                     continue;
 
-                if (!in_array($submit['problemId'], $solved)) {
-                    array_push($solved, $submit['problemId']);
+                if (!array_key_exists($submit['problemId'], $solved)) {
+                    $solved[$submit['problemId']] = true;
                     if ($submit['userId'] == $user->id) {
                         $date = $submit['submitted'];
                         break;
@@ -235,8 +250,8 @@ class AdminAchievementsPage extends Page {
             $langs = array();
             foreach ($submits as $submit) {
                 if ($submit['status'] == 'AC') {
-                    if (!in_array($submit['language'], $langs)) {
-                        array_push($langs, $submit['language']);
+                    if (!array_key_exists($submit['language'], $langs)) {
+                        $langs[$submit['language']] = true;
                         if (count($langs) >= 3) {
                             $date = $submit['submitted'];
                             break;
@@ -335,7 +350,8 @@ class AdminAchievementsPage extends Page {
             $first = 0;
             $submitted = array();
             foreach ($submits as $submit) {
-                if (!in_array($submit['problemId'], $submitted)) {
+                if (!array_key_exists($submit['problemId'], $submitted)) {
+                    $submitted[$submit['problemId']] = true;
                     if ($submit['status'] == 'AC') {
                         $first += 1;
                         if ($first >= 30) {
@@ -343,7 +359,6 @@ class AdminAchievementsPage extends Page {
                             break;
                         }
                     }
-                    array_push($submitted, $submit['problemId']);
                 }
             }
             if ($date != '') {
@@ -361,17 +376,17 @@ class AdminAchievementsPage extends Page {
             );
             $trickyIds = array();
             foreach ($problems as $problem) {
-                if (in_array($problem['name'], $trickyNames)) {
-                    array_push($trickyIds, $problem['id']);
-                }
+                if (in_array($problem['name'], $trickyNames))
+                    $trickyIds[$problem['id']] = true;
             }
             $date = '';
             $first = 0;
             $submitted = array();
             foreach ($submits as $submit) {
-                if (!in_array($submit['problemId'], $submitted)) {
+                if (!array_key_exists($submit['problemId'], $submitted)) {
+                    $submitted[$submit['problemId']] = true;
                     if ($submit['status'] == 'AC') {
-                        if (in_array($submit['problemId'], $trickyIds)) {
+                        if (array_key_exists($submit['problemId'], $trickyIds)) {
                             $first += 1;
                             if ($first >= 3) {
                                 $date = $submit['submitted'];
@@ -379,7 +394,6 @@ class AdminAchievementsPage extends Page {
                             }
                         }
                     }
-                    array_push($submitted, $submit['problemId']);
                 }
             }
             if ($date != '') {
@@ -403,7 +417,8 @@ class AdminAchievementsPage extends Page {
         if (!in_array('ACCAGN', $achieved)) {
             $date = '';
             $solved = array();
-            for ($i = 0; $i < count($submits); $i += 1) {
+            $submitCount = count($submits);
+            for ($i = 0; $i < $submitCount; $i += 1) {
                 if ($submits[$i]['status'] == 'AC') {
                     if (array_key_exists($submits[$i]['problemId'], $solved)) {
                         if ($solved[$submits[$i]['problemId']] != $sources[$i]) {
@@ -421,29 +436,31 @@ class AdminAchievementsPage extends Page {
     }
 
     private function isOffByOne($str1, $str2) {
-        if (abs(strlen($str1) - strlen($str2)) > 1 || $str1 == $str2)
+        $len1 = strlen($str1);
+        $len2 = strlen($str2);
+        if (abs($len1 - $len2) > 1 || $str1 == $str2)
             return false;
 
         $idx1 = $idx2 = 0;
-        while ($idx1 < strlen($str1) && $idx2 < strlen($str2) && $str1[$idx1] == $str2[$idx2]) {
+        while ($idx1 < $len1 && $idx2 < $len2 && $str1[$idx1] == $str2[$idx2]) {
             $idx1 += 1;
             $idx2 += 1;
         }
-        if ($idx1 >= strlen($str1) || $idx2 >= strlen($str2))
+        if ($idx1 >= $len1 || $idx2 >= $len2)
             return true;
-        if (strlen($str1) > strlen($str2)) {
+        if ($len1 > $len2) {
             $idx2 += 1;
-        } else if (strlen($str2) > strlen($str1)) {
+        } else if ($len2 > $len1) {
             $idx1 += 1;
         } else {
             $idx1 += 1;
             $idx2 += 1;
         }
-        while ($idx1 < strlen($str1) && $idx2 < strlen($str2) && $str1[$idx1] == $str2[$idx2]) {
+        while ($idx1 < $len1 && $idx2 < $len2 && $str1[$idx1] == $str2[$idx2]) {
             $idx1 += 1;
             $idx2 += 1;
         }
-        if ($idx1 < strlen($str1) || $idx2 < strlen($str2))
+        if ($idx1 < $len1 || $idx2 < $len2)
             return false;
         return true;
     }
@@ -453,14 +470,16 @@ class AdminAchievementsPage extends Page {
         if (!in_array('OFFBY1', $achieved)) {
             $date = '';
             $byProblem = array();
-            for ($i = 0; $i < count($submits); $i += 1) {
+            $submitCount = count($submits);
+            for ($i = 0; $i < $submitCount; $i += 1) {
                 $submits[$i]['source'] = $sources[$i]['source'];
                 if (!array_key_exists($submits[$i]['problemId'], $byProblem))
                     $byProblem[$submits[$i]['problemId']] = array();
                 array_push($byProblem[$submits[$i]['problemId']], $submits[$i]);
             }
             foreach ($byProblem as $id => $submits) {
-                for ($i = 1; $i < count($submits); $i += 1) {
+                $submitCount = count($submits);
+                for ($i = 1; $i < $submitCount; $i += 1) {
                     if ($submits[$i]['status'] == 'AC' && $submits[$i - 1]['status'] != 'AC' && $submits[$i - 1]['status'] != 'CE') {
                         if ($this->isOffByOne($submits[$i - 1]['source'], $submits[$i]['source'])) {
                             if ($date == '' || $date > $submits[$i]['submitted']) {
@@ -517,7 +536,7 @@ class AdminAchievementsPage extends Page {
         }
     }
 
-    public function updateAll($user, $games, $problems, $submits, $sources, $ranking) {
+    public function updateAll($user, $games, $standings, $problems, $submits, $sources, $ranking) {
         $brain = new Brain();
 
         // Already achieved
@@ -554,33 +573,19 @@ class AdminAchievementsPage extends Page {
         }
 
         // Sent submissions on problems
-        $userGameSubmits = $userProblemSubmits = array();
-        $userGameSources = $userProblemSources = array();
+        $userAllSubmits = array();
+        $userProblemSubmits = array();
+        $userProblemSources = array();
         $submitCount = count($submits);
         for ($i = 0; $i < $submitCount; $i++) {
             if ($submits[$i]['id'] != $sources[$i]['submitId'])
                 error_log('Mismatch in submits and sources at index ' . $i . '!');
             if ($submits[$i]['userId'] == $user->id) {
+                array_push($userAllSubmits, $submits[$i]);
                 if (array_key_exists($submits[$i]['problemId'], $problemDifficulties)) {
                     array_push($userProblemSubmits, $submits[$i]);
                     array_push($userProblemSources, $sources[$i]);
-                } else {
-                    array_push($userGameSubmits, $submits[$i]);
-                    array_push($userGameSources, $sources[$i]);
                 }
-            }
-        }
-        $userSubmits = array_merge($userGameSubmits, $userProblemSubmits);
-
-        // Played games
-        $userGameFullSubmits = array();
-        foreach ($userGameSubmits as $submit) {
-            if ($submit['full']) {
-                $alreadyIn = false;
-                foreach ($userGameFullSubmits as $full)
-                    $alreadyIn = $alreadyIn || $full['problemId'] == $submit['problemId'];
-                if (!$alreadyIn)
-                    array_push($userGameFullSubmits, $submit);
             }
         }
 
@@ -589,9 +594,9 @@ class AdminAchievementsPage extends Page {
         $userSolvedIds = array();
         foreach ($userProblemSubmits as $submit) {
             if ($submit['status'] == 'AC') {
-                if (!in_array($submit['problemId'], $userSolvedIds)) {
+                if (!array_key_exists($submit['problemId'], $userSolvedIds)) {
+                    $userSolvedIds[$submit['problemId']] = true;
                     array_push($userSolved, $submit);
-                    array_push($userSolvedIds, $submit['problemId']);
                 }
             }
         }
@@ -677,9 +682,9 @@ class AdminAchievementsPage extends Page {
         // TODO: Training section achievements
 
         // Games
-        $this->achievementPlayedGame($brain, $achieved, $user, $userGameFullSubmits, 'PLAYED', 1);
-        $this->achievementPlayedGame($brain, $achieved, $user, $userGameFullSubmits, 'GAMERR', count($games));
-        $this->achievementWonGame($brain, $achieved, $user, $games, $userGameFullSubmits, 'WINNER');
+        $this->achievementPlayedGame($brain, $achieved, $user, $standings, $userAllSubmits, 'PLAYED', 1);
+        $this->achievementPlayedGame($brain, $achieved, $user, $standings, $userAllSubmits, 'GAMERR', count($standings));
+        $this->achievementWonGame($brain, $achieved, $user, $standings, $userAllSubmits);
 
         // TODO: Competitions
 
@@ -689,8 +694,8 @@ class AdminAchievementsPage extends Page {
         $this->achievementDate($brain, $achieved, $user, $userProblemSubmits, 'NUYEAR', '01-01');
 
         // Unusual times
-        $this->achievementUnusualTime($brain, $achieved, $user, $userSubmits, 'NIGHTY', 2, 6);
-        $this->achievementUnusualTime($brain, $achieved, $user, $userSubmits, 'MORNIN', 6, 10);
+        $this->achievementUnusualTime($brain, $achieved, $user, $userAllSubmits, 'NIGHTY', 2, 6);
+        $this->achievementUnusualTime($brain, $achieved, $user, $userAllSubmits, 'MORNIN', 6, 10);
 
         // Ad-hoc achievements
         $this->achievementAllTasks($brain, $achieved, $user, $userSolved, $problemDifficulties);
@@ -701,7 +706,7 @@ class AdminAchievementsPage extends Page {
         $this->achievementRanked($brain, $achieved, $user, $ranking, 'RANK01', 1);
         $this->achievementRanked($brain, $achieved, $user, $ranking, 'RANK10', 10);
         $this->achievementVirgin($brain, $achieved, $user, $submits);
-        $this->achievementRainbow($brain, $achieved, $user, $userSubmits);
+        $this->achievementRainbow($brain, $achieved, $user, $userAllSubmits);
         $this->achievementOldtimer($brain, $achieved, $user);
         $this->achievementSoWrong($brain, $achieved, $user, $userProblemSubmits);
         $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits);
@@ -731,11 +736,17 @@ class AdminAchievementsPage extends Page {
         $sources = $brain->getAllSources();
         $ranking = RankingPage::getRanking();
 
+        $standings = array();
+        foreach ($games as $game) {
+            $standings[$game['id']] = GamesPage::getGameRanking($game['id']);
+        }
+
         $users = $brain->getUsers();
         // Skip service user
-        for ($i = 1; $i < count($users); $i += 1) {
+        $userCount = count($users);
+        for ($i = 1; $i < $userCount; $i += 1) {
             $user = User::instanceFromArray($users[$i]);
-            $this->updateAll($user, $games, $problems, $submits, $sources, $ranking);
+            $this->updateAll($user, $games, $standings, $problems, $submits, $sources, $ranking);
         }
         return microtime(true) - $start;
     }
