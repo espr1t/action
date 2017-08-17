@@ -7,6 +7,13 @@ function swap(&$var1, &$var2) {
     $var2 = $temp;
 }
 
+function popcount($num) {
+    $bits = 0;
+    for (; $num > 0; $num &= ($num - 1))
+        $bits += 1;
+    return $bits;
+}
+
 function showMessage($type, $message) {
     return '<script>showMessage("' . $type . '", "' . $message . '");</script>';
 }

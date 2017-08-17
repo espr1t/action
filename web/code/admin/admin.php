@@ -37,6 +37,11 @@ switch ($_GET['page']) {
         $page = new AdminQueuePage($user);
         break;
 
+    case 'achievements':
+        require_once('achievements.php');
+        $page = new AdminAchievementsPage($user);
+        break;
+
     default:
         header('Location: /error');
         exit();

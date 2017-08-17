@@ -479,6 +479,17 @@ class Brain {
         return $this->getResults($response);
     }
 
+    function getAllSources() {
+        $response = $this->db->query("
+            SELECT * FROM `Sources`
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllSources() query!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
     function getProblemSubmits($problemId, $status = 'all') {
         if ($status == 'all') {
             $response = $this->db->query("
@@ -500,17 +511,10 @@ class Brain {
     }
 
     function getUserSubmits($userId, $problemId = -1) {
-        if ($problemId == -1) {
-            $response = $this->db->query("
-                SELECT * FROM `Submits`
-                WHERE userId = " . $userId . "
-            ");
-        } else {
-            $response = $this->db->query("
-                SELECT * FROM `Submits`
-                WHERE userId = " . $userId . " AND problemId = " . $problemId . "
-            ");
-        }
+        $response = $this->db->query("
+            SELECT * FROM `Submits`
+            WHERE userId = " . $userId . ($problemId == -1 ? '' : (' AND problemId = ' . $problemId)) . "
+        ");
         if (!$response) {
             error_log('Could not execute getUserSubmits() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
             return null;
@@ -519,17 +523,10 @@ class Brain {
     }
 
     function getUserSources($userId, $problemId = -1) {
-        if ($problemId == -1) {
-            $response = $this->db->query("
-                SELECT * FROM `Sources`
-                WHERE userId = " . $userId . "
-            ");
-        } else {
-            $response = $this->db->query("
-                SELECT * FROM `Sources`
-                WHERE userId = " . $userId . " AND problemId = " . $problemId . "
-            ");
-        }
+        $response = $this->db->query("
+            SELECT * FROM `Sources`
+            WHERE userId = " . $userId . ($problemId == -1 ? '' : (' AND problemId = ' . $problemId)) . "
+        ");
         if (!$response) {
             error_log('Could not execute getUserSources() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
             return null;
@@ -788,16 +785,29 @@ class Brain {
     }
 
     // Achievements
-    function getAchievements($userId) {
+    function getAchievements($userId = -1) {
         $response = $this->db->query("
-            SELECT DISTINCT achievement FROM `Achievements`
-            WHERE user = " . $userId . "
+            SELECT * FROM `Achievements`
+            " . ($userId == -1 ? '' : 'WHERE user = ' . $userId) . "
         ");
         if (!$response) {
             error_log('Could not execute getAchievements() query for user with id ' . $userId . '!');
             return null;
         }
-        return $this->getIntResults($response);
+        return $this->getResults($response);
+    }
+
+    function addAchievement($userId, $achievement, $date) {
+        $response = $this->db->query("
+            INSERT INTO `Achievements` (user, achievement, date)
+            VALUES(" . $userId . ", '" . $achievement ."', '" . $date . "')
+            ON DUPLICATE KEY UPDATE user = " . $userId . "
+        ");
+        if (!$response) {
+            error_log('Could not execute addAchievements() query for user with id ' . $userId . ' and achievement "' . $achievement . '"!');
+            return null;
+        }
+        return true;
     }
 
     // Spam counters

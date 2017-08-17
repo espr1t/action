@@ -57,3 +57,5 @@ RewriteRule    ^admin/problems$                                 /code/admin/admi
 RewriteRule    ^admin/problems/(\d+|new)$                       /code/admin/admin.php?page=problems&problemId=$1                                    [NC,L,QSA]
 RewriteRule    ^admin/regrade$                                  /code/admin/admin.php?page=regrade                                                  [NC,L,QSA]
 RewriteRule    ^admin/regrade/(\d+|pending)$                    /code/admin/admin.php?page=regrade&submitId=$1                                      [NC,L,QSA]
+RewriteRule    ^admin/achievements$                             /code/admin/admin.php?page=achievements                                             [NC,L,QSA]
+RewriteRule    ^admin/achievements/recalc$                      /code/admin/admin.php?page=achievements&recalc=true                                 [NC,L,QSA]

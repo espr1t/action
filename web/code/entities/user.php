@@ -48,7 +48,7 @@ class User {
         }
     }
 
-    private static function instanceFromArray($info) {
+    public static function instanceFromArray($info) {
         $user = new User;
         $user->id = getValue($info, 'id');
         $user->access = getValue($info, 'access');

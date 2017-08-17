@@ -31,7 +31,7 @@ class GamesPage extends Page {
         return null;
     }
 
-    private function getPositionAndScore($gameId, $userId, &$position, &$score, &$maxScore, &$numPlayers) {
+    public function getPositionAndScore($gameId, $userId, &$position, &$score, &$maxScore, &$numPlayers) {
         $brain = new Brain();
         $gameMatches = $brain->getGameMatches($gameId, true);
 

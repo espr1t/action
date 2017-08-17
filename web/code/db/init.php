@@ -59,6 +59,7 @@ if ($db->tableExists('Users')) {
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
 
+
 /*
 Table::Problems
 ===============
@@ -454,7 +455,7 @@ Table::Achievements
 {
     "id": 1,
     "user": 1,
-    "achievement": 1,
+    "achievement": "RGSTRD",
     "date": 2016-07-23
 }
 */
@@ -468,9 +469,10 @@ if ($db->tableExists('Achievements')) {
         CREATE TABLE `Achievements`(
             id INT NOT NULL AUTO_INCREMENT,
             user INT NOT NULL,
-            achievement INT NOT NULL,
+            achievement VARCHAR(8) NOT NULL,
             date DATE NOT NULL,
-            PRIMARY KEY (id)
+            seen BOOLEAN NOT NULL DEFAULT FALSE,
+            PRIMARY KEY (id), UNIQUE(user, achievement)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
