@@ -40,11 +40,12 @@ class ProblemsPage extends Page {
             foreach ($problemSolutions as $problemSolution) {
                 if ($problemSolution['userId'] == $GLOBALS['user']->id) {
                     $statusIcon = '<i class="fa fa-check green" title="Вече сте решили успешно тази задача!."></i>';
-                } else if ($problemSolution['userId'] == 0) {
-                    $serviceUserSolutions = 1;
+                }
+                if ($problemSolution['userId'] <= 1) {
+                    $serviceUserSolutions |= (1 << $problemSolution['userId']);
                 }
             }
-            $solutions = '<i class="fa fa-users" title="Решена от"></i> ' . (count($problemSolutions) - $serviceUserSolutions);
+            $solutions = '<i class="fa fa-users" title="Решена от"></i> ' . (count($problemSolutions) - popcount($serviceUserSolutions));
 
             $problemsInfo[$i]['box'] = '
                 <a href="problems/' . $problemsInfo[$i]['id'] . '" class="decorated">
