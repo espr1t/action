@@ -277,28 +277,26 @@ class ProfilePage extends Page {
     }
 
     private function getAchievements() {
-        /*
         $fileName = sprintf('%s/achievements.json', $GLOBALS['PATH_ACHIEVEMENTS']);
         $achInfo = json_decode(file_get_contents($fileName), true);
+        $achievements = $this->brain->getAchievements($this->profile->id);
 
-        $achievements = '';
-        foreach ($this->profile->achievements as $achievement) {
+        $content = '<h2>Постижения</h2>';
+        $content .= '<div>';
+        foreach ($achievements as $achievement) {
             for ($i = 0; $i < count($achInfo); $i = $i + 1) {
-                if ($achInfo[$i]['id'] == $achievement) {
-                    $achievements .= '
+                if ($achInfo[$i]['key'] == $achievement['achievement']) {
+                    $content .= '
                         <div class="achievement" title="' . $achInfo[$i]['description'] . '">
                             <i class="fa fa-' . $achInfo[$i]['icon'] . ' fa-fw"></i>
-                            <span style="font-weight: bold">' . $achInfo[$i]['title'] . '</span>
+                            <span style="font-weight: bold">' . $achInfo[$i]['title'] . ' | ' . $achievement['date'] . '</span>
                         </div>
                     ';
                 }
             }
         }
-        $content .= '
-                <h2>Постижения</h2>
-                <div>' . $achievements . '</div>
-        ';
-        */
+        $content .= '</div>';
+        return $content;
     }
 
     private function profileHead() {
@@ -345,14 +343,13 @@ class ProfilePage extends Page {
         // ====================================================================
         // TODO
 
-        // Achievements
-        // ====================================================================
-        // TODO
-        $content .= $this->getAchievements();
-
         // Submission information
         // ====================================================================
         $content .= $this->submissionDotChart();
+
+        // Achievements
+        // ====================================================================
+        $content .= $this->getAchievements();
 
         return inBox($content);
     }

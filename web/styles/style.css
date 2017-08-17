@@ -1031,12 +1031,12 @@ div.achievement {
     margin-right: 0.25rem;
     margin-bottom: 0.25rem;
     padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-right: 0.75rem;
     line-height: 2rem;
     font-size: 0.75rem;
     color: #FFFFFF;
     background-color: #0099FF;
-    border-radius: 1rem 0.125rem 0.125rem 1rem;
+    border-radius: 1rem 1rem 1rem 1rem;
     box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
 }
 
