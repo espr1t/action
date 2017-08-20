@@ -29,12 +29,20 @@ class ProblemsPage extends Page {
     private function getAllProblems() {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
-
-        // Skip games, show them on the Games page instead
-        $problemsInfo = array_values(array_filter($problemsInfo, function($el) {return $el['type'] != 'game';}));
+        $allProblemsSubmits = $brain->getAllSubmits('AC');
+        $problemSubmits = array();
+        foreach ($allProblemsSubmits as $submit) {
+            if (!array_key_exists($submit['problemId'], $problemSubmits))
+                $problemSubmits[$submit['problemId']] = array();
+            $alreadyIn = false;
+            foreach ($problemSubmits[$submit['problemId']] as $prevSubmit)
+                $alreadyIn = $alreadyIn || $prevSubmit['userId'] == $submit['userId'];
+            if (!$alreadyIn)
+                array_push($problemSubmits[$submit['problemId']], $submit);
+        }
 
         for ($i = 0; $i < count($problemsInfo); $i += 1) {
-            $problemSolutions = $brain->getProblemSubmits($problemsInfo[$i]['id'], $GLOBALS['STATUS_ACCEPTED']);
+            $problemSolutions = $problemSubmits[$problemsInfo[$i]['id']];
             $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
             $serviceUserSolutions = 0;
             foreach ($problemSolutions as $problemSolution) {
@@ -191,6 +199,60 @@ class ProblemsPage extends Page {
         ';
     }
 
+    private function getUsersBox($problem) {
+        $brain = new Brain();
+        $submits = $brain->getProblemSubmits($problem->id, 'AC');
+
+        $tableContent = '';
+        $users = array();
+        foreach ($submits as $submit) {
+            // Skip system user
+            if ($submit['userId'] < 1)
+                continue;
+
+            if (array_key_exists($submit['userId'], $users))
+                continue;
+            $users[$submit['userId']] = true;
+
+            $tableContent .= '
+                <tr>
+                    <td>' . getUserLink($submit['userName']) . '</td>
+                    <td>' . $submit['language'] . '</td>
+                    <td>' . max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time']))) . '</td>
+                    <td>' . max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory']))) . '</td>
+                    <td>' . $submit['submitted'] . '</td>
+                </tr>
+            ';
+        }
+
+        $content = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Потребители</h2>
+            <div class="centered">
+                <table class="default">
+                    <thead>
+                        <tr>
+                            <th>Потребител</th>
+                            <th>Език</th>
+                            <th>Време</th>
+                            <th>Памет</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ' . $tableContent . '
+                    </tbody>
+                </table>
+            </div>
+        ';
+
+        $redirect = '/problems/' . $problem->id;
+        return '
+            <script>
+                showActionForm(`' . $content . '`, \'' . $redirect . '\');
+            </script>
+        ';
+    }
+
     private function getStatement($problem) {
         $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
@@ -237,7 +299,10 @@ class ProblemsPage extends Page {
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submitButtons . '
             </div>
-            <div class="problem-stats-link""><a class="decorated" href="/problems/' . $problem->id . '/stats"><i class="fa fa-info-circle"></i></a></div>
+            <div class="problem-stats-link"">
+                <a class="decorated" href="/problems/' . $problem->id . '/stats"><i class="fa fa-info-circle"></i></a>
+                <a class="decorated" href="/problems/' . $problem->id . '/users"><i class="fa fa-users"></i></a>
+            </div>
         ';
     }
 
@@ -467,6 +532,8 @@ class ProblemsPage extends Page {
                 }
             } else if (isset($_GET['stats'])) {
                 $content .= $this->getStatsBox($this->problem);
+            } else if (isset($_GET['users'])) {
+                $content .= $this->getUsersBox($this->problem);
             }
             return $content;
         }

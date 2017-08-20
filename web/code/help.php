@@ -10,7 +10,7 @@ class HelpPage extends Page {
     public function getContent() {
         $version = '
             <div class="help-version">
-                Версия на системата: <a href="https://github.com/espr1t/action/commit/90d6d0c18683eea97c4e177a14e2d54a280d766c" target="_blank">v.170808.90d6d0c</a>
+                Версия на системата: <a href="https://github.com/espr1t/action/commit/9b8b8a9c8f8bb0a96d0eddcfcb5e8039c8e6df9f" target="_blank">v.170818.9b8b8a9</a>
             </div>
         ';
 

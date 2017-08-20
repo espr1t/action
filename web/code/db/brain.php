@@ -468,9 +468,10 @@ class Brain {
         return $this->getResult($response);
     }
 
-    function getAllSubmits() {
+    function getAllSubmits($status = 'all') {
         $response = $this->db->query("
             SELECT * FROM `Submits`
+            " . ($status == 'all' ? '' : 'WHERE status = \'' . $status . '\'') . "
         ");
         if (!$response) {
             error_log('Could not execute getAllSubmits() query!');
@@ -498,9 +499,10 @@ class Brain {
             ");
         } else {
             $response = $this->db->query("
-                SELECT id, userId FROM `Submits`
+                SELECT * FROM `Submits`
                 WHERE problemId = " . $problemId . " AND status = '" . $status . "'
                 GROUP BY userId
+                ORDER BY submitted
             ");
         }
         if (!$response) {
@@ -789,6 +791,7 @@ class Brain {
         $response = $this->db->query("
             SELECT * FROM `Achievements`
             " . ($userId == -1 ? '' : 'WHERE user = ' . $userId) . "
+            ORDER BY date ASC
         ");
         if (!$response) {
             error_log('Could not execute getAchievements() query for user with id ' . $userId . '!');
