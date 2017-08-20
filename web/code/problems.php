@@ -45,14 +45,35 @@ class ProblemsPage extends Page {
                     $serviceUserSolutions |= (1 << $problemSolution['userId']);
                 }
             }
-            $solutions = '<i class="fa fa-users" title="Решена от"></i> ' . (count($problemSolutions) - popcount($serviceUserSolutions));
+            $difficulty = '';
+            switch ($problemsInfo[$i]['difficulty']) {
+                case 'trivial':
+                    $difficulty = '<i class="fa fa-child" title="Trivial"></i>';
+                    break;
+                case 'easy':
+                    $difficulty = '<i class="fa fa-paper-plane" title="Easy"></i>';
+                    break;
+                case 'medium':
+                    $difficulty = '<i class="fa fa-balance-scale" title="Medium"></i>';
+                    break;
+                case 'hard':
+                    $difficulty = '<i class="fa fa-tint" title="Hard"></i>';
+                    break;
+                case 'brutal':
+                    $difficulty = '<i class="fa fa-paw" title="Brutal"></i>';
+                    break;
+                default:
+                    $difficulty = '<i class="fa fa-question" title="Unknown"></i>';
+            }
+            $numSolutions = (count($problemSolutions) - popcount($serviceUserSolutions));
+            $solutions = '<i class="fa fa-users" title="Решена от ' . $numSolutions . ' човек' . ($numSolutions != 1 ? 'a' : '') . '"></i> ' . $numSolutions;
 
             $problemsInfo[$i]['box'] = '
                 <a href="problems/' . $problemsInfo[$i]['id'] . '" class="decorated">
                     <div class="box narrow boxlink">
                             <div class="problem-status">' . $statusIcon . '</div>
                             <div class="problem-name">' . $problemsInfo[$i]['name'] . '</div>
-                            <div class="problem-solutions">' . $solutions . '</div>
+                            <div class="problem-stats">' . $difficulty . ' &nbsp; '  . $solutions . '</div>
                     </div>
                 </a>
             ';

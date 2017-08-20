@@ -45,13 +45,13 @@
     "key": "1TRIVL",
     "title": "Trivial",
     "description": "Решена задача със сложност trivial",
-    "icon": "leaf"
+    "icon": "child"
   },
   {
     "key": "1EASYY",
     "title": "Easy",
     "description": "Решена задача със сложност easy",
-    "icon": "child"
+    "icon": "paper-plane"
   },
   {
     "key": "1MEDIU",
@@ -73,15 +73,15 @@
   },
   {
     "key": "ALLTRV",
-    "title": "Light as a leaf",
+    "title": "Child's play",
     "description": "Решени всички задачи със сложност trivial",
-    "icon": "leaf"
+    "icon": "child"
   },
   {
     "key": "ALLESY",
     "title": "Easy peasy",
     "description": "Решени всички задачи със сложност easy",
-    "icon": "child"
+    "icon": "paper-plane"
   },
   {
     "key": "ALLMED",

@@ -523,16 +523,16 @@ div.problem-status {
 div.problem-name {
     display: inline-block;
     vertical-align: middle;
-    width: 29rem;
+    width: 30rem;
     line-height: 3rem;
     font-size: 1.25rem;
     font-weight: bold;
 }
 
-div.problem-solutions {
+div.problem-stats {
     display: inline-block;
     vertical-align: middle;
-    width: 12rem;
+    width: 11rem;
     line-height: 3rem;
     font-size: 1.25rem;
     text-align: right;
