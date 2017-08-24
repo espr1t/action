@@ -31,9 +31,12 @@ class ProblemsPage extends Page {
         $problemsInfo = $brain->getAllProblems();
         $allProblemsSubmits = $brain->getAllSubmits('AC');
         $problemSubmits = array();
+        foreach ($problemsInfo as $problem)
+            $problemSubmits[$problem['id']] = array();
         foreach ($allProblemsSubmits as $submit) {
+            // Apparently a submit on a game
             if (!array_key_exists($submit['problemId'], $problemSubmits))
-                $problemSubmits[$submit['problemId']] = array();
+                continue;
             $alreadyIn = false;
             foreach ($problemSubmits[$submit['problemId']] as $prevSubmit)
                 $alreadyIn = $alreadyIn || $prevSubmit['userId'] == $submit['userId'];
