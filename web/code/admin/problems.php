@@ -23,7 +23,7 @@ class AdminProblemsPage extends Page {
                 <a href="/admin/problems/' . $problemInfo['id'] . '" class="decorated">
                     <div class="box narrow boxlink">
                         <div class="problem-name">' . $problemInfo['name'] . '</div>
-                        <div class="problem-solutions" style="font-size: 0.875rem; width: 14rem;">
+                        <div class="problem-stats" style="font-size: 0.875rem;">
                             Добавена от: <strong>' . $problemInfo['addedBy'] . '</strong><br>
                         </div>
                     </div>

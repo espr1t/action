@@ -512,30 +512,24 @@ div.game-stats {
 
 div.problem-status {
     display: inline-block;
-    vertical-align: middle;
-    width: 2rem;
     line-height: 3rem;
     font-size: 1.25rem;
     text-align: center;
-    padding-top: 0.125rem;
 }
 
 div.problem-name {
     display: inline-block;
-    vertical-align: middle;
-    width: 30rem;
+    margin-left: 0.5rem;
     line-height: 3rem;
     font-size: 1.25rem;
     font-weight: bold;
 }
 
 div.problem-stats {
-    display: inline-block;
-    vertical-align: middle;
-    width: 11rem;
+    display: block;
+    float: right;
     line-height: 3rem;
     font-size: 1.25rem;
-    text-align: right;
 }
 
 div.problem-visibility {
