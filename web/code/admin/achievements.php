@@ -367,12 +367,12 @@ class AdminAchievementsPage extends Page {
         }
     }
 
-    // Solved 3 tricky problems on the first try
+    // Solved 5 tricky problems on the first try
     public function achievementPedantic($brain, $achieved, $user, $submits, $problems) {
         if (!in_array('TRICKY', $achieved)) {
             $trickyNames = array(
-                'Sheep', 'Ssssss', 'Bribes', 'Sequence Members', 'Wordrow', 'Next', 'Shades',
-                'Crosses', 'Collatz', 'Passwords', 'Digit Holes', 'Seats', 'Directory Listing'
+                'Sheep', 'Ssssss', 'Bribes', 'Sequence Members', 'Wordrow', 'Next', 'Shades', 'Seats',
+                'Bazinga!', 'Crosses', 'Collatz', 'Passwords', 'Digit Holes', 'Directory Listing'
             );
             $trickyIds = array();
             foreach ($problems as $problem) {
@@ -388,7 +388,7 @@ class AdminAchievementsPage extends Page {
                     if ($submit['status'] == 'AC') {
                         if (array_key_exists($submit['problemId'], $trickyIds)) {
                             $first += 1;
-                            if ($first >= 3) {
+                            if ($first >= 5) {
                                 $date = $submit['submitted'];
                                 break;
                             }
