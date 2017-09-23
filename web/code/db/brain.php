@@ -926,6 +926,32 @@ class Brain {
         }
         return true;
     }
+
+    // Training
+    function addTopic($id, $key, $problems, $threshold) {
+        $response = $this->db->query("
+            INSERT INTO `Training` (`id`, `key`, `problems`, `threshold`)
+            VALUES(" . $id . ", '" . $key . "', '" . $problems ."', " . $threshold . ")
+            ON DUPLICATE KEY UPDATE problems = '" . $problems . "', threshold = " . $threshold . "
+        ");
+        if (!$response) {
+            error_log('Could not execute addTopic() query for topic "' . $key . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function getTopic($key) {
+        $response = $this->db->query("
+            SELECT * FROM `Training`
+            WHERE `key` = '" . $key . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getTopic() query for topic "' . $key . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
 }
 
 ?>

@@ -1160,3 +1160,19 @@ div.show-source-box {
     max-height: 20rem;
     overflow: auto;
 }
+
+div.training-list-entry {
+    position: relative;
+}
+
+div.training-list-text {
+    display: inline-block;
+    width: 85%;
+}
+
+div.training-list-progress {
+    display: inline-block;
+    position: absolute;
+    width: 15%;
+    height: 100%;
+}

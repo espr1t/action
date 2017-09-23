@@ -506,4 +506,32 @@ if ($db->tableExists('Spam')) {
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
 
+/*
+Table::Training
+==============
+{
+    "key": "IMPL",
+    "order": 1,
+    "problems": "1,2,3,5,8,13,21,34,55,89,144,233",
+    "threshold": 6
+}
+*/
+output('');
+output('Creating table Training...');
+
+if ($db->tableExists('Training')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Training`(
+            `id` INT NOT NULL,
+            `key` VARCHAR(4) NOT NULL,
+            `problems` TEXT NOT NULL,
+            `threshold` INT NOT NULL,
+            PRIMARY KEY (`id`, `key`)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
 ?>
