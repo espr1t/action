@@ -345,3 +345,106 @@ function copyToClipboard() {
         document.execCommand('copy');
     }
 }
+
+/*
+ * Circular progress bar
+ */
+function circularProgress(parentId, done, total) {
+    var percent = done / total;
+    var remaining = 1 - percent - 0.025;
+
+    // Unfinished segment
+    var unfinished = document.createElement('div');
+    unfinished.style.height = unfinished.style.width = '4.8rem';
+    unfinished.style.position = 'absolute';
+    unfinished.style.left = '50%';
+    unfinished.style.marginLeft = '-2.4rem';
+    unfinished.style.top = '50%';
+    unfinished.style.marginTop = '-2.4rem';
+    unfinished.style.borderRadius = '50%';
+    unfinished.style.backgroundColor = '#999999';
+    unfinished.style.opacity = '0.1';
+
+    if (remaining > 0.05) {
+        if (remaining <= 1.0 / 8.0) {
+            unfinished.style.clipPath = 'polygon(50% 50%, 40% 0, ' + ((1 - remaining / (1.0 / 8.0)) * 50) + '% 0)';
+        } else if (remaining <= 3.0 / 8.0) {
+            unfinished.style.clipPath = 'polygon(50% 50%, 40% 0, 0 0, 0 ' + ((remaining - 1.0 / 8.0) / (2.0 / 8.0) * 100) + '%)';
+        } else if (remaining <= 5.0 / 8.0) {
+            unfinished.style.clipPath = 'polygon(50% 50%, 40% 0, 0 0, 0 100%, ' + ((remaining - 3.0 / 8.0) / (2.0 / 8.0) * 100) + '% 100%)';
+        } else if (remaining <= 7.0 / 8.0) {
+            unfinished.style.clipPath = 'polygon(50% 50%, 40% 0, 0 0, 0 100%, 100% 100%, 100% ' + ((1 - (remaining - 5.0 / 8.0) / (2.0 / 8.0)) * 100) + '%)';
+        } else if (remaining <= 8.0 / 8.0) {
+            unfinished.style.clipPath = 'polygon(50% 50%, 40% 0, 0 0, 0 100%, 100% 100%, 100% 0, ' + ((1 - (remaining - 7.0 / 8.0) / (1.0 / 8.0)) * 50) + '% 0)';
+        }
+    }
+
+    // Unfinished cover
+    var cover = document.createElement('div');
+    cover.style.height = cover.style.width = '4.6rem';
+    cover.style.position = 'absolute';
+    cover.style.left = '50%';
+    cover.style.marginLeft = '-2.3rem';
+    cover.style.top = '50%';
+    cover.style.marginTop = '-2.3rem';
+    cover.style.borderRadius = '50%';
+    cover.style.backgroundColor = 'white';
+
+    // Finished segment
+    var finished = document.createElement('div');
+    finished.style.height = finished.style.width = '5rem';
+    finished.style.position = 'absolute';
+
+    if (percent <= 0.25) {
+        finished.style.backgroundColor = '#E74C3C';
+    } else if (percent <= 0.5) {
+        finished.style.backgroundColor = '#E67E22';
+    } else if (percent <= 0.75) {
+        finished.style.backgroundColor = '#F1C40F';
+    } else {
+        finished.style.backgroundColor = '#2ECC71';
+    }
+
+    // Making it round and filling required percent
+    finished.style.borderRadius = '50%';
+    if (percent <= 1.0 / 8.0) {
+        finished.style.clipPath = 'polygon(50% 50%, 50% 0, ' + (50 + percent / (1.0 / 8.0) * 50) + '% 0)';
+    } else if (percent <= 3.0 / 8.0) {
+        finished.style.clipPath = 'polygon(50% 50%, 50% 0, 100% 0, 100% ' + ((percent - 1.0 / 8.0) / (2.0 / 8.0) * 100) + '%)';
+    } else if (percent <= 5.0 / 8.0) {
+        finished.style.clipPath = 'polygon(50% 50%, 50% 0, 100% 0, 100% 100%, ' + ((1 - (percent - 3.0 / 8.0) / (2.0 / 8.0)) * 100) + '% 100%)';
+    } else if (percent <= 7.0 / 8.0) {
+        finished.style.clipPath = 'polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 0 100%, 0 ' + ((1 - (percent - 5.0 / 8.0) / (2.0 / 8.0)) * 100) + '%)';
+    } else if (percent <= 8.0 / 8.0) {
+        finished.style.clipPath = 'polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 0 100%, 0 0, ' + ((percent - 7.0 / 8.0) / (1.0 / 8.0) * 50) + '% 0)';
+    }
+
+    // Inner part of progress bar (used as text container)
+    var inner = document.createElement('div');
+    inner.style.height = inner.style.width = '4.5rem';
+    inner.style.position = 'absolute';
+    inner.style.left = '50%';
+    inner.style.marginLeft = '-2.25rem';
+    inner.style.top = '50%';
+    inner.style.marginTop = '-2.25rem';
+    inner.style.borderRadius = '50%';
+    inner.style.backgroundColor = 'white';
+    inner.style.lineHeight = '4.5rem';
+    inner.style.textAlign = 'center';
+    inner.style.fontSize = '1rem';
+    inner.style.fontWeight = 'bold';
+    inner.innerText = Math.round(percent * 100) + '%';
+
+    // Container to hold and offset
+    var container = document.createElement('div');
+    container.style.height = container.style.width = '5rem';
+    container.style.position = 'absolute';
+    container.style.right = '0';
+    container.style.top = '50%';
+    container.style.marginTop = '-2rem';
+    container.appendChild(rest);
+    container.appendChild(cover);
+    container.appendChild(finished);
+    container.appendChild(inner);
+    document.getElementById(parentId).appendChild(container);
+}
