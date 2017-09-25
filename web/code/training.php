@@ -10,7 +10,7 @@ class TrainingPage extends Page {
 
     private function initTraining() {
         $brain = new Brain();
-        $brain->addTopic(1, 'IMPL', '2,157,134,155,181,184,15,43,194,199,214,164,232', 10);
+        $brain->addTopic(1, 'IMPL', '2,157,134,155,181,184,15,43,194,199,214,164', 10);
         $brain->addTopic(2, 'CORN', '119,195,144,171,191,95', 6);
         $brain->addTopic(3, 'RECU', '66,179,63,90,145,102', 5);
         $brain->addTopic(4, 'BRUT', '166,200,229,153,220,203,4,175', 6);
@@ -21,7 +21,7 @@ class TrainingPage extends Page {
         $brain = new Brain();
         $topic = $brain->getTopic($key);
         $problems = explode(',', $topic['problems']);
-        $solved = $brain->getSolved(/*$this->user->id*/ 42);
+        $solved = $brain->getSolved($this->user->id);
         $accepted = array_filter($solved, function($el) use ($problems) {return in_array($el, $problems);});
         $parentId = 'topic-stats-' . $key;
         return '<script>circularProgress(\'' . $parentId . '\', ' . count($accepted) . ', ' . count($problems) . ');</script>';
