@@ -442,7 +442,7 @@ function circularProgress(parentId, done, total) {
     container.style.right = '0';
     container.style.top = '50%';
     container.style.marginTop = '-2rem';
-    container.appendChild(rest);
+    container.appendChild(unfinished);
     container.appendChild(cover);
     container.appendChild(finished);
     container.appendChild(inner);

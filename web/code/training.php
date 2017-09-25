@@ -72,7 +72,8 @@ class TrainingPage extends Page {
             target="_blank">CodeForces</a>, <a href="https://www.topcoder.com/tc" target="_blank">TopCoder</a>, и <a href="https://icpc.baylor.edu/"
             target="_blank">ACM ICPC</a>). Подходяща тема, която би ви помогнала да пишете по-чист код и така да избягвате потенциални проблеми е тази за
             <a href="http://www.informatika.bg/lectures/coding-conventions" target="_blank">Конвенции за стил на кода</a>.<br>
-            Упражняват се лесни задачи, в които има частни случаи или нещо, което лесно може да се обърка при имплементацията.
+            Упражняват се лесни задачи, в които има частни случаи или нещо, което лесно може да се обърка при имплементацията. В темите по-нататък
+            ще срещнете и други, по-сложни такива задачи.
         */
         return $this->getTopicBox($key, $title, $text);
     }
@@ -139,6 +140,7 @@ class TrainingPage extends Page {
 
         $this->initTraining();
 
+        // Group D
         $content .= $this->getTopicBoxImpl();
         $content .= $this->getTopicBoxCorn();
         $content .= $this->getTopicBoxRecu();
