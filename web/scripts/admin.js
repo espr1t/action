@@ -193,10 +193,13 @@ function deleteTest(position) {
 function uploadTest(problemId, position, testFile) {
     var fileReader = new FileReader();
     fileReader.addEventListener('load', function() {
+        // If file is empty the fileReader result will be "data:" and will not match the regex.
+        // If it is not, the actual content will be stored in the second ([1]) element of the match result.
+        var content = fileReader.result == "data:" ? "" : fileReader.result.match(/,(.*)$/)[1];
         var data = {
             'problemId': problemId,
             'testName': testFile.name,
-            'testContent': fileReader.result.match(/,(.*)$/)[1],
+            'testContent': content,
             'testPosition': position
         };
 
