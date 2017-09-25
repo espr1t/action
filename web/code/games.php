@@ -73,6 +73,10 @@ class GamesPage extends Page {
         $problems = '';
         // Calculate statistics (position and points) for each game for this user
         foreach ($games as $game) {
+            // Don't show hidden games
+            if (!canSeeProblem($this->user, $game['visible'] == '1', $game['id']))
+                continue;
+
             $ranking = $this->getGameRanking($game['id']);
 
             $position = 0;
@@ -91,7 +95,7 @@ class GamesPage extends Page {
                 <i class="fa fa-star"></i> Score: ' . $scoreStr . '
             ';
 
-            $problems .= '
+            $gameBox = '
                 <a href="/games/' . getGameUrlName($game['name']) . '" class="decorated">
                     <div class="box narrow boxlink">
                         <div class="game-info">
@@ -103,6 +107,16 @@ class GamesPage extends Page {
                     </div>
                 </a>
             ';
+            // Make hidden games grayed out (actually visible only to admins).
+            if ($game['visible'] == '0') {
+                $gameBox = '
+                    <div style="opacity: 0.5;">
+                    ' . $gameBox . '
+                    </div>
+                ';
+            }
+
+            $problems .= $gameBox;
         }
         return $problems;
     }

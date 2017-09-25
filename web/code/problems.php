@@ -20,12 +20,6 @@ class ProblemsPage extends Page {
         return array('/scripts/language_detector.js');
     }
 
-    private function canSeeProblem($user, $problemVisible, $problemId) {
-        if ($problemVisible)
-            return true;
-        return $user->access >= $GLOBALS['ACCESS_HIDDEN_PROBLEMS'];
-    }
-
     private function getAllProblems() {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
@@ -125,7 +119,7 @@ class ProblemsPage extends Page {
         $problems = '';
         foreach ($problemsInfo as $problemInfo) {
             // Don't show hidden problems
-            if (!$this->canSeeProblem($this->user, $problemInfo['visible'] == '1', $problemInfo['id']))
+            if (!canSeeProblem($this->user, $problemInfo['visible'] == '1', $problemInfo['id']))
                 continue;
             $problems .= $problemInfo['box'];
         }
@@ -514,7 +508,7 @@ class ProblemsPage extends Page {
             if ($this->problem == null) {
                 redirect('/problems', 'ERROR', 'Няма задача с такъв идентификатор.');
             }
-            if (!$this->canSeeProblem($this->user, $this->problem->visible, $this->problem->id)) {
+            if (!canSeeProblem($this->user, $this->problem->visible, $this->problem->id)) {
                 redirect('/problems', 'ERROR', 'Нямате права да видите тази задача.');
             }
             if ($this->problem->type == 'game') {

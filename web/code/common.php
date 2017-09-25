@@ -28,6 +28,12 @@ function redirect($url, $type = null, $message = null) {
     exit();
 }
 
+function canSeeProblem($user, $problemVisible, $problemId) {
+    if ($problemVisible)
+        return true;
+    return $user->access >= $GLOBALS['ACCESS_HIDDEN_PROBLEMS'];
+}
+
 function getGameUrlName($problemName) {
     $urlName = strtolower($problemName);
     $urlName = str_replace(' ', '-', $urlName);
