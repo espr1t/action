@@ -15,7 +15,7 @@ class AdminProblemsPage extends Page {
 
     private function getProblemList() {
         $brain = new Brain();
-        $problemsInfo = $brain->getAllProblems();
+        $problemsInfo = array_merge($brain->getAllGames(), $brain->getAllProblems());
 
         $problems = '';
         foreach ($problemsInfo as $problemInfo) {
