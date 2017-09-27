@@ -209,6 +209,15 @@ class GamesPage extends Page {
                     <br>
                     <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
             ';
+        } else {
+            $partSubmitButton = '
+                <input type="submit" value="Частично решение" class="button button-large button-color-gray"
+                        title="Трябва да влезете в системата за да можете да предавате решения.">
+            ';
+            $fullSubmitButton = '
+                <input type="submit" value="Пълно решение" class="button button-large button-color-gray"
+                        title="Трябва да влезете в системата за да можете да предавате решения.">
+            ';
         }
 
         $controlButtons = '
