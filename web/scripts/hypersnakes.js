@@ -331,6 +331,34 @@ function runSnakesReplay(log) {
     snakesReplayCycle(0, log);
 }
 
+function updateSnakesBoard() {
+    // Update the DOM
+    var boardWrapper = document.getElementById('snakesBoard');
+    boardWrapper.removeChild(boardWrapper.firstChild);
+    boardWrapper.appendChild(getSnakesBoard());
+}
+
+function resetSnakesGame() {
+    snakesCells = [];
+    snakesNumRows = 20;
+    snakesNumCols = 20;
+    snakesNumApples = 25;
+    snakesSnakeDir = null;
+
+    snakesAiTurn = false;
+    snakesGameLoop = null;
+    showLetters = true;
+    snakesReplayRunning = false;
+
+    createSnakesGame();
+    updateSnakesBoard();
+
+    document.getElementById('p1score').innerText = '1';
+    document.getElementById('p2score').innerText = '1';
+    // Add action event listeners
+    document.addEventListener('keydown', identifySnakeArrowEvent, false);
+}
+
 function createSnakesGame() {
     snakesCells = []
     for (var row = 0; row < snakesNumRows; row++) {
@@ -376,13 +404,6 @@ function createSnakesGame() {
     snakesNumApples = 25;
     for (var app = 0; app < snakesNumApples; app++)
         addSnakesApple();
-}
-
-function updateSnakesBoard() {
-    // Update the DOM
-    var boardWrapper = document.getElementById('snakesBoard');
-    boardWrapper.removeChild(boardWrapper.firstChild);
-    boardWrapper.appendChild(getSnakesBoard());
 }
 
 function getSnakesBoard() {
@@ -450,10 +471,18 @@ function getSnakesContent() {
     content.appendChild(player2);
 
     // Footer with instructions
-    var header = document.createElement('div');
-    header.style.textAlign = 'center';
-    header.innerHTML = '<i style="font-size: smaller">Използвайте стрелките на клавиатурата за да управлявате змията.</i>';
-    content.appendChild(header);
+    var footer = document.createElement('div');
+    footer.style.textAlign = 'center';
+    footer.innerHTML = '<i style="font-size: smaller">Използвайте стрелките на клавиатурата за да управлявате змията.</i>';
+    content.appendChild(footer);
+
+    // Reset button
+    var reset = document.createElement('button');
+    reset.className = 'button button-color-blue';
+    reset.type = 'button';
+    reset.innerText = 'Нова игра';
+    reset.setAttribute('onclick', 'resetSnakesGame();');
+    content.appendChild(reset);
 
     return content;
 }
