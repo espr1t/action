@@ -12,7 +12,7 @@ class GamesPage extends Page {
     public function getTitle() {
         return 'O(N)::Games';
     }
-    
+
     public function getExtraScripts() {
         return array('/scripts/language_detector.js', '/scripts/snakes.js', '/scripts/uttt.js', '/scripts/hypersnakes.js');
     }
@@ -86,7 +86,7 @@ class GamesPage extends Page {
             $scoreStr = $positionStr = 'N/A';
             if ($position < count($ranking)) {
                 $scoreStr = sprintf("%.2f (best is %.2f)", $ranking[$position]['points'], $ranking[0]['points']);
-                $positionStr = sprintf("%d (out of %d)", $position, count($ranking));
+                $positionStr = sprintf("%d (out of %d)", $position + 1, count($ranking));
             }
 
             $stats = '
@@ -281,12 +281,12 @@ class GamesPage extends Page {
             // If submit is partial we care only about matches against author's solutions
             if (($submit->full && $opponentId < 0) || (!$submit->full && $opponentId > 0))
                 continue;
-            
+
             $lastSubmit = $submit->userId == intval($match['userOne']) ? intval($match['submitOne']) : intval($match['submitTwo']);
             // If not latest submit, skip it
             if ($submit->id != $lastSubmit)
                 continue;
-            
+
             $found = true;
             $opponentKey = 'User_' . $opponentId;
             if (!array_key_exists($opponentKey, $games))
