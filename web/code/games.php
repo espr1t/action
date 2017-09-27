@@ -392,6 +392,7 @@ class GamesPage extends Page {
                     $scoreOpponent += $result['scoreOpponent'];
                     $message = $result['message'];
                     $log = $result['log'];
+                    $showLink = true;
 
                     if ($result['scoreUser'] > $result['scoreOpponent']) {
                         // Win
@@ -404,6 +405,7 @@ class GamesPage extends Page {
                             // Not played
                             $classes = 'fa fa-question-circle-o gray';
                             $message = 'Мачът още не е изигран.';
+                            $showLink = false;
                         } else {
                             // Draw
                             $classes = 'fa fa-pause-circle-o yellow';
@@ -411,9 +413,9 @@ class GamesPage extends Page {
                     }
                     $perTestStatus .= '
                         <td>
-                            <a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '/replays/' . $result['id'] .'">
+                            ' . ($showLink ? '<a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '/replays/' . $result['id'] .'">' : '') . '
                                 <i class="' . $classes . '" title="' . $message . '"></i>
-                            </a>
+                            ' . ($showLink ? '</a>' : '') . '
                         </td>
                     ';
                 }
