@@ -442,6 +442,8 @@ function circularProgress(parentId, done, total) {
     container.style.right = '0';
     container.style.top = '50%';
     container.style.marginTop = '-2rem';
+    container.title = done + ' out of ' + total;
+    container.style.cursor = 'help';
     container.appendChild(unfinished);
     container.appendChild(cover);
     container.appendChild(finished);
