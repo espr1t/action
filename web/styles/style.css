@@ -675,6 +675,40 @@ div.input-wrapper {
     text-align: center;
 }
 
+button.button {
+    padding: 0 0.75rem;
+    width: 8rem;
+    min-width: 8rem;
+    left: 50%;
+    margin-top: 0.5rem;
+    margin-left: auto;
+    line-height: 2rem;
+    text-align: center;
+    color: #ECECEC;
+    border: 0.0625rem solid #FFFFFF;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    -webkit-appearance: none;
+}
+
+button.button-large {
+    width: 14rem;
+    min-width: 14rem;
+    line-height: 2.5rem;
+}
+
+button.button-color-blue {
+    background-color: #0099FF;
+}
+
+button.button-color-red {
+    background-color: #D84A38;
+}
+
+button.button-color-gray {
+    color: #FFFFFF;
+}
+
 input.button {
     padding: 0 0.75rem;
     width: 8rem;
