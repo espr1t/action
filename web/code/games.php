@@ -14,7 +14,7 @@ class GamesPage extends Page {
     }
     
     public function getExtraScripts() {
-        return array('/scripts/language_detector.js', '/scripts/snakes.js', '/scripts/uttt.js');
+        return array('/scripts/language_detector.js', '/scripts/snakes.js', '/scripts/uttt.js', '/scripts/hypersnakes.js');
     }
 
     public function getExtraStyles() {
@@ -544,7 +544,8 @@ class GamesPage extends Page {
         $playerTwo = User::get($match->userTwo);
         $playerTwo = $playerTwo != null ? $playerTwo->username : sprintf('Author%d', -$match->userTwo);
 
-        $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' : 'showUtttReplay';
+        $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' :
+                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHyperSnakesReplay';
         $content = '
             <script>
                 ' . $functionName . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->log . '");
@@ -681,7 +682,7 @@ class GamesPage extends Page {
 
         if (isset($_GET['game'])) {
             $problem = $this->getGameByName($_GET['game']);
-            if ($problem == null) {
+            if ($problem == null || $_GET['game'] == 'snakes') {
                 return $this->getMainPage();
             }
 
@@ -689,6 +690,8 @@ class GamesPage extends Page {
             if (isset($_GET['visualizer'])) {
                 if ($_GET['game'] == 'snakes') {
                     $content .= '<script>showSnakesVisualizer("'. $this->user->username . '");</script>';
+                } else if ($_GET['game'] == 'hypersnakes') {
+                    $content .= '<script>showHyperSnakesVisualizer("'. $this->user->username . '");</script>';
                 } else if ($_GET['game'] == 'ultimate-ttt') {
                     $content .= '<script>showUtttVisualizer("'. $this->user->username . '");</script>';
                 }
