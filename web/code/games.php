@@ -625,6 +625,12 @@ class GamesPage extends Page {
         }
 
         $numPlayers = count($playerScore);
+        $unofficial = array();
+        if ($problem->name == 'HyperSnakes') {
+            $unofficial = array('espr1t', 'IvayloS', 'stuno');
+        } else if ($problem->name == 'Ultimate TTT') {
+            $unofficial = array('espr1t');
+        }
 
         $ranking = '';
         for ($pos = 1; $pos <= $numPlayers; $pos++) {
@@ -653,7 +659,7 @@ class GamesPage extends Page {
             $ranking .= '
                 <tr>
                     <td>' . $pos . '</td>
-                    <td>' . getUserLink($user->username) . '</td>
+                    <td>' . getUserLink($user->username, $unofficial) . '</td>
                     <td>' . $user->name . '</td>
                     <td>' . $submitId . '</td>
                     <td title="' . $title . '">' . $maxPlayerScore . '</td>
@@ -675,6 +681,9 @@ class GamesPage extends Page {
                 </tr>
                 ' . $ranking . '
             </table>
+            <div class="centered italic" style="font-size: smaller;">
+                Състезателите, отбелязани със звездичка (*), не участват в официалното класиране.
+            </div>
         ';
 
         return '

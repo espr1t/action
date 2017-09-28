@@ -44,8 +44,11 @@ function getGameLink($problemName) {
     return '/games/' . getGameUrlName($problemName);
 }
 
-function getUserLink($userName) {
-    return '<a href="/users/' . $userName . '"><div class="user">' . $userName . '</div></a>';
+function getUserLink($userName, $unofficial=array()) {
+    $suffix = '';
+    if (in_array($userName, $unofficial))
+        $suffix = '*';
+    return '<a href="/users/' . $userName . '"><div class="user">' . $userName . $suffix . '</div></a>';
 }
 
 function getProblemLink($problemId, $problemName) {
