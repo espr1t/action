@@ -693,6 +693,32 @@ class GamesPage extends Page {
         ';
     }
 
+    private function getDemo($problem) {
+        // Show the standings for 5 seconds, then play a random replay
+
+        $brain = new Brain();
+        $matches = $brain->getGameMatches($problem->id);
+        $idx = rand() % count($matches);
+        while ($matches[$idx]['userOne'] < 0 || $matches[$idx]['userTwo'] < 0 || $matches[$idx]['log'] == '')
+            $idx = rand() % count($matches);
+
+        $scoreboard = $this->getScoreboard($problem);
+
+        $playerOne = User::get($matches[$idx]['userOne']);
+        $playerTwo = User::get($matches[$idx]['userTwo']);
+        $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' :
+                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHyperSnakesReplay';
+        $replay = $functionName . '("'. $playerOne->username . '", "' . $playerTwo->username .'", "' . $matches[$idx]['log'] . '", true);';
+
+        $demoActions = '
+            <script>
+                setTimeout(function() {hideActionForm();}, 4500);
+                setTimeout(function() {' . $replay . '}, 5000);
+            </script>
+        ';
+        return $scoreboard . $demoActions;
+    }
+
     public function getContent() {
         $queueShortcut = false;
         if (isset($_SESSION['queueShortcut'])) {
@@ -731,6 +757,8 @@ class GamesPage extends Page {
                         $content .= $this->getReplay($problem, $_GET['submitId'], $_GET['matchId']);
                     }
                 }
+            } else if (isset($_GET['demo']) && $this->user->username == 'ThinkCreative') {
+                $content = $this->getDemo($problem);
             }
             return $content;
         }

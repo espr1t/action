@@ -11,6 +11,7 @@ snakesNumCols = 20;
 snakesNumApples = 25;
 snakesSnakeDir = null;
 
+snakesDemo = false;
 snakesAiTurn = false;
 snakesGameLoop = null;
 showLetters = true;
@@ -120,7 +121,12 @@ function addSnakesApple() {
 
 function endSnakesGame(message) {
     // Wait a little so the board is updated
-    window.setTimeout(function() {alert(message);}, 20);
+    if (snakesDemo) {
+        showMessage('INFO', message);
+        window.setTimeout(function() {location.reload();}, 4000);
+    } else {
+        window.setTimeout(function() {alert(message);}, 20);
+    }
     clearTimeout(snakesGameLoop);
     document.removeEventListener('keydown', identifySnakeArrowEvent, false);
 }
@@ -326,6 +332,10 @@ function runSnakesReplay(log) {
 
     updateSnakesBoard();
 
+    if (snakesDemo) {
+        setTimeout(function() {snakesReplayRunning = true;}, 1000);
+    }
+
     log = log.split('|')[1];
     // Start the update process
     snakesReplayCycle(0, log);
@@ -435,7 +445,7 @@ function getSnakesBoard() {
     return board;
 }
 
-function getSnakesContent() {
+function getSnakesContent(showReset) {
     // Create the board and initial cells
     createSnakesGame();
 
@@ -446,7 +456,7 @@ function getSnakesContent() {
     // Header with the task name
     var header = document.createElement('div');
     header.style.textAlign = 'left';
-    header.innerHTML = '<h2><span class="blue">Snakes</span> :: Визуализатор</h2>';
+    header.innerHTML = '<h2><span class="blue">HyperSnakes</span> :: Визуализатор</h2>';
     content.appendChild(header);
 
     // First player (nickname and score)
@@ -470,34 +480,40 @@ function getSnakesContent() {
     player2.innerHTML += '<div style="font-size: smaller;" id="p2score">1</div>';
     content.appendChild(player2);
 
-    // Footer with instructions
-    var footer = document.createElement('div');
-    footer.style.textAlign = 'center';
-    footer.innerHTML = '<i style="font-size: smaller">Използвайте стрелките на клавиатурата за да управлявате змията.</i>';
-    content.appendChild(footer);
+    if (showReset) {
+        // Footer with instructions
+        var footer = document.createElement('div');
+        footer.style.textAlign = 'center';
+        footer.innerHTML = '<i style="font-size: smaller">Използвайте стрелките на клавиатурата за да управлявате змията.</i>';
+        content.appendChild(footer);
 
-    // Reset button
-    var reset = document.createElement('button');
-    reset.className = 'button button-color-blue';
-    reset.type = 'button';
-    reset.innerText = 'Нова игра';
-    reset.setAttribute('onclick', 'resetSnakesGame();');
-    content.appendChild(reset);
+        // Reset button
+        var reset = document.createElement('button');
+        reset.className = 'button button-color-blue';
+        reset.type = 'button';
+        reset.innerText = 'Нова игра';
+        reset.setAttribute('onclick', 'resetSnakesGame();');
+        content.appendChild(reset);
+    }
 
     return content;
 }
 
-function showHyperSnakesReplay(playerOne, playerTwo, log) {
+function showHyperSnakesReplay(playerOne, playerTwo, log, demo=false) {
+    snakesDemo = demo;
     snakesPlayerOne = playerOne;
     snakesPlayerTwo = playerTwo;
 
     // Create and show the initial board
-    var content = getSnakesContent();
+    var content = getSnakesContent(false);
 
     var instructions = document.createElement('div');
+    instructions.id = 'instructions';
     instructions.style.textAlign = 'center';
     instructions.style.fontStyle = 'italic';
-    instructions.innerHTML = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
+    if (!snakesDemo) {
+        instructions.innerText = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
+    }
     content.appendChild(instructions);
 
     // Make pressing escape return back to the game
@@ -519,7 +535,7 @@ function showHyperSnakesVisualizer(username) {
     snakesPlayerTwo = 'AI';
 
     // Create and show the initial board
-    var content = getSnakesContent();
+    var content = getSnakesContent(true);
 
     // Add action event listeners
     document.addEventListener('keydown', identifySnakeArrowEvent, false);
