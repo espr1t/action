@@ -15,6 +15,13 @@ class TrainingPage extends Page {
         $brain->addTopic(3, 'RECU', '66,179,63,90,145,102', 5);
         $brain->addTopic(4, 'BRUT', '166,200,229,153,220,203,4,175', 6);
         $brain->addTopic(5, 'SORT', '123,127,215,132,217,221,45,182,128', 7);
+        $brain->addTopic(6, 'GRDY', '143,165,206,170,72,58,178,190,230,138,81,120,218,223,67,208,55', 14);
+        $brain->addTopic(7, 'MATH', '225,24,228,187,201,140,156,192,92,93,4,172', 10);
+        $brain->addTopic(8, 'DS01', '125,129,20,40,124,107', 5);
+        $brain->addTopic(9, 'GRPH', '114,122,115,147,151,158,177,180,12,27,99,100,104,83,87,78,121,133', 15);
+        $brain->addTopic(10, 'BSTS', '117,130,141,168,226,118,28,30,60,76,185,209,22', 12);
+        $brain->addTopic(11, 'DPDP', '116,142,167,174,50,33,61,85,196,198,39,212,213,224', 12);
+        $brain->addTopic(12, 'BUCK', '105,68,150,162', 4);
     }
 
     private function getTopicStats($key) {
@@ -39,7 +46,6 @@ class TrainingPage extends Page {
                 </div>
             </div>
         ');
-
     }
 
     private function getTopicBoxImpl() {
@@ -114,6 +120,77 @@ class TrainingPage extends Page {
         return $this->getTopicBox($key, $title, $text);
     }
 
+    private function getTopicBoxGrdy() {
+        $key = 'GRDY';
+        $title = 'Greedy';
+        $text = '
+            Секцията покрива задачи, които могат да бъдат решени ползвайки алчна стратегия. Тук няма много теория, а по-скоро практика
+            за да почнете да "надушвате" кога може да бъде подходено по този начин.
+        ';
+        return $this->getTopicBox($key, $title, $text);
+    }
+
+    private function getTopicBoxMath() {
+        $key = 'MATH';
+        $title = 'Math';
+        $text = '
+            Секцията покрива прости числа, решето на Ератостен, модулна аритметика, бързо вдигане на степен, умножение на матрици,
+            основи на комбинаториката и деление по модул. Повечето от задачите в секцията се решават с доста по-проста математика
+            от изброеното, но тези теми ще са ви полезни по-нататък.
+        ';
+        return $this->getTopicBox($key, $title, $text);
+    }
+
+    private function getTopicBoxDS01() {
+        $key = 'DS01';
+        $title = 'Simple Data Structures';
+        $text = '
+            Секцията покрива най-основните структури данни: префиксен масив, динамичен масив (вектор), опашка, стек, свързан списък,
+            и приоритетна опашка. Задачите тук изискват да се приложи умно една от тези стуктури за да бъде решението достатъчно ефективно.
+        ';
+        return $this->getTopicBox($key, $title, $text);
+    }
+
+    private function getTopicBoxGrph() {
+        $key = 'GRPH';
+        $title = 'Simple Graphs';
+        $text = '
+            Секцията покрива графи и базови алгоритми в графи: търсене в дълбочина и ширина, Дийкстра, минимално покриващо дърво,
+            непресичащи се множества, топологично сортиране, и разширяване на графа.
+        ';
+        return $this->getTopicBox($key, $title, $text);
+    }
+
+    private function getTopicBoxBsts() {
+        $key = 'BSTS';
+        $title = 'Binary & Ternary Search';
+        $text = '
+            Секцията покрива най-популярната форма на "Разделяй и Владей": двоично търсене, а както и неговата модификация троично търсене,
+            което решава малко по-сложен проблем. Най-често задачите в тази тема ще комбинират двоично или троично търсене с някакъв друг алгоритъм.
+        ';
+        return $this->getTopicBox($key, $title, $text);
+    }
+
+    private function getTopicBoxDpdp() {
+        $key = 'DPDP';
+        $title = 'Dynamic Programming';
+        $text = '
+            Секцията покрива една от най-фундаменталните теми в състезателното програмиране - а именно, динамично оптимиране. Тук са включени само
+            стандартни динамични (едномерни, двумерни, и многомерни), без различни специфични разновидности, които ще разгледаме по-нататък.
+        ';
+        return $this->getTopicBox($key, $title, $text);
+    }
+
+    private function getTopicBoxBuck() {
+        $key = 'BUCK';
+        $title = 'Bucketing';
+        $text = '
+            Секцията покрива задачи, които се решават чрез разделяне на данните в определен брой купчини (наричани "buckets").
+            Най-чистата версия (Counting Sort) вече трябва да сте срещали в секцията за сортиране.
+        ';
+        return $this->getTopicBox($key, $title, $text);
+    }
+
     public function getContent() {
         $content = '';
         $content .= inBox('
@@ -146,6 +223,15 @@ class TrainingPage extends Page {
         $content .= $this->getTopicBoxRecu();
         $content .= $this->getTopicBoxBrut();
         $content .= $this->getTopicBoxSort();
+
+        // Group C
+        $content .= $this->getTopicBoxGrdy();
+        $content .= $this->getTopicBoxMath();
+        $content .= $this->getTopicBoxDS01();
+        $content .= $this->getTopicBoxGrph();
+        $content .= $this->getTopicBoxBsts();
+        $content .= $this->getTopicBoxDpdp();
+        $content .= $this->getTopicBoxBuck();
 
         return $content;
     }
