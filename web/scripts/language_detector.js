@@ -41,7 +41,7 @@ function removeCStyleComments(code) {
         ML_COMMENT : 3  // multi line comment state
     }
 
-    var curState       = states.DEFAULT;  
+    var curState       = states.DEFAULT;
     var curIndex       = 0;
     var startString    = 0; // start index of a string
     var startMLComment = 0; // start index of a multiline comment
@@ -69,7 +69,7 @@ function removeCStyleComments(code) {
                         curIndex += 3;
                     } else if ((curIndex + 3) < code.length && code[curIndex + 1] == '\\' && code[curIndex + 3] == '\'') {
                         if (code[curIndex + 2] != '\\') {
-                            // remove special character 
+                            // remove special character
                             code = code.substring(0, curIndex + 1) + code.substring(curIndex + 3);
                         }
                         curIndex += 4;
@@ -248,18 +248,18 @@ function detectLanguage(code) {
     }
 
     var keywordsCpp = ["auto", "bool", "const", "constexpr", "const_cast", "delete", "dynamic_cast", "extern", "friend",
-                       "inline", "nullptr", "operator", "reinterpret_cast", "signed", "sizeof", "static_cast", 
+                       "inline", "nullptr", "operator", "reinterpret_cast", "signed", "sizeof", "static_cast",
                        "struct", "template", "typedef", "typename", "union", "unsigned", "using", "virtual", "#include"];
 
-    var keywordsCppAndJava = ["case", "catch", "char", "default", "do", "double", "enum", "float", "int", "long", "namespace", 
+    var keywordsCppAndJava = ["case", "catch", "char", "default", "do", "double", "enum", "float", "int", "long", "namespace",
                               "new", "private", "protected", "public", "short", "static", "switch", "synchronized", "this",
                               "throw", "void", "volatile"];
 
-    var keywordsJava = ["abstract", "boolean", "byte", "extends", "final", "finally", "implements", "import", "instanceof", 
-                        "interface", "native", "package", "super", "throws", "transient", "java", "System.out.println", 
+    var keywordsJava = ["abstract", "boolean", "byte", "extends", "final", "finally", "implements", "import", "instanceof",
+                        "interface", "native", "package", "super", "throws", "transient", "java", "System.out.println",
                         "public(\\s)+static", "public(\\s)+class", "String"];
-    
-    var keywordsPython = ["as", "def", "elif", "except", "exec", "from", "global", "in", "is", "lambda", "pass", "print", "raise", 
+
+    var keywordsPython = ["as", "def", "elif", "except", "exec", "from", "global", "in", "is", "lambda", "pass", "print", "raise",
                           "with", "yield"];
 
     var keywordsPythonAndJava = ["import"];

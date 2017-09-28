@@ -211,7 +211,10 @@ function showSubmitForm(content) {
     sourceEl.onchange = sourceEl.onpaste = sourceEl.onkeydown = function() {
         setTimeout(function() {
             var langEl = document.getElementById('language');
-            langEl.innerText = detectLanguage(sourceEl.value);
+            var language = detectLanguage(sourceEl.value);
+            if (language == 'Python')
+                language = 'Python3'
+            langEl.innerText = language;
         }, 50);
     }
 }
