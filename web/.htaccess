@@ -28,14 +28,21 @@ RewriteRule    ^stats$                                          /code/main.php?p
 RewriteRule    ^error$                                          /code/main.php?page=error                                                           [NC,L,QSA]
 RewriteRule    ^forbidden$                                      /code/main.php?page=forbidden                                                       [NC,L,QSA]
 
-# Problem page
+# Problem pages
 RewriteRule    ^problems/(\d+)$                                 /code/main.php?page=problems&problemId=$1                                           [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/stats$                           /code/main.php?page=problems&problemId=$1&stats=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/users$                           /code/main.php?page=problems&problemId=$1&users=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits$                         /code/main.php?page=problems&problemId=$1&submits=true                              [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)$                   /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2                  [NC,L,QSA]
 
-# Games page
+# Training pages
+RewriteRule    ^training/implementation$						/code/main.php?page=training&section=IMPL											[NC,L,QSA]
+RewriteRule    ^training/corner-cases$							/code/main.php?page=training&section=CCAS											[NC,L,QSA]
+RewriteRule    ^training/recursion-and-backtrack$				/code/main.php?page=training&section=RECU											[NC,L,QSA]
+RewriteRule    ^training/bruteforce$							/code/main.php?page=training&section=BRUT											[NC,L,QSA]
+RewriteRule    ^training/sorting$								/code/main.php?page=training&section=SORT											[NC,L,QSA]
+
+# Games pages
 RewriteRule    ^games/([\w-]+)$                                 /code/main.php?page=games&game=$1                                                   [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/submits$                         /code/main.php?page=games&game=$1&submits=true                                      [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/submits/(\d+)$                   /code/main.php?page=games&game=$1&submits=true&submitId=$2                          [NC,L,QSA]

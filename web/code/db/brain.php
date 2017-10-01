@@ -928,11 +928,11 @@ class Brain {
     }
 
     // Training
-    function addTopic($id, $key, $title, $summary, $expanded, $problems) {
+    function addTopic($id, $key, $link, $title, $summary, $expanded, $problems) {
         $response = $this->db->query("
-            INSERT INTO `Training` (`id`, `key`, `title`, `summary`, `expanded`, `problems`)
-            VALUES(" . $id . ", '" . $key . "', '" . $title . "', '" . $summary . "', '" . $expanded . "', '" . $problems . "')
-            ON DUPLICATE KEY UPDATE title = '" . $title . "', summary = '" . $summary . "', expanded = '" . $expanded . "', problems = '" . $problems . "'
+            INSERT INTO `Training` (`id`, `key`, `link`, `title`, `summary`, `expanded`, `problems`)
+            VALUES(" . $id . ", '" . $key . "', '" . $link . "', '" . $title . "', '" . $summary . "', '" . $expanded . "', '" . $problems . "')
+            ON DUPLICATE KEY UPDATE link = '" . $link . "', title = '" . $title . "', summary = '" . $summary . "', expanded = '" . $expanded . "', problems = '" . $problems . "'
         ");
         if (!$response) {
             error_log('Could not execute addTopic() query for topic "' . $key . '"!');

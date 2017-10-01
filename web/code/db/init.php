@@ -512,6 +512,7 @@ Table::Training
 {
     "id": 1,
     "key": "IMPL",
+    "link": "implementation",
     "title": "Implementation",
     "summary": "Short summary of this training section.",
     "expanded": "Longer text about this training section and where to prepare from.",
@@ -528,6 +529,7 @@ if ($db->tableExists('Training')) {
         CREATE TABLE `Training`(
             `id` INT NOT NULL,
             `key` VARCHAR(4) NOT NULL,
+            `link` TEXT NOT NULL,
             `title` TEXT NOT NULL,
             `summary` TEXT NOT NULL,
             `expanded` TEXT NOT NULL,

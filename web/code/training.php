@@ -1,6 +1,8 @@
 <?php
+require_once('config.php');
 require_once('common.php');
 require_once('page.php');
+require_once('problems.php');
 require_once('db/brain.php');
 
 class TrainingPage extends Page {
@@ -11,6 +13,7 @@ class TrainingPage extends Page {
     private function initIMPL($position) {
         $brain = new Brain();
         $key = 'IMPL';
+        $link = 'implementation';
         $title = 'Implementation';
         $summary = '
             Секцията покрива вход и изход от програма, работа с масиви и символни низове.
@@ -31,13 +34,14 @@ class TrainingPage extends Page {
             имплементирате - тоест просто трябва да превърнете описаната процедура в код.
         ';
         $problems = '2,157,134,155,181,184,15,43,194,199,214,164';
-        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initCCAS($position) {
         $brain = new Brain();
         $key = 'CCAS';
         $title = 'Corner Cases';
+        $link = 'corner-cases';
         $summary = '
             Секцията покрива задачи с относително лесно решение, в които обаче има някаква уловка,
             частни случаи, или нещо, което лесно може да се обърка при имплементацията.
@@ -58,12 +62,13 @@ class TrainingPage extends Page {
             имплементацията. В темите по-нататък ще срещнете и други, по-сложни такива задачи.
         ';
         $problems = '119,195,144,171,191,95';
-        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initRECU($position) {
         $brain = new Brain();
         $key = 'RECU';
+        $link = 'recursion-and-backtrack';
         $title = 'Recursion & Backtrack';
         $summary = '
             Секцията покрива рекурсия и търсене с връщане, както и различни оптимизации, които могат да се приложат при
@@ -81,12 +86,13 @@ class TrainingPage extends Page {
             Упражняват се лесни до средно-трудни задачи, в които трябва да се имплементира рекурсивно решение.
         ';
         $problems = '66,179,63,90,145,102';
-        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initBRUT($position) {
         $brain = new Brain();
         $key = 'BRUT';
+        $link = 'bruteforce';
         $title = 'Bruteforce';
         $summary = '
             Секцията покрива задачи, които се решават с "груба сила" - обикновено пълно изчерпване или поне изчерпване
@@ -114,12 +120,13 @@ class TrainingPage extends Page {
             ги дебъгваме (знаем верния отговор за него от брутфорс решението).
         ';
         $problems = '166,200,229,153,220,203,4,175';
-        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initSORT($position) {
         $brain = new Brain();
         $key = 'SORT';
+        $link = 'sorting';
         $title = 'Sorting';
         $summary = '
             Секцията покрива темата за сортиране - "бавни" (O(N<sup>2</sup>)) и "бързи" (O(N * log(N)) сортирания, както
@@ -141,20 +148,21 @@ class TrainingPage extends Page {
             трябва сами да имплементирате логиката на някои от сортиращите алгоритми.
         ';
         $problems = '123,127,215,132,217,221,45,182,128';
-        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     /*
     private function initXXXX($position) {
         $brain = new Brain();
         $key = 'XXXX';
+        $link = 'xxxxxxxxx';
         $title = 'XXXXXXXXX';
         $summary = '
         ';
         $expanded = '
         ';
         $problems = 'XX,YYY,ZZ';
-        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
     */
 
@@ -260,6 +268,22 @@ class TrainingPage extends Page {
         return $this->getTopicBox($key, $title, $text);
     }
 
+    private function getSection($key) {
+        $brain = new Brain();
+        $submits = $brain->getAllSubmits('AC');
+        $topic = $brain->getTopic($key);
+        $problemIds = explode(',', $topic['problems']);
+
+        $sectionInfo = inBox('<h1>' . $topic['title'] . '</h1>' . $topic['expanded']);
+        $sectionProblems = '';
+        foreach ($problemIds as $problemId) {
+            $problemInfo = $brain->getProblem($problemId);
+            $problemSubmits = $brain->getProblemSubmits($problemId, $GLOBALS['STATUS_ACCEPTED']);
+            $sectionProblems .= ProblemsPage::getProblemBox($problemInfo, $problemSubmits);
+        }
+        return $sectionInfo . $sectionProblems;
+    }
+
     private function getTopicStats($key) {
         $brain = new Brain();
         $topic = $brain->getTopic($key);
@@ -271,7 +295,7 @@ class TrainingPage extends Page {
     }
 
     private function getTopicBox($topic) {
-        return inBox('
+        $box = inBox('
             <div class="training-list-entry">
                 <div class="training-list-text">
                     <h2>' . $topic['title'] . '</h2>
@@ -282,6 +306,7 @@ class TrainingPage extends Page {
                 </div>
             </div>
         ');
+        return '<a href="/training/' . $topic['link'] . '" class="decorated">' . $box . '</a>';
     }
 
     private function getTopics() {
@@ -295,34 +320,73 @@ class TrainingPage extends Page {
         return $content;
     }
 
+    private function getMainInfo() {
+        return inBox('
+            <h1>Подготовка</h1>
+            Тук можете да навлезете в света на състезателната информатика като учите и тренирате върху задачи, групирани
+            по теми, в нарастваща сложност. Темите са така подредени, че да изискват само материал, който е покрит в
+            по-предни. Разбира се, очаква се да можете да владеете основи на програмирането (на C++, Java, или Python),
+            което включва как да стартирате програма, вход и изход, типове данни, променливи, масиви, условни оператори,
+            и цикли.
+            <br><br>
+            В случай, че сте състезател или подготвяте състезатели, ориентировъчно темите са подходящи за следните групи:
+            <ul>
+                <li>
+                    <a href="/training/implementation">Implementation</a>,
+                    <a href="/training/corner-cases">Corner Cases</a>,
+                    <a href="/training/recursion-and-backtrack">Recursion & Backtrack</a>,
+                    <a href="/training/bruteforce">Bruteforce</a>, и
+                    <a href="/training/sorting">Sorting</a>
+                    са подходящи за ученици от D група и нагоре.
+                </li>
+                <li>
+                    <a href="/training/greedy">Greedy</a>,
+                    <a href="/training/math">Math</a>,
+                    <a href="/training/simple-data-structures">Simple Data Structures</a>,
+                    <a href="/training/graphs">Simple Graphs</a>,
+                    <a href="/training/binary-and-ternary-search">Binary/Ternary Search</a>,
+                    <a href="/training/dynamic-programming">Dynamic Programming</a>,
+                    <a href="/training/bucketing">Bucketing</a>
+                    са подходящи за ученици от C група и нагоре.
+                </li>
+                <li>
+                    <a href="/training/bitmask-dp">Bitmask DP</a>,
+                    <a href="/training/sliding-window">Sliding Window</a>,
+                    <a href="/training/iterative-dp">Iterative DP</a>,
+                    <a href="/training/game-theory">Game Theory</a>,
+                    <a href="/training/advanced-data-structures">Advanced Data Structures</a>,
+                    <a href="/training/strings">Strings</a>,
+                    <a href="/training/geometry">Geometry</a>, и
+                    <a href="/training/advanced-graphs">Medium Graphs</a>
+                    са подходящи за ученици от B група и нагоре.
+                </li>
+                <li>
+                    <a href="/training/meet-in-the-middle">Meet-in-the-Middle</a>,
+                    <a href="/training/probability">Probability</a>,
+                    <a href="/training/inner-cycle-optimization">Inner Cycle Optimization</a>,
+                    <a href="/training/sweep-line">Sweep Line</a>,
+                    <a href="/training/advanced-dp">Advanced DP</a>, и
+                    <a href="/training/advanced-graphs">Advanced Graphs</a>
+                    са подходящи за ученици от А група.
+                </li>
+                <li>
+                    <a href="/training/various">Various</a> задачите са предимно Ad-hoc или такива, съчетаващи няколко
+                    различни теми. Сложността им е доста варираща.
+                </li>
+            </ul>
+        ');
+    }
+
     public function getContent() {
         $this->initTraining();
 
         $content = '';
-        $content .= inBox('
-            <h1>Подготовка</h1>
-            Тук можете да навлезете в света на състезателната информатика като учите и тренирате върху задачи, групирани по теми, в нарастваща сложност.
-            Темите са така подредени, че да изискват само материал, който е покрит в по-предни. Разбира се, очаква се да можете да владеете основи на
-            програмирането (на C++, Java, или Python), което включва как да стартирате програма, вход и изход, типове данни, променливи, масиви, условни оператори, и цикли.
-            <br><br>
-            В случай, че сте състезател или подготвяте състезатели, ориентировъчно темите са подходящи за следните групи:
-            <ul>
-            <li><a href="/training/implementation/">Implementation</a>, <a href="/training/corner-cases">Corner Cases</a>, <a href="/training/recursion-and-backtrack">Recursion & Backtrack</a>,
-            <a href="/training/bruteforce/">Bruteforce</a>, и <a href="/training/sorting">Sorting</a> са подходящи за ученици от D група и нагоре.</li>
-            <li><a href="/training/greedy">Greedy</a>, <a href="/training/math">Math</a>, <a href="/training/simple-data-structures">Simple Data Structures</a>,
-            <a href="/training/graphs">Simple Graphs</a>, <a href="/training/binary-and-ternary-search">Binary/Ternary Search</a>, <a href="/training/dynamic-programming">Dynamic Programming</a>,
-            <a href="/training/bucketing">Bucketing</a> са подходящи за ученици от C група и нагоре.</li>
-            <li><a href="/training/bitmask-dp">Bitmask DP</a>, <a href="/training/sliding-window">Sliding Window</a>, <a href="/training/iterative-dp">Iterative DP</a>,
-            <a href="/training/game-theory">Game Theory</a>, <a href="/training/advanced-data-structures">Advanced Data Structures</a>, <a href="/training/strings">Strings</a>,
-            <a href="/training/geometry">Geometry</a>, <a href="/training/advanced-graphs">Medium Graphs</a> са подходящи за ученици от B група и нагоре.</li>
-            <li><a href="/training/meet-in-the-middle">Meet-in-the-Middle</a>, <a href="/training/probability">Probability</a>, <a href="/training/inner-cycle-optimization">Inner Cycle Optimization</a>,
-            <a href="/training/sweep-line">Sweep Line</a>, <a href="/training/advanced-dp">Advanced DP</a>, <a href="/training/advanced-graphs">Advanced Graphs</a> са подходящи за ученици от А група.</li>
-            <li><a href="/training/various">Various</a> задачите са предимно Ad-hoc или такива, съчетаващи няколко различни теми. Сложността им е доста варираща.</li>
-            </ul>
-        ');
-
-        $content .= $this->getTopics();
-
+        if (!isset($_GET['section'])) {
+            $content .= $this->getMainInfo();
+            $content .= $this->getTopics();
+        } else {
+            $content .= $this->getSection($_GET['section']);
+        }
         return $content;
     }
     

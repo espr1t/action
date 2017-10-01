@@ -20,7 +20,7 @@ class ProblemsPage extends Page {
         return array('/scripts/language_detector.js');
     }
 
-    private function getProblemBox($problemInfo, $problemSolutions) {
+    public function getProblemBox($problemInfo, $problemSolutions) {
         $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
         $serviceUserSolutions = 0;
         foreach ($problemSolutions as $problemSolution) {
