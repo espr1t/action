@@ -306,22 +306,25 @@ function detectLanguage(code) {
         scoreByKeyword(codeWithoutHaskellComments, scores, 3, keywordType.STRONG, item);
     });
 
-    var cppScore    = scores[0];
-    var javaScore   = scores[1];
-    var pythonScore = scores[2];
-    var haskellScore = scores[3];
+    var cppScore    = [scores[0], "C++"];
+    var javaScore    = [scores[1], "Java"];
+    var pythonScore    = [scores[2], "Python"];
+    var cppScore    = [scores[3], "Haskell"];
 
-    cppScore    /= codeWithoutCStyleComments.length;  // cpp score
-    javaScore   /= codeWithoutCStyleComments.length;  // java score
-    pythonScore /= codeWithoutPyStyleComments.length; // python score
-    haskellScore /= codeWithoutHaskellComments.length; // haskell score
 
-    /*
-    console.log("C++ score: " + cppScore)
-    console.log("Java score: " + javaScore)
-    console.log("Python score: " + pythonScore)
-    */
-    scores.sort((lhs, rhs) => (lhs - rhs));
+    cppScore[0]    /= codeWithoutCStyleComments.length;  // cpp score
+    javaScore[0]   /= codeWithoutCStyleComments.length;  // java score
+    pythonScore[0] /= codeWithoutPyStyleComments.length; // python score
+    haskellScore[0] /= codeWithoutHaskellComments.length; // haskell score
 
-    return scores[0];
+    var associatedScores = [cppScore, javaScore, pythonScore, haskellScore];
+
+    console.log("C++ score: " + cppScore[0])
+    console.log("Java score: " + javaScore[0])
+    console.log("Python score: " + pythonScore[0])
+    console.log("Haskell score: " + haskellScore[0])
+
+    scores.sort((lhs, rhs) => (lhs[0] - rhs[0]));
+
+    return scores[3][1];
 }
