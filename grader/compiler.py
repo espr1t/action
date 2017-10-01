@@ -15,6 +15,7 @@ class Compiler:
     COMPILE_LINE_CPP = "g++ -O2 -std=c++14 -w -s -static -o {path_executable} {path_source}"
     COMPILE_LINE_JAVA = "javac -nowarn -d {path_executable} {path_source}"
     COMPILE_LINE_PYTHON = "python3 -m pyflakes {path_source}"
+    COMPILE_LINE_HASKELL = "ghc -O2 -w -o {path_executable} {path_source}"
 
     @staticmethod
     def compile(language, path_source, path_executable):
@@ -27,6 +28,8 @@ class Compiler:
             return Compiler.compile_java(path_source, path_executable)
         elif language == "Python":
             return Compiler.compile_python(path_source, path_executable)
+        elif language == "Haskell":
+            return Compiler.compile_haskell(path_source, path_executable)
         else:
             raise ValueError("Unknown Language {}!".format(language))
 
@@ -155,3 +158,18 @@ class Compiler:
         copyfile(path_source, path_executable)
         return ""
 
+    @staticmethod
+    def compile_haskell(path_source, path_executable):
+        command = Compiler.COMPILE_LINE_HASKELL.format(path_executable=path_executable, path_source=path_source)
+        exit_code, stdout_output, stderr_output, compilation_time = Compiler.run_command(command)
+
+        if stderr_output != "":
+            return "Compilation error: " + stderr_output
+
+        if compilation_time > config.MAX_COMPILATION_TIME:
+            return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
+
+        if exit_code != 0:
+            return "Compilation exited with a non-zero exit code: {}".format(exit_code)
+
+        return ""
