@@ -274,10 +274,12 @@ function detectLanguage(code) {
     var keywordsHaskell = ["type", "newtype", "data", "forall", "infixl", "infixr", "infix", "let", "where", "module",
                            "=>", "<-", "deriving", "instance"];
 
-    var scores = [0, 0, 0];
+    var scores = [0, 0, 0, 0];
 
     var codeWithoutCStyleComments = removeCStyleComments(removeSpaces(code), "\\\\", "\\*", "*\\");
     var codeWithoutPyStyleComments = removePyStyleComments(code);
+    var codeWithoutHaskellComments = removeCStyleComments(code, "--", "{-", "-}");
+
 
     keywordsCpp.forEach(function(item) {
         scoreByKeyword(codeWithoutCStyleComments, scores, 0, keywordType.STRONG, item);
@@ -300,19 +302,26 @@ function detectLanguage(code) {
         scoreByKeyword(codeWithoutPyStyleComments, scores, 2, keywordType.WEAK, item);
     });
 
+    keywordsHaskell.forEach(function(item) {
+        scoreByKeyword(codeWithoutHaskellComments, scores, 3, keywordType.STRONG, item);
+    });
+
     var cppScore    = scores[0];
     var javaScore   = scores[1];
     var pythonScore = scores[2];
+    var haskellScore = scores[3];
 
     cppScore    /= codeWithoutCStyleComments.length;  // cpp score
     javaScore   /= codeWithoutCStyleComments.length;  // java score
     pythonScore /= codeWithoutPyStyleComments.length; // python score
+    haskellScore /= codeWithoutHaskellComments.length; // haskell score
 
     /*
     console.log("C++ score: " + cppScore)
     console.log("Java score: " + javaScore)
     console.log("Python score: " + pythonScore)
     */
+    scores.sort((lhs, rhs) => (lhs - rhs));
 
-    return (javaScore < cppScore) ? ((pythonScore < cppScore) ? "C++" : "Python") : ((javaScore < pythonScore) ? "Python" : "Java");
+    return scores[0];
 }
