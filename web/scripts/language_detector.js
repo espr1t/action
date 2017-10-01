@@ -271,6 +271,9 @@ function detectLanguage(code) {
 
     var keywordsPythonAndJava = ["import"];
 
+    var keywordsHaskell = ["type", "newtype", "data", "forall", "infixl", "infixr", "infix", "let", "where", "module",
+                           "=>", "<-", "deriving", "instance"];
+
     var scores = [0, 0, 0];
 
     var codeWithoutCStyleComments = removeCStyleComments(removeSpaces(code), "\\\\", "\\*", "*\\");
