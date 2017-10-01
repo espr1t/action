@@ -132,7 +132,6 @@ function removeCStyleComments(code, singleLineStart, multiLineStart, multiLineEn
         }
     }
 
-    code = removeSpaces(code);
 
     return code;
 }
@@ -274,7 +273,7 @@ function detectLanguage(code) {
 
     var scores = [0, 0, 0];
 
-    var codeWithoutCStyleComments = removeCStyleComments(code);
+    var codeWithoutCStyleComments = removeCStyleComments(removeSpaces(code), "\\\\", "\\*", "*\\");
     var codeWithoutPyStyleComments = removePyStyleComments(code);
 
     keywordsCpp.forEach(function(item) {
