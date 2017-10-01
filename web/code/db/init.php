@@ -510,10 +510,12 @@ if ($db->tableExists('Spam')) {
 Table::Training
 ==============
 {
+    "id": 1,
     "key": "IMPL",
-    "order": 1,
-    "problems": "1,2,3,5,8,13,21,34,55,89,144,233",
-    "threshold": 6
+    "title": "Implementation",
+    "summary": "Short summary of this training section.",
+    "expanded": "Longer text about this training section and where to prepare from.",
+    "problems": "1,2,3,5,8,13,21,34,55,89,144,233"
 }
 */
 output('');
@@ -526,8 +528,10 @@ if ($db->tableExists('Training')) {
         CREATE TABLE `Training`(
             `id` INT NOT NULL,
             `key` VARCHAR(4) NOT NULL,
+            `title` TEXT NOT NULL,
+            `summary` TEXT NOT NULL,
+            `expanded` TEXT NOT NULL,
             `problems` TEXT NOT NULL,
-            `threshold` INT NOT NULL,
             PRIMARY KEY (`id`, `key`)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

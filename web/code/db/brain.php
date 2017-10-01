@@ -928,11 +928,11 @@ class Brain {
     }
 
     // Training
-    function addTopic($id, $key, $problems, $threshold) {
+    function addTopic($id, $key, $title, $summary, $expanded, $problems) {
         $response = $this->db->query("
-            INSERT INTO `Training` (`id`, `key`, `problems`, `threshold`)
-            VALUES(" . $id . ", '" . $key . "', '" . $problems ."', " . $threshold . ")
-            ON DUPLICATE KEY UPDATE problems = '" . $problems . "', threshold = " . $threshold . "
+            INSERT INTO `Training` (`id`, `key`, `title`, `summary`, `expanded`, `problems`)
+            VALUES(" . $id . ", '" . $key . "', '" . $title . "', '" . $summary . "', '" . $expanded . "', '" . $problems . "')
+            ON DUPLICATE KEY UPDATE title = '" . $title . "', summary = '" . $summary . "', expanded = '" . $expanded . "', problems = '" . $problems . "'
         ");
         if (!$response) {
             error_log('Could not execute addTopic() query for topic "' . $key . '"!');
@@ -951,6 +951,17 @@ class Brain {
             return null;
         }
         return $this->getResult($response);
+    }
+
+    function getTrainingTopics() {
+        $response = $this->db->query("
+            SELECT * FROM `Training`
+        ");
+        if (!$response) {
+            error_log('Could not execute getTrainingTopics() query!');
+            return null;
+        }
+        return $this->getResults($response);
     }
 }
 

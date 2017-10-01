@@ -8,13 +8,165 @@ class TrainingPage extends Page {
         return 'O(N)::Training';
     }
 
-    private function initTraining() {
+    private function initIMPL($position) {
         $brain = new Brain();
-        $brain->addTopic(1, 'IMPL', '2,157,134,155,181,184,15,43,194,199,214,164', 10);
-        $brain->addTopic(2, 'CORN', '119,195,144,171,191,95', 6);
-        $brain->addTopic(3, 'RECU', '66,179,63,90,145,102', 5);
-        $brain->addTopic(4, 'BRUT', '166,200,229,153,220,203,4,175', 6);
-        $brain->addTopic(5, 'SORT', '123,127,215,132,217,221,45,182,128', 7);
+        $key = 'IMPL';
+        $title = 'Implementation';
+        $summary = '
+            Секцията покрива вход и изход от програма, работа с масиви и символни низове.
+            Упражняват се лесни задачи, които изискват директна имплементация на описана процедура.
+        ';
+        $expanded = '
+            В тази секция ще се научите как да четете и пишете стрингове, цели числа, числа с плаваща запетая, като
+            част от входа и изхода на програма. Ще упражните да манипулирате масиви и символни низове ползвайки
+            основните конструкции в програмните езици (if/else, for, while), а както и функции.
+            <br><br>
+            Подходящи теми, които можете да прочетете, са
+            <a href="http://www.informatika.bg/lectures/io" target="_blank">Вход и изход от програма</a>,
+            <a href="http://www.informatika.bg/lectures/variables-structs-arrays" target="_blank">Променливи, масиви,
+            и структури</a>, и
+            <a href="http://www.informatika.bg/lectures/search-and-iteration" target="_blank">Търсене и итерация</a>.
+            <br><br>
+            За тренировка сме ви подготвили лесни задачи, в повечето от които е казано директно какво се иска от вас да
+            имплементирате - тоест просто трябва да превърнете описаната процедура в код.
+        ';
+        $problems = '2,157,134,155,181,184,15,43,194,199,214,164';
+        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+    }
+
+    private function initCCAS($position) {
+        $brain = new Brain();
+        $key = 'CCAS';
+        $title = 'Corner Cases';
+        $summary = '
+            Секцията покрива задачи с относително лесно решение, в които обаче има някаква уловка,
+            частни случаи, или нещо, което лесно може да се обърка при имплементацията.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме за какво да внимаваме, когато имплементираме дадена задача. Ще наблегнем на
+            задачи с относително лесно решение, в които обаче има някакъв частен случай или уловка, който(ято) лесно
+            може да бъде пропуснат(а). Такива задачи могат да струват много "скъпо" на състезателите в състезания,
+            където за да се мине задачата се изисква правилно справяне с всички тестове (като например
+            <a href="http://codeforces.com/" target="_blank">CodeForces</a>,
+            <a href="https://www.topcoder.com/tc" target="_blank">TopCoder</a>, и
+            <a href="https://icpc.baylor.edu/" target="_blank">ACM ICPC</a>).
+            <br><br>
+            Подходяща тема, която би ви помогнала да пишете по-чист код и така да избягвате потенциални проблеми е тази за
+            <a href="http://www.informatika.bg/lectures/coding-conventions" target="_blank">Конвенции за стил на кода</a>.
+            <br><br>
+            Упражняват се лесни задачи, в които има частни случаи или нещо, което лесно може да се обърка при
+            имплементацията. В темите по-нататък ще срещнете и други, по-сложни такива задачи.
+        ';
+        $problems = '119,195,144,171,191,95';
+        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+    }
+
+    private function initRECU($position) {
+        $brain = new Brain();
+        $key = 'RECU';
+        $title = 'Recursion & Backtrack';
+        $summary = '
+            Секцията покрива рекурсия и търсене с връщане, както и различни оптимизации, които могат да се приложат при
+            тях (ред на извикване на под-задачите, рязане на рекурсията, и други).
+        ';
+        $expanded = '
+            В тази секция ще разгледаме как да решаваме задачи с изчерпване, ползвайки рекурсия и търсене с връщане
+            (backtrack). За някои от задачите ще ви се наложи да измислите оптимизации, за да бъде достатъчно бързо
+            решението ви - например в какъв ред да извиквате под-задачите, кои клони на рекурсията нямат смисъл да
+            бъдат обходени и могат да бъдат "изрязани" (наричано на Английски "pruning"), както и други.
+            <br><br>
+            Подходяща тема, която можете да прочетете е
+            <a href="http://www.informatika.bg/lectures/recursion" target="_blank">Рекурсия и търсене с връщане</a>.
+            <br><br>
+            Упражняват се лесни до средно-трудни задачи, в които трябва да се имплементира рекурсивно решение.
+        ';
+        $problems = '66,179,63,90,145,102';
+        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+    }
+
+    private function initBRUT($position) {
+        $brain = new Brain();
+        $key = 'BRUT';
+        $title = 'Bruteforce';
+        $summary = '
+            Секцията покрива задачи, които се решават с "груба сила" - обикновено пълно изчерпване или поне изчерпване
+            на част от задачата за опростяване на остатъка от нея, както и генериране на малките отговори за стигане до
+            наблюдение.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме задачи, които или се решават изцяло с пълно изчерпване (но не backtrack), или
+            или се ползва изчерпване на някаква част от задачата за да се опрости остатъка от нея. В много задачи не е
+            нужно да се ползва изчерпване - съществува ефективен алгоритъм, който ги решава - но той е или труден или
+            изисква разглеждането на много частни случаи. Понякога, ако ограниченията го позволяват, можем вместо това
+            да обходим всички възможности за дадено нещо в задачата, като така или вече ни трябва значително по-прост
+            алгоритъм за останалата част, или броя частни случаи намалява многократно.
+            <br><br>
+            Допълнително, в задачи (в които обикновено отговорът е едно единствено число), за които нямаме идея как да
+            подходим, можем да напишем bruteforce решение за малките стойности, и да се опитаме да намерим някаква
+            зависимост в отговорите: може да се окаже някаква редица или проста формула.
+            <br><br>
+            Последно, на състезания, в които нямаме feedback за изпратените от нас решения преди края (например
+            <a href="http://codeforces.com/" target="_blank">CodeForces</a>,
+            <a href="https://www.topcoder.com/tc" target="_blank">TopCoder</a>,
+            <a href="https://icpc.baylor.edu/" target="_blank">ACM ICPC</a>,
+            а също и някои задачи по ученически състезания), понякога е полезно да напишем bruteforce решение с което да
+            тестваме "умното" ни такова. Обикновено така се откриват бъгове, като плюсът е, че имаме и тест, с който да
+            ги дебъгваме (знаем верния отговор за него от брутфорс решението).
+        ';
+        $problems = '166,200,229,153,220,203,4,175';
+        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+    }
+
+    private function initSORT($position) {
+        $brain = new Brain();
+        $key = 'SORT';
+        $title = 'Sorting';
+        $summary = '
+            Секцията покрива темата за сортиране - "бавни" (O(N<sup>2</sup>)) и "бързи" (O(N * log(N)) сортирания, както
+            и сортирания, които не са базирани на сравнения (например counting sort).
+        ';
+        $expanded = '
+            В тази секция ще разгледаме една от популярните теми в програмирането - а именно какво е сортиране и
+            няколко стандартни алгоритми, които можем да ползваме. Ще разгледаме както "лесни" алгоритми със сложност
+            O(N<sup>2</sup>), като например Bubble Sort, Selection Sort, Insertion Sort, така и ефективни
+            такива (Quick Sort, Merge Sort, Heap Sort) със сложност O(N*log(N)). Ще видим и начини, по които можем да
+            сортираме и за по-бързо (линейно) време, ползвайки Counting Sort.
+            <br><br>
+            Подходящи теми, които можете да прочетете, са тези за
+            <a href="http://www.informatika.bg/lectures/sorting" target="_blank">Сортиране</a>,
+            <a href="http://www.informatika.bg/lectures/fast-sorting-algorithms" target="_blank">Бързи сортирания</a>,
+            а донякъде полезна тук би ви била и <a href="http://www.informatika.bg/lectures/STL" target="_blank">STL</a>.
+            <br><br>
+            Макар и да има лесно за ползване ефективно сортиране в STL, част от задачите в секцията са такива, че да
+            трябва сами да имплементирате логиката на някои от сортиращите алгоритми.
+        ';
+        $problems = '123,127,215,132,217,221,45,182,128';
+        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+    }
+
+    /*
+    private function initXXXX($position) {
+        $brain = new Brain();
+        $key = 'XXXX';
+        $title = 'XXXXXXXXX';
+        $summary = '
+        ';
+        $expanded = '
+        ';
+        $problems = 'XX,YYY,ZZ';
+        $brain->addTopic($position, $key, $title, $summary, $expanded, $problems);
+    }
+    */
+
+    private function initTraining() {
+        // Group D
+        $this->initIMPL(1);
+        $this->initCCAS(2);
+        $this->initRECU(3);
+        $this->initBRUT(4);
+        $this->initSORT(5);
+
+        /*
         $brain->addTopic(6, 'GRDY', '143,165,206,170,72,58,178,190,230,138,81,120,218,223,67,208,55', 14);
         $brain->addTopic(7, 'MATH', '225,24,228,187,201,140,156,192,92,93,4,172', 10);
         $brain->addTopic(8, 'DS01', '125,129,20,40,124,107', 5);
@@ -22,102 +174,19 @@ class TrainingPage extends Page {
         $brain->addTopic(10, 'BSTS', '117,130,141,168,226,118,28,30,60,76,185,209,22', 12);
         $brain->addTopic(11, 'DPDP', '116,142,167,174,50,33,61,85,196,198,39,212,213,224', 12);
         $brain->addTopic(12, 'BUCK', '105,68,150,162', 4);
-    }
-
-    private function getTopicStats($key) {
-        $brain = new Brain();
-        $topic = $brain->getTopic($key);
-        $problems = explode(',', $topic['problems']);
-        $solved = $brain->getSolved($this->user->id);
-        $accepted = array_filter($solved, function($el) use ($problems) {return in_array($el, $problems);});
-        $parentId = 'topic-stats-' . $key;
-        return '<script>circularProgress(\'' . $parentId . '\', ' . count($accepted) . ', ' . count($problems) . ');</script>';
-    }
-
-    private function getTopicBox($key, $title, $text) {
-        return inBox('
-            <div class="training-list-entry">
-                <div class="training-list-text">
-                    <h2>' . $title . '</h2>
-                    ' . $text . '
-                </div>
-                <div class="training-list-progress" id="topic-stats-' . $key . '">
-                    ' . $this->getTopicStats($key) . '
-                </div>
-            </div>
-        ');
-    }
-
-    private function getTopicBoxImpl() {
-        $key = 'IMPL';
-        $title = 'Implementation';
-        $text = '
-            Секцията покрива вход и изход от програма, работа с масиви и символни низове.
-            Упражняват се лесни задачи, които изискват директна имплементация на описана процедура.
-        ';
-        /*
-            Секцията покрива вход и изход от програма, работа с масиви и символни низове. Подходящи теми, които можете да прочетете, са
-            <a href="http://www.informatika.bg/lectures/io" target="_blank">Вход и изход от програма</a>,
-            <a href="http://www.informatika.bg/lectures/variables-structs-arrays" target="_blank">Променливи, масиви, и структури</a>,
-            и <a href="http://www.informatika.bg/lectures/search-and-iteration" target="_blank">Търсене и итерация</a>.<br>
-            Упражняват се лесни задачи, които изискват директна имплементация на описана процедура.
         */
-        return $this->getTopicBox($key, $title, $text);
-    }
-    
-    private function getTopicBoxCorn() {
-        $key = 'CORN';
-        $title = 'Corner Cases';
-        $text = '
-            Секцията покрива задачи с относително лесно решение, в които обаче има някаква уловка, частни случаи, или нещо,
-            което лесно може да се обърка при имплементацията.
-        ';
+
         /*
-            Секцията покрива задачи с относително лесно решение, в които обаче има някаква уловка. Такива задачи могат да струват много "скъпо" на
-            състезателите в състезания, където за да се мине задачата се изисква правилно справяне с всички тестове (например <a href="http://codeforces.com/"
-            target="_blank">CodeForces</a>, <a href="https://www.topcoder.com/tc" target="_blank">TopCoder</a>, и <a href="https://icpc.baylor.edu/"
-            target="_blank">ACM ICPC</a>). Подходяща тема, която би ви помогнала да пишете по-чист код и така да избягвате потенциални проблеми е тази за
-            <a href="http://www.informatika.bg/lectures/coding-conventions" target="_blank">Конвенции за стил на кода</a>.<br>
-            Упражняват се лесни задачи, в които има частни случаи или нещо, което лесно може да се обърка при имплементацията. В темите по-нататък
-            ще срещнете и други, по-сложни такива задачи.
+        // Group C
+        $content .= $this->getTopicBoxGrdy();
+        $content .= $this->getTopicBoxMath();
+        $content .= $this->getTopicBoxDS01();
+        $content .= $this->getTopicBoxGrph();
+        $content .= $this->getTopicBoxBsts();
+        $content .= $this->getTopicBoxDpdp();
+        $content .= $this->getTopicBoxBuck();
         */
-        return $this->getTopicBox($key, $title, $text);
-    }
 
-    private function getTopicBoxRecu() {
-        $key = 'RECU';
-        $title = 'Recursion & Backtrack';
-        $text = '
-            Секцията покрива рекурсия и търсене с връщане (backtrack), както и различни оптимизации, които могат да се приложат при тях
-            (ред на извикване на под-задачите, рязане на рекурсията (pruning), и други).
-        ';
-        /*
-            Секцията покрива рекурсия и търсене с връщане (backtrack), както и различни оптимизации, които могат да се приложат при тях
-            (ред на извикване на под-задачите, рязане на рекурсията (pruning), и други). Подходяща тема, която можете да прочетете е
-            <a href="http://www.informatika.bg/lectures/recursion" target="_blank">Рекурсия и търсене с връщане</a>.<br>
-            Упражняват се лесни до средно-трудни задачи, в които трябва да се имплементира решение, базирано на рекурсия.
-        */
-        return $this->getTopicBox($key, $title, $text);
-    }
-
-    private function getTopicBoxBrut() {
-        $key = 'BRUT';
-        $title = 'Bruteforce';
-        $text = '
-            Секцията покрива задачи, които се решават с "груба сила" - обикновено пълно изчерпване или поне изчерпване на част
-            от задачата за опростяване на остатъка от нея, както и генериране на малките отговори за стигане до наблюдение.
-        ';
-        return $this->getTopicBox($key, $title, $text);
-    }
-
-    private function getTopicBoxSort() {
-        $key = 'SORT';
-        $title = 'Sorting';
-        $text = '
-            Секцията покрива темата за сортиране - "бавни" (O(N<sup>2</sup>) и "бързи" (O(N * log(N)) сортирания, както и сортирания,
-            които не са базирани на сравнения (например counting sort).
-        ';
-        return $this->getTopicBox($key, $title, $text);
     }
 
     private function getTopicBoxGrdy() {
@@ -191,7 +260,44 @@ class TrainingPage extends Page {
         return $this->getTopicBox($key, $title, $text);
     }
 
+    private function getTopicStats($key) {
+        $brain = new Brain();
+        $topic = $brain->getTopic($key);
+        $problems = explode(',', $topic['problems']);
+        $solved = $brain->getSolved($this->user->id);
+        $accepted = array_filter($solved, function($el) use ($problems) {return in_array($el, $problems);});
+        $parentId = 'topic-stats-' . $key;
+        return '<script>circularProgress(\'' . $parentId . '\', ' . count($accepted) . ', ' . count($problems) . ');</script>';
+    }
+
+    private function getTopicBox($topic) {
+        return inBox('
+            <div class="training-list-entry">
+                <div class="training-list-text">
+                    <h2>' . $topic['title'] . '</h2>
+                    ' . $topic['summary'] . '
+                </div>
+                <div class="training-list-progress" id="topic-stats-' . $topic['key'] . '">
+                    ' . $this->getTopicStats($topic['key']) . '
+                </div>
+            </div>
+        ');
+    }
+
+    private function getTopics() {
+        $brain = new Brain();
+        $topics = $brain->getTrainingTopics();
+
+        $content = '';
+        foreach ($topics as $topic) {
+            $content .= $this->getTopicBox($topic);
+        }
+        return $content;
+    }
+
     public function getContent() {
+        $this->initTraining();
+
         $content = '';
         $content .= inBox('
             <h1>Подготовка</h1>
@@ -215,23 +321,7 @@ class TrainingPage extends Page {
             </ul>
         ');
 
-        $this->initTraining();
-
-        // Group D
-        $content .= $this->getTopicBoxImpl();
-        $content .= $this->getTopicBoxCorn();
-        $content .= $this->getTopicBoxRecu();
-        $content .= $this->getTopicBoxBrut();
-        $content .= $this->getTopicBoxSort();
-
-        // Group C
-        $content .= $this->getTopicBoxGrdy();
-        $content .= $this->getTopicBoxMath();
-        $content .= $this->getTopicBoxDS01();
-        $content .= $this->getTopicBoxGrph();
-        $content .= $this->getTopicBoxBsts();
-        $content .= $this->getTopicBoxDpdp();
-        $content .= $this->getTopicBoxBuck();
+        $content .= $this->getTopics();
 
         return $content;
     }
