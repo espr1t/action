@@ -20,76 +20,79 @@ class ProblemsPage extends Page {
         return array('/scripts/language_detector.js');
     }
 
+    private function getProblemBox($problemInfo, $problemSolutions) {
+        $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
+        $serviceUserSolutions = 0;
+        foreach ($problemSolutions as $problemSolution) {
+            if ($problemSolution['userId'] == $this->user->id) {
+                $statusIcon = '<i class="fa fa-check green" title="Вече сте решили успешно тази задача!."></i>';
+            }
+            if ($problemSolution['userId'] <= 1) {
+                $serviceUserSolutions |= (1 << $problemSolution['userId']);
+            }
+        }
+
+        $difficulty = '';
+        switch ($problemInfo['difficulty']) {
+            case 'trivial':
+                $difficulty = '<i class="fa fa-child" title="Trivial"></i>';
+                break;
+            case 'easy':
+                $difficulty = '<i class="fa fa-paper-plane" title="Easy"></i>';
+                break;
+            case 'medium':
+                $difficulty = '<i class="fa fa-balance-scale" title="Medium"></i>';
+                break;
+            case 'hard':
+                $difficulty = '<i class="fa fa-tint" title="Hard"></i>';
+                break;
+            case 'brutal':
+                $difficulty = '<i class="fa fa-paw" title="Brutal"></i>';
+                break;
+            default:
+                $difficulty = '<i class="fa fa-question" title="Unknown"></i>';
+        }
+
+        $numSolutions = (count($problemSolutions) - popcount($serviceUserSolutions));
+        $solutions = '<i class="fa fa-users" title="Решена от ' . $numSolutions . ' човек' . ($numSolutions != 1 ? 'a' : '') . '"></i> ' . $numSolutions;
+
+        $box = '
+            <a href="/problems/' . $problemInfo['id'] . '" class="decorated">
+                <div class="box narrow boxlink">
+                        <div class="problem-status">' . $statusIcon . '</div>
+                        <div class="problem-name">' . $problemInfo['name'] . '</div>
+                        <div class="problem-stats">' . $difficulty . ' &nbsp; '  . $solutions . '</div>
+                </div>
+            </a>
+        ';
+        // Make hidden problems grayed out (actually visible only to admins).
+        if ($problemInfo['visible'] == '0') {
+            $box = '<div style="opacity: 0.5;">' . $box . '</div>';
+        }
+        return $box;
+    }
+
     private function getAllProblems() {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
-        $allProblemsSubmits = $brain->getAllSubmits('AC');
-        $problemSubmits = array();
+        $allProblemsSubmits = $brain->getAllSubmits($GLOBALS['STATUS_ACCEPTED']);
+        $problemSolvedBy = array();
         foreach ($problemsInfo as $problem)
-            $problemSubmits[$problem['id']] = array();
+            $problemSolvedBy[$problem['id']] = array();
         foreach ($allProblemsSubmits as $submit) {
             // Apparently a submit on a game
-            if (!array_key_exists($submit['problemId'], $problemSubmits))
+            if (!array_key_exists($submit['problemId'], $problemSolvedBy))
                 continue;
             $alreadyIn = false;
-            foreach ($problemSubmits[$submit['problemId']] as $prevSubmit)
-                $alreadyIn = $alreadyIn || $prevSubmit['userId'] == $submit['userId'];
+            foreach ($problemSolvedBy[$submit['problemId']] as $author)
+                $alreadyIn = $alreadyIn || $author['userId'] == $submit['userId'];
             if (!$alreadyIn)
-                array_push($problemSubmits[$submit['problemId']], $submit);
+                array_push($problemSolvedBy[$submit['problemId']], $submit);
         }
 
         for ($i = 0; $i < count($problemsInfo); $i += 1) {
-            $problemSolutions = $problemSubmits[$problemsInfo[$i]['id']];
-            $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
-            $serviceUserSolutions = 0;
-            foreach ($problemSolutions as $problemSolution) {
-                if ($problemSolution['userId'] == $GLOBALS['user']->id) {
-                    $statusIcon = '<i class="fa fa-check green" title="Вече сте решили успешно тази задача!."></i>';
-                }
-                if ($problemSolution['userId'] <= 1) {
-                    $serviceUserSolutions |= (1 << $problemSolution['userId']);
-                }
-            }
-            $difficulty = '';
-            switch ($problemsInfo[$i]['difficulty']) {
-                case 'trivial':
-                    $difficulty = '<i class="fa fa-child" title="Trivial"></i>';
-                    break;
-                case 'easy':
-                    $difficulty = '<i class="fa fa-paper-plane" title="Easy"></i>';
-                    break;
-                case 'medium':
-                    $difficulty = '<i class="fa fa-balance-scale" title="Medium"></i>';
-                    break;
-                case 'hard':
-                    $difficulty = '<i class="fa fa-tint" title="Hard"></i>';
-                    break;
-                case 'brutal':
-                    $difficulty = '<i class="fa fa-paw" title="Brutal"></i>';
-                    break;
-                default:
-                    $difficulty = '<i class="fa fa-question" title="Unknown"></i>';
-            }
-            $numSolutions = (count($problemSolutions) - popcount($serviceUserSolutions));
-            $solutions = '<i class="fa fa-users" title="Решена от ' . $numSolutions . ' човек' . ($numSolutions != 1 ? 'a' : '') . '"></i> ' . $numSolutions;
-
-            $problemsInfo[$i]['box'] = '
-                <a href="problems/' . $problemsInfo[$i]['id'] . '" class="decorated">
-                    <div class="box narrow boxlink">
-                            <div class="problem-status">' . $statusIcon . '</div>
-                            <div class="problem-name">' . $problemsInfo[$i]['name'] . '</div>
-                            <div class="problem-stats">' . $difficulty . ' &nbsp; '  . $solutions . '</div>
-                    </div>
-                </a>
-            ';
-            // Make hidden problems grayed out (actually visible only to admins).
-            if ($problemsInfo[$i]['visible'] == '0') {
-                $problemsInfo[$i]['box'] = '
-                    <div style="opacity: 0.5;">
-                    ' . $problemsInfo[$i]['box'] . '
-                    </div>
-                ';
-            }
+            $problemSolutions = $problemSolvedBy[$problemsInfo[$i]['id']];
+            $problemsInfo[$i]['box'] = $this->getProblemBox($problemsInfo[$i], $problemSolutions);
             $problemsInfo[$i]['solutions'] = count($problemSolutions);
         }
 
