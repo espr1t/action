@@ -41,6 +41,13 @@ RewriteRule    ^training/corner-cases$							/code/main.php?page=training&sectio
 RewriteRule    ^training/recursion-and-backtrack$				/code/main.php?page=training&section=RECU											[NC,L,QSA]
 RewriteRule    ^training/bruteforce$							/code/main.php?page=training&section=BRUT											[NC,L,QSA]
 RewriteRule    ^training/sorting$								/code/main.php?page=training&section=SORT											[NC,L,QSA]
+RewriteRule    ^training/greedy$								/code/main.php?page=training&section=GRDY											[NC,L,QSA]
+RewriteRule    ^training/math$									/code/main.php?page=training&section=MATH											[NC,L,QSA]
+RewriteRule    ^training/simple-data-structures$				/code/main.php?page=training&section=DS01											[NC,L,QSA]
+RewriteRule    ^training/simple-graphs$							/code/main.php?page=training&section=GRPH											[NC,L,QSA]
+RewriteRule    ^training/binary-search$							/code/main.php?page=training&section=BSTS											[NC,L,QSA]
+RewriteRule    ^training/dynamic-programming$					/code/main.php?page=training&section=DPDP											[NC,L,QSA]
+RewriteRule    ^training/bucketing$								/code/main.php?page=training&section=BUCK											[NC,L,QSA]
 
 # Games pages
 RewriteRule    ^games/([\w-]+)$                                 /code/main.php?page=games&game=$1                                                   [NC,L,QSA]
