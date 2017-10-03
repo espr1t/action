@@ -32,8 +32,9 @@ function removeSpaces(code) {
      return code;
 }
 
-/* Removes C style comments and strings from code */
-function removeCStyleComments(code) {
+/* Removes C style comments and strings from code 
+ * with generic two character comments being possible*/
+function removeCStyleComments(code, singleLineStart, multiLineStart, multiLineEnd) {
     var states = {
         DEFAULT    : 0, // default state
         STRING     : 1, // string state
@@ -44,8 +45,8 @@ function removeCStyleComments(code) {
     var curState       = states.DEFAULT;
     var curIndex       = 0;
     var startString    = 0; // start index of a string
-    var startMLComment = 0; // start index of a multiline comment
     var startSLComment = 0; // start index of a single line comment
+    var startMLComment = 0; // start index of a multiline comment
 
    while (curIndex < code.length) {
         switch (code[curIndex]) {
@@ -76,20 +77,26 @@ function removeCStyleComments(code) {
                     } else ++curIndex;
                 } else ++curIndex;
                 break;
-            case '/':
+            case singleLineStart[0]:
                 if ((curIndex + 1) < code.length && curState == states.DEFAULT) {
-                    if (code[curIndex + 1] == '/') {
+                    if (code[curIndex + 1] == singleLineStart[1]) {
                         startSLComment = curIndex;
                         curState = states.SL_COMMENT;
-                    } else if (code[curIndex + 1] == '*') {
+                    }
+                }
+                ++curIndex;
+                break;
+            case multiLineStart[0]:
+                if ((curIndex + 1) < code.length && curState == states.DEFAULT) {
+                    if (code[curIndex + 1] == multiLineStart[1]) {
                         startMLComment = curIndex;
                         curState = states.ML_COMMENT;
                     }
                 }
                 ++curIndex;
                 break;
-           case '*':
-                if ((curIndex + 1) < code.length && code[curIndex + 1] == '/' && curState == states.ML_COMMENT) {
+           case multiLineEnd[0]:
+                if ((curIndex + 1) < code.length && code[curIndex + 1] == multiLineEnd[1] && curState == states.ML_COMMENT) {
                     // remove multi line comment
                     code = code.substring(0, startMLComment) + (((curIndex + 2) < code.length) ? code.substring(curIndex + 2) : '');
                     curIndex = startMLComment;
@@ -124,7 +131,7 @@ function removeCStyleComments(code) {
                 break;
         }
     }
-    code = removeSpaces(code);
+
 
     return code;
 }
@@ -264,10 +271,15 @@ function detectLanguage(code) {
 
     var keywordsPythonAndJava = ["import"];
 
-    var scores = [0, 0, 0];
+    var keywordsHaskell = ["type", "newtype", "data", "forall", "infixl", "infixr", "infix", "let", "where", "module",
+                           "=>", "<-", "deriving", "instance"];
 
-    var codeWithoutCStyleComments = removeCStyleComments(code);
+    var scores = [0, 0, 0, 0];
+
+    var codeWithoutCStyleComments = removeCStyleComments(removeSpaces(code), "\\\\", "\\*", "*\\");
     var codeWithoutPyStyleComments = removePyStyleComments(code);
+    var codeWithoutHaskellComments = removeCStyleComments(code, "--", "{-", "-}");
+
 
     keywordsCpp.forEach(function(item) {
         scoreByKeyword(codeWithoutCStyleComments, scores, 0, keywordType.STRONG, item);
@@ -290,19 +302,29 @@ function detectLanguage(code) {
         scoreByKeyword(codeWithoutPyStyleComments, scores, 2, keywordType.WEAK, item);
     });
 
-    var cppScore    = scores[0];
-    var javaScore   = scores[1];
-    var pythonScore = scores[2];
+    keywordsHaskell.forEach(function(item) {
+        scoreByKeyword(codeWithoutHaskellComments, scores, 3, keywordType.STRONG, item);
+    });
 
-    cppScore    /= codeWithoutCStyleComments.length;  // cpp score
-    javaScore   /= codeWithoutCStyleComments.length;  // java score
-    pythonScore /= codeWithoutPyStyleComments.length; // python score
+    var cppScore    = [scores[0], "C++"];
+    var javaScore    = [scores[1], "Java"];
+    var pythonScore    = [scores[2], "Python"];
+    var cppScore    = [scores[3], "Haskell"];
 
-    /*
-    console.log("C++ score: " + cppScore)
-    console.log("Java score: " + javaScore)
-    console.log("Python score: " + pythonScore)
-    */
 
-    return (javaScore < cppScore) ? ((pythonScore < cppScore) ? "C++" : "Python") : ((javaScore < pythonScore) ? "Python" : "Java");
+    cppScore[0]    /= codeWithoutCStyleComments.length;  // cpp score
+    javaScore[0]   /= codeWithoutCStyleComments.length;  // java score
+    pythonScore[0] /= codeWithoutPyStyleComments.length; // python score
+    haskellScore[0] /= codeWithoutHaskellComments.length; // haskell score
+
+    var associatedScores = [cppScore, javaScore, pythonScore, haskellScore];
+
+    console.log("C++ score: " + cppScore[0])
+    console.log("Java score: " + javaScore[0])
+    console.log("Python score: " + pythonScore[0])
+    console.log("Haskell score: " + haskellScore[0])
+
+    scores.sort((lhs, rhs) => (lhs[0] - rhs[0]));
+
+    return scores[3][1];
 }
