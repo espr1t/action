@@ -124,10 +124,12 @@ function addSnakesApple() {
 }
 
 function endSnakesGame(message) {
-    // Wait a little so the board is updated
-    window.setTimeout(function() {alert(message);}, 20);
     clearTimeout(snakesGameLoop);
     document.removeEventListener('keydown', identifySnakeArrowEvent, false);
+    showMessage('INFO', message);
+    if (snakesDemo) {
+        window.setTimeout(function() {location.reload();}, 4000);
+    }
 }
 
 function changeSnakesChar(ch, add) {
@@ -324,6 +326,10 @@ function runSnakesReplay(log) {
 
     updateSnakesBoard();
 
+    if (snakesDemo) {
+        setTimeout(function() {snakesReplayRunning = true;}, 1000);
+    }
+
     log = log.split('|')[1];
     // Start the update process
     snakesReplayCycle(0, log);
@@ -426,7 +432,8 @@ function getSnakesContent() {
     return content;
 }
 
-function showSnakesReplay(playerOne, playerTwo, log) {
+function showSnakesReplay(playerOne, playerTwo, log, demo=false) {
+    snakesDemo = demo;
     snakesPlayerOne = playerOne;
     snakesPlayerTwo = playerTwo;
 
@@ -436,7 +443,9 @@ function showSnakesReplay(playerOne, playerTwo, log) {
     var instructions = document.createElement('div');
     instructions.style.textAlign = 'center';
     instructions.style.fontStyle = 'italic';
-    instructions.innerHTML = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
+    if (!snakesDemo) {
+        instructions.innerText = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
+    }
     content.appendChild(instructions);
 
     // Make pressing escape return back to the game

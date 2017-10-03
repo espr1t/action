@@ -1,59 +1,59 @@
-SNAKES_SPACE = 32;
-SNAKES_ARROW_LEFT = 37;
-SNAKES_ARROW_UP = 38;
-SNAKES_ARROW_RIGHT = 39;
-SNAKES_ARROW_DOWN = 40;
-SNAKES_MOVE_INTERVAL = 120; // Milliseconds
+HYPERSNAKES_SPACE = 32;
+HYPERSNAKES_ARROW_LEFT = 37;
+HYPERSNAKES_ARROW_UP = 38;
+HYPERSNAKES_ARROW_RIGHT = 39;
+HYPERSNAKES_ARROW_DOWN = 40;
+HYPERSNAKES_MOVE_INTERVAL = 120; // Milliseconds
 
-snakesCells = [];
-snakesNumRows = 20;
-snakesNumCols = 20;
-snakesNumApples = 25;
-snakesSnakeDir = null;
+hypersnakesCells = [];
+hypersnakesNumRows = 20;
+hypersnakesNumCols = 20;
+hypersnakesNumApples = 25;
+hypersnakesSnakeDir = null;
 
-snakesDemo = false;
-snakesAiTurn = false;
-snakesGameLoop = null;
-showLetters = true;
-snakesReplayRunning = false;
-snakesPlayerOne = '';
-snakesPlayerTwo = '';
+hypersnakesDemo = false;
+hypersnakesAiTurn = false;
+hypersnakesGameLoop = null;
+hypersnakesShowLetters = true;
+hypersnakesReplayRunning = false;
+hypersnakesPlayerOne = '';
+hypersnakesPlayerTwo = '';
 
-function identifySnakeArrowEvent(event) {
-    if (event.keyCode >= SNAKES_ARROW_LEFT && event.keyCode <= SNAKES_ARROW_DOWN) {
+function identifyHypersnakesArrowEvent(event) {
+    if (event.keyCode >= HYPERSNAKES_ARROW_LEFT && event.keyCode <= HYPERSNAKES_ARROW_DOWN) {
         event.preventDefault();
         event.stopPropagation();
-        snakesSnakeDir = event.keyCode;
-        clearTimeout(snakesGameLoop);
-        runSnakesGame();
+        hypersnakesSnakeDir = event.keyCode;
+        clearTimeout(hypersnakesGameLoop);
+        runHypersnakesGame();
     }
 }
 
-function identifySnakeReplayEvent(event) {
-    if (event.keyCode == SNAKES_SPACE) {
+function identifyHypersnakesReplayEvent(event) {
+    if (event.keyCode == HYPERSNAKES_SPACE) {
         event.preventDefault();
         event.stopPropagation();
-        snakesReplayRunning = !snakesReplayRunning;
+        hypersnakesReplayRunning = !hypersnakesReplayRunning;
     }
 }
 
-function snakesAiLogic() {
+function hypersnakesAiLogic() {
     // BFS to find shortest paths, originated at the apple
     var INF = 1000000001;
     var dir = [ [-1, 0], [0, 1], [1, 0], [0, -1] ];
 
     dist = [];
-    for (var row = 0; row < snakesNumRows; row++) {
+    for (var row = 0; row < hypersnakesNumRows; row++) {
         var cur = [];
-        for (var col = 0; col < snakesNumCols; col++)
+        for (var col = 0; col < hypersnakesNumCols; col++)
             cur.push(INF - 1);
         dist.push(cur);
     }
 
     q = [];
-    for (var row = 0; row < snakesNumRows; row++) {
-        for (var col = 0; col < snakesNumCols; col++) {
-            if (snakesCells[row][col] == '@') {
+    for (var row = 0; row < hypersnakesNumRows; row++) {
+        for (var col = 0; col < hypersnakesNumCols; col++) {
+            if (hypersnakesCells[row][col] == '@') {
                 q.push([row, col]);
                 dist[row][col] = 0;
             }
@@ -63,9 +63,9 @@ function snakesAiLogic() {
     for (var i = 0; i < q.length; i++) {
         var curRow = q[i][0], curCol = q[i][1];
         for (var d = 0; d < 4; d++) {
-            var nxtRow = curRow + dir[d][0]; if (nxtRow < 0 || nxtRow >= snakesNumRows) continue;
-            var nxtCol = curCol + dir[d][1]; if (nxtCol < 0 || nxtCol >= snakesNumCols) continue;
-            if (snakesCells[nxtRow][nxtCol] == '.' && dist[curRow][curCol] + 1 < dist[nxtRow][nxtCol]) {
+            var nxtRow = curRow + dir[d][0]; if (nxtRow < 0 || nxtRow >= hypersnakesNumRows) continue;
+            var nxtCol = curCol + dir[d][1]; if (nxtCol < 0 || nxtCol >= hypersnakesNumCols) continue;
+            if (hypersnakesCells[nxtRow][nxtCol] == '.' && dist[curRow][curCol] + 1 < dist[nxtRow][nxtCol]) {
                 dist[nxtRow][nxtCol] = dist[curRow][curCol] + 1;
                 q.push([nxtRow, nxtCol]);
             }
@@ -74,18 +74,18 @@ function snakesAiLogic() {
 
     // Find the best possible move
     var headRow = -1, headCol = -1;
-    for (var row = 0; row < snakesNumRows; row++) {
-        for (var col = 0; col < snakesNumCols; col++) {
-            if (snakesCells[row][col] == 'a')
+    for (var row = 0; row < hypersnakesNumRows; row++) {
+        for (var col = 0; col < hypersnakesNumCols; col++) {
+            if (hypersnakesCells[row][col] == 'a')
                 headRow = row, headCol = col;
         }
     }
     
     var bestDir = -1, bestDist = INF;
     for (var d = 0; d < 4; d++) {
-        var row = headRow + dir[d][0]; if (row < 0 || row >= snakesNumRows) continue;
-        var col = headCol + dir[d][1]; if (col < 0 || col >= snakesNumCols) continue;
-        if (snakesCells[row][col] != '.' && snakesCells[row][col] != '@')
+        var row = headRow + dir[d][0]; if (row < 0 || row >= hypersnakesNumRows) continue;
+        var col = headCol + dir[d][1]; if (col < 0 || col >= hypersnakesNumCols) continue;
+        if (hypersnakesCells[row][col] != '.' && hypersnakesCells[row][col] != '@')
             continue;
         if (bestDist > dist[row][col]) {
             bestDist = dist[row][col];
@@ -94,58 +94,55 @@ function snakesAiLogic() {
     }
 
     // Save the user's direction
-    var userSnakeDir = snakesSnakeDir;
+    var userSnakeDir = hypersnakesSnakeDir;
 
-    if (bestDir == 0) snakesSnakeDir = SNAKES_ARROW_UP;
-    else if (bestDir == 1) snakesSnakeDir = SNAKES_ARROW_RIGHT;
-    else if (bestDir == 2) snakesSnakeDir = SNAKES_ARROW_DOWN;
-    else snakesSnakeDir = SNAKES_ARROW_LEFT;
-    var message = updateSnakesGame();
+    if (bestDir == 0) hypersnakesSnakeDir = HYPERSNAKES_ARROW_UP;
+    else if (bestDir == 1) hypersnakesSnakeDir = HYPERSNAKES_ARROW_RIGHT;
+    else if (bestDir == 2) hypersnakesSnakeDir = HYPERSNAKES_ARROW_DOWN;
+    else hypersnakesSnakeDir = HYPERSNAKES_ARROW_LEFT;
+    var message = updateHypersnakesGame();
 
     // Revert moving direction to the one the user has selected
-    snakesSnakeDir = userSnakeDir;
+    hypersnakesSnakeDir = userSnakeDir;
 
     return message;
 }
 
-function addSnakesApple() {
-    var appleRow = Math.floor(Math.random() * snakesNumRows);
-    var appleCol = Math.floor(Math.random() * snakesNumCols);
+function addHypersnakesApple() {
+    var appleRow = Math.floor(Math.random() * hypersnakesNumRows);
+    var appleCol = Math.floor(Math.random() * hypersnakesNumCols);
 
-    while (snakesCells[appleRow][appleCol] != '.') {
-        appleRow = Math.floor(Math.random() * snakesNumRows);
-        appleCol = Math.floor(Math.random() * snakesNumCols);
+    while (hypersnakesCells[appleRow][appleCol] != '.') {
+        appleRow = Math.floor(Math.random() * hypersnakesNumRows);
+        appleCol = Math.floor(Math.random() * hypersnakesNumCols);
     }
-    snakesCells[appleRow][appleCol] = '@';
+    hypersnakesCells[appleRow][appleCol] = '@';
 }
 
-function endSnakesGame(message) {
-    // Wait a little so the board is updated
-    if (snakesDemo) {
-        showMessage('INFO', message);
+function endHypersnakesGame(message) {
+    clearTimeout(hypersnakesGameLoop);
+    document.removeEventListener('keydown', identifyHypersnakesArrowEvent, false);
+    showMessage('INFO', message);
+    if (hypersnakesDemo) {
         window.setTimeout(function() {location.reload();}, 4000);
-    } else {
-        window.setTimeout(function() {alert(message);}, 20);
     }
-    clearTimeout(snakesGameLoop);
-    document.removeEventListener('keydown', identifySnakeArrowEvent, false);
 }
 
-function changeSnakesChar(ch, add) {
+function changeHypersnakesChar(ch, add) {
     return String.fromCharCode(ch.charCodeAt(0) + add)
 }
 
-function updateSnakesGame() {
-    var headChar = snakesAiTurn ? 'a' : 'A';
-    var tailChar = snakesAiTurn ? 'z' : 'Z';
+function updateHypersnakesGame() {
+    var headChar = hypersnakesAiTurn ? 'a' : 'A';
+    var tailChar = hypersnakesAiTurn ? 'z' : 'Z';
 
     var snake = {};
     var currentLength = 0;
-    for (row = 0; row < snakesNumRows; row++) {
-        for (col = 0; col < snakesNumCols; col++) {
-            if (snakesCells[row][col] >= headChar && snakesCells[row][col] <= tailChar) {
+    for (row = 0; row < hypersnakesNumRows; row++) {
+        for (col = 0; col < hypersnakesNumCols; col++) {
+            if (hypersnakesCells[row][col] >= headChar && hypersnakesCells[row][col] <= tailChar) {
                 currentLength++;
-                snake[snakesCells[row][col]] = [row, col];
+                snake[hypersnakesCells[row][col]] = [row, col];
             }
         }
     }
@@ -154,113 +151,113 @@ function updateSnakesGame() {
 
     var nextRow = snake[headChar][0];
     var nextCol = snake[headChar][1];
-    if (snakesSnakeDir == SNAKES_ARROW_LEFT) nextCol--;
-    else if (snakesSnakeDir == SNAKES_ARROW_UP) nextRow--;
-    else if (snakesSnakeDir == SNAKES_ARROW_RIGHT) nextCol++;
-    else if (snakesSnakeDir == SNAKES_ARROW_DOWN) nextRow++;
+    if (hypersnakesSnakeDir == HYPERSNAKES_ARROW_LEFT) nextCol--;
+    else if (hypersnakesSnakeDir == HYPERSNAKES_ARROW_UP) nextRow--;
+    else if (hypersnakesSnakeDir == HYPERSNAKES_ARROW_RIGHT) nextCol++;
+    else if (hypersnakesSnakeDir == HYPERSNAKES_ARROW_DOWN) nextRow++;
 
-    var currentPlayer = !snakesAiTurn ? snakesPlayerOne : snakesPlayerTwo;
+    var currentPlayer = !hypersnakesAiTurn ? hypersnakesPlayerOne : hypersnakesPlayerTwo;
 
     // Outside the board
-    if (nextRow < 0 || nextRow >= snakesNumRows || nextCol < 0 || nextCol >= snakesNumCols) {
+    if (nextRow < 0 || nextRow >= hypersnakesNumRows || nextCol < 0 || nextCol >= hypersnakesNumCols) {
         return 'Game over! ' + currentPlayer + ' left limits of the board.';
     }
 
     // Part of own snake
-    if (snakesCells[nextRow][nextCol] >= 'A' && snakesCells[nextRow][nextCol] <= 'Z') {
-        return 'Game over! ' + currentPlayer + ' attempted eating part of his/her own snake.';
+    if (hypersnakesCells[nextRow][nextCol] >= 'A' && hypersnakesCells[nextRow][nextCol] <= 'Z') {
+        return 'Game over! ' + currentPlayer + ' attempted eating part of a snake.';
     }
 
     // Part of opponent's snake
-    if (snakesCells[nextRow][nextCol] >= 'a' && snakesCells[nextRow][nextCol] <= 'z') {
-        return 'Game over! ' + currentPlayer + ' attempted eating part of opponent\'s snake.';
+    if (hypersnakesCells[nextRow][nextCol] >= 'a' && hypersnakesCells[nextRow][nextCol] <= 'z') {
+        return 'Game over! ' + currentPlayer + ' attempted eating part of a snake.';
     }
 
     // Eating an apple
-    if (snakesCells[nextRow][nextCol] == '@') {
+    if (hypersnakesCells[nextRow][nextCol] == '@') {
         // Otherwise, update the rest of the body of the snake
         for (var key in snake) {
-            snakesCells[snake[key][0]][snake[key][1]] = changeSnakesChar(snakesCells[snake[key][0]][snake[key][1]], +1);
+            hypersnakesCells[snake[key][0]][snake[key][1]] = changeHypersnakesChar(hypersnakesCells[snake[key][0]][snake[key][1]], +1);
         }
-        snakesCells[nextRow][nextCol] = headChar;
+        hypersnakesCells[nextRow][nextCol] = headChar;
 
         currentLength++;
-        snakesNumApples--;
-        document.getElementById(!snakesAiTurn ? 'p1score' : 'p2score').innerHTML = currentLength;
+        hypersnakesNumApples--;
+        document.getElementById(!hypersnakesAiTurn ? 'p1score' : 'p2score').innerHTML = currentLength;
     }
 
     // Just a regular empty cell
-    if (snakesCells[nextRow][nextCol] == '.') {
+    if (hypersnakesCells[nextRow][nextCol] == '.') {
         for (var key in snake) {
-            snakesCells[snake[key][0]][snake[key][1]] = changeSnakesChar(snakesCells[snake[key][0]][snake[key][1]], +1);
+            hypersnakesCells[snake[key][0]][snake[key][1]] = changeHypersnakesChar(hypersnakesCells[snake[key][0]][snake[key][1]], +1);
         }
-        var lastPos = snake[changeSnakesChar(headChar, currentLength - 1)];
-        snakesCells[lastPos[0]][lastPos[1]] = '.';
-        snakesCells[nextRow][nextCol] = headChar;
+        var lastPos = snake[changeHypersnakesChar(headChar, currentLength - 1)];
+        hypersnakesCells[lastPos[0]][lastPos[1]] = '.';
+        hypersnakesCells[nextRow][nextCol] = headChar;
     }
 
     // Update the DOM
-    updateSnakesBoard();
+    updateHypersnakesBoard();
 
     // If already at desired length
-    if (snakesNumApples == 0) {
+    if (hypersnakesNumApples == 0) {
         if (currentLength >= 14)
-            return 'Player ' + (!snakesAiTurn ? snakesPlayerOne : snakesPlayerTwo) + ' won!';
+            return 'Player ' + (!hypersnakesAiTurn ? hypersnakesPlayerOne : hypersnakesPlayerTwo) + ' won!';
         else
-            return 'Player ' + (!snakesAiTurn ? snakesPlayerTwo : snakesPlayerOne) + ' won!';
+            return 'Player ' + (!hypersnakesAiTurn ? hypersnakesPlayerTwo : hypersnakesPlayerOne) + ' won!';
     }
 
     return '';
 }
 
-function userMove() {
+function hypersnakesUserMove() {
     // If the returned string is non-empty, the game has ended (either with a win, or with a loss)
-    var message = updateSnakesGame();
+    var message = updateHypersnakesGame();
     if (message != '') {
-        endSnakesGame(message);
+        endHypersnakesGame(message);
         return false;
     }
     return true;
 }
 
-function aiMove() {
-    message = snakesAiLogic();
+function hypersnakesAiMove() {
+    message = hypersnakesAiLogic();
     if (message != '') {
         if (message.startsWith('Player'))
-            endSnakesGame(message);
+            endHypersnakesGame(message);
         else if (message == 'You win!')
-            endSnakesGame('You lost. Opponent ate more apples!');
+            endHypersnakesGame('You lost. Opponent ate more apples!');
         else
-            endSnakesGame('You win! Opponent made invalid move.');
+            endHypersnakesGame('You win! Opponent made invalid move.');
         return false;
     }
     return true;
 }
 
-function runSnakesGame() {
+function runHypersnakesGame() {
     // User's move
-    if (!snakesAiTurn) {
-        if (!userMove()) {
+    if (!hypersnakesAiTurn) {
+        if (!hypersnakesUserMove()) {
             return false;
         }
     }
     // AI move
     else {
-        if (!aiMove()) {
+        if (!hypersnakesAiMove()) {
             return false;
         }
     }
     // Continue self-update loop
-    snakesAiTurn = !snakesAiTurn;
-    snakesGameLoop = setTimeout(function() {
-        runSnakesGame();
-    }, SNAKES_MOVE_INTERVAL);
+    hypersnakesAiTurn = !hypersnakesAiTurn;
+    hypersnakesGameLoop = setTimeout(function() {
+        runHypersnakesGame();
+    }, HYPERSNAKES_MOVE_INTERVAL);
 }
 
-function snakesReplayCycle(idx, log) {
-    if (snakesReplayRunning || idx == 0) {
+function hypersnakesReplayCycle(idx, log) {
+    if (hypersnakesReplayRunning || idx == 0) {
         if (idx >= log.length) {
-            endSnakesGame('Reached end of game log.');
+            endHypersnakesGame('Reached end of game log.');
             return;
         } else if (log[idx] == '(') {
             idx++;
@@ -270,37 +267,37 @@ function snakesReplayCycle(idx, log) {
             idx++;
             var appleRow = parseInt(appleCoords.split(',')[0]);
             var appleCol = parseInt(appleCoords.split(',')[1]);
-            snakesCells[appleRow][appleCol] = '@';
-            updateSnakesBoard();
+            hypersnakesCells[appleRow][appleCol] = '@';
+            updateHypersnakesBoard();
         } else {
-            if (log[idx] == 'L') snakesSnakeDir = SNAKES_ARROW_LEFT;
-            else if (log[idx] == 'U') snakesSnakeDir = SNAKES_ARROW_UP;
-            else if (log[idx] == 'R') snakesSnakeDir = SNAKES_ARROW_RIGHT;
-            else if (log[idx] == 'D') snakesSnakeDir = SNAKES_ARROW_DOWN;
+            if (log[idx] == 'L') hypersnakesSnakeDir = HYPERSNAKES_ARROW_LEFT;
+            else if (log[idx] == 'U') hypersnakesSnakeDir = HYPERSNAKES_ARROW_UP;
+            else if (log[idx] == 'R') hypersnakesSnakeDir = HYPERSNAKES_ARROW_RIGHT;
+            else if (log[idx] == 'D') hypersnakesSnakeDir = HYPERSNAKES_ARROW_DOWN;
             else {
                 alert('Error in the game log: found invalid character \'' + log[idx] + '\'!');
                 return;
             }
             idx++;
 
-            var message = updateSnakesGame();
+            var message = updateHypersnakesGame();
             if (message != '') {
-                endSnakesGame(message);
+                endHypersnakesGame(message);
                 if (idx < log.length) {
                     alert('Game log claims there are more moves?');
                 }
                 return;
             }
-            snakesAiTurn = !snakesAiTurn;
+            hypersnakesAiTurn = !hypersnakesAiTurn;
         }
     }
-    window.setTimeout(function() {snakesReplayCycle(idx, log);}, SNAKES_MOVE_INTERVAL);
+    window.setTimeout(function() {hypersnakesReplayCycle(idx, log);}, HYPERSNAKES_MOVE_INTERVAL);
 }
 
-function runSnakesReplay(log) {
-    SNAKES_MOVE_INTERVAL = 80; // Milliseconds
+function runHypersnakesReplay(log) {
+    HYPERSNAKES_MOVE_INTERVAL = 80; // Milliseconds
 
-    snakesNumApples = 25;
+    hypersnakesNumApples = 25;
 
     // Create the board
     var settings = log.split('|')[0].split(',');
@@ -308,79 +305,79 @@ function runSnakesReplay(log) {
     document.getElementById('p1score').innerHTML = 1;
     document.getElementById('p2score').innerHTML = 1;
 
-    snakesCells = [];
-    for (var row = 0; row < snakesNumRows; row++) {
-        snakesCells.push([]);
-        for (var col = 0; col < snakesNumCols; col++) {
-            snakesCells[snakesCells.length - 1].push('.');
+    hypersnakesCells = [];
+    for (var row = 0; row < hypersnakesNumRows; row++) {
+        hypersnakesCells.push([]);
+        for (var col = 0; col < hypersnakesNumCols; col++) {
+            hypersnakesCells[hypersnakesCells.length - 1].push('.');
         }
     }
 
     var playerOneRow = parseInt(settings[0]);
     var playerOneCol = parseInt(settings[1]);
-    snakesCells[playerOneRow][playerOneCol] = 'A';
+    hypersnakesCells[playerOneRow][playerOneCol] = 'A';
 
     var playerTwoRow = parseInt(settings[2]);
     var playerTwoCol = parseInt(settings[3]);
-    snakesCells[playerTwoRow][playerTwoCol] = 'a';
+    hypersnakesCells[playerTwoRow][playerTwoCol] = 'a';
 
-    for (var app = 0; app < snakesNumApples; app++) {
+    for (var app = 0; app < hypersnakesNumApples; app++) {
         var appleRow = parseInt(settings[app * 2 + 4]);
         var appleCol = parseInt(settings[app * 2 + 5]);
-        snakesCells[appleRow][appleCol] = '@';
+        hypersnakesCells[appleRow][appleCol] = '@';
     }
 
-    updateSnakesBoard();
+    updateHypersnakesBoard();
 
-    if (snakesDemo) {
-        setTimeout(function() {snakesReplayRunning = true;}, 1000);
+    if (hypersnakesDemo) {
+        setTimeout(function() {hypersnakesReplayRunning = true;}, 1000);
     }
 
     log = log.split('|')[1];
     // Start the update process
-    snakesReplayCycle(0, log);
+    hypersnakesReplayCycle(0, log);
 }
 
-function updateSnakesBoard() {
+function updateHypersnakesBoard() {
     // Update the DOM
     var boardWrapper = document.getElementById('snakesBoard');
     boardWrapper.removeChild(boardWrapper.firstChild);
-    boardWrapper.appendChild(getSnakesBoard());
+    boardWrapper.appendChild(getHypersnakesBoard());
 }
 
-function resetSnakesGame() {
-    snakesCells = [];
-    snakesNumRows = 20;
-    snakesNumCols = 20;
-    snakesNumApples = 25;
-    snakesSnakeDir = null;
+function resetHypersnakesGame() {
+    hypersnakesCells = [];
+    hypersnakesNumRows = 20;
+    hypersnakesNumCols = 20;
+    hypersnakesNumApples = 25;
+    hypersnakesSnakeDir = null;
 
-    snakesAiTurn = false;
-    snakesGameLoop = null;
-    showLetters = true;
-    snakesReplayRunning = false;
+    hypersnakesAiTurn = false;
+    hypersnakesGameLoop = null;
+    hypersnakesShowLetters = true;
+    hypersnakesReplayRunning = false;
 
-    createSnakesGame();
-    updateSnakesBoard();
+    createHypersnakesGame();
+    updateHypersnakesBoard();
 
     document.getElementById('p1score').innerText = '1';
     document.getElementById('p2score').innerText = '1';
     // Add action event listeners
-    document.addEventListener('keydown', identifySnakeArrowEvent, false);
+    document.addEventListener('keydown', identifyHypersnakesArrowEvent, false);
 }
 
-function createSnakesGame() {
-    snakesCells = []
-    for (var row = 0; row < snakesNumRows; row++) {
-        snakesCells.push([]);
-        for (var col = 0; col < snakesNumCols; col++) {
-            snakesCells[snakesCells.length - 1].push('.');
+function createHypersnakesGame() {
+    hypersnakesCells = []
+    for (var row = 0; row < hypersnakesNumRows; row++) {
+        hypersnakesCells.push([]);
+        for (var col = 0; col < hypersnakesNumCols; col++) {
+            hypersnakesCells[hypersnakesCells.length - 1].push('.');
         }
     }
 
     /*
-    snakesNumRows = snakesNumCols = 15;
-    snakesCells = [
+    hypersnakesNumRows = hypersnakesNumCols = 15;
+    hypersnakesCells = [
         ['@', '@', '@', '.', '.', '.', '.', '.', '.', '.', '.', '.', '@', '@', '@'],
         ['@', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '@'],
         ['@', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '@'],
@@ -399,43 +396,43 @@ function createSnakesGame() {
     ];
     */
 
-    var playerOneRow = Math.floor(Math.random() * snakesNumRows);
-    var playerOneCol = Math.floor(Math.random() * snakesNumCols);
-    snakesCells[playerOneRow][playerOneCol] = 'A';
+    var playerOneRow = Math.floor(Math.random() * hypersnakesNumRows);
+    var playerOneCol = Math.floor(Math.random() * hypersnakesNumCols);
+    hypersnakesCells[playerOneRow][playerOneCol] = 'A';
 
-    var playerTwoRow = Math.floor(Math.random() * snakesNumRows);
-    var playerTwoCol = Math.floor(Math.random() * snakesNumCols);
+    var playerTwoRow = Math.floor(Math.random() * hypersnakesNumRows);
+    var playerTwoCol = Math.floor(Math.random() * hypersnakesNumCols);
     while (playerOneRow == playerTwoRow && playerOneCol == playerTwoCol) {
-        playerTwoRow = Math.floor(Math.random() * snakesNumRows);
-        playerTwoCol = Math.floor(Math.random() * snakesNumCols);
+        playerTwoRow = Math.floor(Math.random() * hypersnakesNumRows);
+        playerTwoCol = Math.floor(Math.random() * hypersnakesNumCols);
     }
-    snakesCells[playerTwoRow][playerTwoCol] = 'a';
+    hypersnakesCells[playerTwoRow][playerTwoCol] = 'a';
 
-    snakesNumApples = 25;
-    for (var app = 0; app < snakesNumApples; app++)
-        addSnakesApple();
+    hypersnakesNumApples = 25;
+    for (var app = 0; app < hypersnakesNumApples; app++)
+        addHypersnakesApple();
 }
 
-function getSnakesBoard() {
+function getHypersnakesBoard() {
     var board = document.createElement('table');
     board.className = 'snakes-board';
     var tbody = document.createElement('tbody');
-    for (var row = 0; row < snakesCells.length; row++) {
+    for (var row = 0; row < hypersnakesCells.length; row++) {
         var tr = document.createElement('tr');
-        for (var col = 0; col < snakesCells[row].length; col++) {
+        for (var col = 0; col < hypersnakesCells[row].length; col++) {
             var td = document.createElement('td');
-            if (snakesCells[row][col] == '@') {
+            if (hypersnakesCells[row][col] == '@') {
                 td.className = 'apple';
-            } else if (snakesCells[row][col] >= 'A' && snakesCells[row][col] <= 'Z') {
-                var segmentId = snakesCells[row][col].charCodeAt(0) - 'A'.charCodeAt(0);
+            } else if (hypersnakesCells[row][col] >= 'A' && hypersnakesCells[row][col] <= 'Z') {
+                var segmentId = hypersnakesCells[row][col].charCodeAt(0) - 'A'.charCodeAt(0);
                 td.className = 'player-one';
                 td.style = "opacity: " + (100 - segmentId * 3) / 100.0 + ";";
-                td.innerText = showLetters ? snakesCells[row][col] : '';
-            } else if (snakesCells[row][col] >= 'a' && snakesCells[row][col] <= 'z') {
-                var segmentId = snakesCells[row][col].charCodeAt(0) - 'a'.charCodeAt(0);
+                td.innerText = hypersnakesShowLetters ? hypersnakesCells[row][col] : '';
+            } else if (hypersnakesCells[row][col] >= 'a' && hypersnakesCells[row][col] <= 'z') {
+                var segmentId = hypersnakesCells[row][col].charCodeAt(0) - 'a'.charCodeAt(0);
                 td.className = 'player-two';
                 td.style = "opacity: " + (100 - segmentId * 3) / 100.0 + ";";
-                td.innerText = showLetters ? snakesCells[row][col] : '';
+                td.innerText = hypersnakesShowLetters ? hypersnakesCells[row][col] : '';
             }
             tr.appendChild(td);
         }
@@ -445,9 +442,9 @@ function getSnakesBoard() {
     return board;
 }
 
-function getSnakesContent(showReset) {
+function getHypersnakesContent(showReset) {
     // Create the board and initial cells
-    createSnakesGame();
+    createHypersnakesGame();
 
     // Now create the DOM content
     var content = document.createElement('div');
@@ -462,7 +459,7 @@ function getSnakesContent(showReset) {
     // First player (nickname and score)
     var player1 = document.createElement('div');
     player1.style = 'display: inline-block; width: 20%; vertical-align: middle; font-size: 1.5rem; font-weight: bold;';
-    player1.innerHTML += '<div class="blue">' + snakesPlayerOne + '</div>';
+    player1.innerHTML += '<div class="blue">' + hypersnakesPlayerOne + '</div>';
     player1.innerHTML += '<div style="font-size: smaller;" id="p1score">1</div>';
     content.appendChild(player1);
 
@@ -470,13 +467,13 @@ function getSnakesContent(showReset) {
     var board = document.createElement('div');
     board.style = 'display: inline-block; width: 60%; vertical-align: middle;';
     board.id = 'snakesBoard';
-    board.appendChild(getSnakesBoard());
+    board.appendChild(getHypersnakesBoard());
     content.appendChild(board);
 
     // Second player (nickname and score)
     var player2 = document.createElement('div');
     player2.style = 'display: inline-block; width: 20%; vertical-align: middle; font-size: 1.5rem; font-weight: bold;';
-    player2.innerHTML += '<div class="red">' + snakesPlayerTwo + '</div>';
+    player2.innerHTML += '<div class="red">' + hypersnakesPlayerTwo + '</div>';
     player2.innerHTML += '<div style="font-size: smaller;" id="p2score">1</div>';
     content.appendChild(player2);
 
@@ -492,26 +489,26 @@ function getSnakesContent(showReset) {
         reset.className = 'button button-color-blue';
         reset.type = 'button';
         reset.innerText = 'Нова игра';
-        reset.setAttribute('onclick', 'resetSnakesGame();');
+        reset.setAttribute('onclick', 'resetHypersnakesGame();');
         content.appendChild(reset);
     }
 
     return content;
 }
 
-function showHyperSnakesReplay(playerOne, playerTwo, log, demo=false) {
-    snakesDemo = demo;
-    snakesPlayerOne = playerOne;
-    snakesPlayerTwo = playerTwo;
+function showHypersnakesReplay(playerOne, playerTwo, log, demo=false) {
+    hypersnakesDemo = demo;
+    hypersnakesPlayerOne = playerOne;
+    hypersnakesPlayerTwo = playerTwo;
 
     // Create and show the initial board
-    var content = getSnakesContent(false);
+    var content = getHypersnakesContent(false);
 
     var instructions = document.createElement('div');
     instructions.id = 'instructions';
     instructions.style.textAlign = 'center';
     instructions.style.fontStyle = 'italic';
-    if (!snakesDemo) {
+    if (!hypersnakesDemo) {
         instructions.innerText = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
     }
     content.appendChild(instructions);
@@ -521,24 +518,24 @@ function showHyperSnakesReplay(playerOne, playerTwo, log, demo=false) {
     showActionForm(content.outerHTML, gameUrl);
 
     // Add action event listeners
-    document.addEventListener('keydown', identifySnakeReplayEvent, false);
+    document.addEventListener('keydown', identifyHypersnakesReplayEvent, false);
     document.getElementById('snakesBoard').addEventListener('mousedown', function() {
-        snakesReplayRunning = !snakesReplayRunning;
+        hypersnakesReplayRunning = !hypersnakesReplayRunning;
     }, true);
 
     // Run the actual replay
-    runSnakesReplay(log);
+    runHypersnakesReplay(log);
 }
 
-function showHyperSnakesVisualizer(username) {
-    snakesPlayerOne = username;
-    snakesPlayerTwo = 'AI';
+function showHypersnakesVisualizer(username) {
+    hypersnakesPlayerOne = username;
+    hypersnakesPlayerTwo = 'AI';
 
     // Create and show the initial board
-    var content = getSnakesContent(true);
+    var content = getHypersnakesContent(true);
 
     // Add action event listeners
-    document.addEventListener('keydown', identifySnakeArrowEvent, false);
+    document.addEventListener('keydown', identifyHypersnakesArrowEvent, false);
 
     // Make pressing escape return back to the game
     var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/'));

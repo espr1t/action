@@ -204,6 +204,7 @@ class GamesPage extends Page {
                                 title="Ще можете да предадете отново след ' . $remainFull . ' секунди.">
                 ';
             }
+
             // See previous submissions link
             $seeSubmissionsLink = '
                     <br>
@@ -556,7 +557,7 @@ class GamesPage extends Page {
         $playerTwo = $playerTwo != null ? $playerTwo->username : sprintf('Author%d', -$match->userTwo);
 
         $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' :
-                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHyperSnakesReplay';
+                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHypersnakesReplay';
         $content = '
             <script>
                 ' . $functionName . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->log . '");
@@ -626,10 +627,12 @@ class GamesPage extends Page {
 
         $numPlayers = count($playerScore);
         $unofficial = array();
-        if ($problem->name == 'HyperSnakes') {
-            $unofficial = array('espr1t', 'IvayloS', 'stuno');
+        if ($problem->name == 'Snakes') {
+            $unofficial = array('espr1t');
         } else if ($problem->name == 'Ultimate TTT') {
             $unofficial = array('espr1t');
+        } else if ($problem->name == 'HyperSnakes') {
+            $unofficial = array('espr1t', 'IvayloS', 'stuno', 'ov32m1nd', 'peterlevi');
         }
 
         $ranking = '';
@@ -707,7 +710,7 @@ class GamesPage extends Page {
         $playerOne = User::get($matches[$idx]['userOne']);
         $playerTwo = User::get($matches[$idx]['userTwo']);
         $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' :
-                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHyperSnakesReplay';
+                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHypersnakesReplay';
         $replay = $functionName . '("'. $playerOne->username . '", "' . $playerTwo->username .'", "' . $matches[$idx]['log'] . '", true);';
 
         $demoActions = '
@@ -728,7 +731,7 @@ class GamesPage extends Page {
 
         if (isset($_GET['game'])) {
             $problem = $this->getGameByName($_GET['game']);
-            if ($problem == null || $_GET['game'] == 'snakes') {
+            if ($problem == null) {
                 return $this->getMainPage();
             }
 
@@ -737,7 +740,7 @@ class GamesPage extends Page {
                 if ($_GET['game'] == 'snakes') {
                     $content .= '<script>showSnakesVisualizer("'. $this->user->username . '");</script>';
                 } else if ($_GET['game'] == 'hypersnakes') {
-                    $content .= '<script>showHyperSnakesVisualizer("'. $this->user->username . '");</script>';
+                    $content .= '<script>showHypersnakesVisualizer("'. $this->user->username . '");</script>';
                 } else if ($_GET['game'] == 'ultimate-ttt') {
                     $content .= '<script>showUtttVisualizer("'. $this->user->username . '");</script>';
                 }
@@ -757,7 +760,7 @@ class GamesPage extends Page {
                         $content .= $this->getReplay($problem, $_GET['submitId'], $_GET['matchId']);
                     }
                 }
-            } else if (isset($_GET['demo']) && $this->user->username == 'ThinkCreative') {
+            } else if (isset($_GET['demo'])) {
                 $content = $this->getDemo($problem);
             }
             return $content;

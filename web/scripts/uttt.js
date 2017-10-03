@@ -4,6 +4,7 @@ utttBoard = [];
 utttNextPlayer = 'x';
 utttNextRow = -1, utttNextCol = -1;
 
+utttDemo = false;
 utttAiTurn = false;
 utttPlayerOne = '';
 utttPlayerTwo = '';
@@ -18,10 +19,11 @@ function utttIdentifyReplayEvent(event) {
 }
 
 function utttEndGame(message) {
-    // Wait a little so the board is updated
-    window.setTimeout(function() {alert(message);}, 20);
+    showMessage('INFO', message);
+    if (utttDemo) {
+        window.setTimeout(function() {location.reload();}, 4000);
+    }
 }
-
 
 var utttLines = [
     [ [0, 0], [0, 1], [0, 2] ],
@@ -273,6 +275,10 @@ function utttReplayCycle(idx, log) {
 }
 
 function utttRunReplay(log) {
+    if (utttDemo) {
+        setTimeout(function() {utttReplayRunning = true;}, 1000);
+    }
+
     // Start the update process
     utttReplayCycle(0, log);
 }
@@ -427,7 +433,8 @@ function utttGetContent() {
     return content;
 }
 
-function showUtttReplay(playerOne, playerTwo, log) {
+function showUtttReplay(playerOne, playerTwo, log, demo=false) {
+    utttDemo = demo;
     utttPlayerOne = playerOne;
     utttPlayerTwo = playerTwo;
     utttAiTurn = true;
@@ -438,7 +445,9 @@ function showUtttReplay(playerOne, playerTwo, log) {
     var instructions = document.createElement('div');
     instructions.style.textAlign = 'center';
     instructions.style.fontStyle = 'italic';
-    instructions.innerHTML = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
+    if (!utttDemo) {
+        instructions.innerText = 'Натиснете шпация или кликнете на дъската за да пуснете или паузирате играта.';
+    }
     content.appendChild(instructions);
 
     // Make pressing escape return back to the game
