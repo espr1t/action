@@ -557,7 +557,7 @@ class GamesPage extends Page {
         $playerTwo = $playerTwo != null ? $playerTwo->username : sprintf('Author%d', -$match->userTwo);
 
         $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' :
-                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHypersnakesReplay';
+                        ($_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHypersnakesReplay');
         $content = '
             <script>
                 ' . $functionName . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->log . '");
