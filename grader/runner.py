@@ -359,6 +359,10 @@ class Runner:
             thread_limit = config.THREAD_LIMIT_JAVA
             time_offset = config.TIME_OFFSET_JAVA
             memory_offset = config.MEMORY_OFFSET_JAVA
+        if language == "Python":
+            thread_limit = config.THREAD_LIMIT_PYTHON
+            time_offset = config.TIME_OFFSET_PYTHON
+            memory_offset = config.MEMORY_OFFSET_PYTHON
 
         # TODO: Figure out if this is still needed
         execution_time_limit = max(1.0, self.evaluator.time_limit * 2)

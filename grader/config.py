@@ -5,7 +5,7 @@
 WORKER_COUNT = 3  # Threads
 
 # Evaluation
-UPDATE_INTERVAL = 1.0  # Seconds
+UPDATE_INTERVAL = 0.5  # Seconds
 FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 
 # Execution
@@ -16,14 +16,17 @@ MAX_GAME_LENGTH = 300.0  # Seconds = 5 minutes
 # Start time taken by non-user actions
 TIME_OFFSET_CPP = 0.0  # Seconds
 TIME_OFFSET_JAVA = 0.1  # Seconds
+TIME_OFFSET_PYTHON = 0.1  # Seconds
 
 # Memory used by non-user code
 MEMORY_OFFSET_CPP = 1800000  # Bytes
 MEMORY_OFFSET_JAVA = 26000000  # Bytes
+MEMORY_OFFSET_PYTHON = 19000000  # Bytes
 
 # Maximum number of threads
 THREAD_LIMIT_CPP = 2  # Threads
 THREAD_LIMIT_JAVA = 99  # Threads
+THREAD_LIMIT_PYTHON = 2  # Threads
 
 # Compilation
 MAX_COMPILATION_TIME = 3.0  # Seconds
