@@ -35,7 +35,6 @@ function ajaxCall(url, data, callback) {
  */
 function redirect(url) {
     window.location = url;
-    exit(0);
 }
 
 /*
@@ -167,19 +166,19 @@ function showActionForm(content, redirect, classes = '') {
 }
 
 function hideActionForm(redirectUrl) {
-    // Redirect to another page if requested
     if (redirectUrl && redirectUrl != 'undefined') {
+		// Redirect to another page if requested
         redirect(redirectUrl);
+    } else {
+        // Otherwise just hide the form box using a fade-out animation
+        document.onkeydown = keyDownEventStack.pop();
+        var form = document.getElementsByClassName('action-form')[0];
+        form.className = 'action-form fade-out';
+        setTimeout(function() {
+            document.body.removeChild(form);
+        }, 300);
+        hideOverlay();
     }
-
-    // Otherwise just hide the form box using a fade-out animation
-    document.onkeydown = keyDownEventStack.pop();
-    var form = document.getElementsByClassName('action-form')[0];
-    form.className = 'action-form fade-out';
-    setTimeout(function() {
-        document.body.removeChild(form);
-    }, 300);
-    hideOverlay();
 }
 
 function submitActionForm(response, hideOnSuccess = true) {
