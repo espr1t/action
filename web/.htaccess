@@ -34,6 +34,7 @@ RewriteRule    ^problems/(\d+)/stats$                           /code/main.php?p
 RewriteRule    ^problems/(\d+)/users$                           /code/main.php?page=problems&problemId=$1&users=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits$                         /code/main.php?page=problems&problemId=$1&submits=true                              [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)$                   /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2                  [NC,L,QSA]
+RewriteRule    ^problems/(\d+)/submits/(\d+)/updates$           /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2&updates=true     [NC,L,QSA]
 
 # Training pages
 RewriteRule    ^training/implementation$						/code/main.php?page=training&section=IMPL											[NC,L,QSA]
@@ -43,7 +44,7 @@ RewriteRule    ^training/bruteforce$							/code/main.php?page=training&section=
 RewriteRule    ^training/sorting$								/code/main.php?page=training&section=SORT											[NC,L,QSA]
 RewriteRule    ^training/greedy$								/code/main.php?page=training&section=GRDY											[NC,L,QSA]
 RewriteRule    ^training/math$									/code/main.php?page=training&section=MATH											[NC,L,QSA]
-RewriteRule    ^training/simple-data-structures$				/code/main.php?page=training&section=DS01											[NC,L,QSA]
+RewriteRule    ^training/simple-data-structures$				/code/main.php?page=training&section=SIDS											[NC,L,QSA]
 RewriteRule    ^training/simple-graphs$							/code/main.php?page=training&section=GRPH											[NC,L,QSA]
 RewriteRule    ^training/binary-search$							/code/main.php?page=training&section=BSTS											[NC,L,QSA]
 RewriteRule    ^training/dynamic-programming$					/code/main.php?page=training&section=DPDP											[NC,L,QSA]

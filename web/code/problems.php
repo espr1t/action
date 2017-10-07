@@ -5,17 +5,18 @@ require_once('entities/submit.php');
 require_once('config.php');
 require_once('common.php');
 require_once('page.php');
+require_once('events.php');
 
 class ProblemsPage extends Page {
     private $problem;
 
     public function getTitle() {
-        if ($this->problem == null) {
+        if ($this->problemName == null) {
             return 'O(N)::Problems';
         }
-        return 'O(N)::' . $this->problem->name;
+        return 'O(N)::' . $this->problemName;
     }
-    
+
     public function getExtraScripts() {
         return array('/scripts/language_detector.js');
     }
@@ -306,45 +307,9 @@ class ProblemsPage extends Page {
         ';
     }
 
-    private function getSubmitInfoBox($problem, $submitId) {
-        $returnUrl = '/problems/' . $problem->id . '/submits';
-        if (isset($_SESSION['queueShortcut']))
-            $returnUrl = '/queue';
-
-        if (!is_numeric($submitId)) {
-            redirect($returnUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
-        }
-
-        $submit = Submit::get($submitId);
-        if ($submit == null) {
-            redirect($returnUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
-        }
-
-        if ($this->user->access < $GLOBALS['ACCESS_SEE_SUBMITS']) {
-            if ($submit->userId != $this->user->id) {
-                redirect($returnUrl, 'ERROR', 'Нямате достъп до това решение!');
-            }
-
-            if ($submit->problemId != $problem->id) {
-                redirect($returnUrl, 'ERROR', 'Решението не е по поисканата задача!');
-            }
-        }
-
-        $status = $submit->calcStatus();
-        $color = 'black';
-        switch ($status) {
-            case $GLOBALS['STATUS_ACCEPTED']:
-                $color = 'green';
-                break;
-            case $GLOBALS['STATUS_INTERNAL_ERROR']:
-                $color = 'black';
-                break;
-            default:
-                $color = strlen($status) == 1 ? 'gray' : 'red';
-        }
-        $problemStatus = $GLOBALS['STATUS_DISPLAY_NAME'][$status];
-
-        $summaryTable = '
+    private function getStatusTable($submit, $status) {
+        $color = getStatusColor($status);
+        return '
             <table class="default ' . $color . '">
                 <tr>
                     <th>Статус на задачата</th>
@@ -353,20 +318,28 @@ class ProblemsPage extends Page {
                     <th style="width: 100px;">Точки</th>
                 </tr>
                 <tr>
-                    <td>' . $problemStatus . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$status] . '</td>
                     <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
                     <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
                     <td>' . $submit->calcScore() . '</td>
                 </tr>
             </table>
         ';
+    }
 
+    private function getDetailsTable($submit, $status) {
+        // If compilation error, pretty-print it and return instead of the per-test circles
+        if ($status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
+            return prettyPrintCompilationErrors($submit);
+        }
+
+        // Otherwise get information for each test and print it as a colored circle with
+        // additional roll-over information
         $scores = $submit->calcScores();
-
-        $detailedTable = '<div class="centered">';
+        $detailsTable = '<div class="centered">';
         for ($i = 1; $i < count($scores); $i = $i + 1) {
             if ($i > 1 && $i % 10 == 1) {
-                $detailedTable .= '<br>';
+                $detailsTable .= '<br>';
             }
             $result = $submit->results[$i];
             $title = 'Тест ' . $i . '\n' .
@@ -405,52 +378,69 @@ class ProblemsPage extends Page {
                 $class .= 'dull-black';
                 $icon = '<i class="fa fa-warning"></i>';
             }
-            $detailedTable .= '<div class="' . $class . ' test-status-tooltip" data-title="' . $title . '">' . $icon . '</div>';
+            $detailsTable .= '<div class="' . $class . ' test-status-tooltip" data-title="' . $title . '">' . $icon . '</div>';
         }
-        $detailedTable .= '</div>';
+        $detailsTable .= '</div>';
 
-        // If compilation error, pretty-print it so the user has an idea what is happening
-        $message = '';
-        if ($problemStatus == $GLOBALS['STATUS_DISPLAY_NAME'][$GLOBALS['STATUS_COMPILATION_ERROR']]) {
-            $message = prettyPrintCompilationErrors($submit);
-        }
+        return $detailsTable;
+    }
 
-        // Don't display the per-test circles if compilation error, display the error instead
-        if ($message != '') {
-            $detailedTable = $message;
-        }
+    private function getSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
+        $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
+        $status = $submit->calcStatus();
+
+        $statusTable = $this->getStatusTable($submit, $status);
+        $detailsTable = $this->getDetailsTable($submit, $status);
 
         $author = '';
         if ($this->user->id != $submit->userId) {
             $author = '(' . $submit->userName . ')';
         }
 
-        $source = '
-            <div class="centered" id="sourceLink">
-                <a onclick="displaySource();">Виж кода</a>
-            </div>
-            <div style="display: none;" id="sourceField">
-                <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
-                <div class="show-source-box">
-                    <code id="source">' . htmlspecialchars(addslashes($submit->source)) . '</code>
-                </div>
-            </div>
-        ';
+        $source = getSourceSection($submit);
 
-        $content = '
+        return '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
-            <div class="right smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
+            <div class="right" style="font-size: smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
             <br>
-            ' . $summaryTable . '
+            ' . $statusTable . '
             <br>
-            ' . $detailedTable . '
+            ' . $detailsTable . '
             <br>
             ' . $source . '
         ';
+    }
+
+    private function getSubmitUpdates($problem, $submitId) {
+        $lastContent = '';
+        while (true) {
+            $content = $this->getSubmitInfoBoxContent($problem, $submitId, '');
+            if ($content != $lastContent) {
+                sendServerEventData('content', $content);
+                $lastContent = $content;
+            }
+            // If nothing to wait for, stop the updates
+            if (strpos($content, 'fa-circle-o') === false && strpos($content, 'fa-spinner') === false) {
+                terminateServerEventStream();
+                return;
+            }
+            // Sleep for 0.5 seconds until next check for changes
+            sleep(0.5);
+        }
+    }
+
+    private function getSubmitInfoBox($problem, $submitId) {
+        $redirectUrl = '/problems/' . $problem->id . '/submits';
+        if (isset($_SESSION['queueShortcut']))
+            $redirectUrl = '/queue';
+        $updatesUrl = '/problems/' . $problem->id . '/submits/' . $submitId . '/updates';
+
+        $content = $this->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
 
         return '
             <script>
-                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
+                showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
+                subscribeForUpdates(\'' . $updatesUrl . '\');
             </script>
         ';
     }
@@ -505,35 +495,40 @@ class ProblemsPage extends Page {
             unset($_SESSION['queueShortcut']);
         }
 
-        $this->problem = null;
+        $this->problemName = null;
         if (isset($_GET['problemId'])) {
-            $this->problem = Problem::get($_GET['problemId']);
-            if ($this->problem == null) {
+            $problem = Problem::get($_GET['problemId']);
+            $this->problemName = $problem->name;
+            if ($problem == null) {
                 redirect('/problems', 'ERROR', 'Няма задача с такъв идентификатор.');
             }
-            if (!canSeeProblem($this->user, $this->problem->visible, $this->problem->id)) {
+            if (!canSeeProblem($this->user, $problem->visible, $problem->id)) {
                 redirect('/problems', 'ERROR', 'Нямате права да видите тази задача.');
             }
-            if ($this->problem->type == 'game') {
+            if ($problem->type == 'game') {
                 redirect('/games', 'ERROR', 'Поисканата задача всъщност е игра. Моля съобщете на администратор за проблема.');
             }
 
-            $content = $this->getStatement($this->problem);
+            $content = $this->getStatement($problem);
             if (isset($_GET['submits'])) {
                 if ($this->user->id == -1) {
-                    redirect('/problems/' . $this->problem->id, 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
+                    redirect('/problems/' . $problem->id, 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
                 }
                 if (!isset($_GET['submitId'])) {
-                    $content .= $this->getAllSubmitsBox($this->problem);
+                    $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    if ($queueShortcut)
-                        $_SESSION['queueShortcut'] = true;
-                    $content .= $this->getSubmitInfoBox($this->problem, $_GET['submitId']);
+                    if (isset($_GET['updates'])) {
+                        $this->getSubmitUpdates($problem, $_GET['submitId']);
+                    } else {
+                        if ($queueShortcut)
+                            $_SESSION['queueShortcut'] = true;
+                        $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
+                    }
                 }
             } else if (isset($_GET['stats'])) {
-                $content .= $this->getStatsBox($this->problem);
+                $content .= $this->getStatsBox($problem);
             } else if (isset($_GET['users'])) {
-                $content .= $this->getUsersBox($this->problem);
+                $content .= $this->getUsersBox($problem);
             }
             return $content;
         }

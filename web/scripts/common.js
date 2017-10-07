@@ -150,7 +150,7 @@ function showActionForm(content, redirect, classes = '') {
     var form = document.createElement('div');
     form.innerHTML = '' +
         '<div class="action-form-close" onclick="hideActionForm(\'' + redirect + '\');"><i class="fa fa-close fa-fw"></i></div>' +
-        content
+        '<div id="action-form-content">' + content + '</div>'
     ;
     document.body.appendChild(form);
     form.className = 'action-form fade-in' + (classes != '' ? ' ' + classes : '');
@@ -166,19 +166,18 @@ function showActionForm(content, redirect, classes = '') {
 }
 
 function hideActionForm(redirectUrl) {
+    // Redirect to another page if requested
     if (redirectUrl && redirectUrl != 'undefined') {
-		// Redirect to another page if requested
         redirect(redirectUrl);
-    } else {
-        // Otherwise just hide the form box using a fade-out animation
-        document.onkeydown = keyDownEventStack.pop();
-        var form = document.getElementsByClassName('action-form')[0];
-        form.className = 'action-form fade-out';
-        setTimeout(function() {
-            document.body.removeChild(form);
-        }, 300);
-        hideOverlay();
     }
+    // Otherwise just hide the form box using a fade-out animation
+    document.onkeydown = keyDownEventStack.pop();
+    var form = document.getElementsByClassName('action-form')[0];
+    form.className = 'action-form fade-out';
+    setTimeout(function() {
+        document.body.removeChild(form);
+    }, 300);
+    hideOverlay();
 }
 
 function submitActionForm(response, hideOnSuccess = true) {
@@ -451,4 +450,27 @@ function circularProgress(parentId, done, total) {
     container.appendChild(finished);
     container.appendChild(inner);
     document.getElementById(parentId).appendChild(container);
+}
+
+/*
+ * Subscribe for SSE events
+ * https://www.html5rocks.com/en/tutorials/eventsource/basics/
+ */
+function subscribeForUpdates(url) {
+    if (!!window.EventSource) {
+        var eventSource = new EventSource(url);
+        eventSource.addEventListener('message', function(e) {
+            console.log('Received new data at ' + ((new Date()).getTime()) + '.');
+            var data = JSON.parse(e.data);
+            if (data.hasOwnProperty('content')) {
+                document.getElementById('action-form-content').innerHTML = data['content'];
+            }
+            if (data.hasOwnProperty('eos')) {
+                eventSource.close();
+                console.log('Closing server-sent events connection.');
+            }
+        }, false);
+    } else {
+        console.log('Cannot subscribe to automatic updates. Use page refresh instead.');
+    }
 }

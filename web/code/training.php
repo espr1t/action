@@ -227,9 +227,9 @@ class TrainingPage extends Page {
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initDS01($position) {
+    private function initSIDS($position) {
         $brain = new Brain();
-        $key = 'DS01';
+        $key = 'SIDS';
         $link = 'simple-data-structures';
         $title = 'Simple Data Structures';
         $summary = '
@@ -418,7 +418,7 @@ class TrainingPage extends Page {
         // Group C
         $this->initGRDY(6);
         $this->initMATH(7);
-        $this->initDS01(8);
+        $this->initSIDS(8);
         $this->initGRPH(9);
         $this->initBSTS(10);
         $this->initDPDP(11);

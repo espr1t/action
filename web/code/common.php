@@ -146,4 +146,55 @@ function getWaitingTimes($user, $problem, &$remainPartial, &$remainFull) {
     $remainFull = $problem->waitFull * 60 - (time() - $lastFull);
 }
 
+function getSubmitWithChecks($user, $submitId, $problem, $redirectUrl) {
+    if (!is_numeric($submitId)) {
+        redirect($redirectUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
+    }
+
+    $submit = Submit::get($submitId);
+    if ($submit == null) {
+        redirect($redirectUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
+    }
+
+    if ($user->access < $GLOBALS['ACCESS_SEE_SUBMITS']) {
+        if ($submit->userId != $user->id) {
+            redirect($redirectUrl, 'ERROR', 'Нямате достъп до това решение!');
+        }
+
+        if ($submit->problemId != $problem->id) {
+            redirect($redirectUrl, 'ERROR', 'Решението не е по поисканата задача!');
+        }
+    }
+    return $submit;
+}
+
+function getStatusColor($status) {
+    $color = 'black';
+    switch ($status) {
+        case $GLOBALS['STATUS_ACCEPTED']:
+            $color = 'green';
+            break;
+        case $GLOBALS['STATUS_INTERNAL_ERROR']:
+            $color = 'black';
+            break;
+        default:
+            $color = strlen($status) == 1 ? 'gray' : 'red';
+    }
+    return $color;
+}
+
+function getSourceSection($submit) {
+    return '
+        <div class="centered" id="sourceLink">
+            <a onclick="displaySource();">Виж кода</a>
+        </div>
+        <div style="display: none;" id="sourceField">
+            <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
+            <div class="show-source-box">
+                <code id="source">' . htmlspecialchars(addslashes($submit->source)) . '</code>
+            </div>
+        </div>
+    ';
+}
+
 ?>
