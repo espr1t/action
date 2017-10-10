@@ -8,6 +8,10 @@ ErrorDocument 404 /error
 #
 RewriteEngine on
 
+# Enforce HTTPS usage
+RewriteCond %{HTTPS} off
+RewriteRule (.*) https://%{SERVER_NAME}/$1 [R=301,L]
+
 # Hack for CGI handlers of PHP
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
