@@ -243,29 +243,132 @@ class GamesPage extends Page {
         ';
     }
 
-    private function getSubmitInfoBox($problem, $submitId) {
-        $returnUrl = getGameLink($problem->name) . '/submits';
-        if (isset($_SESSION['queueShortcut']))
-            $returnUrl = '/queue';
+    private function getStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents) {
+        $color = getStatusColor($status);
+        // An old submit, no score for it
+        if ($color == 'green' && $found == false)
+            $color = 'gray';
 
-        if (!is_numeric($submitId)) {
-            redirect($returnUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
+        if ($found) {
+            $score = sprintf('<span>%.0f:%.0f</span>', $totalScoreUser, $totalScoreOpponents);
+        } else {
+            $score = sprintf('<span title="Точки се изчисляват само за последното изпратено решение.">-</span>');
         }
 
-        $submit = Submit::get($submitId);
-        if ($submit == null) {
-            redirect($returnUrl, 'ERROR', 'Не съществува решение с този идентификатор!');
+        return '
+            <table class="default ' . $color . '">
+                <tr>
+                    <th>Статус на задачата</th>
+                    <th style="width: 100px;">Време</th>
+                    <th style="width: 100px;">Памет</th>
+                    <th style="width: 100px;">Резултат</th>
+                </tr>
+                <tr>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$status] . '</td>
+                    <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
+                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
+                    <td>' . $score . '</td>
+                </tr>
+            </table>
+        ';
+    }
+
+    private function getDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame) {
+        // If compilation error, pretty-print it and return instead of the per-match circles
+        if ($status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
+            return prettyPrintCompilationErrors($submit);
         }
 
-        if ($this->user->access < $GLOBALS['ACCESS_SEE_SUBMITS']) {
-            if ($submit->userId != $this->user->id) {
-                redirect($returnUrl, 'ERROR', 'Нямате достъп до това решение!');
+        // If there is no information about this submission, then there is a newer submitted solution
+        // Let the user know that only the latest submissions are being kept as official
+        if (!$found) {
+            return '
+                <div class="centered italic">
+                    Имате по-ново предадено решение.<br>
+                    Точки се изчисляват само за последното изпратено такова.
+                </div>
+            ';
+        }
+
+        $matchColumns = '';
+        for ($i = 1; $i <= $matchesPerGame; $i += 1) {
+            $matchColumns .= '
+                    <th style="width: 5%;">' . $i . '</th>
+            ';
+        }
+        $detailsTable = '
+            <table class="default blue">
+                <tr>
+                    <th style="width: 28%;">Опонент</th>
+                    <th style="width: 12%;">Резултат</th>'
+                    . $matchColumns . '
+                </tr>
+        ';
+
+        ksort($games);
+        foreach($games as $opponentKey => $results) {
+            $opponentId = intval(split('_', $opponentKey)[1]);
+            $opponentName = '';
+            if ($opponentId < 0) {
+                $opponentName = sprintf('Author%d', -$opponentId);
+            } else {
+                $opponent = User::get($opponentId);
+                $opponentName = getUserLink($opponent->username);
             }
 
-            if ($submit->problemId != $problem->id) {
-                redirect($returnUrl, 'ERROR', 'Решението не е по поисканата задача!');
+            $scoreUser = 0;
+            $scoreOpponent = 0;
+            $perTestStatus = '';
+            foreach ($results as $result) {
+                $scoreUser += $result['scoreUser'];
+                $scoreOpponent += $result['scoreOpponent'];
+                $message = $result['message'];
+                $log = $result['log'];
+                $showLink = true;
+
+                if ($result['scoreUser'] > $result['scoreOpponent']) {
+                    // Win
+                    $classes = 'fa fa-check-circle-o green';
+                } else if ($result['scoreUser'] < $result['scoreOpponent']) {
+                    // Loss
+                    $classes = 'fa fa-times-circle-o red';
+                } else {
+                    if ($result['scoreUser'] == 0 && $result['scoreOpponent'] == 0) {
+                        // Not played
+                        $classes = 'fa fa-question-circle-o gray';
+                        $message = 'Мачът още не е изигран.';
+                        $showLink = false;
+                    } else {
+                        // Draw
+                        $classes = 'fa fa-pause-circle-o yellow';
+                    }
+                }
+                $perTestStatus .= '
+                    <td>
+                        ' . ($showLink ? '<a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '/replays/' . $result['id'] .'">' : '') . '
+                            <i class="' . $classes . '" title="' . $message . '"></i>
+                        ' . ($showLink ? '</a>' : '') . '
+                    </td>
+                ';
             }
+            $detailsTable .= '
+                <tr>
+                    <td>' . $opponentName . '</td>
+                    <td>' . sprintf('%.0f:%.0f', $scoreUser, $scoreOpponent) . '</td>
+                    ' . $perTestStatus . '
+                </tr>
+            ';
         }
+
+        $detailsTable .= '
+            </table>
+        ';
+        return $detailsTable;
+    }
+
+    private function getSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
+        $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
+        $status = $submit->calcStatus();
 
         $brain = new Brain();
         $matches = $brain->getGameMatches($problem->id, $submit->userId);
@@ -309,175 +412,38 @@ class GamesPage extends Page {
             }
         }
 
-        $summaryTable = '';
-        $detailedTable = '';
-
-        $status = $submit->calcStatus();
-        $color = 'black';
-        switch ($status) {
-            case $GLOBALS['STATUS_ACCEPTED']:
-                $color = 'green';
-                break;
-            case $GLOBALS['STATUS_INTERNAL_ERROR']:
-                $color = 'black';
-                break;
-            default:
-                $color = strlen($status) == 1 ? 'gray' : 'red';
-        }
-        // An old submit, no score for it
-        if ($color == 'green' && $found == false)
-            $color = 'gray';
-        $problemStatus = $GLOBALS['STATUS_DISPLAY_NAME'][$status];
-
-        if ($found) {
-            $score = sprintf('<span>%.0f:%.0f</span>', $totalScoreUser, $totalScoreOpponents);
-            $infoMessage = '';
-        } else {
-            $score = sprintf('<span title="Точки се изчисляват само за последното изпратено решение.">-</span>');
-            $infoMessage = '<div class="centered italic">
-                                Имате по-ново предадено решение.<br>
-                                Точки се изчисляват само за последното изпратено такова.
-                            </div>';
-        }
-
-        $summaryTable = '
-            <table class="default ' . $color . '">
-                <tr>
-                    <th>Статус на задачата</th>
-                    <th style="width: 100px;">Време</th>
-                    <th style="width: 100px;">Памет</th>
-                    <th style="width: 100px;">Резултат</th>
-                </tr>
-                <tr>
-                    <td>' . $problemStatus . '</td>
-                    <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
-                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
-                    <td>' . $score . '</td>
-                </tr>
-            </table>
-        ';
-
-        $detailedTable = '';
-        if ($found) {
-            $matchColumns = '';
-            for ($i = 1; $i <= $matchesPerGame; $i += 1) {
-                $matchColumns .= '
-                        <th style="width: 5%;">' . $i . '</th>
-                ';
-            }
-            $detailedTable = '
-                <table class="default blue">
-                    <tr>
-                        <th style="width: 28%;">Опонент</th>
-                        <th style="width: 12%;">Резултат</th>'
-                        . $matchColumns . '
-                    </tr>
-            ';
-
-            ksort($games);
-            foreach($games as $opponentKey => $results) {
-                $opponentId = intval(split('_', $opponentKey)[1]);
-                $opponentName = '';
-                if ($opponentId < 0) {
-                    $opponentName = sprintf('Author%d', -$opponentId);
-                } else {
-                    $opponent = User::get($opponentId);
-                    $opponentName = getUserLink($opponent->username);
-                }
-
-                $scoreUser = 0;
-                $scoreOpponent = 0;
-                $perTestStatus = '';
-                foreach ($results as $result) {
-                    $scoreUser += $result['scoreUser'];
-                    $scoreOpponent += $result['scoreOpponent'];
-                    $message = $result['message'];
-                    $log = $result['log'];
-                    $showLink = true;
-
-                    if ($result['scoreUser'] > $result['scoreOpponent']) {
-                        // Win
-                        $classes = 'fa fa-check-circle-o green';
-                    } else if ($result['scoreUser'] < $result['scoreOpponent']) {
-                        // Loss
-                        $classes = 'fa fa-times-circle-o red';
-                    } else {
-                        if ($result['scoreUser'] == 0 && $result['scoreOpponent'] == 0) {
-                            // Not played
-                            $classes = 'fa fa-question-circle-o gray';
-                            $message = 'Мачът още не е изигран.';
-                            $showLink = false;
-                        } else {
-                            // Draw
-                            $classes = 'fa fa-pause-circle-o yellow';
-                        }
-                    }
-                    $perTestStatus .= '
-                        <td>
-                            ' . ($showLink ? '<a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '/replays/' . $result['id'] .'">' : '') . '
-                                <i class="' . $classes . '" title="' . $message . '"></i>
-                            ' . ($showLink ? '</a>' : '') . '
-                        </td>
-                    ';
-                }
-                $detailedTable .= '
-                    <tr>
-                        <td>' . $opponentName . '</td>
-                        <td>' . sprintf('%.0f:%.0f', $scoreUser, $scoreOpponent) . '</td>
-                        ' . $perTestStatus . '
-                    </tr>
-                ';
-            }
-
-            $detailedTable .= '
-                </table>
-            ';
-        }
-
-        // If compilation error, pretty-print it so the user has an idea what is happening
-        $message = '';
-        if ($problemStatus == $GLOBALS['STATUS_DISPLAY_NAME'][$GLOBALS['STATUS_COMPILATION_ERROR']]) {
-            $message = prettyPrintCompilationErrors($submit);
-        }
-
-        // Don't display the per-test circles if compilation error, display the error instead
-        if ($message != '') {
-            $detailedTable = $message;
-        }
+        $statusTable = $this->getStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents);
+        $detailsTable = $this->getDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame);
 
         $author = '';
         if ($this->user->id != $submit->userId) {
             $author = '(' . $submit->userName . ')';
         }
 
-        $source = '
-            <div class="centered" id="sourceLink">
-                <a onclick="displaySource();">Виж кода</a>
-            </div>
-            <div style="display: none;" id="sourceField">
-                <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
-                <div class="show-source-box">
-                    <code id="source">' . htmlspecialchars(addslashes($submit->source)) . '</code>
-                </div>
-            </div>
-        ';
+        $source = getSourceSection($submit);
 
-        $content = '
+        return '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
-            <div class="right smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
+            <div class="right" style="font-size: smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
             <br>
-            ' . $summaryTable . '
+            ' . $statusTable . '
             <br>
-            ' . $infoMessage . '
-            <br>
-            ' . $detailedTable . '
+            ' . $detailsTable . '
             <br>
             ' . $source . '
         ';
+    }
+
+    private function getSubmitInfoBox($problem, $submitId) {
+        $redirectUrl = getGameLink($problem->name) . '/submits';
+        if (isset($_SESSION['queueShortcut']))
+            $redirectUrl = '/queue';
+
+        $content = $this->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
 
         return '
             <script>
-                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
+                showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
             </script>
         ';
     }

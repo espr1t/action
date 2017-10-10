@@ -16,7 +16,7 @@ function sendServerEventData($label, $message) {
         $data .= str_repeat(' ', $padding);
     }
     echo 'data: ' . $data . PHP_EOL . PHP_EOL;
-    ob_end_flush();
+    ob_flush();
     flush();
 }
 
