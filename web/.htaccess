@@ -4,6 +4,18 @@ ErrorDocument 403 /error
 ErrorDocument 404 /error
 
 #
+# Cache configuration
+#
+# One day for image files
+<filesMatch ".(jpg|jpeg|png|gif|ico)$">
+Header set Cache-Control "max-age=86400, public"
+</filesMatch>
+# One minute for css and js
+<filesMatch ".(css|js)$">
+Header set Cache-Control "max-age=60, public"
+</filesMatch>
+
+#
 # Rewrite rules
 #
 RewriteEngine on
