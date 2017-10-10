@@ -9,26 +9,36 @@ class QueuePage extends Page {
     public function getTitle() {
         return 'O(N)::Queue';
     }
-    
+
     private function getQueueTable($data) {
         // Return links for submit shortcuts
         $_SESSION['queueShortcut'] = true;
 
         $brain = new Brain();
+        $allGames = $brain->getAllGames();
         $allProblems = $brain->getAllProblems();
+
         $games = array();
-        foreach ($allProblems as $problem) {
-            if ($problem['type'] == 'game') {
-                array_push($games, intval($problem['id']));
-            }
+        foreach ($allGames as $game) {
+            array_push($games, intval($game['id']));
         }
+
+        $hidden = array();
+        foreach ($allGames as $game)
+            if ($game['visible'] == '0') array_push($hidden, $game['id']);
+        foreach ($allProblems as $problem)
+            if ($problem['visible'] == '0') array_push($hidden, $problem['id']);
 
         $list = '';
         for ($i = 0; $i < count($data); $i = $i + 1) {
             $entry = $data[$i];
 
+            // Hidden submits should not be shown to standard users
+            if (in_array($entry['problemId'], $hidden) && !canSeeProblem($this->user, false, $entry['problemId']))
+                continue;
+
             $regradeSubmission = '';
-            if ($this->user->access >=  $GLOBALS['ACCESS_REGRADE_SUBMITS']) {
+            if ($this->user->access >= $GLOBALS['ACCESS_REGRADE_SUBMITS']) {
                 $regradeSubmission = '
                     <td style="width: 16px;">
                         <a onclick="regradeSubmission(' . $entry['submitId'] . ');" title="Regrade submission ' . $entry['submitId'] . '">
@@ -44,8 +54,8 @@ class QueuePage extends Page {
                 $submitLink = getGameLink($entry['problemName']) . '/submits/' . $entry['submitId'];
                 $problemLink = '<a href="' . getGameLink($entry['problemName']) . '"><div class="problem">' . $entry['problemName'] . '</div></a>';
             }
-            $list .= '
-                <tr>
+            $listEntry = '
+                <tr' . (in_array($entry['problemId'], $hidden) ? ' style="opacity: 0.33"' : '') . '>
                     <td><a href="' . $submitLink . '">' . $entry['submitId'] . '</a></td>
                     <td>' . getUserLink($entry['userName']) . '</td>
                     <td>' . $problemLink . '</td>
@@ -55,6 +65,7 @@ class QueuePage extends Page {
                     ' . $regradeSubmission . '
                 </tr>
             ';
+            $list .= $listEntry;
         }
 
         $adminExtras = '';
@@ -118,7 +129,7 @@ class QueuePage extends Page {
 
         return $head . $time . $pending . $latest . $compilers . $invokeGraderCheck;
     }
-    
+
 }
 
 ?>
