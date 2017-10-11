@@ -342,12 +342,14 @@ class ProblemsPage extends Page {
                 $detailsTable .= '<br>';
             }
             $result = $submit->results[$i];
-            $title = 'Тест ' . $i . '\n' .
-                     'Статус: ' . (is_numeric($result) ? 'OK' : $result) . '\n' .
-                     'Точки: ' . $scores[$i] . '\n' .
-                     'Време: ' . sprintf("%.2fs", $submit->exec_time[$i]) . '\n' .
-                     'Памет: ' . sprintf("%.2f MiB", $submit->exec_memory[$i]) . '\n' .
-            '';
+            $title = sprintf('Тест %d%sСтатус: %s%sТочки: %s%sВреме: %s%sПамет: %s',
+                $i, PHP_EOL,
+                is_numeric($result) ? 'OK' : $result, PHP_EOL,
+                sprintf('%.1f', $scores[$i]), PHP_EOL,
+                sprintf('%.2fs', $submit->exec_time[$i]), PHP_EOL,
+                sprintf('%.2f MiB', $submit->exec_memory[$i])
+            );
+
             $icon = 'WTF?';
             $class = 'test-result background-';
             if (is_numeric($result)) {
