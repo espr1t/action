@@ -176,7 +176,7 @@ class TrainingPage extends Page {
             <br><br>
             Една от известните задачи, базирани на алчна стратегия, вече разгледахме в секцията за сортиране - това
             беше задачата <a href="/problems/182">MaxNumber</a>.
-            Друга доста "стандартна" е <a href="/problems/138">Codes</a>, която с дадените ограничения може да бъде
+            Друга доста "стандартна" е <a href="/problems/138">Schedule</a>, която с дадените ограничения може да бъде
             решена и с bruteforce, но съществува много по-ефективно алчно решение за нея. Донякъде известна задача от
             интервюта е <a href="/problems/55">Codes</a>. Останалите варират по сложност на алчното наблюдение, което
             трябва да направите - в някои то е много очевидно, докато в други съвсем не е!
@@ -266,9 +266,9 @@ class TrainingPage extends Page {
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initGRPH($position) {
+    private function initGRF1($position) {
         $brain = new Brain();
-        $key = 'GRPH';
+        $key = 'GRF1';
         $link = 'simple-graphs';
         $title = 'Simple Graphs';
         $summary = '
@@ -392,6 +392,255 @@ class TrainingPage extends Page {
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
+    private function initITDP($position) {
+        $brain = new Brain();
+        $key = 'ITDP';
+        $link = 'iterative-dynamic-programming';
+        $title = 'Iterative Dynamic Programming';
+        $summary = '
+            Секцията покрива малко по-сложни динамични задачи, в които решението трябва да се направи итеративно. Така
+            може да се спести паметта от някое от измеренията, което е един от специфичните видове динамично оптимиране
+            (с оптимизация на паметта).
+        ';
+        $expanded = '
+            В тази секция ще разгледаме още задачи, решавани с динамично оптимиране. За разлика от миналата секция, в
+            която разгледахме неговите най-базови варианти, тук задачите ще са малко по-специфични - освен да измислите
+            стейта ще трябва да видите и как точно да попълните динамичната таблица, така че да не се налага да я
+            държите цялата в паметта. Това е възможно като се попълва някое от измеренията слой по слой - тоест, ако
+            имате измерение, което зависи единствено от предходния или следващия слой (+/- 1 в индексирането) за
+            изчисляването на текущия. В този случай цялото измерение се свежда до само два слоя, което може да доведе
+            до огромни подобрения в нужната памет (например от N на 2, тоест, например от таблица
+            <code>dyn[N][M][K]</code> на таблица <code>dyn[2][M][K]</code>.
+            <br><br>
+            Подходяща тема, която можете да разгледате, е
+            <a href="http://www.informatika.bg/lectures/dynamic-programming-part2" target="_blank">Динамично оптимиране, част II</a>.
+            <br><br>
+            Задачите в секцията изискват оптимизация на паметта, ползвайки итеративно динамично.
+        ';
+        $problems = '6,148,71,19,101,189';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
+    private function initWIND($position) {
+        $brain = new Brain();
+        $key = 'WIND';
+        $link = 'sliding-window';
+        $title = 'Sliding Window';
+        $summary = '
+            Секцията покрива техниката "Плъзгащ се прозорец" (или "Sliding Window" на английски), която позволява
+            по-ефективно справяне с (на пръв поглед рандом) задачи ако те са ни предварително известни и няма значение
+            в какъв ред ги изпълняваме.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме няколко задачи, решавани с метода на "плъзгащия се прозорец" ("sliding window").
+            Тази техника е популярна както в състезателни задачи, така и в задачи от интервюта за работа (макар и там да
+            са значително по-лесни). Основната идея е да се възползваме от това, че редът, в който изпълняваме
+            query-тата или се извършва някакво търсене в задачата, няма значение и можем да го "променим" в по-удобен за
+            нас начин. Обикновено това ни позволява да преизползваме някаква информация от предходните query-та или
+            търсения, без да се налага да я изчисляваме наново. Това може драстично да оптимизира алгоритъма, като
+            свежда сложността на части от наивната имплементация от линейна до логаритмична или дори константна.
+            <br><br>
+            Подходяща тема, която можете да разгледате, е
+            <a href="http://www.informatika.bg/lectures/sliding-window" target="_blank">Плъзгащ се прозорец</a>.
+            <br><br>
+            Задачите в секцията имат наивно, бавно решение, и бързо решение, базирано на "плъзгащ се прозорец". Много
+            състезатели ползват наивното решение за да тестват бързото (с малки "рандом" тестове).
+        ';
+        $problems = '25,146,65,193';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
+    private function initBMDP($position) {
+        $brain = new Brain();
+        $key = 'BMDP';
+        $link = 'bitmask-dynamic-programming';
+        $title = 'Bitmask Dynamic Programming';
+        $summary = '
+            Секцията покрива понятието "битова маска" и как можем да я ползваме в специфични динамични задачи, в чиито
+            стейт се пази кои обекти от дадено множество вече са били използвани и кои - не.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме какво представлява "битова маска" и как тя се ползва като измерение в стейта на
+            динамични задачи. Това е една от най-популярните разновидности на динамичното оптимиране и е гарантирано, че
+            рано или късно ще срещнете такива задачи в състезания. Маската не е задължително да е двоична (макар и това
+            да е най-честия случай) - понякога може да е четвъртична (като за всеки елемент от множеството се пазят по
+            два бита) или троична (в който случай трябва да кодираме стейта ръчно).
+            <br><br>
+            За тази секция ще ви е полезно да разгледате темата за
+            <a href="http://www.informatika.bg/lectures/bitwise-operations" target="_blank">побитови операции</a> и,
+            разбира се,
+            <a href="http://www.informatika.bg/lectures/dynamic-programming-part3" target="_blank">Динамично оптимиране, част III</a>.
+            <br><br>
+            Задачите в секцията се решават с динамично оптимиране, като едно (или повече) от измеренията са битови маски
+            или числа в троична/четвъртична бройна система.
+        ';
+        $problems = '57,183,51,75,223,47,202,54';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
+    private function initGAME($position) {
+        $brain = new Brain();
+        $key = 'GAME';
+        $link = 'game-theory';
+        $title = 'Game Theory';
+        $summary = '
+            Секцията покрива теория на игрите: какво е оптимална игра, минимакс стратегия, и Sprague-Grundy числа. Ще
+            бъдат разгледани стандартни задачи, както и стандартни задачи с някакви усложнения, като например търсене
+            на цикъл или ползване на динамично оптимиране.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме основите на "теория на игрите" в състезателното програмиране. Ще научим какво е
+            "оптимална игра" и как можем да намерим победителя в такава. Ще покажем минимакс стратегии (в които искаме
+            да максимизираме нашия резултат и да минимизираме този на противника). Ще застъпим и основната теория зад
+            много от състезателните задачи: числата на Грунди, които също може да срещнете като SG числа или пък
+            NIMbers (кръстени на играта NIM). Реално теорията отзад е доста сложна, но пък прилагането й (което всъщност
+            ви интересува в повечето задачи) е относително просто. Макар и плашеща на пръв поглед, това е една що-годе
+            лесна секция.
+            <br><br>
+            За минаването през секцията ще ви помогне темата
+            <a href="http://www.informatika.bg/lectures/game-theory" target="_blank">Теория на игрите</a>.
+            <br><br>
+            Задачите в секцията ползват или minimax, или SG, или комбинация на предните две с някакъв друг алгоритъм.
+        ';
+        $problems = '49,136,56,91,98,216';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
+    private function initADDS($position) {
+        $brain = new Brain();
+        $key = 'ADDS';
+        $link = 'advanced-data-structures';
+        $title = 'Advanced Data Structures';
+        $summary = '
+            Секцията покрива по-сложни структури данни, които не се учат в базовите курсове по структури данни:
+            индексни дървета, сегментни дървета, интервални дървета, квадратична опашка, префиксно дърво, KD-дърво и
+            други.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме няколко по-сложни структури данни, които решават специфични проблеми значително
+            по-ефективно от алтернативните им наивни имплементации с други структури. Тези структури са интересни за
+            изучаване, тъй като обикновено се базират на интересна идея, която може да се използва и при решаване на
+            други проблеми.
+            <br><br>
+            Най-често срещаните от тях, които ще разгледаме тук са индексно (binary indexed tree) и сегментно дърво
+            (segment tree), както и тяхната генерализация - интервално дърво (interval tree). Малко по-редки (в
+            състезателни задачи), но пък популярни в проблеми от реалния живот са квадратичната опашка (tiered vector),
+            префиксното дърво (TRIE) и KD-дървото (KD-tree) (като последното намира голямо приложение в 3D-графиката).
+            <br><br>
+            Теми, които можете да прочетете, са:
+            <a href="http://www.informatika.bg/lectures/index-trees" target="_blank">Индексно дърво</a>,
+            <a href="http://www.informatika.bg/lectures/segment-trees" target="_blank">Сегментно дърво</a>,
+            <a href="http://www.informatika.bg/lectures/range-minimum-query" target="_blank">Минимум в интервал</a>,
+            <a href="http://www.informatika.bg/lectures/tiered-vector" target="_blank">Квадратична опашка</a>, и
+            <a href="http://www.informatika.bg/lectures/trie" target="_blank">Префиксно дърво</a>, и
+            <a href="http://www.informatika.bg/lectures/kd-tree" target="_blank">KD-дърво</a>.
+            <br><br>
+            Задачите покриват само някои от изброените структури, като трябва да видите коя къде е приложима.
+        ';
+        $problems = '149,34,37,94,5';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
+    private function initSTRI($position) {
+        $brain = new Brain();
+        $key = 'STRI';
+        $link = 'strings';
+        $title = 'Strings';
+        $summary = '
+            Секцията покрива работа със символни низове: алгоритъм на Кнут-Морис-Прат, хеширане и хештаблица,
+            префиксен и суфиксен масив, алгоритъм на Ахо-Корасик, както и модифициране на вече разгледани структури
+            данни за стрингове.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме как да работим ефективно със символни низове - намиране на повтарящи се такива,
+            сравняване на подстрингове, намиране дали даден стринг се среща като подстринг в друг, и т.н. Ще разгледаме
+            основните стрингови алгоритми - хеширане и Кнут-Морис-Прат - като и по-сложни приложения чрез структури
+            данни: <a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank">Хештаблица</a>,
+            <a href="https://en.wikipedia.org/wiki/Merkle_tree" target="_blank">Merkle Tree</a>,
+            префиксно дърво (Trie) и суфиксно дърво, както и Ахо-Корасик.
+            <br><br>
+            Темите, които ще са ви полезни, за да се справите с повечето стрингови задачи, са:
+            <a href="http://www.informatika.bg/lectures/knuth-morris-pratt" target="_blank">Алгоритъм на Кнут-Морис-Прат</a>,
+            <a href="http://www.informatika.bg/lectures/hashing" target="_blank">Хеширане</a>,
+            <a href="http://www.informatika.bg/lectures/hashtable" target="_blank">Хештаблица</a>,
+            <a href="http://www.informatika.bg/lectures/trie" target="_blank">Префиксно Дърво</a>,
+            <a href="http://www.informatika.bg/lectures/suffix-tree" target="_blank">Суфиксно Дърво</a>,
+            <a href="http://www.informatika.bg/lectures/suffix-array" target="_blank">Суфиксен Масив</a>, и
+            <a href="http://www.informatika.bg/lectures/aho-corasick" target="_blank">Алгоритъм на Ахо-Корасик</a>.
+            <br><br>
+            Тук се покриват относително малко от изброените алгоритми и структури данни, така че ако искате да се
+            чувствате сигурни, е хубаво да погледнете и седните задачи:
+            <a href="http://www.spoj.com/problems/SUB_PROB/" target="_blank">SUB_PROB</a>,
+            <a href="http://www.spoj.com/problems/SARRAY/" target="_blank">SARRAY</a>,
+            <a href="http://www.spoj.com/problems/PHONELST/" target="_blank">PHONELST</a>,
+            <a href="http://www.spoj.com/problems/LCS/" target="_blank">LCS</a>.
+        ';
+        $problems = '52,36,110';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
+    private function initGEOM($position) {
+        $brain = new Brain();
+        $key = 'GEOM';
+        $link = 'geometry';
+        $title = 'Geometry';
+        $summary = '
+            Секцията покрива основни геометрични задачи в програмирането: намиране на разстояние, пресичане на права с
+            друга права или окръжност, ротации, насочено лице, принадлежност на точка в многоъгълник и други. Ще видим
+            също какво е и как се намира изпъкнала обвивка.
+        ';
+        $expanded = '
+            В тази секция ще разгледаме как можем да направим основни неща от геометрията ползвайки програмиране. Ще
+            припомним как се намира разстояние между точки, лице на многоъгълник, как се прави ротация на точка около
+            друга точка. Ще видим какво е насочено лице на триъгълник и как можем да го ползваме за проверка от коя
+            страна на някаква права е дадена точка. Ще покрием и относително чести под-задачи, като например проверка
+            за пресичане на права с права и права с окръжност, както и намиране на пресечната точка. Ще видим как да
+            проверим дали точка е във вътрешността на многоъгълник и как ефективно да намерим изпъкналата обвивка на
+            множество от точки.
+            <br><br>
+            Полезни теми, които можете да погледнете тук са
+            <a href="http://www.informatika.bg/lectures/geometry" target="_blank">Геометрия</a>, а както и
+            <a href="http://www.informatika.bg/lectures/binary-search" target="_blank">Двоично Търсене</a> и
+            <a href="http://www.informatika.bg/lectures/ternary-search" target="_blank">Троично Търсене</a>,
+            които понякога можем да ползваме за да избегнем справянето с частни случаи, които възникват при някои
+            геометрични задачи.
+            <br><br>
+            Задачите в секцията изискват само някои от изброените по-горе алгоритми, но по-нататък ще срещнем и други
+            задачи, които включват останалите, като например
+            <a href="/problems/73">Spectre</a>, <a href="/problems/8">Towers</a>, или <a href="/problems/205">Deathstars</a>.
+        ';
+        $problems = '10,161,154,14';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
+    private function initGRF2($position) {
+        $brain = new Brain();
+        $key = 'GRF2';
+        $link = 'medium-graphs';
+        $title = 'Medium Graphs';
+        $summary = '
+            Секцията покрива малко по-сложни графови алгоритми като например намиране на силно-свързани компоненти,
+            артикулационни точки, най-близък общ родител, ойлерови пътища и цикли, намиране на брой пътища чрез матрици.
+        ';
+        $expanded = '
+            В секцията ще разгледаме още няколко алгоритъма в графи: намиране на силно-свързани компоненти,
+            артикулационни точки, най-близък общ родител, ойлерови пътища и цикли. Ще видим и как можем да намерим броя
+            пътища между два върха чрез вдигане на матрицата на съседство на дадена степен. Ще покажем как това може да
+            бъде скрито в различни задачи, които понякога на пръв поглед дори не приличат на графови.
+            <br><br>
+            Темите, които ще ви трябват, са
+            <a href="http://www.informatika.bg/lectures/strongly-connected-components" target="_blank">Силно-свързани компоненти</a>,
+            <a href="http://www.informatika.bg/lectures/eulerian-paths-and-cycles" target="_blank">Ойлерови пътища и цикли</a>,
+            <a href="http://www.informatika.bg/lectures/lowest-common-ancestor" target="_blank">Най-близък общ родител</a>, и
+            <a href="http://www.informatika.bg/lectures/tasks-solved-by-matrices" target="_blank">Задачи, решавани с матрици</a>.
+            <br><br>
+            Освен изброените по-горе неща, в задачите в темата сме включили и графи, които използват няколко неща,
+            които показахме по-рано (например битови маски и разширяване на графа).
+        ';
+        $problems = '163,13,59,62,9,188';
+        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+    }
+
     /*
     private function initXXXX($position) {
         $brain = new Brain();
@@ -419,10 +668,20 @@ class TrainingPage extends Page {
         $this->initGRDY(6);
         $this->initMATH(7);
         $this->initSIDS(8);
-        $this->initGRPH(9);
+        $this->initGRF1(9);
         $this->initBSTS(10);
         $this->initDPDP(11);
         $this->initBUCK(12);
+
+        // Group B
+        $this->initITDP(13);
+        $this->initWIND(14);
+        $this->initBMDP(15);
+        $this->initGAME(16);
+        $this->initADDS(17);
+        $this->initSTRI(18);
+        $this->initGEOM(19);
+        $this->initGRF2(20);
     }
 
     private function getSection($key) {
@@ -507,9 +766,9 @@ class TrainingPage extends Page {
                     са подходящи за ученици от C група и нагоре.
                 </li>
                 <li>
-                    <a href="/training/bitmask-dp">Bitmask DP</a>,
+                    <a href="/training/iterative-dynamic-programming">Iterative DP</a>,
                     <a href="/training/sliding-window">Sliding Window</a>,
-                    <a href="/training/iterative-dp">Iterative DP</a>,
+                    <a href="/training/bitmask-dynamic-programming">Bitmask DP</a>,
                     <a href="/training/game-theory">Game Theory</a>,
                     <a href="/training/advanced-data-structures">Advanced Data Structures</a>,
                     <a href="/training/strings">Strings</a>,
@@ -535,7 +794,7 @@ class TrainingPage extends Page {
     }
 
     public function getContent() {
-        // $this->initTraining();
+        $this->initTraining();
 
         $content = '';
         if (!isset($_GET['section'])) {
@@ -546,7 +805,7 @@ class TrainingPage extends Page {
         }
         return $content;
     }
-    
+
 }
 
 ?>

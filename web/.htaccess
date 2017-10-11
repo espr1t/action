@@ -8,11 +8,11 @@ ErrorDocument 404 /error
 #
 # One day for image files
 <filesMatch ".(jpg|jpeg|png|gif|ico)$">
-Header set Cache-Control "max-age=86400, public"
+	Header set Cache-Control "max-age=86400, public"
 </filesMatch>
 # One minute for css and js
 <filesMatch ".(css|js)$">
-Header set Cache-Control "max-age=60, public"
+	Header set Cache-Control "max-age=60, public"
 </filesMatch>
 
 #
@@ -62,10 +62,18 @@ RewriteRule    ^training/sorting$								/code/main.php?page=training&section=SO
 RewriteRule    ^training/greedy$								/code/main.php?page=training&section=GRDY											[NC,L,QSA]
 RewriteRule    ^training/math$									/code/main.php?page=training&section=MATH											[NC,L,QSA]
 RewriteRule    ^training/simple-data-structures$				/code/main.php?page=training&section=SIDS											[NC,L,QSA]
-RewriteRule    ^training/simple-graphs$							/code/main.php?page=training&section=GRPH											[NC,L,QSA]
+RewriteRule    ^training/simple-graphs$							/code/main.php?page=training&section=GRF1											[NC,L,QSA]
 RewriteRule    ^training/binary-search$							/code/main.php?page=training&section=BSTS											[NC,L,QSA]
 RewriteRule    ^training/dynamic-programming$					/code/main.php?page=training&section=DPDP											[NC,L,QSA]
 RewriteRule    ^training/bucketing$								/code/main.php?page=training&section=BUCK											[NC,L,QSA]
+RewriteRule    ^training/iterative-dynamic-programming$			/code/main.php?page=training&section=ITDP											[NC,L,QSA]
+RewriteRule    ^training/sliding-window$						/code/main.php?page=training&section=WIND											[NC,L,QSA]
+RewriteRule    ^training/bitmask-dynamic-programming$			/code/main.php?page=training&section=BMDP											[NC,L,QSA]
+RewriteRule    ^training/game-theory$							/code/main.php?page=training&section=GAME											[NC,L,QSA]
+RewriteRule    ^training/advanced-data-structures$				/code/main.php?page=training&section=ADDS											[NC,L,QSA]
+RewriteRule    ^training/strings$								/code/main.php?page=training&section=STRI											[NC,L,QSA]
+RewriteRule    ^training/geometry$								/code/main.php?page=training&section=GEOM											[NC,L,QSA]
+RewriteRule    ^training/medium-graphs$							/code/main.php?page=training&section=GRF2											[NC,L,QSA]
 
 # Games pages
 RewriteRule    ^games/([\w-]+)$                                 /code/main.php?page=games&game=$1                                                   [NC,L,QSA]
