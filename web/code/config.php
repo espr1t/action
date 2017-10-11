@@ -19,8 +19,9 @@ $DB_DATABASE = 'action';
 $COOKIE_NAME = 'action_informatika_bg';
 
 // Grader
-$GRADER_URL = 'localhost:5000';
-#$GRADER_URL = '192.168.1.111:5000';
+//$GRADER_URL = 'localhost:5000';
+$GRADER_URL = '192.168.1.111:5000';
+
 
 // Will not work with random UTF-8 characters since the utf8_encode() algorithm
 // in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
@@ -31,10 +32,11 @@ $GRADER_ENDPOINT_AVAILABLE = '/available';
 $GRADER_ENDPOINT_EVALUATE = '/evaluate';
 
 // Grader-exposed system endpoints
-$WEB_ENDPOINT_UPDATE = sprintf('http://%s/actions/update', $_SERVER['HTTP_HOST']);
-$WEB_ENDPOINT_TESTS = sprintf('http://%s/data/problems/%%s/Tests/', $_SERVER['HTTP_HOST']);
-$WEB_ENDPOINT_CHECKER = sprintf('http://%s/data/problems/%%s/Tests/Checker/', $_SERVER['HTTP_HOST']);
-$WEB_ENDPOINT_TESTER = sprintf('http://%s/data/problems/%%s/Tests/Tester/', $_SERVER['HTTP_HOST']);
+$PROTOCOL = PHP_OS == 'WINNT' ? 'http' : 'https';
+$WEB_ENDPOINT_UPDATE = sprintf('%s://%s/actions/update', $PROTOCOL, $_SERVER['HTTP_HOST']);
+$WEB_ENDPOINT_TESTS = sprintf('%s://%s/data/problems/%%s/Tests/', $PROTOCOL, $_SERVER['HTTP_HOST']);
+$WEB_ENDPOINT_CHECKER = sprintf('%s://%s/data/problems/%%s/Tests/Checker/', $PROTOCOL, $_SERVER['HTTP_HOST']);
+$WEB_ENDPOINT_TESTER = sprintf('%s://%s/data/problems/%%s/Tests/Tester/', $PROTOCOL, $_SERVER['HTTP_HOST']);
 
 // User access
 $ADMIN_USER_ACCESS = 100;

@@ -20,8 +20,9 @@ Header set Cache-Control "max-age=60, public"
 #
 RewriteEngine on
 
-# Enforce HTTPS usage
+# Enforce HTTPS usage on production server
 RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_HOST} ^action.informatika.bg$ [NC]
 RewriteRule (.*) https://%{SERVER_NAME}/$1 [R=301,L]
 
 # Hack for CGI handlers of PHP
