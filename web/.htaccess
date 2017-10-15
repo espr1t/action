@@ -74,6 +74,13 @@ RewriteRule    ^training/advanced-data-structures$				/code/main.php?page=traini
 RewriteRule    ^training/strings$								/code/main.php?page=training&section=STRI											[NC,L,QSA]
 RewriteRule    ^training/geometry$								/code/main.php?page=training&section=GEOM											[NC,L,QSA]
 RewriteRule    ^training/medium-graphs$							/code/main.php?page=training&section=GRF2											[NC,L,QSA]
+RewriteRule    ^training/meet-in-the-middle$					/code/main.php?page=training&section=MITM											[NC,L,QSA]
+RewriteRule    ^training/probability$							/code/main.php?page=training&section=PROB											[NC,L,QSA]
+RewriteRule    ^training/inner-cycle-optimization$				/code/main.php?page=training&section=INNR											[NC,L,QSA]
+RewriteRule    ^training/sweep-line$							/code/main.php?page=training&section=SWLN											[NC,L,QSA]
+RewriteRule    ^training/advanced-dynamic-programming$			/code/main.php?page=training&section=ADDP											[NC,L,QSA]
+RewriteRule    ^training/advanced-graphs$						/code/main.php?page=training&section=GRF3											[NC,L,QSA]
+RewriteRule    ^training/various$								/code/main.php?page=training&section=VARI											[NC,L,QSA]
 
 # Games pages
 RewriteRule    ^games/([\w-]+)$                                 /code/main.php?page=games&game=$1                                                   [NC,L,QSA]
