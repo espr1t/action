@@ -461,7 +461,7 @@ function subscribeForUpdates(url) {
         var eventSource = new EventSource(url);
         eventSource.addEventListener('message', function(e) {
             console.log('Received new data at ' + ((new Date()).getTime()) + '.');
-            var data = JSON.parse(e.data);
+            var data = JSON.parse('"' + e.data + '"');
             if (data.hasOwnProperty('content')) {
                 document.getElementById('action-form-content').innerHTML = data['content'];
             }
