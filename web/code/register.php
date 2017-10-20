@@ -9,7 +9,11 @@ class RegisterPage extends Page {
     }
 
     public function getExtraScripts() {
-        return array('/scripts/authentication.js', '/scripts/md5.min.js');
+        return array(
+            '/scripts/authentication.js',
+            '/scripts/md5.min.js',
+            'https://www.google.com/recaptcha/api.js'
+        );
     }
 
     public function onLoad() {
@@ -141,6 +145,10 @@ class RegisterPage extends Page {
                                 </td>
                             </tr>
                         </table>
+                        <br>
+                        <div style="text-align: center;">
+                            <div class="g-recaptcha" style="display: inline-block" data-sitekey="6LdbRTUUAAAAAIDwF-v-BVCEpUzRZxyXLsFYzjMf"></div>
+                        </div>
                         <input name="submit" type="submit" class="button button-color-blue" value="Регистрация">
                     </form>
                 </div>
@@ -177,7 +185,39 @@ class RegisterPage extends Page {
         return $gender == '' || preg_match('/^male|female$/', $gender);
     }
 
+    private function validateReCaptcha() {
+        if (!isset($_POST['g-recaptcha-response']))
+            return false;
+
+        $url = 'https://www.google.com/recaptcha/api/siteverify';
+        $data = array(
+            'secret' => $GLOBALS['RE_CAPTCHA_KEY'],
+            'response' => $_POST['g-recaptcha-response'],
+            'remoteip' => $_SERVER['REMOTE_ADDR']
+        );
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data)
+            )
+        );
+        $context  = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
+        if ($response === false) {
+            error_log('ERROR: Could not call re-CAPTCHA server.');
+            return false;
+        }
+        $result = json_decode($response, true);
+        return $result['success'];
+    }
+
     private function registerUser() {
+        // Check re-CAPTCHA
+        if (!$this->validateReCaptcha()) {
+            return 'Не преминахте re-CAPTCHA валидацията!';
+        }
+
         // Check captcha question
         if (!isset($_POST['captcha']) || !isset($_POST['expected'])) {
             return 'Въведената captcha е невалидна!';
@@ -205,7 +245,7 @@ class RegisterPage extends Page {
             return 'Въведеното име не изпълнява изискванията на сайта!';
         }
         $name = $_POST['name']; unset($_POST['name']);
-        
+
         if (!isset($_POST['surname']) || !$this->validateName($_POST['surname'])) {
             return 'Въведената фамилия не изпълнява изискванията на сайта!';
         }

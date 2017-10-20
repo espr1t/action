@@ -15,6 +15,9 @@ $DB_USERNAME = 'action';
 $DB_PASSWORD = 'password';
 $DB_DATABASE = 'action';
 
+// Google re-CAPTCHA secret key
+$RE_CAPTCHA_KEY = 'f4k3s3cr37k3y';
+
 // Session and cookie
 $COOKIE_NAME = 'action_informatika_bg';
 
