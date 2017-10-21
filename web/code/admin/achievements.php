@@ -344,8 +344,8 @@ class AdminAchievementsPage extends Page {
     }
 
     // Solved 30 tasks from first try
-    public function achievementAccurate($brain, $achieved, $user, $submits) {
-        if (!in_array('30FRST', $achieved)) {
+    public function achievementAccurate($brain, $achieved, $user, $submits, $key, $target) {
+        if (!in_array($key, $achieved)) {
             $date = '';
             $first = 0;
             $submitted = array();
@@ -354,7 +354,7 @@ class AdminAchievementsPage extends Page {
                     $submitted[$submit['problemId']] = true;
                     if ($submit['status'] == 'AC') {
                         $first += 1;
-                        if ($first >= 30) {
+                        if ($first >= $target) {
                             $date = $submit['submitted'];
                             break;
                         }
@@ -362,7 +362,7 @@ class AdminAchievementsPage extends Page {
                 }
             }
             if ($date != '') {
-                $brain->addAchievement($user->id, '30FRST', $date);
+                $brain->addAchievement($user->id, $key, $date);
             }
         }
     }
@@ -621,7 +621,7 @@ class AdminAchievementsPage extends Page {
                     if (!$alreadyIn)
                         array_push($userSolvedPerTag[$tag], $submit);
                 }
-                
+
                 // Difficulties
                 $difficulty = $problemDifficulties[$submit['problemId']];
                 $alreadyIn = false;
@@ -710,7 +710,8 @@ class AdminAchievementsPage extends Page {
         $this->achievementOldtimer($brain, $achieved, $user);
         $this->achievementSoWrong($brain, $achieved, $user, $userProblemSubmits);
         $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits);
-        $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits);
+        $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '20FRST', 20);
+        $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '50FRST', 50);
         $this->achievementPedantic($brain, $achieved, $user, $userProblemSubmits, $problems);
         // TODO: AVATAR
         $this->achievementProfile($brain, $achieved, $user);
@@ -742,9 +743,9 @@ class AdminAchievementsPage extends Page {
         }
 
         $users = $brain->getUsers();
-        // Skip service user
+        // Skip service user and admin
         $userCount = count($users);
-        for ($i = 1; $i < $userCount; $i += 1) {
+        for ($i = 2; $i < $userCount; $i += 1) {
             $user = User::instanceFromArray($users[$i]);
             $this->updateAll($user, $games, $standings, $problems, $submits, $sources, $ranking);
         }
@@ -755,24 +756,37 @@ class AdminAchievementsPage extends Page {
         $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
         $achievementsData = json_decode($achievementsFile, true);
 
-        $count = array();
-        foreach ($achievementsData as $achievement)
-            $count[$achievement['key']] = 0;
-
         $brain = new Brain();
-        foreach ($brain->getAchievements() as $achievement)
-            $count[$achievement['achievement']] += 1;
+
+        $userName = array();
+        foreach ($brain->getUsers() as $user)
+            $userName[$user['id']] = $user['username'];
+
+        $perType = array();
+        foreach ($achievementsData as $achievement)
+            $perType[$achievement['key']] = array();
+
+        $achievements = $brain->getAchievements();
+        foreach ($achievements as $achievement)
+            array_push($perType[$achievement['achievement']], $userName[$achievement['user']]);
 
         $content = '<div>';
         foreach ($achievementsData as $achievement) {
+            $users = '';
+            for ($i = 0; $i < min(5, count($perType[$achievement['key']])); $i += 1) {
+                if ($i > 0) $users .= ', ';
+                $users .= $perType[$achievement['key']][$i];
+            }
+            $info = $achievement['description'] . PHP_EOL . $users;
             $content .= '
-                <div class="achievement" title="' . $achievement['description'] . '">
+                <div class="achievement" title="' . $info . '">
                     <i class="fa fa-' . $achievement['icon'] . ' fa-fw"></i>
-                    <span>' . $achievement['title'] . ' | ' . $count[$achievement['key']] . '</span>
+                    <span>' . $achievement['title'] . ' | ' . count($perType[$achievement['key']]) . '</span>
                 </div>
             ';
         }
         $content .= '</div>';
+        $content .= '<div style="text-align: center; font-weight: bold;">All achievements: ' . count($achievements) . '</div>';
 
         return $content;
     }

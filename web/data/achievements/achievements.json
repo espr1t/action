@@ -450,9 +450,15 @@
     "icon": "meh-o"
   },
   {
-    "key": "30FRST",
+    "key": "20FRST",
+    "title": "Robin Hood",
+    "description": "Двадесет задачи, решени от първи събмит",
+    "icon": "bullseye"
+  },
+  {
+    "key": "50FRST",
     "title": "Vasily Zaytsev",
-    "description": "Тридесет задачи, решени от първи събмит",
+    "description": "Петдесет задачи, решени от първи събмит",
     "icon": "crosshairs"
   },
   {
@@ -522,4 +528,3 @@
     "icon": "barcode"
   }
 ]
-
