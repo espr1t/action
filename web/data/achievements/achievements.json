@@ -450,6 +450,12 @@
     "icon": "meh-o"
   },
   {
+    "key": "20FAIL",
+    "title": "21-st time is the charm",
+    "description": "Двадесет неуспешни събмита по задача",
+    "icon": "umbrella"
+  },
+  {
     "key": "20FRST",
     "title": "Robin Hood",
     "description": "Двадесет задачи, решени от първи събмит",

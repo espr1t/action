@@ -323,8 +323,8 @@ class AdminAchievementsPage extends Page {
     }
 
     // 10 unsuccessful submits on a problem
-    public function achievementUnsuccess($brain, $achieved, $user, $submits) {
-        if (!in_array('10FAIL', $achieved)) {
+    public function achievementUnsuccess($brain, $achieved, $user, $submits, $key, $target) {
+        if (!in_array($key, $achieved)) {
             $date = '';
             $unsuccessful = array();
             foreach ($submits as $submit) {
@@ -332,13 +332,13 @@ class AdminAchievementsPage extends Page {
                     $unsuccessful[$submit['problemId']] = 0;
                 if ($submit['status'] != 'AC')
                     $unsuccessful[$submit['problemId']]++;
-                if ($unsuccessful[$submit['problemId']] >= 10) {
+                if ($unsuccessful[$submit['problemId']] >= $target) {
                     $date = $submit['submitted'];
                     break;
                 }
             }
             if ($date != '') {
-                $brain->addAchievement($user->id, '10FAIL', $date);
+                $brain->addAchievement($user->id, $key, $date);
             }
         }
     }
@@ -709,7 +709,8 @@ class AdminAchievementsPage extends Page {
         $this->achievementRainbow($brain, $achieved, $user, $userAllSubmits);
         $this->achievementOldtimer($brain, $achieved, $user);
         $this->achievementSoWrong($brain, $achieved, $user, $userProblemSubmits);
-        $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits);
+        $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits, '10FAIL', 10);
+        $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits, '20FAIL', 20);
         $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '20FRST', 20);
         $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '50FRST', 50);
         $this->achievementPedantic($brain, $achieved, $user, $userProblemSubmits, $problems);
