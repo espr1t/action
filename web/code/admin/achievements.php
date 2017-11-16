@@ -713,6 +713,7 @@ class AdminAchievementsPage extends Page {
         $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits, '20FAIL', 20);
         $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '20FRST', 20);
         $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '50FRST', 50);
+        $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '100FST', 100);
         $this->achievementPedantic($brain, $achieved, $user, $userProblemSubmits, $problems);
         // TODO: AVATAR
         $this->achievementProfile($brain, $achieved, $user);

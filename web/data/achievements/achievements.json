@@ -457,14 +457,20 @@
   },
   {
     "key": "20FRST",
-    "title": "Robin Hood",
+    "title": "Green Arrow",
     "description": "Двадесет задачи, решени от първи събмит",
-    "icon": "bullseye"
+    "icon": "dot-circle-o"
   },
   {
     "key": "50FRST",
-    "title": "Vasily Zaytsev",
+    "title": "Robin Hood",
     "description": "Петдесет задачи, решени от първи събмит",
+    "icon": "bullseye"
+  },
+  {
+    "key": "100FST",
+    "title": "Vasily Zaytsev",
+    "description": "Сто задачи, решени от първи събмит",
     "icon": "crosshairs"
   },
   {
