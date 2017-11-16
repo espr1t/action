@@ -21,7 +21,7 @@ class ProblemsPage extends Page {
         return array('/scripts/language_detector.js');
     }
 
-    public function getProblemBox($problemInfo, $problemSolutions) {
+    public function getProblemBox(&$problemInfo, $problemSolutions) {
         $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
         $serviceUserSolutions = 0;
         foreach ($problemSolutions as $problemSolution) {
@@ -54,8 +54,9 @@ class ProblemsPage extends Page {
                 $difficulty = '<i class="fa fa-question" title="Unknown"></i>';
         }
 
-        $numSolutions = (count($problemSolutions) - popcount($serviceUserSolutions));
-        $solutions = '<i class="fa fa-users" title="Решена от ' . $numSolutions . ' човек' . ($numSolutions != 1 ? 'a' : '') . '"></i> ' . $numSolutions;
+        $problemInfo['solutions'] = (count($problemSolutions) - popcount($serviceUserSolutions));
+        $solutions = '<i class="fa fa-users" title="Решена от ' . $problemInfo['solutions'] .
+                        ' човек' . ($problemInfo['solutions'] != 1 ? 'a' : '') . '"></i> ' . $problemInfo['solutions'];
 
         $box = '
             <a href="/problems/' . $problemInfo['id'] . '" class="decorated">
@@ -82,8 +83,10 @@ class ProblemsPage extends Page {
             $problemSolvedBy[$problem['id']] = array();
         foreach ($allProblemsSubmits as $submit) {
             // Apparently a submit on a game
-            if (!array_key_exists($submit['problemId'], $problemSolvedBy))
+            if (!array_key_exists($submit['problemId'], $problemSolvedBy)) {
                 continue;
+            }
+            // Check if already counting the solution by this user
             $alreadyIn = false;
             foreach ($problemSolvedBy[$submit['problemId']] as $author)
                 $alreadyIn = $alreadyIn || $author['userId'] == $submit['userId'];
@@ -93,8 +96,8 @@ class ProblemsPage extends Page {
 
         for ($i = 0; $i < count($problemsInfo); $i += 1) {
             $problemSolutions = $problemSolvedBy[$problemsInfo[$i]['id']];
+            // The number of user solutions is calculated in getProblemBox()
             $problemsInfo[$i]['box'] = $this->getProblemBox($problemsInfo[$i], $problemSolutions);
-            $problemsInfo[$i]['solutions'] = count($problemSolutions);
         }
 
         // Order by solutions or difficulty, if requested
@@ -103,19 +106,19 @@ class ProblemsPage extends Page {
             if ($_GET['order'] == 'solutions') {
                 usort($problemsInfo, function($left, $right) use($numericDifficulty) {
                     if ($left['solutions'] != $right['solutions'])
-                        return $left['solutions'] < $right['solutions'];
+                        return $right['solutions'] - $left['solutions'];
                     if ($left['difficulty'] != $right['difficulty'])
-                        return $numericDifficulty[$left['difficulty']] > $numericDifficulty[$right['difficulty']];
-                    return $left['id'] > $right['id'];
+                        return $numericDifficulty[$left['difficulty']] - $numericDifficulty[$right['difficulty']];
+                    return $left['id'] - $right['id'];
                 });
             }
             if ($_GET['order'] == 'difficulty') {
                 usort($problemsInfo, function($left, $right) use($numericDifficulty) {
                     if ($left['difficulty'] != $right['difficulty'])
-                        return $numericDifficulty[$left['difficulty']] > $numericDifficulty[$right['difficulty']];
+                        return $numericDifficulty[$left['difficulty']] - $numericDifficulty[$right['difficulty']];
                     if ($left['solutions'] != $right['solutions'])
-                        return $left['solutions'] < $right['solutions'];
-                    return $left['id'] > $right['id'];
+                        return $right['solutions'] - $left['solutions'];
+                    return $left['id'] - $right['id'];
                 });
             }
         }
