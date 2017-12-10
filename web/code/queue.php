@@ -115,12 +115,12 @@ class QueuePage extends Page {
 
         $latest = inBox('
             <h2>Последно тествани</h2>
-            ' . $this->getQueueTable($brain->getLatest()) . '
+            ' . QueuePage::getQueueTable($brain->getLatest()) . '
         ');
 
         $pending = inBox('
             <h2>Изчакващи тестване</h2>
-            ' . $this->getQueueTable($brain->getPending()) . '
+            ' . QueuePage::getQueueTable($brain->getPending()) . '
         ');
 
         $compilers = '<div class="center" style="font-size: smaller; margin-top: -0.25rem; margin-bottom: 0.375rem;">Информация за ползваните

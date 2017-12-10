@@ -34,7 +34,12 @@ switch ($_GET['page']) {
 
     case 'regrade':
         require_once('regrade.php');
-        $page = new AdminQueuePage($user);
+        $page = new AdminRegradePage($user);
+        break;
+
+    case 'retest':
+        require_once('retest.php');
+        $page = new AdminRetestPage($user);
         break;
 
     case 'achievements':
