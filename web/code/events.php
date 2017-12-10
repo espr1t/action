@@ -11,10 +11,6 @@ function sendServerEventData($label, $message) {
     }
 
     $data = json_encode(array($label => $message));
-    $padding = 65536 - strlen($data);
-    if ($padding > 0) {
-        $data .= str_repeat(' ', $padding);
-    }
     echo 'data: ' . $data . PHP_EOL . PHP_EOL;
     ob_flush();
     flush();

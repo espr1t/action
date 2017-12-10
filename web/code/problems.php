@@ -402,7 +402,7 @@ class ProblemsPage extends Page {
             $author = '(' . $submit->userName . ')';
         }
 
-        $source = getSourceSection($submit);
+        $source = getSourceSection($submit, false);
 
         return '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>

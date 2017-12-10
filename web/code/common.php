@@ -183,7 +183,12 @@ function getStatusColor($status) {
     return $color;
 }
 
-function getSourceSection($submit) {
+function getSourceSection($submit, $addslashes=true) {
+    $source = $submit->source;
+    if ($addslashes)
+        $source = addslashes($source);
+    $source = htmlspecialchars($source);
+
     return '
         <div class="centered" id="sourceLink">
             <a onclick="displaySource();">Виж кода</a>
@@ -191,7 +196,7 @@ function getSourceSection($submit) {
         <div style="display: none;" id="sourceField">
             <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
             <div class="show-source-box">
-                <code id="source">' . htmlspecialchars(addslashes($submit->source)) . '</code>
+                <code id="source">' . $source . '</code>
             </div>
         </div>
     ';
