@@ -7,7 +7,7 @@ INSTRUCTIONS:
         1. The filename of the test's input (in)
         2. The filename of the contestant's output (out)
         3. The filename of the author's output (sol)
-    In case there is a problem with the checker itself or the stystem
+    In case there is a problem with the checker itself or the system
     (e.g., some of the input files is missing or cannot be read) it is
     expected to exit with a non-zero exit code. The stdout stream is
     ignored and the stderr is returned.
@@ -65,6 +65,6 @@ int main(int argc, char* argv[]) {
 
     fprintf(stdout, "%lf\n", min(1.0, max(0.0, score)));
     fprintf(stdout, "OK\n");
-	return 0;
+    return 0;
 }
 
