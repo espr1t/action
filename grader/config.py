@@ -5,7 +5,7 @@
 WORKER_COUNT = 3  # Threads
 
 # Evaluation
-UPDATE_INTERVAL = 0.5  # Seconds
+UPDATE_INTERVAL = 0.33  # Seconds
 FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 
 # Execution
@@ -29,7 +29,7 @@ THREAD_LIMIT_JAVA = 99  # Threads
 THREAD_LIMIT_PYTHON = 2  # Threads
 
 # Compilation
-MAX_COMPILATION_TIME = 3.0  # Seconds
+MAX_COMPILATION_TIME = 5.0  # Seconds
 
 # Checker
 CHECKER_TIMEOUT = 3.0  # Seconds
