@@ -33,7 +33,7 @@ class TrainingPage extends Page {
             За тренировка сме ви подготвили лесни задачи, в повечето от които е казано директно какво се иска от вас да
             имплементирате - тоест просто трябва да превърнете описаната процедура в код.
         ';
-        $problems = '2,157,134,155,181,184,15,43,194,199,106,214,164';
+        $problems = '2,157,134,155,181,184,15,43,194,199,106,214,164,234,236';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -84,8 +84,11 @@ class TrainingPage extends Page {
             <a href="http://www.informatika.bg/lectures/recursion" target="_blank">Рекурсия и търсене с връщане</a>.
             <br><br>
             Упражняват се лесни до средно-трудни задачи, в които трябва да се имплементира рекурсивно решение.
+            Задачата <a href="/problems/138">Schedule</a> с дадените ограничения може да се реши с бектрек, макар че
+            има доста по-добро (полиномиално) решение, което ще разгледаме в секцията
+            <a href="/training/greedy">Greedy</a>.
         ';
-        $problems = '66,179,63,90,145,102';
+        $problems = '66,179,63,90,145,102,138';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -119,7 +122,7 @@ class TrainingPage extends Page {
             тестваме "умното" ни такова. Обикновено така се откриват бъгове, като плюсът е, че имаме и тест, с който да
             ги дебъгваме (знаем верния отговор за него от брутфорс решението).
         ';
-        $problems = '166,200,229,153,220,203,4,175';
+        $problems = '166,200,229,153,220,203,4,175,217';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -149,7 +152,7 @@ class TrainingPage extends Page {
             Макар и да има лесно за ползване ефективно сортиране в STL, част от задачите в секцията са такива, че да
             трябва сами да имплементирате логиката на някои от сортиращите алгоритми.
         ';
-        $problems = '123,127,215,132,217,221,45,182,128';
+        $problems = '123,127,215,132,221,45,182,222,128';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -261,6 +264,8 @@ class TrainingPage extends Page {
             <br><br>
             Задачите в секцията са такива, че да не можете да ползвате наготово вградените в STL имплементации.
             В повечето се ползва само идея от някоя от структурите, или операция, която стандартно не се поддържа.
+            В задачата <a href="/problems/129">Sum of Primes</a> ще можете да упражните Решето на Ератостен, което
+            трябва да сте разгледали в предходната тема.
         ';
         $problems = '125,129,20,40,124';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
@@ -361,7 +366,7 @@ class TrainingPage extends Page {
             по-разчупен стейт (например битова маска) или по-сложни оптимизации (например със структури данни) ще бъдат
             разгледани в секциите по-нататък.
         ';
-        $problems = '113,116,142,167,174,50,33,61,85,196,198,39,212,213,224';
+        $problems = '113,116,142,167,174,50,33,61,85,196,198,39,212,213,224,235';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -478,7 +483,7 @@ class TrainingPage extends Page {
             Задачите в секцията се решават с динамично оптимиране, като едно (или повече) от измеренията са битови маски
             или числа в троична/четвъртична бройна система.
         ';
-        $problems = '57,183,51,75,223,47,202,54';
+        $problems = '57,183,51,75,223,47,202,54,233';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -862,7 +867,7 @@ class TrainingPage extends Page {
             нужно. Макар и да могат да бъдат решени от алгоритмите, които мимикрират, имплементацията им на състезание
             би ви загубили много ценно време.
         ';
-        $problems = '42,111,173,186,108,197,77,96,86,64,53';
+        $problems = '42,111,173,186,108,197,77,96,86,64,53,237';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -1013,7 +1018,7 @@ class TrainingPage extends Page {
     }
 
     public function getContent() {
-        // $this->initTraining();
+        $this->initTraining();
 
         $content = '';
         if (!isset($_GET['section'])) {
