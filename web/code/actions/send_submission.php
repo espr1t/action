@@ -34,10 +34,19 @@ $remainFull = 0;
 getWaitingTimes($user, $problem, $remainPartial, $remainFull);
 
 $remainingTime = $full ? $remainFull : $remainPartial;
+// Too soon (for games) - have a few minutes between submits
 if (($full && $remainFull > 0) || (!$full && $remainPartial > 0)) {
     printAjaxResponse(array(
         'status' => 'ERROR',
         'message' => 'Остават още ' . $remainingTime . ' секунди преди да можете да предадете.'
+    ));
+}
+// Too soon (for regular problems) - have at least 5 seconds between submits
+if ($problem->waitFull == 0 && $remainFull >= -5) {
+    // Fail silently as most likely the user got a response for his first submit.
+    printAjaxResponse(array(
+        'status' => 'NONE',
+        'message' => 'Действието е пропуснато умишлено.'
     ));
 }
 

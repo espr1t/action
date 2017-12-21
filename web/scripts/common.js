@@ -187,13 +187,19 @@ function submitActionForm(response, hideOnSuccess = true) {
         alert(response);
         response = null;
     }
-    var type = (response && response.status == 'OK') ? 'INFO' : 'ERROR';
+    var type = 'ERROR';
+    if (response && response.status) {
+        type = response.status == 'NONE' ? 'NONE' :
+               response.status == 'OK' ? 'INFO' : 'ERROR';
+    }
     var message = (response && response.message != '') ? response.message :
             (type == 'INFO') ? 'Действието беше изпълнено успешно.' : 'Действието не може да бъде изпълнено.';
     if (type == 'INFO' && hideOnSuccess) {
         hideActionForm();
     }
-    showMessage(type, message);
+    if (type != 'NONE') {
+        showMessage(type, message);
+    }
     return response;
 }
 
