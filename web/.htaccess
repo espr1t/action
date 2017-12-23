@@ -3,6 +3,12 @@ Options -Indexes
 ErrorDocument 403 /error
 ErrorDocument 404 /error
 
+# PHP Version Configuration
+<IfModule mod_fcgid.c>
+AddHandler fcgid-script .php
+FcgidWrapper /home/espr1tn/public_html/action/php.fcgi .php
+</IfModule>
+
 #
 # Cache configuration
 #

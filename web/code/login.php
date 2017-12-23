@@ -1,5 +1,6 @@
 <?php
 require_once('entities/user.php');
+require_once('entities/widgets.php');
 require_once('config.php');
 require_once('common.php');
 require_once('page.php');
@@ -8,7 +9,7 @@ class LoginPage extends Page {
     public function getTitle() {
         return 'O(N)::Login';
     }
-    
+
     public function getExtraScripts() {
         return array('/scripts/authentication.js', '/scripts/md5.min.js');
     }

@@ -916,10 +916,11 @@ class TrainingPage extends Page {
 
         $sectionInfo = inBox('<h1>' . $topic['title'] . '</h1>' . $topic['expanded']);
         $sectionProblems = '';
+        $problemClass = new ProblemsPage($this->user);
         foreach ($problemIds as $problemId) {
             $problemInfo = $brain->getProblem($problemId);
             $problemSubmits = $brain->getProblemSubmits($problemId, $GLOBALS['STATUS_ACCEPTED']);
-            $sectionProblems .= ProblemsPage::getProblemBox($problemInfo, $problemSubmits);
+            $sectionProblems .= $problemClass->getProblemBox($problemInfo, $problemSubmits);
         }
         return $sectionInfo . $sectionProblems;
     }
@@ -1018,7 +1019,7 @@ class TrainingPage extends Page {
     }
 
     public function getContent() {
-        $this->initTraining();
+        // $this->initTraining();
 
         $content = '';
         if (!isset($_GET['section'])) {
