@@ -352,8 +352,8 @@ class Submit {
         // If all results are numeric, then the problem has been accepted
         if (count($passedTests) == count($this->results)) {
             // We may, however, consider it not okay, if some of the results are not full scores
-            // In this case we'll consider the solution to be okay if it has more than half of the points
-            if (array_sum($this->results) < count($this->results) / 2.0)
+            // In this case we'll consider the solution to be okay if it has more than 80% of the points
+            if (array_sum($this->results) < count($this->results) * 8.0 / 10.0)
                 return $GLOBALS['STATUS_WRONG_ANSWER'];
             return $GLOBALS['STATUS_ACCEPTED'];
         }
