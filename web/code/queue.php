@@ -42,7 +42,7 @@ class QueuePage extends Page {
                 $regradeSubmission = '
                     <td style="width: 16px;">
                         <a onclick="regradeSubmission(' . $entry['submitId'] . ');" title="Regrade submission ' . $entry['submitId'] . '">
-                           <i class="fa fa-refresh"></i>
+                           <i class="fa fa-sync-alt"></i>
                         </a>
                     </td>
                 ';

@@ -782,7 +782,7 @@ class AdminAchievementsPage extends Page {
             $info = $achievement['description'] . PHP_EOL . $users;
             $content .= '
                 <div class="achievement" title="' . $info . '">
-                    <i class="fa fa-' . $achievement['icon'] . ' fa-fw"></i>
+                    <i class="' . $achievement['icon'] . ' fa-fw"></i>
                     <span>' . $achievement['title'] . ' | ' . count($perType[$achievement['key']]) . '</span>
                 </div>
             ';

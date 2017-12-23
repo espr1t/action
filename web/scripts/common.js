@@ -62,7 +62,7 @@ function showMessage(type, message) {
         icon = '<i class="fa fa-check fa-fw"></i>';
     } else {
         className = 'message message-error';
-        icon = '<i class="fa fa-warning fa-fw"></i>';
+        icon = '<i class="fa fa-exclamation fa-fw"></i>';
     }
 
     messageEl.id = id;
@@ -72,7 +72,7 @@ function showMessage(type, message) {
         '    <div class="message-icon">' + icon + '</div>' +
         '    <div class="message-text">' + message + '</div>' +
         '    <div class="message-close" onclick="hideMessage(\'' + className + '\', \'' + id + '\');">' +
-        '        <i class="fa fa-close fa-fw" style="line-height: 2rem;"></i>'+
+        '        <i class="fa fa-times fa-fw" style="line-height: 2rem;"></i>'+
         '    </div>' +
         '</div>' +
     '';
@@ -149,7 +149,7 @@ function showActionForm(content, redirect, classes = '') {
     // Create the form box and add it to the DOM using a fade-in animation
     var form = document.createElement('div');
     form.innerHTML = '' +
-        '<div class="action-form-close" onclick="hideActionForm(\'' + redirect + '\');"><i class="fa fa-close fa-fw"></i></div>' +
+        '<div class="action-form-close" onclick="hideActionForm(\'' + redirect + '\');"><i class="fa fa-times fa-fw"></i></div>' +
         '<div id="action-form-content">' + content + '</div>'
     ;
     document.body.appendChild(form);

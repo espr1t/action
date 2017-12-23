@@ -5,7 +5,7 @@ require_once('page.php');
 
 class ProfilePage extends Page {
     private $profile;
-    
+
     public function getTitle() {
         return 'O(N)::' . $this->profile->username;
     }
@@ -288,7 +288,7 @@ class ProfilePage extends Page {
                 if ($achInfo[$i]['key'] == $achievement['achievement']) {
                     $content .= '
                         <div class="achievement" title="' . $achInfo[$i]['description'] . '">
-                            <i class="fa fa-' . $achInfo[$i]['icon'] . ' fa-fw"></i>
+                            <i class="' . $achInfo[$i]['icon'] . ' fa-fw"></i>
                             <span style="font-weight: bold">' . $achInfo[$i]['title'] . ' | ' . $achievement['date'] . '</span>
                         </div>
                     ';

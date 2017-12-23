@@ -3,540 +3,540 @@
     "key": "SUB1E0",
     "title": "Submitted",
     "description": "1 предадено решение",
-    "icon": "upload"
+    "icon": "fa fa-upload"
   },
   {
     "key": "SUB1E1",
     "title": "Testing the system",
     "description": "10 предадени решения",
-    "icon": "cloud-upload"
+    "icon": "fa fa-cloud-upload-alt"
   },
   {
     "key": "SUB1E2",
     "title": "More and more",
     "description": "100 предадени решения",
-    "icon": "commenting"
+    "icon": "fa fa-comment-alt"
   },
   {
     "key": "SUB1E3",
     "title": "Spammer",
     "description": "1000 предадени решения",
-    "icon": "spinner"
+    "icon": "fa fa-spinner"
   },
   {
     "key": "SOL1E0",
     "title": "Solved",
     "description": "1 решена задача",
-    "icon": "terminal"
+    "icon": "fa fa-terminal"
   },
   {
     "key": "SOL1E1",
     "title": "Smart is the new sexy",
     "description": "10 решени задачи",
-    "icon": "code"
+    "icon": "fa fa-code"
   },
   {
     "key": "SOL1E2",
     "title": "Bring it on",
     "description": "100 решени задачи",
-    "icon": "heartbeat"
+    "icon": "fa fa-heartbeat"
   },
   {
     "key": "1TRIVL",
     "title": "Trivial",
     "description": "Решена задача със сложност trivial",
-    "icon": "child"
+    "icon": "fa fa-child"
   },
   {
     "key": "1EASYY",
     "title": "Easy",
     "description": "Решена задача със сложност easy",
-    "icon": "paper-plane"
+    "icon": "fa fa-paper-plane"
   },
   {
     "key": "1MEDIU",
     "title": "Medium",
     "description": "Решена задача със сложност medium",
-    "icon": "balance-scale"
+    "icon": "fa fa-balance-scale"
   },
   {
     "key": "1HARDD",
     "title": "Hard",
     "description": "Решена задача със сложност hard",
-    "icon": "tint"
+    "icon": "fa fa-tint"
   },
   {
     "key": "1BRUTL",
     "title": "Brutal",
     "description": "Решена задача със сложност brutal",
-    "icon": "paw"
+    "icon": "fa fa-paw"
   },
   {
     "key": "ALLTRV",
     "title": "Child's play",
     "description": "Решени всички задачи със сложност trivial",
-    "icon": "child"
+    "icon": "fa fa-child"
   },
   {
     "key": "ALLESY",
     "title": "Easy peasy",
     "description": "Решени всички задачи със сложност easy",
-    "icon": "paper-plane"
+    "icon": "fa fa-paper-plane"
   },
   {
     "key": "ALLMED",
     "title": "Being balanced",
     "description": "Решени всички задачи със сложност medium",
-    "icon": "balance-scale"
+    "icon": "fa fa-balance-scale"
   },
   {
     "key": "ALLHRD",
     "title": "Working hard",
     "description": "Решени всички задачи със сложност hard",
-    "icon": "tint"
+    "icon": "fa fa-tint"
   },
   {
     "key": "ALLBRL",
     "title": "Animal",
     "description": "Решени всички задачи със сложност brutal",
-    "icon": "paw"
+    "icon": "fa fa-paw"
   },
   {
     "key": "ALLDIF",
     "title": "Difficulty is irrelevant",
     "description": "Решени задачи от всички трудности",
-    "icon": "sort-amount-asc"
+    "icon": "fa fa-sort-amount-down"
   },
   {
     "key": "ALLIMP",
     "title": "Give me a keyboard",
     "description": "Решени всички задачи с таг implement",
-    "icon": "keyboard-o"
+    "icon": "far fa-keyboard"
   },
   {
     "key": "ALLSRC",
     "title": "Needle in a haystack",
     "description": "Решени всички задачи с таг search",
-    "icon": "search"
+    "icon": "fa fa-search"
   },
   {
     "key": "ALLDPR",
     "title": "Like an elephant",
     "description": "Решени всички задачи с таг dp",
-    "icon": "database"
+    "icon": "fa fa-database"
   },
   {
     "key": "ALLGRF",
     "title": "I know the way",
     "description": "Решени всички задачи с таг graph",
-    "icon": "map-signs"
+    "icon": "fa fa-map-signs"
   },
   {
     "key": "ALLMAT",
     "title": "Two plus two",
     "description": "Решени всички задачи с таг math",
-    "icon": "calculator"
+    "icon": "fa fa-calculator"
   },
   {
     "key": "ALLGEO",
     "title": "Radian(t)",
     "description": "Решени всички задачи с таг geometry",
-    "icon": "object-group"
+    "icon": "fa fa-object-group"
   },
   {
     "key": "ALLADH",
     "title": "Improviser",
     "description": "Решени всички задачи с таг ad-hoc",
-    "icon": "lightbulb-o"
+    "icon": "fa fa-lightbulb"
   },
   {
     "key": "ALLFLW",
     "title": "Go with the flow",
     "description": "Решени всички задачи с таг flow",
-    "icon": "ship"
+    "icon": "fa fa-ship"
   },
   {
     "key": "ALLDAC",
     "title": "Divide et impera",
     "description": "Решени всички задачи с таг divconq",
-    "icon": "unlink"
+    "icon": "fa fa-unlink"
   },
   {
     "key": "ALLSTR",
     "title": "No strings attached",
     "description": "Решени всички задачи с таг strings",
-    "icon": "quote-right"
+    "icon": "fa fa-quote-right"
   },
   {
     "key": "ALLSOR",
     "title": "ORDER BY",
     "description": "Решени всички задачи с таг sorting",
-    "icon": "sort-alpha-asc"
+    "icon": "fa fa-sort-alpha-down"
   },
   {
     "key": "ALLGRD",
     "title": "Greedy is good",
     "description": "Решени всички задачи с таг greedy",
-    "icon": "dollar"
+    "icon": "fa fa-dollar-sign"
   },
   {
     "key": "ALLGAM",
     "title": "Playing optimal",
     "description": "Решени всички задачи с таг game",
-    "icon": "futbol-o"
+    "icon": "far fa-futbol"
   },
   {
     "key": "ALLDST",
     "title": "Data is everything",
     "description": "Решени всички задачи с таг datastruct",
-    "icon": "tree"
+    "icon": "fa fa-tree"
   },
   {
     "key": "ALLPNP",
     "title": "P = NP",
     "description": "Решени всички задачи с таг np",
-    "icon": "edit"
+    "icon": "fa fa-edit"
   },
   {
     "key": "ALLTAG",
     "title": "Diversity is key",
     "description": "Решени задачи от всички типове",
-    "icon": "tags"
+    "icon": "fa fa-tags"
   },
   {
     "key": "TWOTEN",
     "title": "Be quick or be dead",
     "description": "Две решени задачи в рамките на десет минути",
-    "icon": "flash"
+    "icon": "fa fa-bolt"
   },
   {
     "key": "03IN24",
     "title": "Three in a row",
     "description": "Три решени задачи в рамките на 24 часа",
-    "icon": "thermometer-empty"
+    "icon": "fa fa-thermometer-quarter"
   },
   {
     "key": "05IN24",
     "title": "Five in a row",
     "description": "Пет решени задачи в рамките на 24 часа",
-    "icon": "thermometer-half"
+    "icon": "fa fa-thermometer-half"
   },
   {
     "key": "10IN24",
     "title": "Ten in a row",
     "description": "Десет решени задачи в рамките на 24 часа",
-    "icon": "thermometer-full"
+    "icon": "fa fa-thermometer-full"
   },
   {
     "key": "TRSEIT",
     "title": "Nemo",
     "description": "Завършена тема Търсене и итерация",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRDYNP",
     "title": "Rainman",
     "description": "Завършена тема Динамично оптимиране",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRGRAF",
     "title": "Dracula",
     "description": "Завършена тема Графи",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRMATH",
     "title": "Euler",
     "description": "Завършена тема Математика",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRGEOM",
     "title": "Picasso",
     "description": "Завършена тема Геометрия",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRFLOW",
     "title": "Orinoco",
     "description": "Завършена тема Потоци",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRDIVC",
     "title": "Machiavelli",
     "description": "Завършена тема Разделяй и владей",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRHASH",
     "title": "Charming",
     "description": "Завършена тема Стрингове и хеширане",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRSORT",
     "title": "Tim",
     "description": "Завършена тема Сортиране",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRGRDY",
     "title": "Gheed",
     "description": "Завършена тема Алчни алгоритми",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRGAME",
     "title": "Grundy",
     "description": "Завършена тема Теория на игрите",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "TRMITM",
     "title": "Meetyou",
     "description": "Завършена тема Срещане в средата",
-    "icon": "university"
+    "icon": "fa fa-university"
   },
   {
     "key": "GRADU8",
     "title": "Graduated",
     "description": "Завършени всички части от трейнинга",
-    "icon": "graduation-cap"
+    "icon": "fa fa-graduation-cap"
   },
   {
     "key": "PLAYED",
     "title": "Let's play",
     "description": "Предадено решение на игра",
-    "icon": "puzzle-piece"
+    "icon": "fa fa-puzzle-piece"
   },
   {
     "key": "GAMERR",
     "title": "Gamer",
     "description": "Предадено решение на всички игри",
-    "icon": "gamepad"
+    "icon": "fa fa-gamepad"
   },
   {
     "key": "WINNER",
     "title": "Winner",
     "description": "Първо място на игра",
-    "icon": "trophy"
+    "icon": "fa fa-trophy"
   },
   {
     "key": "1COMPN",
     "title": "Competitor",
     "description": "Първо състезание",
-    "icon": "dot-circle-o"
+    "icon": "fa fa-bookmark"
   },
   {
     "key": "GOLDDD",
     "title": "Gold",
     "description": "Първо място на състезание",
-    "icon": "user"
+    "icon": "fa fa-user"
   },
   {
     "key": "SILVER",
     "title": "Silver",
     "description": "Второ място на състезание",
-    "icon": "user-plus"
+    "icon": "fa fa-user-plus"
   },
   {
     "key": "BRONZE",
     "title": "Bronze",
     "description": "Трето място на състезание",
-    "icon": "group"
+    "icon": "fa fa-users"
   },
   {
     "key": "ALLTSK",
     "title": "I've seen it all",
     "description": "Решени всички задачи",
-    "icon": "check"
+    "icon": "fa fa-check-circle"
   },
   {
     "key": "RGSTRD",
     "title": "Registered",
     "description": "Регистриран потребител",
-    "icon": "registered"
+    "icon": "fa fa-registered"
   },
   {
     "key": "REPORT",
     "title": "I spotted it first",
     "description": "Докладван проблем",
-    "icon": "bug"
+    "icon": "fa fa-bug"
   },
   {
     "key": "ACTIVE",
     "title": "Ready, set, action!",
     "description": "Направени 1000 действия на сайта",
-    "icon": "adn"
+    "icon": "fa fa-at"
   },
   {
     "key": "TESTED",
     "title": "Processor",
     "description": "Изтествани 10000 теста",
-    "icon": "microchip"
+    "icon": "fa fa-microchip"
   },
   {
     "key": "RANK01",
     "title": "Rockstar",
     "description": "Първи в ранклистата",
-    "icon": "rocket"
+    "icon": "fa fa-rocket"
   },
   {
     "key": "RANK10",
     "title": "Skyhigh",
     "description": "Сред първите 10 в ранклистата",
-    "icon": "line-chart"
+    "icon": "fa fa-chart-line"
   },
   {
     "key": "VIRGIN",
     "title": "Conquered",
     "description": "Първo решeние на задача",
-    "icon": "flag"
+    "icon": "fa fa-flag"
   },
   {
     "key": "MORNIN",
     "title": "Early bird",
     "description": "Пратено решение между 6:00 и 10:00 сутринта",
-    "icon": "coffee"
+    "icon": "fa fa-coffee"
   },
   {
     "key": "NIGHTY",
     "title": "Night owl",
     "description": "Пратено решение между 2:00 и 6:00 през нощта",
-    "icon": "moon-o"
+    "icon": "fa fa-moon"
   },
   {
     "key": "3LANGS",
     "title": "Rosetta Stone",
     "description": "По една решена задача на всеки език",
-    "icon": "language"
+    "icon": "fa fa-language"
   },
   {
     "key": "OLDREG",
     "title": "Anniversary",
     "description": "Регистриран преди повече от година",
-    "icon": "child"
+    "icon": "fa fa-child"
   },
   {
     "key": "BIRTHD",
     "title": "Happy birthday!",
     "description": "Предадена задача на рождения си ден",
-    "icon": "birthday-cake"
+    "icon": "fa fa-birthday-cake"
   },
   {
     "key": "CHRSTM",
     "title": "Santa's here",
     "description": "Предадена задача на Коледа",
-    "icon": "gift"
+    "icon": "fa fa-gift"
   },
   {
     "key": "NUYEAR",
     "title": "Happy New Year!",
     "description": "Предадена задача на Нова Година",
-    "icon": "calendar"
+    "icon": "far fa-calendar-alt"
   },
   {
     "key": "WARETL",
     "title": "What is wrong NOW?!",
     "description": "Три различни типа грешки на една задача",
-    "icon": "times"
+    "icon": "fa fa-times"
   },
   {
     "key": "10FAIL",
     "title": "Oh, well",
     "description": "Десет неуспешни събмита по задача",
-    "icon": "meh-o"
+    "icon": "far fa-frown"
   },
   {
     "key": "20FAIL",
     "title": "21-st time is the charm",
     "description": "Двадесет неуспешни събмита по задача",
-    "icon": "umbrella"
+    "icon": "fa fa-umbrella"
   },
   {
     "key": "20FRST",
     "title": "Green Arrow",
     "description": "Двадесет задачи, решени от първи събмит",
-    "icon": "dot-circle-o"
+    "icon": "far fa-dot-circle"
   },
   {
     "key": "50FRST",
     "title": "Robin Hood",
     "description": "Петдесет задачи, решени от първи събмит",
-    "icon": "bullseye"
+    "icon": "fa fa-bullseye"
   },
   {
     "key": "100FST",
     "title": "Vasily Zaytsev",
     "description": "Сто задачи, решени от първи събмит",
-    "icon": "crosshairs"
+    "icon": "fa fa-crosshairs"
   },
   {
     "key": "TRICKY",
     "title": "Pedantic",
     "description": "Пет подвеждащи задачи, решени от първи път",
-    "icon": "eye"
+    "icon": "fa fa-eye"
   },
   {
     "key": "AVATAR",
     "title": "Now you see me",
     "description": "Качена снимка/аватар",
-    "icon": "id-badge"
+    "icon": "fa fa-id-badge"
   },
   {
     "key": "PROFIL",
     "title": "Hi, my name is...",
     "description": "Пълна информация в профила",
-    "icon": "address-card-o"
+    "icon": "fa fa-address-card"
   },
   {
     "key": "ACCAGN",
     "title": "Let's do that again",
     "description": "Решена повторно задача с друго решение",
-    "icon": "recycle"
+    "icon": "fa fa-recycle"
   },
   {
     "key": "OFFBY1",
     "title": "Off by one",
     "description": "Едносимволен фикс на решение",
-    "icon": "magic"
+    "icon": "fa fa-magic"
   },
   {
     "key": "3DIFIP",
     "title": "On the road",
     "description": "Изпратени решения от три различни места",
-    "icon": "road"
+    "icon": "fa fa-road"
   },
   {
     "key": "SHEEPS",
     "title": "Draw me a sheep",
     "description": "Решена задачата Sheep",
-    "icon": "ship"
+    "icon": "fab fa-docker"
   },
   {
     "key": "TOWERS",
     "title": "Do you hear me, over?",
     "description": "Решена задачата Radio Towers",
-    "icon": "wifi"
+    "icon": "fa fa-bullhorn"
   },
   {
     "key": "DTHSTR",
     "title": "May the force be with you",
     "description": "Решена задачата Deathstars",
-    "icon": "star"
+    "icon": "fa fa-star"
   },
   {
     "key": "SNWCLN",
     "title": "You know something, Jon Snow",
     "description": "Решена задачата Snow Cleaning",
-    "icon": "snowflake-o"
+    "icon": "far fa-snowflake"
   },
   {
     "key": "SHADES",
     "title": "Fifty% shades of gray",
     "description": "Решена задачата Shades",
-    "icon": "barcode"
+    "icon": "fa fa-barcode"
   }
 ]

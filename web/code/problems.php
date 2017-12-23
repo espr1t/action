@@ -36,7 +36,7 @@ class ProblemsPage extends Page {
         $difficulty = '';
         switch ($problemInfo['difficulty']) {
             case 'trivial':
-                $difficulty = '<i class="fa fa-child" title="Trivial"></i>';
+                $difficulty = '<i class="fa fa-leaf" title="Trivial"></i>';
                 break;
             case 'easy':
                 $difficulty = '<i class="fa fa-paper-plane" title="Easy"></i>';
@@ -55,15 +55,15 @@ class ProblemsPage extends Page {
         }
 
         $problemInfo['solutions'] = (count($problemSolutions) - popcount($serviceUserSolutions));
-        $solutions = '<i class="fa fa-users" title="Решена от ' . $problemInfo['solutions'] .
-                        ' човек' . ($problemInfo['solutions'] != 1 ? 'a' : '') . '"></i> ' . $problemInfo['solutions'];
+        $solutions = '<span style="font-weight: bold;" title="Решена от ' . $problemInfo['solutions'] .
+                        ' човек' . ($problemInfo['solutions'] != 1 ? 'a' : '') . '">' . $problemInfo['solutions'] . '</span>';
 
         $box = '
             <a href="/problems/' . $problemInfo['id'] . '" class="decorated">
                 <div class="box narrow boxlink">
                         <div class="problem-status">' . $statusIcon . '</div>
                         <div class="problem-name">' . $problemInfo['name'] . '</div>
-                        <div class="problem-stats">' . $difficulty . ' &nbsp; '  . $solutions . '</div>
+                        <div class="problem-stats">' . $difficulty . ' | ' . $solutions . '</div>
                 </div>
             </a>
         ';
@@ -360,7 +360,7 @@ class ProblemsPage extends Page {
                 $icon = '<i class="fa fa-check"></i>';
             } else if ($result == $GLOBALS['STATUS_WAITING'] || $result == $GLOBALS['STATUS_PREPARING'] || $result == $GLOBALS['STATUS_COMPILING']) {
                 $class .= 'dull-gray';
-                $icon = '<i class="fa fa-circle-o"></i>';
+                $icon = '<i class="fa fa-circle"></i>';
             } else if ($result == $GLOBALS['STATUS_TESTING']) {
                 $class .= 'dull-gray';
                 $icon = '<i class="fa fa-spinner fa-pulse"></i>';
@@ -369,7 +369,7 @@ class ProblemsPage extends Page {
                 $icon = '<i class="fa fa-times"></i>';
             } else if ($result == $GLOBALS['STATUS_TIME_LIMIT']) {
                 $class .= 'dull-red';
-                $icon = '<i class="fa fa-clock-o"></i>';
+                $icon = '<i class="fa fa-clock"></i>';
             } else if ($result == $GLOBALS['STATUS_MEMORY_LIMIT']) {
                 $class .= 'dull-red';
                 $icon = '<i class="fa fa-database"></i>';
