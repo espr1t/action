@@ -228,75 +228,165 @@
     "icon": "fa fa-thermometer-full"
   },
   {
-    "key": "TRSEIT",
-    "title": "Nemo",
-    "description": "Завършена тема Търсене и итерация",
+    "key": "T_IMPL",
+    "title": "Coder",
+    "description": "Завършена тема Implementation",
     "icon": "fa fa-university"
   },
   {
-    "key": "TRDYNP",
-    "title": "Rainman",
-    "description": "Завършена тема Динамично оптимиране",
+    "key": "T_CCAS",
+    "title": "In the details",
+    "description": "Завършена тема Corner Cases",
     "icon": "fa fa-university"
   },
   {
-    "key": "TRGRAF",
-    "title": "Dracula",
-    "description": "Завършена тема Графи",
+    "key": "T_RECU",
+    "title": "We must go deeper",
+    "description": "Завършена тема Recursion & Backtrack",
     "icon": "fa fa-university"
   },
   {
-    "key": "TRMATH",
-    "title": "Euler",
-    "description": "Завършена тема Математика",
+    "key": "T_BRUT",
+    "title": "Brutus",
+    "description": "Завършена тема Bruteforce",
     "icon": "fa fa-university"
   },
   {
-    "key": "TRGEOM",
-    "title": "Picasso",
-    "description": "Завършена тема Геометрия",
+    "key": "T_SORT",
+    "title": "I want order!",
+    "description": "Завършена тема Sorting",
     "icon": "fa fa-university"
   },
   {
-    "key": "TRFLOW",
-    "title": "Orinoco",
-    "description": "Завършена тема Потоци",
-    "icon": "fa fa-university"
-  },
-  {
-    "key": "TRDIVC",
-    "title": "Machiavelli",
-    "description": "Завършена тема Разделяй и владей",
-    "icon": "fa fa-university"
-  },
-  {
-    "key": "TRHASH",
-    "title": "Charming",
-    "description": "Завършена тема Стрингове и хеширане",
-    "icon": "fa fa-university"
-  },
-  {
-    "key": "TRSORT",
-    "title": "Tim",
-    "description": "Завършена тема Сортиране",
-    "icon": "fa fa-university"
-  },
-  {
-    "key": "TRGRDY",
+    "key": "T_GRDY",
     "title": "Gheed",
-    "description": "Завършена тема Алчни алгоритми",
+    "description": "Завършена тема Greedy",
     "icon": "fa fa-university"
   },
   {
-    "key": "TRGAME",
-    "title": "Grundy",
-    "description": "Завършена тема Теория на игрите",
+    "key": "T_MATH",
+    "title": "Euler",
+    "description": "Завършена тема Math",
     "icon": "fa fa-university"
   },
   {
-    "key": "TRMITM",
-    "title": "Meetyou",
-    "description": "Завършена тема Срещане в средата",
+    "key": "T_SIDS",
+    "title": "I need data!",
+    "description": "Завършена тема Simple Data Structures",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_GRF1",
+    "title": "Dracula",
+    "description": "Завършена тема Simple Graphs",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_BSTS",
+    "title": "Seeker",
+    "description": "Завършена тема Binary & Ternary Search",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_DPDP",
+    "title": "Dynamic",
+    "description": "Завършена тема Dynamic Programming",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_BUCK",
+    "title": "Bouquet",
+    "description": "Завършена тема Bucketing",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_ITDP",
+    "title": "Iterator",
+    "description": "Завършена тема Iterative Dynamic Programming",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_WIND",
+    "title": "Through the window",
+    "description": "Завършена тема Sliding Window",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_BMDP",
+    "title": "Masked",
+    "description": "Завършена тема Bitmask Dynamic Programming",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_GAME",
+    "title": "Nimimax",
+    "description": "Завършена тема Game Theory",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_ADDS",
+    "title": "Data is everything!",
+    "description": "Завършена тема Advanced Data Structures",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_STRI",
+    "title": "CHARming",
+    "description": "Завършена тема Strings",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_GEOM",
+    "title": "Picasso",
+    "description": "Завършена тема Geometry",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_GRF2",
+    "title": "Monte Kristo",
+    "description": "Завършена тема Medium Graphs",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_MITM",
+    "title": "Meet me halfway",
+    "description": "Завършена тема Meet in the Middle",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_PROB",
+    "title": "Chance",
+    "description": "Завършена тема Probability",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_INNR",
+    "title": "It is inside what counts",
+    "description": "Завършена тема Inner Cycle Optimization",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_SWLN",
+    "title": "Sweep me off my line",
+    "description": "Завършена тема Sweep Line",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_ADDP",
+    "title": "Stateful",
+    "description": "Завършена тема Advanced Dynamic Programming",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_GRF3",
+    "title": "Zeppelin",
+    "description": "Завършена тема Advanced Graphs",
+    "icon": "fa fa-university"
+  },
+  {
+    "key": "T_VARI",
+    "title": "Unchained",
+    "description": "Завършена тема Various",
     "icon": "fa fa-university"
   },
   {
@@ -442,6 +532,24 @@
     "title": "What is wrong NOW?!",
     "description": "Три различни типа грешки на една задача",
     "icon": "fa fa-times"
+  },
+  {
+    "key": "HATTRK",
+    "title": "Hattrick",
+    "description": "Три различни статуса в един събмит",
+    "icon": "fab fa-css3-alt"
+  },
+  {
+    "key": "QUATRO",
+    "title": "Quatro",
+    "description": "Четири различни статуса в един събмит",
+    "icon": "fa fa-car"
+  },
+  {
+    "key": "PNTGRM",
+    "title": "Pentagram",
+    "description": "Пет различни статуса в един събмит",
+    "icon": "fab fa-html5"
   },
   {
     "key": "10FAIL",

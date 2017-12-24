@@ -96,6 +96,44 @@ class AdminAchievementsPage extends Page {
         }
     }
 
+    // Solved various training sections
+    public function achievementTraining($brain, $achieved, $user, $solved, $training) {
+        $solvedDate = array();
+        foreach ($solved as $submit) {
+            $solvedDate[$submit['problemId']] = $submit['submitted'];
+        }
+        $completed = 0;
+        $latestDate = '';
+        foreach ($training as $section) {
+            $key = 'T_' . $section['key'];
+            if (!in_array($key, $achieved)) {
+                $date = '';
+                $problems = explode(',', $section['problems']);
+                foreach ($problems as $problemId) {
+                    if (!array_key_exists($problemId, $solvedDate)) {
+                        $date = '';
+                        break;
+                    }
+                    if ($date == '' || $date < $solvedDate[$problemId])
+                        $date = $solvedDate[$problemId];
+                }
+                if ($date != '') {
+                    $brain->addAchievement($user->id, $key, $date);
+                    $completed += 1;
+                    if ($latestDate == '' || $latestDate < $date)
+                        $latestDate = $date;
+                }
+            } else {
+                $completed += 1;
+            }
+        }
+        if (!in_array('GRADU8', $achieved)) {
+            if ($completed == count($training)) {
+                $brain->addAchievement($user->id, 'GRADU8', $latestDate);
+            }
+        }
+    }
+
     // Has solved all problems
     public function achievementAllTasks($brain, $achieved, $user, $solved, $problems) {
         if (!in_array('ALLTSK', $achieved)) {
@@ -310,6 +348,8 @@ class AdminAchievementsPage extends Page {
                     $errors[$submit['problemId']] |= (1 << 3);
                 if ($submit['status'] == 'ML')
                     $errors[$submit['problemId']] |= (1 << 4);
+                if ($submit['status'] == 'IE')
+                    $errors[$submit['problemId']] |= (1 << 5);
 
                 if (popcount($errors[$submit['problemId']]) >= 3) {
                     $date = $submit['submitted'];
@@ -319,6 +359,36 @@ class AdminAchievementsPage extends Page {
             if ($date != '') {
                 $brain->addAchievement($user->id, 'WARETL', $date);
             }
+        }
+    }
+
+    // Got several different types of errors in a single submission
+    public function achievementDisaster($brain, $achieved, $user, $submits) {
+        foreach ($submits as $submit) {
+            $results = explode(',', $submit['results']);
+            $errorMask = 0;
+            foreach($results as $result) {
+                if (is_numeric($result))
+                    $errorMask |= (1 << 0);
+                else if ($result == 'WA')
+                    $errorMask |= (1 << 1);
+                else if ($result == 'RE')
+                    $errorMask |= (1 << 2);
+                else if ($result == 'TL')
+                    $errorMask |= (1 << 3);
+                else if ($result == 'CE')
+                    $errorMask |= (1 << 4);
+                else if ($result == 'ML')
+                    $errorMask |= (1 << 5);
+                else if ($result == 'IE')
+                    $errorMask |= (1 << 6);
+            }
+            if (popcount($errorMask) >= 3 && !in_array('HATTRK', $achieved))
+                $brain->addAchievement($user->id, 'HATTRK', $submit['submitted']);
+            if (popcount($errorMask) >= 4 && !in_array('QUATRO', $achieved))
+                $brain->addAchievement($user->id, 'QUATRO', $submit['submitted']);
+            if (popcount($errorMask) >= 5 && !in_array('PNTGRM', $achieved))
+                $brain->addAchievement($user->id, 'PNTGRM', $submit['submitted']);
         }
     }
 
@@ -632,6 +702,9 @@ class AdminAchievementsPage extends Page {
             }
         }
 
+        // Training sections and problems
+        $training = $brain->getTrainingTopics();
+
         // Number of submits and solutions achievements
         $this->achievementSubmitted($brain, $achieved, $user, $userProblemSubmits, 'SUB1E0', 1);
         $this->achievementSubmitted($brain, $achieved, $user, $userProblemSubmits, 'SUB1E1', 10);
@@ -679,7 +752,8 @@ class AdminAchievementsPage extends Page {
         $this->achievementSpeed($brain, $achieved, $user, $userSolved, '05IN24', 5, 24 * 60 * 60);
         $this->achievementSpeed($brain, $achieved, $user, $userSolved, '10IN24', 10, 24 * 60 * 60);
 
-        // TODO: Training section achievements
+        // Training section achievements
+        $this->achievementTraining($brain, $achieved, $user, $userSolved, $training);
 
         // Games
         $this->achievementPlayedGame($brain, $achieved, $user, $standings, $userAllSubmits, 'PLAYED', 1);
@@ -709,6 +783,7 @@ class AdminAchievementsPage extends Page {
         $this->achievementRainbow($brain, $achieved, $user, $userAllSubmits);
         $this->achievementOldtimer($brain, $achieved, $user);
         $this->achievementSoWrong($brain, $achieved, $user, $userProblemSubmits);
+        $this->achievementDisaster($brain, $achieved, $user, $userProblemSubmits);
         $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits, '10FAIL', 10);
         $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits, '20FAIL', 20);
         $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '20FRST', 20);
