@@ -345,6 +345,8 @@ class ProblemsPage extends Page {
                 $detailsTable .= '<br>';
             }
             $result = $submit->results[$i];
+            if (is_numeric($result) && $result < 0.01)
+                $result = $GLOBALS['STATUS_WRONG_ANSWER'];
             $title = sprintf('Тест %d%sСтатус: %s%sТочки: %s%sВреме: %s%sПамет: %s',
                 $i, PHP_EOL,
                 is_numeric($result) ? 'OK' : $result, PHP_EOL,
