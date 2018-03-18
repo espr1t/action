@@ -26,7 +26,8 @@ class AdminRetestPage extends Page {
             $this->retestProblem($_GET['problemId']);
             redirect('/admin/retest');
         }
-        return QueuePage::getContent();
+        $page = new QueuePage($this->user);
+        return $page->getContent();
     }
 
 }

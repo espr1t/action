@@ -36,7 +36,8 @@ class AdminRegradePage extends Page {
             }
             redirect('/admin/regrade');
         }
-        return QueuePage::getContent();
+        $page = new QueuePage($this->user);
+        return $page->getContent();
     }
 
 }
