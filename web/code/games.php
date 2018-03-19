@@ -307,7 +307,7 @@ class GamesPage extends Page {
 
         ksort($games);
         foreach($games as $opponentKey => $results) {
-            $opponentId = intval(split('_', $opponentKey)[1]);
+            $opponentId = intval(explode('_', $opponentKey)[1]);
             $opponentName = '';
             if ($opponentId < 0) {
                 $opponentName = sprintf('Author%d', -$opponentId);
@@ -328,19 +328,19 @@ class GamesPage extends Page {
 
                 if ($result['scoreUser'] > $result['scoreOpponent']) {
                     // Win
-                    $classes = 'fa fa-check-circle-o green';
+                    $classes = 'far fa-check-circle green';
                 } else if ($result['scoreUser'] < $result['scoreOpponent']) {
                     // Loss
-                    $classes = 'fa fa-times-circle-o red';
+                    $classes = 'far fa-times-circle red';
                 } else {
                     if ($result['scoreUser'] == 0 && $result['scoreOpponent'] == 0) {
                         // Not played
-                        $classes = 'fa fa-question-circle-o gray';
+                        $classes = 'far fa-question-circle gray';
                         $message = 'Мачът още не е изигран.';
                         $showLink = false;
                     } else {
                         // Draw
-                        $classes = 'fa fa-pause-circle-o yellow';
+                        $classes = 'far fa-pause-circle yellow';
                     }
                 }
                 $perTestStatus .= '
@@ -618,7 +618,7 @@ class GamesPage extends Page {
                 }
             }
 
-            $user = User::get(intval(split('_', $bestUser)[1]));
+            $user = User::get(intval(explode('_', $bestUser)[1]));
             $submitId = $submit[$bestUser];
             if ($bestUser == 'User_' . $this->user->id ||
                     $this->user->access > $GLOBALS['ACCESS_SEE_SUBMITS']) {

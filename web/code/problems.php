@@ -362,7 +362,7 @@ class ProblemsPage extends Page {
                 $icon = '<i class="fa fa-check"></i>';
             } else if ($result == $GLOBALS['STATUS_WAITING'] || $result == $GLOBALS['STATUS_PREPARING'] || $result == $GLOBALS['STATUS_COMPILING']) {
                 $class .= 'dull-gray';
-                $icon = '<i class="fa fa-circle"></i>';
+                $icon = '<i class="fas fa-hourglass-start"></i>';
             } else if ($result == $GLOBALS['STATUS_TESTING']) {
                 $class .= 'dull-gray';
                 $icon = '<i class="fa fa-spinner fa-pulse"></i>';
@@ -512,7 +512,7 @@ class ProblemsPage extends Page {
             if (!canSeeProblem($this->user, $problem->visible, $problem->id)) {
                 redirect('/problems', 'ERROR', 'Нямате права да видите тази задача.');
             }
-            if ($problem->type == 'game') {
+            if ($problem->type == 'game' || $problem->type == 'relative') {
                 redirect('/games', 'ERROR', 'Поисканата задача всъщност е игра. Моля съобщете на администратор за проблема.');
             }
 
