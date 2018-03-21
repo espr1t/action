@@ -17,7 +17,7 @@ from compiler import Compiler
 import common
 from status import TestStatus
 from runner import Runner
-from threading import Thread, Lock
+from threading import Timer, Lock
 
 
 class Evaluator:
@@ -55,6 +55,7 @@ class Evaluator:
         self.update_timer = -1
         self.update_message = ""
         self.update_results = []
+        self.update_scheduled_event = None
 
         # Path to sandbox and files inside
         self.path_sandbox = config.PATH_SANDBOX + "submit_{:06d}/".format(self.id)
@@ -152,6 +153,11 @@ class Evaluator:
         # We're using time() instead of perf_counter() so we get a UNIX timestamp (with parts of seconds)
         # This info helps figure out WHEN exactly (date + hour) the solution was graded.
         if time() - self.update_timer > config.UPDATE_INTERVAL or self.update_message != "":
+            # Cancel delayed update if any pending
+            if self.update_scheduled_event is not None:
+                self.update_scheduled_event.cancel()
+                self.update_scheduled_event = None
+
             data = {
                 "id": self.id,
                 "message": self.update_message,
@@ -162,9 +168,17 @@ class Evaluator:
             # before we send the next one (the lock ensures this).
             common.send_request("POST", self.update_url, data)
             # Clear update_results so we don't send them with every update
+            # TODO: Do we lose the results if there is a race condition and the previous update wasn't applied?
             self.update_results = []
             # Finally update the timer until next update
             self.update_timer = time()
+        else:
+            # Schedule a dummy update event if not already scheduled
+            if self.update_scheduled_event is None:
+                remaining_time = max(0.0, config.UPDATE_INTERVAL - (time() - self.update_timer))
+                self.update_scheduled_event = Timer(remaining_time, self.update_frontend)
+                self.update_scheduled_event.start()
+
         self.lock.release()
 
     def set_results(self, status):

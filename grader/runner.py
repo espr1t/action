@@ -527,7 +527,9 @@ class Runner:
             return "Checker Timeout", 0.0
 
         if exit_code != 0:
-            return "Checker returned non-zero exit code: {}".format(exit_code), 0.0
+            message = "Checker returned non-zero exit code. Error was: \"{error_message}\""\
+                      .format(exit_code=exit_code, error_message=process.communicate()[1])
+            return message, 0.0
 
         result = process.communicate()[0]
         result = result.decode("utf-8") if result is not None else "0.0"
