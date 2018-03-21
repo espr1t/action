@@ -763,8 +763,9 @@ div.overlay {
 }
 
 div.action-form {
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow-y: visible;
+    /* Removing this messes up overflow-y on Chrome (apparently a bug) */
+    overflow-x: visible;
     -ms-overflow-style: none;
     max-height: 40rem;
     width: 43rem;
@@ -1138,6 +1139,7 @@ div.help-version {
 }
 div.test-result {
     text-align: center;
+    position: relative;
     display: inline-block;
     min-height: 2rem;
     min-width: 2rem;
@@ -1166,7 +1168,7 @@ div.test-result {
     margin-top: -3px;
     width: 8rem;
     white-space: pre-wrap;
-    position: fixed;
+    position: absolute;
     overflow: visible;
     z-index: 101;
 }
