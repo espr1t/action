@@ -303,7 +303,7 @@ function updateSolutionsTable() {
         statusCol.innerHTML = solutions[i]['status'] == 'pending' ? '-' : solutions[i]['status'];
 
         var regradeCol = row.insertCell(-1);
-        regradeCol.innerHTML = '<i class="fa fa-refresh green" style="cursor: pointer;"></i>';
+        regradeCol.innerHTML = '<i class="fa fa-sync-alt green" style="cursor: pointer;"></i>';
         regradeCol.addEventListener('click', regradeSolution.bind(undefined, solutions[i]['submitId']));
 
         var deleteCol = row.insertCell(-1);

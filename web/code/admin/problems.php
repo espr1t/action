@@ -376,7 +376,7 @@ class AdminProblemsPage extends Page {
                                 <th>Памет</th>
                                 <th>Точки</th>
                                 <th>Статус</th>
-                                <th><i class="fa fa-refresh"></i></th>
+                                <th><i class="fa fa-sync-alt"></i></th>
                                 <th><i class="fa fa-trash"></i></th>
                             </tr>
                         </thead>
@@ -422,7 +422,7 @@ class AdminProblemsPage extends Page {
 
         return $content;
     }
-    
+
     public function getContent() {
         // Default page listing all problems
         $content = inBox('
