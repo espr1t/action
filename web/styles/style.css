@@ -488,6 +488,13 @@ div.game-info {
     padding: 1rem 1rem 1rem 0;
 }
 
+img.game-image {
+    max-width: 12rem;
+    max-height: 12rem;
+    width: auto;
+    height: auto;
+}
+
 div.game-image {
     display: inline-block;
     text-align: right;

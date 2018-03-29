@@ -14,7 +14,13 @@ class GamesPage extends Page {
     }
 
     public function getExtraScripts() {
-        return array('/scripts/language_detector.js', '/scripts/snakes.js', '/scripts/uttt.js', '/scripts/hypersnakes.js');
+        return array(
+            '/scripts/language_detector.js',
+            '/scripts/games/snakes.js',
+            '/scripts/games/uttt.js',
+            '/scripts/games/hypersnakes.js',
+            '/scripts/games/tetris.js'
+        );
     }
 
     public function getExtraStyles() {
@@ -85,7 +91,8 @@ class GamesPage extends Page {
                     break;
             $scoreStr = $positionStr = 'N/A';
             if ($position < count($ranking)) {
-                $scoreStr = sprintf("%.2f (best is %.2f)", $ranking[$position]['points'], $ranking[0]['points']);
+                $scoreStr = sprintf("%.2f (best is %.2f)",
+                    $ranking[$position]['points'], $ranking[0]['points']);
                 $positionStr = sprintf("%d (out of %d)", $position + 1, count($ranking));
             }
 
@@ -103,7 +110,7 @@ class GamesPage extends Page {
                             <div class="game-stats">' . $stats . '</div>
                             <div class="game-description">' . $game['description'] . '</div>
                         </div>
-                        <div class="game-image"><img src="' . $game['logo'] . '"></div>
+                        <div class="game-image"><img class="game-image" src="' . $game['logo'] . '"></div>
                     </div>
                 </a>
             ';
@@ -122,16 +129,18 @@ class GamesPage extends Page {
     }
 
     private function getMainPage() {
-        $text = '<h1>Игри</h1>
-                 Тук можете да намерите няколко игри, за които можете да напишете изкуствен интелект.
+        $text = '
+            <h1>Игри</h1>
+            Тук можете да намерите няколко игри, за които трябва да напишете изкуствен интелект.
         ';
         $header = inBox($text);
         $gamesList = $this->getAllGames();
         return $header . $gamesList;
     }
 
-    private function getStatement($problem) {
-        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+    private function getGameStatement($problem) {
+        $statementFile = sprintf('%s/%s/%s',
+            $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
 
         $partialSubmitInfo = "Частичното решение се тества срещу няколко авторски решения с различна сложност и не се запазва като финално.";
@@ -226,6 +235,96 @@ class GamesPage extends Page {
                     ' . $partSubmitButton . '
                     ' . $visualizerButton . '
                     ' . $fullSubmitButton . '
+                    ' . $seeSubmissionsLink . '
+                    ' . $scoreboardButton . '
+                </div>
+        ';
+
+        return '
+            <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
+                <div class="problem-title" id="problem-title">' . $problem->name . '</div>
+                <div class="problem-origin">' . $problem->origin . '</div>
+                <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
+                <div class="separator"></div>
+                <div class="problem-statement">' . $statement . '</div>
+                ' . $controlButtons . '
+            </div>
+        ';
+    }
+
+    private function getRelativeStatement($problem) {
+        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+        $statement = file_get_contents($statementFile);
+
+        $submitFormContent = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Изпращане на Решение</h2>
+            <div class="center">Решението ще получи пропорционални точки спрямо авторското решение, или това на най-добрия друг участник.</div>
+            <br>
+            <div class="center">
+                <textarea name="source" class="submit-source" cols=80 rows=24 id="source"></textarea>
+            </div>
+            <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
+            <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ');" class="button button-color-red"></div>
+        ';
+
+        $submitButton = '';
+        $seeSubmissionsLink = '';
+        $visualizerButton = '
+                    <a href="' . getGameLink($problem->name) . '/visualizer">
+                        <input type="submit" value="Визуализатор" class="button button-color-blue button-large">
+                    </a>
+        ';
+        $scoreboardButton = '
+                    <br>
+                    <a href="' . getGameLink($problem->name) . '/scoreboard">
+                        <input type="submit" value="Класиране" class="button button-color-gray button-small" title="Още няма изготвено класиране.">
+                    </a>
+        ';
+
+        /*
+        $visualizerButton = '
+            <input type="submit" value="Визуализатор" class="button button-color-gray button-large" title="Визуализаторът не е достъпен.">
+        ';
+        */
+        $scoreboardButton = '
+            <br>
+            <input type="submit" value="Класиране" class="button button-color-gray button-small" title="Още няма изготвено класиране.">
+        ';
+
+        if ($this->user->access >= $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
+            $remainPartial = 0;
+            $remainFull = 0;
+            getWaitingTimes($this->user, $problem, $remainPartial, $remainFull);
+
+            // Submit button
+            if ($remainFull <= 0) {
+                $submitButton = '
+                        <script>function showFullForm() {showSubmitForm(`' . $submitFormContent . '`);}</script>
+                        <input type="submit" onclick="showFullForm();" value="Изпрати Решение" class="button button-large button-color-blue">
+                ';
+            } else {
+                $submitButton = '
+                        <input type="submit" value="Изпрати Решение" class="button button-large button-color-gray"
+                                title="Ще можете да предадете отново след ' . $remainFull . ' секунди.">
+                ';
+            }
+
+            // See previous submissions link
+            $seeSubmissionsLink = '
+                    <br>
+                    <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
+            ';
+        } else {
+            $submitButton = '
+                <input type="submit" value="Изпрати Решение" class="button button-large button-color-gray"
+                        title="Трябва да влезете в системата за да можете да предавате решения.">
+            ';
+        }
+
+        $controlButtons = '
+                <div class="center">
+                    ' . $submitButton . '
+                    ' . $visualizerButton . '
                     ' . $seeSubmissionsLink . '
                     ' . $scoreboardButton . '
                 </div>
@@ -439,7 +538,15 @@ class GamesPage extends Page {
         if (isset($_SESSION['queueShortcut']))
             $redirectUrl = '/queue';
 
-        $content = $this->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+        $content = '';
+        if ($problem->type == 'game') {
+            $content = $this->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+        } else if ($problem->type == 'relative') {
+            $problemsPage = new ProblemsPage($this->user);
+            $content = $problemsPage->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+        } else {
+            error_log("ERROR: In games, but problem is neither 'game' nor 'relative'!");
+        }
 
         return '
             <script>
@@ -701,7 +808,11 @@ class GamesPage extends Page {
                 return $this->getMainPage();
             }
 
-            $content = $this->getStatement($problem);
+            if ($problem->type == 'game') {
+                $content = $this->getGameStatement($problem);
+            } else if ($problem->type == 'relative') {
+                $content = $this->getRelativeStatement($problem);
+            }
             if (isset($_GET['visualizer'])) {
                 if ($_GET['game'] == 'snakes') {
                     $content .= '<script>showSnakesVisualizer("'. $this->user->username . '");</script>';
@@ -709,6 +820,8 @@ class GamesPage extends Page {
                     $content .= '<script>showHypersnakesVisualizer("'. $this->user->username . '");</script>';
                 } else if ($_GET['game'] == 'ultimate-ttt') {
                     $content .= '<script>showUtttVisualizer("'. $this->user->username . '");</script>';
+                } else if ($_GET['game'] == 'tetris') {
+                    $content .= '<script>showTetrisVisualizer("'. $this->user->username . '");</script>';
                 }
             } else if (isset($_GET['scoreboard'])) {
                 $content .= $this->getScoreboard($problem);
