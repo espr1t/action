@@ -74,8 +74,18 @@ class Compiler:
 
         return ""
 
+    @ staticmethod
+    def cleanup_java_source(path_source):
+        with open(path_source, "rt") as inp:
+            lines_left = [line for line in inp.readlines() if not line.strip().startswith("package")]
+        with open(path_source, "wt") as out:
+            out.writelines(lines_left)
+
     @staticmethod
     def compile_java(path_source, path_executable):
+        # Remove "package" directives (we don't need them here)
+        Compiler.cleanup_java_source(path_source)
+
         # Javac expects directory, not complete path
         name_executable = os.path.basename(path_executable)
         path_executable = os.path.dirname(path_executable)
