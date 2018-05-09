@@ -157,64 +157,9 @@ class RegisterPage extends Page {
         return $content;
     }
 
-    private function validateUsername($username) {
-        return preg_match('/^\w[\w.]{1,15}$/', $username);
-    }
-
-    private function validateName($name) {
-        return preg_match('/(*UTF8)^([A-Za-zА-Яа-я]|-){1,32}$/', $name);
-    }
-
-    private function validatePassword($password) {
-        return preg_match('/^.{1,32}$/', $password);
-    }
-
-    private function validateEmail($email) {
-        return $email == '' || preg_match('/^[A-Za-z0-9_.+*=$^-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/', $email);
-    }
-
-    private function validateDate($date) {
-        return $date == '' || preg_match('/^\d\d\d\d-\d\d-\d\d$/', $date);
-    }
-
-    private function validatePlace($town) {
-        return $town == '' || preg_match('/(*UTF8)^[A-Za-zА-Яа-я ]{1,32}$/', $town);
-    }
-
-    private function validateGender($gender) {
-        return $gender == '' || preg_match('/^male|female$/', $gender);
-    }
-
-    private function validateReCaptcha() {
-        if (!isset($_POST['g-recaptcha-response']))
-            return false;
-
-        $url = 'https://www.google.com/recaptcha/api/siteverify';
-        $data = array(
-            'secret' => $GLOBALS['RE_CAPTCHA_KEY'],
-            'response' => $_POST['g-recaptcha-response'],
-            'remoteip' => $_SERVER['REMOTE_ADDR']
-        );
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            )
-        );
-        $context  = stream_context_create($options);
-        $response = file_get_contents($url, false, $context);
-        if ($response === false) {
-            error_log('ERROR: Could not call re-CAPTCHA server.');
-            return false;
-        }
-        $result = json_decode($response, true);
-        return $result['success'];
-    }
-
     private function registerUser() {
         // Check re-CAPTCHA
-        if (!$this->validateReCaptcha()) {
+        if (!validateReCaptcha()) {
             return 'Не преминахте re-CAPTCHA валидацията!';
         }
 
@@ -232,7 +177,7 @@ class RegisterPage extends Page {
         unset($_POST['expected']);
 
         // Check username
-        if (!isset($_POST['username']) || !$this->validateUsername($_POST['username'])) {
+        if (!isset($_POST['username']) || !validateUsername($_POST['username'])) {
             return 'Въведеното потребителско име е празно или невалидно!';
         }
         $username = $_POST['username']; unset($_POST['username']);
@@ -241,12 +186,12 @@ class RegisterPage extends Page {
         }
 
         // Check first and last names
-        if (!isset($_POST['name']) || !$this->validateName($_POST['name'])) {
+        if (!isset($_POST['name']) || !validateName($_POST['name'])) {
             return 'Въведеното име не изпълнява изискванията на сайта!';
         }
         $name = $_POST['name']; unset($_POST['name']);
 
-        if (!isset($_POST['surname']) || !$this->validateName($_POST['surname'])) {
+        if (!isset($_POST['surname']) || !validateName($_POST['surname'])) {
             return 'Въведената фамилия не изпълнява изискванията на сайта!';
         }
         $surname = $_POST['surname']; unset($_POST['surname']);

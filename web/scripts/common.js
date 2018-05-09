@@ -62,7 +62,7 @@ function showMessage(type, message) {
         icon = '<i class="fa fa-check fa-fw"></i>';
     } else {
         className = 'message message-error';
-        icon = '<i class="fa fa-exclamation fa-fw"></i>';
+        icon = '<i class="fa fa-exclamation-triangle fa-fw"></i>';
     }
 
     messageEl.id = id;

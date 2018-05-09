@@ -31,6 +31,8 @@ $GRADER_URL = '192.168.1.111:5000';
 $GRADER_USERNAME = 'username';
 $GRADER_PASSWORD = 'password';
 
+$ADMIN_EMAIL = 'admin.email@example.com';
+
 $GRADER_ENDPOINT_AVAILABLE = '/available';
 $GRADER_ENDPOINT_EVALUATE = '/evaluate';
 

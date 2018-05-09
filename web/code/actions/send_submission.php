@@ -3,7 +3,6 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../entities/problem.php');
 require_once(__DIR__ . '/../entities/submit.php');
-require_once(__DIR__ . '/../entities/widgets.php');
 
 // User doesn't have access level needed for submitting a solution
 if ($user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {

@@ -1,7 +1,7 @@
 <?php
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
-require_once(__DIR__ . '/widgets.php');
 
 class News {
     public $id = -1;
@@ -10,7 +10,7 @@ class News {
     public $content = '';
     public $icon = '';
     public $type = '';
-    
+
     public function __construct() {
         $this->title = 'Заглавие';
         $this->date = date('Y-m-d');

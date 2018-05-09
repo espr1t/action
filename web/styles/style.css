@@ -291,12 +291,12 @@ div.authenticate {
 
 div.register {
     position: absolute;
-    height: 34rem;
+    height: 40rem;
     width: 50rem;
     min-width: 50rem;
     max-width: 50rem;
     top: 50%;
-    margin-top: -17rem;
+    margin-top: -20rem;
     left: 50%;
     margin-left: -25rem;
     z-index: 89;
@@ -770,9 +770,8 @@ div.overlay {
 }
 
 div.action-form {
-    overflow-y: visible;
-    /* Removing this messes up overflow-y on Chrome (apparently a bug) */
-    overflow-x: visible;
+    overflow-y: auto;
+    overflow-x: hidden;
     -ms-overflow-style: none;
     max-height: 40rem;
     width: 43rem;
@@ -1144,6 +1143,11 @@ div.help-version {
     text-align: right;
     padding-right: 0.25rem;
 }
+
+div.test-result-wrapper {
+    position: relative;
+}
+
 div.test-result {
     text-align: center;
     position: relative;
@@ -1159,7 +1163,6 @@ div.test-result {
 }
 
 .test-status-tooltip {
-    position: relative;
     cursor: pointer;
     overflow: visible;
 }
@@ -1175,9 +1178,9 @@ div.test-result {
     margin-top: -3px;
     width: 8rem;
     white-space: pre-wrap;
-    position: absolute;
+    position: fixed;
     overflow: visible;
-    z-index: 101;
+    z-index: 1001;
 }
 
 table.bordered {

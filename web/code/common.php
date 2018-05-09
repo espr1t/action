@@ -1,5 +1,6 @@
 <?php
 require_once('config.php');
+require_once('db/brain.php');
 
 function swap(&$var1, &$var2) {
     $temp = $var1;
@@ -26,6 +27,88 @@ function redirect($url, $type = null, $message = null) {
     }
     header('Location: ' . $url);
     exit();
+}
+
+function printAjaxResponse($response) {
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit(0);
+}
+
+function saltHashPassword($password) {
+    return md5($password . $GLOBALS['PASSWORD_SALT']);
+}
+
+function validateReCaptcha() {
+    if (!isset($_POST['g-recaptcha-response']))
+        return false;
+
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $data = array(
+        'secret' => $GLOBALS['RE_CAPTCHA_KEY'],
+        'response' => $_POST['g-recaptcha-response'],
+        'remoteip' => $_SERVER['REMOTE_ADDR']
+    );
+    $options = array(
+        'http' => array(
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($data)
+        )
+    );
+    $context  = stream_context_create($options);
+    $response = file_get_contents($url, false, $context);
+    if ($response === false) {
+        error_log('ERROR: Could not call re-CAPTCHA server.');
+        return false;
+    }
+    $result = json_decode($response, true);
+    return $result['success'];
+}
+
+function validateUsername($username) {
+    return preg_match('/^\w[\w.]{1,15}$/', $username);
+}
+
+function validateName($name) {
+    return preg_match('/(*UTF8)^([A-Za-zА-Яа-я]|-){1,32}$/', $name);
+}
+
+function validatePassword($password) {
+    return preg_match('/^.{1,32}$/', $password);
+}
+
+function validateEmail($email) {
+    return $email == '' || preg_match('/^[A-Za-z0-9_.+*=$^-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/', $email);
+}
+
+function validateDate($date) {
+    return $date == '' || preg_match('/^\d\d\d\d-\d\d-\d\d$/', $date);
+}
+
+function validatePlace($town) {
+    return $town == '' || preg_match('/(*UTF8)^[A-Za-zА-Яа-я ]{1,32}$/', $town);
+}
+
+function validateGender($gender) {
+    return $gender == '' || preg_match('/^male|female$/', $gender);
+}
+
+function getValue($array, $key) {
+    if (!array_key_exists($key, $array)) {
+        error_log('Array does not contain value for key "'. $key . '"!');
+        return null;
+    }
+    return $array[$key];
+}
+
+function passSpamProtection($user, $type, $limit) {
+    $brain = new Brain();
+    $brain->refreshSpamCounters(time() - $GLOBALS['SPAM_INTERVAL']);
+    if ($brain->getSpamCounter($user, $type) < $limit) {
+        $brain->incrementSpamCounter($user, $type, time());
+        return true;
+    }
+    return false;
 }
 
 function canSeeProblem($user, $problemVisible, $problemId) {

@@ -47,7 +47,7 @@ function snakesAiLogic() {
             if (snakesCells[row][col] == '@')
                 startRow = row, startCol = col;
     }
-    
+
     dist = [];
     for (var row = 0; row < snakesNumRows; row++) {
         var cur = [];
@@ -59,7 +59,7 @@ function snakesAiLogic() {
     q = [];
     q.push([startRow, startCol]);
     dist[startRow][startCol] = 0;
-    
+
     for (var i = 0; i < q.length; i++) {
         var curRow = q[i][0], curCol = q[i][1];
         for (var d = 0; d < 4; d++) {
@@ -80,7 +80,7 @@ function snakesAiLogic() {
                 headRow = row, headCol = col;
         }
     }
-    
+
     var bestDir = -1, bestDist = INF;
     for (var d = 0; d < 4; d++) {
         var row = headRow + dir[d][0]; if (row < 0 || row >= snakesNumRows) continue;
@@ -167,14 +167,16 @@ function updateSnakesGame() {
         return 'Game over! ' + currentPlayer + ' left limits of the board.';
     }
 
-    // Part of own snake
-    if (snakesCells[nextRow][nextCol] >= 'A' && snakesCells[nextRow][nextCol] <= 'Z') {
-        return 'Game over! ' + currentPlayer + ' attempted eating part of his/her own snake.';
-    }
-
-    // Part of opponent's snake
-    if (snakesCells[nextRow][nextCol] >= 'a' && snakesCells[nextRow][nextCol] <= 'z') {
-        return 'Game over! ' + currentPlayer + ' attempted eating part of opponent\'s snake.';
+    var crashIntoSnake = false;
+    if (snakesCells[nextRow][nextCol] >= 'A' && snakesCells[nextRow][nextCol] <= 'Z') crashIntoSnake = true;
+    if (snakesCells[nextRow][nextCol] >= 'a' && snakesCells[nextRow][nextCol] <= 'z') crashIntoSnake = true;
+    if (crashIntoSnake) {
+        // Part of own snake
+        if (snakesCells[nextRow][nextCol] >= headChar && snakesCells[nextRow][nextCol] <= tailChar)
+            return 'Game over! ' + currentPlayer + ' attempted eating part of his/her own snake.';
+        // Part of opponent's snake
+        else
+            return 'Game over! ' + currentPlayer + ' attempted eating part of opponent\'s snake.';
     }
 
     // Eating an apple

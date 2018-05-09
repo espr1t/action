@@ -1,7 +1,7 @@
 <?php
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
-require_once(__DIR__ . '/widgets.php');
 
 class Problem {
     public $id = -1;

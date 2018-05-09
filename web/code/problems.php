@@ -310,8 +310,8 @@ class ProblemsPage extends Page {
         ';
     }
 
-    private function getStatusTable($submit, $status) {
-        $color = getStatusColor($status);
+    private function getStatusTable($submit) {
+        $color = getStatusColor($submit->status);
         return '
             <table class="default ' . $color . '">
                 <tr>
@@ -321,7 +321,7 @@ class ProblemsPage extends Page {
                     <th style="width: 100px;">Точки</th>
                 </tr>
                 <tr>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$status] . '</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->status] . '</td>
                     <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
                     <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
                     <td>' . $submit->calcScore() . '</td>
@@ -330,9 +330,9 @@ class ProblemsPage extends Page {
         ';
     }
 
-    private function getDetailsTable($submit, $status) {
+    private function getDetailsTable($submit) {
         // If compilation error, pretty-print it and return instead of the per-test circles
-        if ($status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
+        if ($submit->status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
             return prettyPrintCompilationErrors($submit);
         }
 
@@ -345,8 +345,6 @@ class ProblemsPage extends Page {
                 $detailsTable .= '<br>';
             }
             $result = $submit->results[$i];
-            if (is_numeric($result) && $result < 0.01)
-                $result = $GLOBALS['STATUS_WRONG_ANSWER'];
             $title = sprintf('Тест %d%sСтатус: %s%sТочки: %s%sВреме: %s%sПамет: %s',
                 $i, PHP_EOL,
                 is_numeric($result) ? 'OK' : $result, PHP_EOL,
@@ -388,16 +386,15 @@ class ProblemsPage extends Page {
             $detailsTable .= '<div class="' . $class . ' test-status-tooltip" data-title="' . $title . '">' . $icon . '</div>';
         }
         $detailsTable .= '</div>';
+        $detailsTable = '<div class="test-result-wrapper">' . $detailsTable . '</div>';
 
         return $detailsTable;
     }
 
-    private function getSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
+    function getSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
-        $status = $submit->calcStatus();
-
-        $statusTable = $this->getStatusTable($submit, $status);
-        $detailsTable = $this->getDetailsTable($submit, $status);
+        $statusTable = $this->getStatusTable($submit);
+        $detailsTable = $this->getDetailsTable($submit);
 
         $author = '';
         if ($this->user->id != $submit->userId) {
@@ -427,7 +424,7 @@ class ProblemsPage extends Page {
                 $lastContent = $content;
             }
             // If nothing to wait for, stop the updates
-            if (strpos($content, 'fa-circle-o') === false && strpos($content, 'fa-spinner') === false) {
+            if (strpos($content, 'fa-hourglass-start') === false && strpos($content, 'fa-spinner') === false) {
                 terminateServerEventStream();
                 return;
             }

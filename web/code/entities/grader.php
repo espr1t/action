@@ -1,6 +1,7 @@
 <?php
-require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
+require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/problem.php');
 require_once(__DIR__ . '/submit.php');
 require_once(__DIR__ . '/match.php');
@@ -126,6 +127,7 @@ class Grader {
         }
 
         // If already updated, skip it
+        // TODO: This logic still imposes some risk of a race condition (between this check and the updateSubmit() call)
         if ($submit->graded > $timestamp) {
             error_log(sprintf('Skipping update: requested update for %f, but already at %f.',
                     $timestamp, $submit->graded));

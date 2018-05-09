@@ -230,6 +230,20 @@ class GamesPage extends Page {
             ';
         }
 
+        if ($problem->name == 'Connect') {
+            $partSubmitButton = '
+                <input type="submit" value="Частично решение" class="button button-large button-color-gray"
+                        title="Временно не може да бъдат предавани решения по играта.">
+            ';
+            $fullSubmitButton = '
+                <input type="submit" value="Пълно решение" class="button button-large button-color-gray"
+                        title="Временно не може да бъдат предавани решения по играта.">
+            ';
+            $visualizerButton = '
+                <input type="submit" value="Визуализатор" class="button button-color-gray button-large" title="Все още няма качен визуализатор.">
+            ';
+        }
+
         $controlButtons = '
                 <div class="center">
                     ' . $partSubmitButton . '
@@ -277,18 +291,8 @@ class GamesPage extends Page {
         $scoreboardButton = '
                     <br>
                     <a href="' . getGameLink($problem->name) . '/scoreboard">
-                        <input type="submit" value="Класиране" class="button button-color-gray button-small" title="Още няма изготвено класиране.">
+                        <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на участниците.">
                     </a>
-        ';
-
-        /*
-        $visualizerButton = '
-            <input type="submit" value="Визуализатор" class="button button-color-gray button-large" title="Визуализаторът не е достъпен.">
-        ';
-        */
-        $scoreboardButton = '
-            <br>
-            <input type="submit" value="Класиране" class="button button-color-gray button-small" title="Още няма изготвено класиране.">
         ';
 
         if ($this->user->access >= $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
@@ -498,6 +502,12 @@ class GamesPage extends Page {
             $scoreUser = $submit->userId == intval($match['userOne']) ? floatval($match['scoreOne']) : floatval($match['scoreTwo']);
             $scoreOpponent = $submit->userId == intval($match['userOne']) ? floatval($match['scoreTwo']) : floatval($match['scoreOne']);
 
+            // TODO: Fix this in a better way (add scoreWin and scoreTie to each game)
+            if ($problem->name == "Ultimate TTT") {
+                if ($scoreUser > $scoreOpponent) $scoreUser = 3;
+                if ($scoreOpponent > $scoreUser) $scoreOpponent = 3;
+            }
+
             if (intval($match['test']) >= 0) {
                 $totalScoreUser += $scoreUser;
                 $totalScoreOpponents += $scoreOpponent;
@@ -675,15 +685,25 @@ class GamesPage extends Page {
             $userOneKey = 'User_' . $match['userOne'];
             $userTwoKey = 'User_' . $match['userTwo'];
 
+
+            $scoreUserOne = floatval($match['scoreOne']);
+            $scoreUserTwo = floatval($match['scoreTwo']);
+
+            // TODO: Fix this in a better way (add scoreWin and scoreTie to each game)
+            if ($problem->name == "Ultimate TTT") {
+                if ($scoreUserOne > $scoreUserTwo) $scoreUserOne = 3;
+                if ($scoreUserTwo > $scoreUserOne) $scoreUserTwo = 3;
+            }
+
             // Player one scores
             $submit[$userOneKey] = intval($match['submitOne']);
-            $playerScore[$userOneKey] += floatval($match['scoreOne']);
-            $opponentScore[$userOneKey] += floatval($match['scoreTwo']);
+            $playerScore[$userOneKey] += $scoreUserOne;
+            $opponentScore[$userOneKey] += $scoreUserTwo;
 
             // Player two scores
             $submit[$userTwoKey] = intval($match['submitTwo']);
-            $playerScore[$userTwoKey] += floatval($match['scoreTwo']);
-            $opponentScore[$userTwoKey] += floatval($match['scoreOne']);
+            $playerScore[$userTwoKey] += $scoreUserTwo;
+            $opponentScore[$userTwoKey] += $scoreUserOne;
 
             // Wins and losses
             if ($match['scoreOne'] > $match['scoreTwo']) {
@@ -769,6 +789,95 @@ class GamesPage extends Page {
         ';
     }
 
+    private function getRelativeScoreboard($problem) {
+        $returnUrl = getGameLink($problem->name);
+
+        $brain = new Brain();
+        $submits = $brain->getProblemSubmits($problem->id);
+
+        $bestSubmits = array();
+        foreach ($submits as $submitDict) {
+            $submit = Submit::instanceFromArray($submitDict, array('source' => ''));
+            $submit->score = $submit->calcScore();
+            $atIndex = -1;
+            for ($i = 0; $i < count($bestSubmits); $i++) {
+                if ($bestSubmits[$i]->userId == $submit->userId) {
+                    $atIndex = $i;
+                    break;
+                }
+            }
+            if ($atIndex == -1) {
+                array_push($bestSubmits, $submit);
+            } else {
+                if ($bestSubmits[$atIndex]->score < $submit->score) {
+                    $bestSubmits[$atIndex] = $submit;
+                }
+            }
+        }
+        usort($bestSubmits, function($submit1, $submit2) {
+            if ($submit1->score != $submit2->score) {
+                return $submit1->score < $submit2->score ? +1 : -1;
+            } else {
+                return $submit1->submitted < $submit2->submitted ? -1 : +1;
+            }
+        });
+
+
+        $unofficial = array();
+        if ($problem->name == 'Tetris') {
+            $unofficial = array('espr1t');
+        }
+
+        $ranking = '';
+        $nextPosition = 1;
+        for ($i = 0; $i < count($bestSubmits); $i++) {
+            $submit = $bestSubmits[$i];
+            // Skip the service user
+            if ($submit->userId == 0)
+                continue;
+
+            $user = User::get($submit->userId);
+            $submitId = $submit->id;
+            if ($this->user->id == $submit->userId || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
+                $submitId = '<a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
+            }
+            $title = sprintf("%.3f", $submit->score);
+            $ranking .= '
+                <tr>
+                    <td>' . $nextPosition . '</td>
+                    <td>' . getUserLink($user->username, $unofficial) . '</td>
+                    <td>' . $user->name . '</td>
+                    <td>' . $submitId . '</td>
+                    <td title="' . $title . '">' . $submit->score . '</td>
+                </tr>
+            ';
+            $nextPosition++;
+        }
+
+        $content = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Класиране</h2>
+            <table class="default">
+                <tr>
+                    <th>#</th>
+                    <th>Потребител</th>
+                    <th>Име</th>
+                    <th>Събмит</th>
+                    <th>Точки</th>
+                </tr>
+                ' . $ranking . '
+            </table>
+            <div class="centered italic" style="font-size: smaller;">
+                Състезателите, отбелязани със звездичка (*), не участват в официалното класиране.
+            </div>
+        ';
+
+        return '
+            <script>
+                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
+            </script>
+        ';
+    }
+
     private function getDemo($problem) {
         // Show the standings for 5 seconds, then play a random replay
 
@@ -824,7 +933,11 @@ class GamesPage extends Page {
                     $content .= '<script>showTetrisVisualizer("'. $this->user->username . '");</script>';
                 }
             } else if (isset($_GET['scoreboard'])) {
-                $content .= $this->getScoreboard($problem);
+                if ($problem->type == 'game') {
+                    $content .= $this->getScoreboard($problem);
+                } else if ($problem->type == 'relative') {
+                    $content .= $this->getRelativeScoreboard($problem);
+                }
             } else if (isset($_GET['submits'])) {
                 if ($this->user->id == -1) {
                     redirect(getGameLink($problem->name), 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');

@@ -3,7 +3,6 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/problem.php');
-require_once(__DIR__ . '/widgets.php');
 require_once(__DIR__ . '/grader.php');
 
 class Submit {
@@ -105,10 +104,12 @@ class Submit {
         }
 
         $problem = Problem::get($this->problemId);
-        if ($problem->type != 'game') {
+        if ($problem->type == 'game') {
+            return $this->sendGame($problem);
+        } else if ($problem->type == 'relative') {
             return $this->sendTask($problem);
         } else {
-            return $this->sendGame($problem);
+            return $this->sendTask($problem);
         }
     }
 
@@ -288,7 +289,7 @@ class Submit {
         return $grader->evaluate($data);
     }
 
-    private static function instanceFromArray($info, $source) {
+    public static function instanceFromArray($info, $source) {
         $submit = new Submit();
         $submit->id = intval(getValue($info, 'id'));
         $submit->submitted = getValue($info, 'submitted');
@@ -352,9 +353,14 @@ class Submit {
         // If all results are numeric, then the problem has been accepted
         if (count($passedTests) == count($this->results)) {
             // We may, however, consider it not okay, if some of the results are not full scores
-            // In this case we'll consider the solution to be okay if it has more than 80% of the points
-            if (array_sum($this->results) < count($this->results) * 8.0 / 10.0)
-                return $GLOBALS['STATUS_WRONG_ANSWER'];
+            // On non-relative problems consider the solution to be okay only if it has more than 80% of the points
+            // TODO: Remove the 80-percent logic altogether (make all relative problems games)
+            $brain = new Brain();
+            $problem = $brain->getProblem($this->problemId);
+            if ($problem['type'] != 'relative') {
+                if (array_sum($this->results) < count($this->results) * 8.0 / 10.0)
+                    return $GLOBALS['STATUS_WRONG_ANSWER'];
+            }
             return $GLOBALS['STATUS_ACCEPTED'];
         }
 

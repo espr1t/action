@@ -1,7 +1,7 @@
 <?php
 require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
-require_once(__DIR__ . '/../entities/widgets.php');
 
 // User doesn't have access level needed for sending a mail
 if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {

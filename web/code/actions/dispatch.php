@@ -1,6 +1,6 @@
 <?php
+require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../entities/user.php');
-require_once(__DIR__ . '/../entities/widgets.php');
 
 session_start();
 

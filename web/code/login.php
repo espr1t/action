@@ -1,6 +1,5 @@
 <?php
 require_once('entities/user.php');
-require_once('entities/widgets.php');
 require_once('config.php');
 require_once('common.php');
 require_once('page.php');
