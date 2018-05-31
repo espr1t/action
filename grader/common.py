@@ -61,13 +61,9 @@ def create_response(status, message, data=None):
     return make_response(jsonify(**data), status, {"Content-Type": "application/json"})
 
 
-def hashed_auth_token(token):
-    return sha1(token.encode("utf-8")).hexdigest()
-
-
 def send_request(method, url, data=None):
     username = config.AUTH_USERNAME
-    password = hashed_auth_token(config.AUTH_PASSWORD)
+    password = config.AUTH_PASSWORD
     response = None
     if method == "GET":
         response = requests.get(url, data, auth=(username, password), stream=True)
@@ -96,6 +92,10 @@ def download_file(url, destination):
                 file.write(chunk)
     except EnvironmentError:
         raise RuntimeError("Could not write downloaded data to file!")
+
+
+def hashed_auth_token(token):
+    return sha1(token.encode("utf-8")).hexdigest()
 
 
 def authorized(auth):

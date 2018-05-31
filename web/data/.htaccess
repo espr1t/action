@@ -1,0 +1,7 @@
+# Secure problem tests
+<FilesMatch ".+\.(in|sol)$">
+	AuthName "Authorized Users Only"
+	AuthType Basic
+	AuthUserFile /path/to/htpasswd/dir/.htpasswd
+	require valid-user
+</FilesMatch>

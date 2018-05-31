@@ -14,7 +14,7 @@ if ($GLOBALS['GRADER_USERNAME'] != $_SERVER['PHP_AUTH_USER']) {
     exit();
 }
 
-if (sha1($GLOBALS['GRADER_PASSWORD']) != $_SERVER['PHP_AUTH_PW']) {
+if ($GLOBALS['GRADER_PASSWORD'] != $_SERVER['PHP_AUTH_PW']) {
     error_log('Update command with wrong password ("' . $_SERVER['PHP_AUTH_PW'] . '") from IP: ' . $_SERVER['REMOTE_ADDR']);
     exit();
 }
