@@ -647,6 +647,22 @@ class GamesPage extends Page {
         return $content;
     }
 
+    private function getUnofficial($problem) {
+        switch ($problem->name) {
+            case 'Snakes':
+                return array('espr1t', 'ThinkCreative');
+            case 'Ultimate TTT':
+                return array('espr1t', 'ThinkCreative');
+            case 'HyperSnakes':
+                return array('espr1t', 'ThinkCreative', 'IvayloS', 'stuno', 'ov32m1nd', 'peterlevi');
+            case 'Connect':
+                return array('espr1t', 'ThinkCreative');
+            case 'Tetris':
+                return array('espr1t', 'ThinkCreative');
+        }
+        return array();
+    }
+
     private function getScoreboard($problem) {
         $returnUrl = getGameLink($problem->name);
 
@@ -716,16 +732,7 @@ class GamesPage extends Page {
         }
 
         $numPlayers = count($playerScore);
-        $unofficial = array();
-        if ($problem->name == 'Snakes') {
-            $unofficial = array('espr1t');
-        } else if ($problem->name == 'Ultimate TTT') {
-            $unofficial = array('espr1t');
-        } else if ($problem->name == 'HyperSnakes') {
-            $unofficial = array('espr1t', 'IvayloS', 'stuno', 'ov32m1nd', 'peterlevi');
-        } else if ($problem->name == 'Connect') {
-            $unofficial = array('espr1t', 'ThinkCreative');
-        }
+        $unofficial = $this->getUnofficial($problem);
 
         $ranking = '';
         for ($pos = 1; $pos <= $numPlayers; $pos++) {
@@ -822,10 +829,7 @@ class GamesPage extends Page {
         });
 
 
-        $unofficial = array();
-        if ($problem->name == 'Tetris') {
-            $unofficial = array('espr1t');
-        }
+        $unofficial = $this->getUnofficial($problem);
 
         $ranking = '';
         $nextPosition = 1;
