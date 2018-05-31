@@ -19,7 +19,8 @@ class GamesPage extends Page {
             '/scripts/games/snakes.js',
             '/scripts/games/uttt.js',
             '/scripts/games/hypersnakes.js',
-            '/scripts/games/tetris.js'
+            '/scripts/games/tetris.js',
+            '/scripts/games/connect.js'
         );
     }
 
@@ -75,6 +76,9 @@ class GamesPage extends Page {
     private function getAllGames() {
         $brain = new Brain();
         $games = $brain->getAllGames();
+
+        // Show newest games first
+        $games = array_reverse($games);
 
         $problems = '';
         // Calculate statistics (position and points) for each game for this user
@@ -227,20 +231,6 @@ class GamesPage extends Page {
             $fullSubmitButton = '
                 <input type="submit" value="Пълно решение" class="button button-large button-color-gray"
                         title="Трябва да влезете в системата за да можете да предавате решения.">
-            ';
-        }
-
-        if ($problem->name == 'Connect') {
-            $partSubmitButton = '
-                <input type="submit" value="Частично решение" class="button button-large button-color-gray"
-                        title="Временно не може да бъдат предавани решения по играта.">
-            ';
-            $fullSubmitButton = '
-                <input type="submit" value="Пълно решение" class="button button-large button-color-gray"
-                        title="Временно не може да бъдат предавани решения по играта.">
-            ';
-            $visualizerButton = '
-                <input type="submit" value="Визуализатор" class="button button-color-gray button-large" title="Все още няма качен визуализатор.">
             ';
         }
 
@@ -614,6 +604,14 @@ class GamesPage extends Page {
         ';
     }
 
+    private function getReplayFunction($gameName) {
+        if ($gameName == 'snakes') return 'showSnakesReplay';
+        if ($gameName == 'ultimate-ttt') return 'showUtttReplay';
+        if ($gameName == 'hypersnakes') return 'showHypersnakesReplay';
+        if ($gameName == 'connect') return 'showConnectReplay';
+        return 'undefinedFunction';
+    }
+
     private function getReplay($problem, $submitId, $matchId) {
         $returnUrl = getGameLink($problem->name) . '/submits/' . $submitId;
 
@@ -639,8 +637,7 @@ class GamesPage extends Page {
         $playerTwo = User::get($match->userTwo);
         $playerTwo = $playerTwo != null ? $playerTwo->username : sprintf('Author%d', -$match->userTwo);
 
-        $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' :
-                        ($_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHypersnakesReplay');
+        $functionName = $this->getReplayFunction($_GET['game']);
         $content = '
             <script>
                 ' . $functionName . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->log . '");
@@ -726,6 +723,8 @@ class GamesPage extends Page {
             $unofficial = array('espr1t');
         } else if ($problem->name == 'HyperSnakes') {
             $unofficial = array('espr1t', 'IvayloS', 'stuno', 'ov32m1nd', 'peterlevi');
+        } else if ($problem->name == 'Connect') {
+            $unofficial = array('espr1t', 'ThinkCreative');
         }
 
         $ranking = '';
@@ -891,8 +890,7 @@ class GamesPage extends Page {
 
         $playerOne = User::get($matches[$idx]['userOne']);
         $playerTwo = User::get($matches[$idx]['userTwo']);
-        $functionName = $_GET['game'] == 'snakes' ? 'showSnakesReplay' :
-                        $_GET['game'] == 'ultimate-ttt' ? 'showUtttReplay' : 'showHypersnakesReplay';
+        $functionName = $this->getReplayFunction($_GET['game']);
         $replay = $functionName . '("'. $playerOne->username . '", "' . $playerTwo->username .'", "' . $matches[$idx]['log'] . '", true);';
 
         $demoActions = '
@@ -931,6 +929,8 @@ class GamesPage extends Page {
                     $content .= '<script>showUtttVisualizer("'. $this->user->username . '");</script>';
                 } else if ($_GET['game'] == 'tetris') {
                     $content .= '<script>showTetrisVisualizer("'. $this->user->username . '");</script>';
+                } else if ($_GET['game'] == 'connect') {
+                    $content .= '<script>showConnectVisualizer("'. $this->user->username . '");</script>';
                 }
             } else if (isset($_GET['scoreboard'])) {
                 if ($problem->type == 'game') {

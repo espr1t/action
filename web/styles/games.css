@@ -248,3 +248,102 @@ table.tetris-board td.piece7 {
 table.tetris-board td.piece7-shadow {
     background-color: #f2f9ff;
 }
+
+
+/***********************
+       Connect
+************************/
+div.connect-content {
+    width: 100%;
+    text-align: center;
+}
+
+table.connect-board {
+    margin: auto;
+    border-spacing: 0;
+}
+
+table.connect-board tr td {
+    width: 1.0rem;
+    min-width: 1.0rem;
+    max-width: 1.0rem;
+    height: 1.0rem;
+    min-height: 1.0rem;
+    max-height: 1.0rem;
+    color: #FEFEFE;
+}
+
+table.connect-board td.connect-cell {
+    text-align: center;
+    border: 0.05rem dotted;
+    border-color: #666666;
+    border-radius: 0.55rem;
+}
+
+div.connect-horizontal-edge {
+    background-color: #666666;
+    height: 0.125rem;
+    min-height: 0.125rem;
+    max-height: 0.125rem;
+    width: 1rem;
+    min-width: 1rem;
+    max-width: 1rem;
+    margin: auto;
+}
+
+div.connect-vertical-edge {
+    background-color: #666666;
+    height: 1rem;
+    min-height: 1rem;
+    max-height: 1rem;
+    width: 0.125rem;
+    min-width: 0.125rem;
+    max-width: 0.125rem;
+    margin: auto;
+}
+
+div.connect-diagonal-edge {
+    background-color: #666666;
+    height: 0.125rem;
+    min-height: 0.125rem;
+    max-height: 0.125rem;
+    width: 1rem;
+    min-width: 1rem;
+    max-width: 1rem;
+    margin: auto;
+    transform: rotate(45deg);
+}
+
+div.connect-edge-color-player1 {
+    background-color: #0099FF;
+}
+
+div.connect-edge-color-player2 {
+    background-color: #DD4337;
+}
+
+table.connect-board td.player1 {
+    background-color: #0099FF;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
+    height: 1.1rem;
+    min-height: 1.1rem;
+    max-height: 1.1rem;
+    width: 1.1rem;
+    min-width: 1.1rem;
+    max-width: 1.1rem;
+    border: 0;
+    border-radius: 0.6rem;
+}
+
+table.connect-board td.player2 {
+    background-color: #DD4337;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
+    height: 1.1rem;
+    min-height: 1.1rem;
+    max-height: 1.1rem;
+    width: 1.1rem;
+    min-width: 1.1rem;
+    max-width: 1.1rem;
+    border: 0;
+    border-radius: 0.6rem;
+}
