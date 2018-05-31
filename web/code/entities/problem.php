@@ -67,7 +67,7 @@ class Problem {
         );
     }
 
-    private static function instanceFromArray($info) {
+    public static function instanceFromArray($info) {
         $problem = new Problem();
         $problem->id = intval(getValue($info, 'id'));
         $problem->name = getValue($info, 'name');

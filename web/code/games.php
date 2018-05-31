@@ -38,6 +38,7 @@ class GamesPage extends Page {
         return null;
     }
 
+    /*
     public function getGameRanking($gameId) {
         $brain = new Brain();
         $gameMatches = $brain->getGameMatches($gameId, 'all');
@@ -72,22 +73,188 @@ class GamesPage extends Page {
         }
         return $ranking;
     }
+    */
+
+    public function getGameRanking($problem) {
+        // Returns a sorted array of data:
+        // {
+        //     'user': <integer>,
+        //     'submit': <integer>,
+        //     'score': <float>
+        // }
+        // The array is sorted from best to worst.
+        // A user is ranked better than another user, if he/she has more points or has submitted earlier.
+
+        $brain = new Brain();
+        $matches = $brain->getGameMatches($problem->id);
+
+        $submit = array();
+        $playerScore = array();
+        $opponentScore = array();
+
+        // Initialize all arrays with zeroes
+        foreach ($matches as $match) {
+            // If one of the users is negative, this means this is a partial submission match.
+            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
+                continue;
+            for ($player = 0; $player < 2; $player += 1) {
+                $userKey = ($player == 0 ? 'User_' . $match['userOne'] : 'User_' . $match['userTwo']);
+                $submit[$userKey] = $playerScore[$userKey] = $opponentScore[$userKey] = 0;
+            }
+        }
+
+        // Get the scores, wins, draws, and losses for each player
+        $games = array();
+        foreach ($matches as $match) {
+            // If one of the users is negative, this means this is a partial submission match.
+            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
+                continue;
+
+            // Don't even get me started on why we must prepend with "User_"...
+            $userOneKey = 'User_' . $match['userOne'];
+            $userTwoKey = 'User_' . $match['userTwo'];
+
+            $scoreUserOne = floatval($match['scoreOne']);
+            $scoreUserTwo = floatval($match['scoreTwo']);
+
+            // TODO: Fix this in a better way (add scoreWin and scoreTie to each game)
+            if ($problem->name == "Ultimate TTT") {
+                if ($scoreUserOne > $scoreUserTwo) $scoreUserOne = 3;
+                if ($scoreUserTwo > $scoreUserOne) $scoreUserTwo = 3;
+            }
+
+            // Player one scores
+            $submit[$userOneKey] = intval($match['submitOne']);
+            $playerScore[$userOneKey] += $scoreUserOne;
+            $opponentScore[$userOneKey] += $scoreUserTwo;
+
+            // Player two scores
+            $submit[$userTwoKey] = intval($match['submitTwo']);
+            $playerScore[$userTwoKey] += $scoreUserTwo;
+            $opponentScore[$userTwoKey] += $scoreUserOne;
+        }
+
+        $ranking = array();
+        $numPlayers = count($playerScore);
+        for ($pos = 0; $pos < $numPlayers; $pos++) {
+            $bestUser = '';
+            $maxPlayerScore = -1;
+            $minOpponentScore = 1e100;
+
+            foreach ($playerScore as $userKey => $score) {
+                $isBetter = ($maxPlayerScore < $playerScore[$userKey]) ||
+                            ($maxPlayerScore == $playerScore[$userKey] && $minOpponentScore > $opponentScore[$userKey]) ||
+                            ($maxPlayerScore == $playerScore[$userKey] && $minOpponentScore == $opponentScore[$userKey] && $submit[$userKey] < $submit[$bestUser]);
+                if ($isBetter) {
+                    $bestUser = $userKey;
+                    $maxPlayerScore = $playerScore[$userKey];
+                    $minOpponentScore = $opponentScore[$userKey];
+                }
+            }
+
+            array_push($ranking, array(
+                'user' => intval(substr($bestUser, 5)),
+                'score' => $playerScore[$bestUser],
+                'submit' => $submit[$bestUser]
+            ));
+            unset($playerScore[$bestUser]);
+        }
+        return $ranking;
+    }
+
+    private function populateRelativePoints($problem, &$bestScores, &$userSubmits) {
+        $brain = new Brain();
+        $submits = $brain->getProblemSubmits($problem->id);
+        // Take into account only the latest submission of each user
+        $submits = array_reverse($submits);
+
+        foreach ($submits as $submitDict) {
+            $submit = Submit::instanceFromArray($submitDict, array('source' => ''));
+            // Skip system submits
+            if ($submit->userId == 0)
+                continue;
+            $userKey = 'User_' . $submit->userId;
+            if (array_key_exists($userKey, $userSubmits)) {
+                continue;
+            }
+            $userSubmits[$userKey] = $submit;
+
+            for ($i = 0; $i < count($submit->results); $i += 1) {
+                if (count($bestScores) <= $i) {
+                    array_push($bestScores, 0.0);
+                }
+                if (is_numeric($submit->results[$i]) && $bestScores[$i] < floatval($submit->results[$i])) {
+                    $bestScores[$i] = floatval($submit->results[$i]);
+                }
+            }
+        }
+    }
+
+    public function getRelativeRanking($problem) {
+        // Returns a sorted array of data:
+        // {
+        //     'user': <integer>,
+        //     'submit': <integer>,
+        //     'score': <float>
+        // }
+        // The array is sorted from best to worst.
+        // A user is ranked better than another user, if he/she has more points or has submitted earlier.
+
+        $bestScores = array();
+        $userSubmits = array();
+        $this->populateRelativePoints($problem, $bestScores, $userSubmits);
+
+        $testScore = 100.0 / (count($bestScores) - 1);
+
+        $ranking = array();
+        foreach ($userSubmits as $userKey => $submit) {
+            $score = 0.0;
+            for ($i = 1; $i < count($submit->results); $i += 1) {
+                if (is_numeric($submit->results[$i])) {
+                    if (floatval($submit->results[$i]) > 0.0) {
+                        // TODO: Make the formula be configurable per problem
+                        $score += pow($submit->results[$i] / $bestScores[$i], 2.0) * $testScore;
+                    }
+                }
+            }
+            array_push($ranking, array(
+                'user' => intval(substr($userKey, 5)),
+                'score' => $score,
+                'submit' => $submit->id
+            ));
+        }
+
+        usort($ranking, function($user1, $user2) {
+            if ($user1['score'] != $user2['score']) {
+                return $user1['score'] < $user2['score'] ? +1 : -1;
+            } else {
+                return $user1['submit'] < $user2['submit'] ? -1 : +1;
+            }
+        });
+        return $ranking;
+    }
 
     private function getAllGames() {
         $brain = new Brain();
         $games = $brain->getAllGames();
-
         // Show newest games first
         $games = array_reverse($games);
 
-        $problems = '';
+        $gameList = '';
         // Calculate statistics (position and points) for each game for this user
         foreach ($games as $game) {
+            $problem = Problem::instanceFromArray($game);
+
             // Don't show hidden games
-            if (!canSeeProblem($this->user, $game['visible'] == '1', $game['id']))
+            if (!canSeeProblem($this->user, $problem->visible, $problem->id))
                 continue;
 
-            $ranking = $this->getGameRanking($game['id']);
+            $ranking = array();
+            if ($problem->type == 'game') {
+                $ranking = $this->getGameRanking($problem);
+            } else {
+                $ranking = $this->getRelativeRanking($problem);
+            }
 
             $position = 0;
             for (; $position < count($ranking); $position += 1)
@@ -96,7 +263,7 @@ class GamesPage extends Page {
             $scoreStr = $positionStr = 'N/A';
             if ($position < count($ranking)) {
                 $scoreStr = sprintf("%.2f (best is %.2f)",
-                    $ranking[$position]['points'], $ranking[0]['points']);
+                    $ranking[$position]['score'], $ranking[0]['score']);
                 $positionStr = sprintf("%d (out of %d)", $position + 1, count($ranking));
             }
 
@@ -127,9 +294,9 @@ class GamesPage extends Page {
                 ';
             }
 
-            $problems .= $gameBox;
+            $gameList .= $gameBox;
         }
-        return $problems;
+        return $gameList;
     }
 
     private function getMainPage() {
@@ -336,7 +503,7 @@ class GamesPage extends Page {
         ';
     }
 
-    private function getStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents) {
+    private function getGameStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents) {
         $color = getStatusColor($status);
         // An old submit, no score for it
         if ($color == 'green' && $found == false)
@@ -366,7 +533,7 @@ class GamesPage extends Page {
         ';
     }
 
-    private function getDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame) {
+    private function getGameDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame) {
         // If compilation error, pretty-print it and return instead of the per-match circles
         if ($status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
             return prettyPrintCompilationErrors($submit);
@@ -459,7 +626,7 @@ class GamesPage extends Page {
         return $detailsTable;
     }
 
-    private function getSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
+    private function getGameSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
         $status = $submit->calcStatus();
 
@@ -511,8 +678,8 @@ class GamesPage extends Page {
             }
         }
 
-        $statusTable = $this->getStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents);
-        $detailsTable = $this->getDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame);
+        $statusTable = $this->getGameStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents);
+        $detailsTable = $this->getGameDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame);
 
         $author = '';
         if ($this->user->id != $submit->userId) {
@@ -533,6 +700,128 @@ class GamesPage extends Page {
         ';
     }
 
+    private function getRelativeStatusTable($submit, $points) {
+        $color = getStatusColor($submit->status);
+        return '
+            <table class="default ' . $color . '">
+                <tr>
+                    <th>Статус на задачата</th>
+                    <th style="width: 100px;">Време</th>
+                    <th style="width: 100px;">Памет</th>
+                    <th style="width: 100px;">Точки</th>
+                </tr>
+                <tr>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->status] . '</td>
+                    <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
+                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
+                    <td>' . sprintf("%.3f", array_sum($points) - $points[0]) . '</td>
+                </tr>
+            </table>
+        ';
+    }
+
+    private function getRelativeDetailsTable($submit, $points) {
+        // If compilation error, pretty-print it and return instead of the per-test circles
+        if ($submit->status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
+            return prettyPrintCompilationErrors($submit);
+        }
+
+        // Otherwise get information for each test and print it as a colored circle with
+        // additional roll-over information
+        $detailsTable = '<div class="centered">';
+        for ($i = 1; $i < count($points); $i = $i + 1) {
+            if ($i > 1 && $i % 10 == 1) {
+                $detailsTable .= '<br>';
+            }
+            $result = $submit->results[$i];
+            $title =
+                'Тест ' . $i . PHP_EOL .
+                'Статус: ' . (is_numeric($result) ? 'OK' : $result) . PHP_EOL .
+                'Точки: ' . sprintf('%.1f', $points[$i]) . ' (' . $result . ')' . PHP_EOL .
+                'Време: ' . sprintf('%.2fs', $submit->exec_time[$i]) . PHP_EOL .
+                'Памет: ' .sprintf('%.2f MiB', $submit->exec_memory[$i])
+            ;
+
+            $icon = 'WTF?';
+            $class = 'test-result background-';
+            if (is_numeric($result)) {
+                $maxPoints = 100.0 / (count($points) - 1);
+                $class .= (abs($points[$i] - $maxPoints) < 0.001 ? 'dull-green' : 'dull-teal');
+                $icon = '<i class="fa fa-check"></i>';
+            } else if ($result == $GLOBALS['STATUS_WAITING'] || $result == $GLOBALS['STATUS_PREPARING'] || $result == $GLOBALS['STATUS_COMPILING']) {
+                $class .= 'dull-gray';
+                $icon = '<i class="fas fa-hourglass-start"></i>';
+            } else if ($result == $GLOBALS['STATUS_TESTING']) {
+                $class .= 'dull-gray';
+                $icon = '<i class="fa fa-spinner fa-pulse"></i>';
+            } else if ($result == $GLOBALS['STATUS_WRONG_ANSWER']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-times"></i>';
+            } else if ($result == $GLOBALS['STATUS_TIME_LIMIT']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-clock"></i>';
+            } else if ($result == $GLOBALS['STATUS_MEMORY_LIMIT']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-database"></i>';
+            } else if ($result == $GLOBALS['STATUS_RUNTIME_ERROR']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-bug"></i>';
+            } else if ($result == $GLOBALS['STATUS_COMPILATION_ERROR']) {
+                $class .= 'dull-red';
+                $icon = '<i class="fa fa-code"></i>';
+            } else if ($result == $GLOBALS['STATUS_INTERNAL_ERROR']) {
+                $class .= 'dull-black';
+                $icon = '<i class="fa fa-warning"></i>';
+            }
+            $detailsTable .= '<div class="' . $class . ' test-status-tooltip" data-title="' . $title . '">' . $icon . '</div>';
+        }
+        $detailsTable .= '</div>';
+        $detailsTable = '<div class="test-result-wrapper">' . $detailsTable . '</div>';
+
+        return $detailsTable;
+    }
+
+    function getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
+        $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
+
+        $bestScores = array();
+        $userSubmits = array();
+        $this->populateRelativePoints($problem, $bestScores, $userSubmits);
+
+        $points = array();
+        $testWeight = 100.0 / (count($bestScores) - 1);
+        for ($i = 0; $i < count($bestScores); $i += 1) {
+            if (!is_numeric($submit->results[$i]) || $submit->results[$i] == 0.0) {
+                array_push($points, 0.0);
+            } else {
+                // TODO: Make the formula to be configurable per problem
+                $score = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], 2.0);
+                array_push($points, $score * $testWeight);
+            }
+        }
+
+        $statusTable = $this->getRelativeStatusTable($submit, $points);
+        $detailsTable = $this->getRelativeDetailsTable($submit, $points);
+
+        $author = '';
+        if ($this->user->id != $submit->userId) {
+            $author = '(' . $submit->userName . ')';
+        }
+
+        $source = getSourceSection($submit, false);
+
+        return '
+            <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
+            <div class="right" style="font-size: smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
+            <br>
+            ' . $statusTable . '
+            <br>
+            ' . $detailsTable . '
+            <br>
+            ' . $source . '
+        ';
+    }
+
     private function getSubmitInfoBox($problem, $submitId) {
         $redirectUrl = getGameLink($problem->name) . '/submits';
         if (isset($_SESSION['queueShortcut']))
@@ -540,10 +829,9 @@ class GamesPage extends Page {
 
         $content = '';
         if ($problem->type == 'game') {
-            $content = $this->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+            $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
         } else if ($problem->type == 'relative') {
-            $problemsPage = new ProblemsPage($this->user);
-            $content = $problemsPage->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+            $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
         } else {
             error_log("ERROR: In games, but problem is neither 'game' nor 'relative'!");
         }
@@ -664,111 +952,40 @@ class GamesPage extends Page {
     }
 
     private function getScoreboard($problem) {
-        $returnUrl = getGameLink($problem->name);
-
-        $brain = new Brain();
-        $matches = $brain->getGameMatches($problem->id);
-
-        $wins = array();
-        $draws = array();
-        $losses = array();
-        $submit = array();
-        $playerScore = array();
-        $opponentScore = array();
-
-        // Initialize all arrays with zeroes
-        foreach ($matches as $match) {
-            // If one of the users is negative, this means this is a partial submission match.
-            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
-                continue;
-            for ($player = 0; $player < 2; $player += 1) {
-                $userKey = ($player == 0 ? 'User_' . $match['userOne'] : 'User_' . $match['userTwo']);
-                $wins[$userKey] = $draws[$userKey] = $losses[$userKey] = 0;
-                $submit[$userKey] = $playerScore[$userKey] = $opponentScore[$userKey] = 0;
-            }
+        $ranking = array();
+        if ($problem->type == 'game') {
+            $ranking = $this->getGameRanking($problem);
+        } else {
+            $ranking = $this->getRelativeRanking($problem);
         }
-
-        // Get the scores, wins, draws, and losses for each player
-        $games = array();
-        foreach ($matches as $match) {
-            // If one of the users is negative, this means this is a partial submission match.
-            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
-                continue;
-
-            $userOneKey = 'User_' . $match['userOne'];
-            $userTwoKey = 'User_' . $match['userTwo'];
-
-
-            $scoreUserOne = floatval($match['scoreOne']);
-            $scoreUserTwo = floatval($match['scoreTwo']);
-
-            // TODO: Fix this in a better way (add scoreWin and scoreTie to each game)
-            if ($problem->name == "Ultimate TTT") {
-                if ($scoreUserOne > $scoreUserTwo) $scoreUserOne = 3;
-                if ($scoreUserTwo > $scoreUserOne) $scoreUserTwo = 3;
-            }
-
-            // Player one scores
-            $submit[$userOneKey] = intval($match['submitOne']);
-            $playerScore[$userOneKey] += $scoreUserOne;
-            $opponentScore[$userOneKey] += $scoreUserTwo;
-
-            // Player two scores
-            $submit[$userTwoKey] = intval($match['submitTwo']);
-            $playerScore[$userTwoKey] += $scoreUserTwo;
-            $opponentScore[$userTwoKey] += $scoreUserOne;
-
-            // Wins and losses
-            if ($match['scoreOne'] > $match['scoreTwo']) {
-                $wins[$userOneKey] += 1;
-                $losses[$userTwoKey] += 1;
-            } else if ($match['scoreOne'] == $match['scoreTwo']) {
-                $draws[$userOneKey] += 1;
-                $draws[$userTwoKey] += 1;
-            } else {
-                $losses[$userOneKey] += 1;
-                $wins[$userTwoKey] += 1;
-            }
-        }
-
-        $numPlayers = count($playerScore);
         $unofficial = $this->getUnofficial($problem);
 
-        $ranking = '';
-        for ($pos = 1; $pos <= $numPlayers; $pos++) {
-            $bestUser = '';
-            $maxPlayerScore = -1;
-            $minOpponentScore = 1e100;
+        $scoreIsFloat = false;
+        for ($i = 0; $i < count($ranking); $i += 1) {
+            if (abs($ranking[$i]['score'] - round($ranking[$i]['score']) > 0.001))
+                $scoreIsFloat = true;
+        }
 
-            foreach ($playerScore as $userKey => $score) {
-                $isBetter = ($maxPlayerScore < $playerScore[$userKey]) ||
-                            ($maxPlayerScore == $playerScore[$userKey] && $minOpponentScore > $opponentScore[$userKey]) ||
-                            ($maxPlayerScore == $playerScore[$userKey] && $minOpponentScore == $opponentScore[$userKey] && $submit[$userKey] < $submit[$bestUser]);
-                if ($isBetter) {
-                    $bestUser = $userKey;
-                    $maxPlayerScore = $playerScore[$userKey];
-                    $minOpponentScore = $opponentScore[$userKey];
-                }
+        $rankingTable = '';
+        for ($pos = 0; $pos < count($ranking); $pos += 1) {
+            $user = User::get($ranking[$pos]['user']);
+            $submitId = $ranking[$pos]['submit'];
+            if ($user->id == $this->user->id || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
+                $submitId = '<a href="' . getGameLink($problem->name) . '/submits/' . $ranking[$pos]['submit'] . '">' . $ranking[$pos]['submit'] . '</a>';
             }
 
-            $user = User::get(intval(explode('_', $bestUser)[1]));
-            $submitId = $submit[$bestUser];
-            if ($bestUser == 'User_' . $this->user->id ||
-                    $this->user->access > $GLOBALS['ACCESS_SEE_SUBMITS']) {
-                $submitId = '<a href="' . getGameLink($problem->name) . '/submits/' . $submit[$bestUser] . '">' . $submit[$bestUser] . '</a>';
-            }
-            $title = '' . $wins[$bestUser] . '/' . $draws[$bestUser] . '/' . $losses[$bestUser];
-            $ranking .= '
+            $shownTitle = $scoreIsFloat ? sprintf('%.9f', $ranking[$pos]['score']) : '';
+            $shownScore = $scoreIsFloat ? sprintf('%.3f', $ranking[$pos]['score']) : $ranking[$pos]['score'];
+
+            $rankingTable .= '
                 <tr>
-                    <td>' . $pos . '</td>
+                    <td>' . ($pos + 1) . '</td>
                     <td>' . getUserLink($user->username, $unofficial) . '</td>
                     <td>' . $user->name . '</td>
                     <td>' . $submitId . '</td>
-                    <td title="' . $title . '">' . $maxPlayerScore . '</td>
+                    <td title="' . $shownTitle . '">' . $shownScore . '</td>
                 </tr>
             ';
-
-            unset($playerScore[$bestUser]);
         }
 
         $content = '
@@ -781,99 +998,14 @@ class GamesPage extends Page {
                     <th>Събмит</th>
                     <th>Точки</th>
                 </tr>
-                ' . $ranking . '
+                ' . $rankingTable . '
             </table>
             <div class="centered italic" style="font-size: smaller;">
                 Състезателите, отбелязани със звездичка (*), не участват в официалното класиране.
             </div>
         ';
 
-        return '
-            <script>
-                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
-            </script>
-        ';
-    }
-
-    private function getRelativeScoreboard($problem) {
         $returnUrl = getGameLink($problem->name);
-
-        $brain = new Brain();
-        $submits = $brain->getProblemSubmits($problem->id);
-
-        $bestSubmits = array();
-        foreach ($submits as $submitDict) {
-            $submit = Submit::instanceFromArray($submitDict, array('source' => ''));
-            $submit->score = $submit->calcScore();
-            $atIndex = -1;
-            for ($i = 0; $i < count($bestSubmits); $i++) {
-                if ($bestSubmits[$i]->userId == $submit->userId) {
-                    $atIndex = $i;
-                    break;
-                }
-            }
-            if ($atIndex == -1) {
-                array_push($bestSubmits, $submit);
-            } else {
-                if ($bestSubmits[$atIndex]->score < $submit->score) {
-                    $bestSubmits[$atIndex] = $submit;
-                }
-            }
-        }
-        usort($bestSubmits, function($submit1, $submit2) {
-            if ($submit1->score != $submit2->score) {
-                return $submit1->score < $submit2->score ? +1 : -1;
-            } else {
-                return $submit1->submitted < $submit2->submitted ? -1 : +1;
-            }
-        });
-
-
-        $unofficial = $this->getUnofficial($problem);
-
-        $ranking = '';
-        $nextPosition = 1;
-        for ($i = 0; $i < count($bestSubmits); $i++) {
-            $submit = $bestSubmits[$i];
-            // Skip the service user
-            if ($submit->userId == 0)
-                continue;
-
-            $user = User::get($submit->userId);
-            $submitId = $submit->id;
-            if ($this->user->id == $submit->userId || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
-                $submitId = '<a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
-            }
-            $title = sprintf("%.3f", $submit->score);
-            $ranking .= '
-                <tr>
-                    <td>' . $nextPosition . '</td>
-                    <td>' . getUserLink($user->username, $unofficial) . '</td>
-                    <td>' . $user->name . '</td>
-                    <td>' . $submitId . '</td>
-                    <td title="' . $title . '">' . $submit->score . '</td>
-                </tr>
-            ';
-            $nextPosition++;
-        }
-
-        $content = '
-            <h2><span class="blue">' . $problem->name . '</span> :: Класиране</h2>
-            <table class="default">
-                <tr>
-                    <th>#</th>
-                    <th>Потребител</th>
-                    <th>Име</th>
-                    <th>Събмит</th>
-                    <th>Точки</th>
-                </tr>
-                ' . $ranking . '
-            </table>
-            <div class="centered italic" style="font-size: smaller;">
-                Състезателите, отбелязани със звездичка (*), не участват в официалното класиране.
-            </div>
-        ';
-
         return '
             <script>
                 showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
@@ -937,11 +1069,7 @@ class GamesPage extends Page {
                     $content .= '<script>showConnectVisualizer("'. $this->user->username . '");</script>';
                 }
             } else if (isset($_GET['scoreboard'])) {
-                if ($problem->type == 'game') {
-                    $content .= $this->getScoreboard($problem);
-                } else if ($problem->type == 'relative') {
-                    $content .= $this->getRelativeScoreboard($problem);
-                }
+                $content .= $this->getScoreboard($problem);
             } else if (isset($_GET['submits'])) {
                 if ($this->user->id == -1) {
                     redirect(getGameLink($problem->name), 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
