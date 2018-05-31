@@ -76,11 +76,11 @@ class QueuePage extends Page {
         $table = '
             <table class="default">
                 <tr>
-                    <th style="width: 20px;">#</th>
-                    <th style="width: 170px;">Потребител</th>
-                    <th style="width: 170px;">Задача</th>
-                    <th style="width: 70px;">Час</th>
-                    <th style="width: 70px;">Прогрес</th>
+                    <th style="width: 3rem;">#</th>
+                    <th style="width: 10rem;">Потребител</th>
+                    <th style="width: 10rem;">Задача</th>
+                    <th style="width: 4.5rem;">Час</th>
+                    <th style="width: 4.5rem;">Прогрес</th>
                     <th>Статус</th>
                     ' . $adminExtras . '
                 </tr>
