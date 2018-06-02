@@ -482,6 +482,10 @@ class GamesPage extends Page {
             ';
         }
 
+        if ($problem->name == 'HyperWords') {
+            $visualizerButton = '';
+        }
+
         $controlButtons = '
                 <div class="center">
                     ' . $submitButton . '
@@ -947,6 +951,8 @@ class GamesPage extends Page {
                 return array('espr1t', 'ThinkCreative');
             case 'Tetris':
                 return array('espr1t', 'ThinkCreative');
+            case 'HyperWords':
+                return array('espr1t', 'ThinkCreative', 'IvayloS', 'stuno');
         }
         return array();
     }
