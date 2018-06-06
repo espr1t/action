@@ -268,9 +268,11 @@ function getStatusColor($status) {
 
 function getSourceSection($submit, $addslashes=true) {
     $source = $submit->source;
-    if ($addslashes)
+    $source = htmlspecialchars($source, ENT_NOQUOTES | ENT_HTML5);
+    if ($addslashes) {
         $source = addslashes($source);
-    $source = htmlspecialchars($source);
+    }
+    $source = str_replace('`', '&#96;', $source);
 
     return '
         <div class="centered" id="sourceLink">
