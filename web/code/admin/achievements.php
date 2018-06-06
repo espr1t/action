@@ -5,6 +5,7 @@ require_once(__DIR__ . '/../games.php');
 require_once(__DIR__ . '/../ranking.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/user.php');
+require_once(__DIR__ . '/../entities/problem.php');
 
 class AdminAchievementsPage extends Page {
     public function getTitle() {
@@ -816,7 +817,8 @@ class AdminAchievementsPage extends Page {
 
         $standings = array();
         foreach ($games as $game) {
-            $standings[$game['id']] = GamesPage::getGameRanking($game['id']);
+            $problem = Problem::instanceFromArray($game);
+            $standings[$game['id']] = GamesPage::getGameRanking($problem);
         }
 
         $users = $brain->getUsers();

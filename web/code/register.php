@@ -211,7 +211,7 @@ class RegisterPage extends Page {
         // Get optional information
         $email = '';
         if (isset($_POST['email'])) {
-            if ($this->validateEmail($_POST['email'])) {
+            if (validateEmail($_POST['email'])) {
                 $email = $_POST['email'];
             } else {
                 return 'Въведеният e-mail адрес не изпълнява изискванията на сайта!';
@@ -221,7 +221,7 @@ class RegisterPage extends Page {
 
         $birthdate = '';
         if (isset($_POST['birthdate'])) {
-            if ($this->validateDate($_POST['birthdate'])) {
+            if (validateDate($_POST['birthdate'])) {
                 $birthdate = $_POST['birthdate'];
             } else {
                 return 'Въведената дата на раждане не изпълнява изискванията на сайта!';
@@ -231,7 +231,7 @@ class RegisterPage extends Page {
 
         $town = '';
         if (isset($_POST['town'])) {
-            if ($this->validatePlace($_POST['town'])) {
+            if (validatePlace($_POST['town'])) {
                 $town = $_POST['town'];
             } else {
                 return 'Въведеният град не изпълнява изискванията на сайта!';
@@ -241,7 +241,7 @@ class RegisterPage extends Page {
 
         $country = '';
         if (isset($_POST['country'])) {
-            if ($this->validatePlace($_POST['country'])) {
+            if (validatePlace($_POST['country'])) {
                 $country = $_POST['country'];
             } else {
                 return 'Въведената държава не изпълнява изискванията на сайта!';
@@ -251,7 +251,7 @@ class RegisterPage extends Page {
 
         $gender = '';
         if (isset($_POST['gender'])) {
-            if ($this->validateGender($_POST['gender'])) {
+            if (validateGender($_POST['gender'])) {
                 $gender = $_POST['gender'];
             } else {
                 return 'Въведеният пол не е валиден!';
