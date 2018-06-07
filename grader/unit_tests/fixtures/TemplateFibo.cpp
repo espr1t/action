@@ -6,7 +6,7 @@ INFO: Source to test slow compilations.
 */
 
 #include <cstdio>
-const int FIB = 27;
+const int FIB = 28;
 
 template <int N, int M> struct TemplateFibo {
     enum {

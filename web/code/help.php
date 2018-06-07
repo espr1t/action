@@ -79,7 +79,7 @@ class HelpPage extends Page {
                 <li><b>Java (Oracle 1.8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
                 <li><b>Python (Python 3.5.2):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
-            Максималното време за компилация е 3 секунди.<br>
+            Максималното време за компилация е 10 секунди.<br>
             Максималният размер на стека е 64 мегабайта.
         ') . inBox('
             <h2 id="grader"><a href="#grader">Тестова машина</a></h2>

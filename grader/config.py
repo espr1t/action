@@ -29,7 +29,7 @@ THREAD_LIMIT_JAVA = 99  # Threads
 THREAD_LIMIT_PYTHON = 2  # Threads
 
 # Compilation
-MAX_COMPILATION_TIME = 5.0  # Seconds
+MAX_COMPILATION_TIME = 10.0  # Seconds
 
 # Checker
 CHECKER_TIMEOUT = 3.0  # Seconds

@@ -20,7 +20,7 @@ class TestCompiler(unittest.TestCase):
         shutil.rmtree(config.PATH_SANDBOX)
 
     def test_compilation_timeout_okay(self):
-        # Slow compilation, but within the 5 second limit
+        # Slow compilation, but within the 10 second limit
         path_source = "unit_tests/fixtures/LongCompilation.cpp"
         path_executable = "unit_tests/test_sandbox/LongCompilation.o"
 
@@ -28,7 +28,7 @@ class TestCompiler(unittest.TestCase):
         self.assertEqual("", message, "The C++ compilation failed, but expected to pass.")
 
     def test_compilation_timeout_fail(self):
-        # Too slow compilation: over the 5 second limit (8.08s on the machine I'm currently writing this)
+        # Too slow compilation: over the 10 second limit (>20s on the grader machine)
         path_source = "unit_tests/fixtures/TemplateFibo.cpp"
         path_executable = "unit_tests/test_sandbox/TemplateFibo.o"
 
