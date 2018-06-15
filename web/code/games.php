@@ -5,7 +5,7 @@ require_once('entities/submit.php');
 require_once('config.php');
 require_once('common.php');
 require_once('page.php');
-require_once('problems.php');
+require_once('events.php');
 
 class GamesPage extends Page {
 
@@ -826,6 +826,33 @@ class GamesPage extends Page {
         ';
     }
 
+    private function getSubmitUpdates($problem, $submitId) {
+        $lastContent = '';
+        while (true) {
+            $content = '';
+            if ($problem->type == 'game') {
+                $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+            } else if ($problem->type == 'relative') {
+                $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+            }
+
+            if ($content != $lastContent) {
+                sendServerEventData('content', $content);
+                $lastContent = $content;
+            }
+            // If nothing to wait for, stop the updates
+            $allTested = strpos($content, 'fa-hourglass-start') === false &&
+                         strpos($content, 'fa-spinner') === false &&
+                         strpos($content, 'fa-question-circle') == false;
+            if ($allTested) {
+                terminateServerEventStream();
+                return;
+            }
+            // Sleep for 0.5 seconds until next check for changes
+            sleep(0.5);
+        }
+    }
+
     private function getSubmitInfoBox($problem, $submitId) {
         $redirectUrl = getGameLink($problem->name) . '/submits';
         if (isset($_SESSION['queueShortcut']))
@@ -834,17 +861,24 @@ class GamesPage extends Page {
         $content = '';
         if ($problem->type == 'game') {
             $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+            return '
+                <script>
+                    showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
+                </script>
+            ';
         } else if ($problem->type == 'relative') {
             $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+            $updatesUrl = getGameLink($problem->name) . '/submits/' . $submitId . '/updates';
+            return '
+                <script>
+                    showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
+                    subscribeForUpdates(\'' . $updatesUrl . '\');
+                </script>
+            ';
         } else {
             error_log("ERROR: In games, but problem is neither 'game' nor 'relative'!");
+            return '';
         }
-
-        return '
-            <script>
-                showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
-            </script>
-        ';
     }
 
     private function getAllSubmitsBox($problem) {
@@ -1082,12 +1116,16 @@ class GamesPage extends Page {
                 } else if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    if ($queueShortcut)
-                        $_SESSION['queueShortcut'] = true;
-                    if (!isset($_GET['matchId'])) {
-                        $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
+                    if (isset($_GET['updates'])) {
+                        $this->getSubmitUpdates($problem, $_GET['submitId']);
                     } else {
-                        $content .= $this->getReplay($problem, $_GET['submitId'], $_GET['matchId']);
+                        if ($queueShortcut)
+                            $_SESSION['queueShortcut'] = true;
+                        if (!isset($_GET['matchId'])) {
+                            $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
+                        } else {
+                            $content .= $this->getReplay($problem, $_GET['submitId'], $_GET['matchId']);
+                        }
                     }
                 }
             } else if (isset($_GET['demo'])) {
