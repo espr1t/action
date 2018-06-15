@@ -411,8 +411,10 @@ class GamesPage extends Page {
                 </div>
         ';
 
+        $visibilityRestriction = $problem->visible ? '' : '<i class="fa fa-eye-slash" title="This problem is hidden."></i>';
         return '
             <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
+                <div class="problem-visibility">' . $visibilityRestriction . '</div>
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
                 <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
@@ -495,8 +497,10 @@ class GamesPage extends Page {
                 </div>
         ';
 
+        $visibilityRestriction = $problem->visible ? '' : '<i class="fa fa-eye-slash" title="This problem is hidden."></i>';
         return '
             <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
+                <div class="problem-visibility">' . $visibilityRestriction . '</div>
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
                 <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
@@ -1089,6 +1093,9 @@ class GamesPage extends Page {
             $problem = $this->getGameByName($_GET['game']);
             if ($problem == null) {
                 return $this->getMainPage();
+            }
+            if (!canSeeProblem($this->user, $problem->visible, $problem->id)) {
+                redirect('/games', 'ERROR', 'Нямате права да видите тази игра.');
             }
 
             if ($problem->type == 'game') {
