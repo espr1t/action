@@ -121,6 +121,8 @@ function showOverlay() {
     overlay.className = 'overlay';
     document.body.appendChild(overlay);
     overlay.className = 'overlay fade-in-overlay';
+
+    document.body.style.overflow = 'hidden';
 }
 
 function hideOverlay() {

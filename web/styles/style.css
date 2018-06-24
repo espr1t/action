@@ -765,10 +765,6 @@ div.overlay {
     z-index: 50;
 }
 
-::-webkit-scrollbar {
-    display: none;
-}
-
 div.action-form {
     overflow-y: auto;
     overflow-x: hidden;
@@ -793,8 +789,9 @@ div.larger-box {
 
 div.action-form-close {
     display: inline-block;
-    position: absolute;
-    margin-left: 43.75rem;
+    position: relative;
+    float: right;
+    right: -1.75rem;
     margin-top: -0.75rem;
     color: #555555;
 }
