@@ -221,15 +221,31 @@ class StatsPage extends Page {
 
         $users = $this->brain->getUsers();
 
+        $content = '
+            <h2>Потребители</h2>
+            <b>Брой потребители:</b> ' . count($users) . '<br>
+
+            <br><br>
+        ';
+
+        // Pie chart by gender
         $genders = array('male' => 0, 'female' => 0, 'unknown' => 0);
-        $towns = array();
         foreach ($users as $user) {
             if ($user['gender'] == '') {
                 $genders['unknown'] += 1;
             } else {
                 $genders[$user['gender']] += 1;
             }
+        }
 
+        $genderChartLabels = array('Пол', 'Мъж', 'Жена', 'Незададен');
+        $genderChartValues = array('Процент', $genders['male'], $genders['female'],  $genders['unknown']);
+        $content .= $this->createChart('PieChart', 'genderPieChart', 'Дял на потребителите по пол',
+                $genderChartLabels, $genderChartValues, 340, 300, 90, 85, 'right');
+
+        // Pie chart by town
+        $towns = array();
+        foreach ($users as $user) {
             // Make the town in proper First Letter Uppercase style
             $town = ucwords(strtolower($user['town']));
             // Convert it ot Cyrillic if a town in Bulgaria
@@ -245,20 +261,6 @@ class StatsPage extends Page {
         }
         arsort($towns);
 
-        $content = '
-            <h2>Потребители</h2>
-            <b>Брой потребители:</b> ' . count($users) . '<br>
-
-            <br><br>
-        ';
-
-        // Pie chart by gender
-        $genderChartLabels = array('Пол', 'Male', 'Female', 'Unspecified');
-        $genderChartValues = array('Процент', $genders['male'], $genders['female'],  $genders['unknown']);
-        $content .= $this->createChart('PieChart', 'genderPieChart', 'Дял на потребителите по пол',
-                $genderChartLabels, $genderChartValues, 340, 300, 90, 85, 'right');
-
-        // Pie chart by town
         $townChartLabels = array('Град');
         $townChartValues = array('Потребители');
         foreach ($towns as $key => $value) {
@@ -296,14 +298,38 @@ class StatsPage extends Page {
             array_push($usersChartValues, $index);
             $firstDate += $timeOffset;
         }
-        $content .= $this->createChart('LineChart', 'usersAreaChart', 'Брой потребители във времето',
+        $content .= $this->createChart('LineChart', 'usersAreaChart', 'Брой регистрирани потребители',
                 $usersChartLabels, $usersChartValues, 700, 300, 90, 70, 'none');
+
+        // Histogram of user's age
+        $ageHistogram = array_fill(0, 81, 0);
+        foreach ($users as $user) {
+            if ($user['birthdate'] == '0000-00-00')
+                continue;
+            $lastAction = explode(' ', $user['lastSeen'])[0];
+            if ($lastAction == '0000-00-00')
+                $lastAction = $user['registered'];
+            if ($user['birthdate'] >= $lastAction)
+                continue;
+            $age = floor((strtotime($lastAction) - strtotime($user['birthdate'])) / (365 * 24 * 60 * 60));
+            if ($age <= 80) {
+                $ageHistogram[$age] += 1;
+            }
+        }
+
+        $ageHistogramLabels = array('Възраст');
+        $ageHistogramValues = array('Брой');
+        for ($i = 0; $i <= 80; $i += 1) {
+            array_push($ageHistogramValues, $ageHistogram[$i]);
+            array_push($ageHistogramLabels, sprintf("%d", $i));
+        }
+        $content .= $this->createChart('ColumnChart', 'ageHistogram', 'Брой потребители по възраст',
+                $ageHistogramLabels, $ageHistogramValues, 700, 300, 90, 70, 'none');
 
         $content .= '
             <br>
             TODO:
             <ul>
-                <li>Хистограма по възраст</li>
                 <li>Графика на брой активни потребители по месец в годината</li>
                 <li>Графика на брой активни потребители по час в денонощието</li>
                 <li>Word Cloud с постиженията на юзърите</li>
