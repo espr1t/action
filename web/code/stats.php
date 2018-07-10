@@ -138,6 +138,7 @@ class StatsPage extends Page {
             $statuses[$status] = 0;
         }
         $hourHistogram = array_fill(0, 24, 0);
+        $monthHistogram = array_fill(0, 12, 0);
 
         $submits = $this->brain->getAllSubmits();
 
@@ -145,6 +146,7 @@ class StatsPage extends Page {
             $languages[$submit['language']] += 1;
             $statuses[$submit['status']] += 1;
             $hourHistogram[intval(substr($submit['submitted'], 11, 2))] += 1;
+            $monthHistogram[intval(substr($submit['submitted'], 5, 2)) - 1] += 1;
         }
 
         $content = '
@@ -178,14 +180,25 @@ class StatsPage extends Page {
         $content .= '<br>';
 
         // Per-hour activity histogram
-        $activityHistogramLabels = array('Час');
-        $activityHistogramValues = array('Брой');
+        $hourlyActivityHistogramLabels = array('Час');
+        $hourlyActivityHistogramValues = array('Брой');
         for ($i = 0; $i < 24; $i += 1) {
-            array_push($activityHistogramValues, $hourHistogram[$i]);
-            array_push($activityHistogramLabels, sprintf("%d:00", $i));
+            array_push($hourlyActivityHistogramValues, $hourHistogram[$i]);
+            array_push($hourlyActivityHistogramLabels, sprintf("%d:00", $i));
         }
-        $content .= $this->createChart('ColumnChart', 'activityHistogram', 'Предадени решения по час в денонощието',
-                $activityHistogramLabels, $activityHistogramValues, 700, 300, 90, 70, 'none');
+        $content .= $this->createChart('ColumnChart', 'hourlyActivityHistogram', 'Предадени решения по час в денонощието',
+                $hourlyActivityHistogramLabels, $hourlyActivityHistogramValues, 700, 300, 90, 70, 'none');
+
+        // Per-month activity histogram
+        $months = array('Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември');
+        $monthlyActivityHistogramLabels = array('Месец');
+        $monthlyActivityHistogramValues = array('Брой');
+        for ($i = 0; $i < 12; $i += 1) {
+            array_push($monthlyActivityHistogramValues, $monthHistogram[$i]);
+            array_push($monthlyActivityHistogramLabels, $months[$i]);
+        }
+        $content .= $this->createChart('ColumnChart', 'monthlyActivityHistogram', 'Предадени решения по месец в годината',
+                $monthlyActivityHistogramLabels, $monthlyActivityHistogramValues, 700, 300, 90, 70, 'none');
 
         return inBox($content);
     }
@@ -330,8 +343,6 @@ class StatsPage extends Page {
             <br>
             TODO:
             <ul>
-                <li>Графика на брой активни потребители по месец в годината</li>
-                <li>Графика на брой активни потребители по час в денонощието</li>
                 <li>Word Cloud с постиженията на юзърите</li>
             </ul>
         ';
