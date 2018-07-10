@@ -186,6 +186,32 @@ class StatsPage extends Page {
         return inBox($content);
     }
 
+    private $TOWN_ALIASES = array(
+        'Gorna Orqhovica' => 'Горна Оряховица',
+        'Belene' => 'Белене',
+        'Sofia' => 'София',
+        'Sofiq' => 'София',
+        'Plovdiv' => 'Пловдив',
+        'Ruse' => 'Русе',
+        'Rousse' => 'Русе',
+        'Varna' => 'Варна',
+        'Gabrovo' => 'Габрово',
+        'Yambol' => 'Ямбол',
+        'Belovo' => 'Белово',
+        'Kazanlak' => 'Казанлък',
+        'Burgas' => 'Бургас',
+        'Sliven' => 'Сливен',
+        'Vratsa' => 'Враца',
+        'Shumen' => 'Шумен',
+        'Veliko Tarnovo' => 'Велико Търново',
+        'Smolyan' => 'Смолян',
+        'Dobrich' => 'Добрич',
+        'Blagoevgrad' => 'Благоевград',
+        'Razgrad' => 'Разград',
+        'Montana' => 'Монтана',
+        'Pleven' => 'Плевен'
+    );
+
     private function userStats() {
         $genders = array();
 
@@ -199,10 +225,19 @@ class StatsPage extends Page {
             } else {
                 $genders[$user['gender']] += 1;
             }
-            if (!array_key_exists($user['town'], $towns)) {
-                $towns[$user['town']] = 0;
+
+            // Make the town in proper First Letter Uppercase style
+            $town = ucwords(strtolower($user['town']));
+            // Convert it ot Cyrillic if a town in Bulgaria
+            if (array_key_exists($town, $this->TOWN_ALIASES))
+                $town = $this->TOWN_ALIASES[$town];
+            // Uncomment this if you want to see all Latin-lettered towns
+            // if (ctype_alpha(substr($town, 0, 1)))
+            //     echo $town . ', ';
+            if (!array_key_exists($town, $towns)) {
+                $towns[$town] = 0;
             }
-            $towns[$user['town']] += 1;
+            $towns[$town] += 1;
         }
         arsort($towns);
 
@@ -214,7 +249,7 @@ class StatsPage extends Page {
         ';
 
         // Pie chart by gender
-        $genderChartLabels = array('Пол', 'Male', 'Female', 'Unknown');
+        $genderChartLabels = array('Пол', 'Male', 'Female', 'Unspecified');
         $genderChartValues = array('Процент', $genders['male'], $genders['female'],  $genders['unknown']);
         $content .= $this->createChart('PieChart', 'genderPieChart', 'Дял на потребителите по пол',
                 $genderChartLabels, $genderChartValues, 340, 300, 90, 85, 'right');
@@ -291,7 +326,7 @@ class StatsPage extends Page {
 
         return $content;
     }
-    
+
 }
 
 ?>
