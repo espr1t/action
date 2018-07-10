@@ -59,7 +59,11 @@ class StatsPage extends Page {
                             "colors": ' . json_encode($colors) . ',
                             "pieHole": 0.5,
                             "vAxis": {
-                                "format": "#"
+                                "format": "#",
+                                "viewWindowMode": "explicit",
+                                "viewWindow": {
+                                    min: 0
+                                }
                             },
                             "hAxis": {
                                 "textStyle": {
