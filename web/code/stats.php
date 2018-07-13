@@ -11,12 +11,40 @@ class StatsPage extends Page {
 
     public function getExtraScripts() {
         return array(
-            'https://www.gstatic.com/charts/loader.js'
+            'https://www.gstatic.com/charts/loader.js',
+            '/scripts/d3.min.js',
+            '/scripts/d3.layout.cloud.js',
+            '/scripts/d3.layout.cloud.wrapper.js'
         );
     }
 
     public function init() {
         $this->brain = new Brain();
+    }
+
+    private function createWordCloud($wordCounts) {
+        arsort($wordCounts);
+        $words = array();
+        foreach ($wordCounts as $word => $count) {
+            array_push($words, array('text' => $word, 'size' => $count));
+        }
+
+        return '
+            <div id="wordcloud"></div>
+            <script>
+                var words = ' . json_encode($words) . ';
+                console.log(words);
+
+                d3.wordcloud()
+                    .size([700, 350])
+                    .font("Century Gothic")
+                    .selector("#wordcloud")
+                    .words(words)
+                    .scale("sqrt")
+                    .start();
+
+            </script>
+        ';
     }
 
     private function createChart($type, $id, $title, $labels, $values, $width, $height, $percWidth, $percHeight, $legend) {
@@ -339,13 +367,34 @@ class StatsPage extends Page {
         $content .= $this->createChart('ColumnChart', 'ageHistogram', 'Брой потребители по възраст',
                 $ageHistogramLabels, $ageHistogramValues, 700, 300, 90, 70, 'none');
 
-        $content .= '
+        return inBox($content);
+    }
+
+    private function wordCloud() {
+        $brain = new Brain();
+        $achievements = $brain->getAchievements();
+
+        $keyCount = array();
+        foreach ($achievements as $achievement) {
+            $key = $achievement['achievement'];
+            if (!array_key_exists($key, $keyCount))
+                $keyCount[$key] = 0;
+            $keyCount[$key] = $keyCount[$key] + 1;
+        }
+
+        $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
+        $achievementsData = json_decode($achievementsFile, true);
+
+        $achievementCount = array();
+        foreach ($achievementsData as $achievement) {
+            if (array_key_exists($achievement['key'], $keyCount)) {
+                $achievementCount[$achievement['title']] = $keyCount[$achievement['key']];
+            }
+        }
+        $content = '
+            <h2>Постижения</h2>
             <br>
-            TODO:
-            <ul>
-                <li>Word Cloud с постиженията на юзърите</li>
-            </ul>
-        ';
+        ' . $this->createWordCloud($achievementCount);
 
         return inBox($content);
     }
@@ -364,6 +413,9 @@ class StatsPage extends Page {
 
         // User statistics
         $content .= $this->userStats();
+
+        // Achievements Word-Cloud
+        $content .= $this->wordCloud();
 
         return $content;
     }
