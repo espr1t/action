@@ -791,7 +791,7 @@ class Brain {
         $response = $this->db->query("
             SELECT * FROM `Achievements`
             " . ($userId == -1 ? '' : 'WHERE user = ' . $userId) . "
-            ORDER BY date ASC
+            ORDER BY date, id ASC
         ");
         if (!$response) {
             error_log('Could not execute getAchievements() query for user with id ' . $userId . '!');
