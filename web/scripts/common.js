@@ -482,3 +482,21 @@ function subscribeForUpdates(url) {
         console.log('Cannot subscribe to automatic updates. Use page refresh instead.');
     }
 }
+
+/*
+ * Add <pre> tags for input/output on problem statements if browser is Firefox.
+ * It appears there is a 17-year old bug about white-space: pre-wrap; not being copied properly.
+ * https://bugzilla.mozilla.org/show_bug.cgi?id=116083
+ */
+function addPreTags() {
+    if (navigator.userAgent.indexOf('Firefox') != -1) {
+        var tables = document.getElementsByClassName('problem-sample');
+        for (var i = 0; i < tables.length; i++) {
+            for (var r = 1; r < tables[i].rows.length; r++) {
+                for (var c = 0; c < tables[i].rows[r].cells.length; c++) {
+                    tables[i].rows[r].cells[c].innerHTML = '<pre>' + tables[i].rows[r].cells[c].innerHTML + '</pre>';
+                }
+            }
+        }
+    }
+}

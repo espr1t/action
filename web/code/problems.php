@@ -25,6 +25,10 @@ class ProblemsPage extends Page {
         return array('/styles/tooltips.css');
     }
 
+    public function onLoad() {
+        return 'addPreTags()';
+    }
+
     public function getProblemBox(&$problemInfo, $problemSolutions) {
         $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
         $serviceUserSolutions = 0;
@@ -307,7 +311,7 @@ class ProblemsPage extends Page {
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submitButtons . '
             </div>
-            <div class="problem-stats-link"">
+            <div class="problem-stats-link">
                 <a class="decorated" href="/problems/' . $problem->id . '/stats"><i class="fa fa-info-circle"></i></a>
                 <a class="decorated" href="/problems/' . $problem->id . '/users"><i class="fa fa-users"></i></a>
             </div>

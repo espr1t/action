@@ -28,6 +28,10 @@ class GamesPage extends Page {
         return array('/styles/tooltips.css', '/styles/games.css');
     }
 
+    public function onLoad() {
+        return 'addPreTags()';
+    }
+
     private function getGameByName($name) {
         $brain = new Brain();
         $gamesInfo = $brain->getAllGames();
