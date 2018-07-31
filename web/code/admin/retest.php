@@ -13,6 +13,18 @@ class AdminRetestPage extends Page {
         return 'O(N)::Admin - Retest';
     }
 
+    private function retestLatest($problemId) {
+        $brain = new Brain();
+        $submits = $brain->getProblemSubmits($problemId);
+        $seen = array();
+        for ($i = count($submits) - 1; $i >= 0; $i -= 1) {
+            if (!in_array($submits[$i]['userId'], $seen)) {
+                array_push($seen, $submits[$i]['userId']);
+                AdminRegradePage::regradeSubmit($submits[$i]['id']);
+            }
+        }
+    }
+
     private function retestProblem($problemId) {
         $brain = new Brain();
         $submits = $brain->getProblemSubmits($problemId);
@@ -23,8 +35,13 @@ class AdminRetestPage extends Page {
 
     public function getContent() {
         if (isset($_GET['problemId'])) {
-            $this->retestProblem($_GET['problemId']);
-            redirect('/admin/retest');
+            if (isset($_GET['latest'])) {
+                $this->retestLatest($_GET['problemId']);
+                redirect('/admin/retest/latest');
+            } else {
+                $this->retestProblem($_GET['problemId']);
+                redirect('/admin/retest');
+            }
         }
         $page = new QueuePage($this->user);
         return $page->getContent();
