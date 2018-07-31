@@ -1,0 +1,136 @@
+/* Source: https://github.com/yutakahoulette/data-tooltip */
+/* Applied small modifications on sizes (made them relative and changed them a bit) */
+
+/* the :before pseudo-element contains the triangle */
+/* the :after pseudo-element contains the text */
+
+[class*=tooltip--] {
+  position: relative;
+}
+
+[class*=tooltip--]:before,
+[class*=tooltip--]:after {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+  transition: .1s ease;
+  transition-delay: 0s;
+}
+
+.tooltip--show:before,
+.tooltip--show:after,
+[class*=tooltip--]:hover:before,
+[class*=tooltip--]:hover:after {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: .1s;
+  z-index: 1001;
+}
+
+[class*=tooltip--]:before {
+  content: '';
+  position: absolute;
+  background: transparent;
+  height: 0.375rem;
+  width: 0.375rem;
+  border: 0.375rem solid transparent;
+}
+
+[class*=tooltip--]:after {
+  background: rgba(0, 0, 0, 0.85);;
+  font-weight: normal;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.75rem;
+  white-space: pre;
+  box-shadow: 0.0625rem 0.0625rem 0.25rem 0.0625rem rgba(0,0,0,.2);
+  border-radius: 0.25rem;
+  text-align: center;
+  content: attr(data-tooltip);
+}
+
+[class*=tooltip--top]:before { border-top-color: #383838; }
+
+[class*=tooltip--bottom]:before { border-bottom-color: #383838; }
+
+.tooltip--left:before { border-left-color: #383838; }
+
+.tooltip--right:before { border-right-color: #383838; }
+
+[class*=tooltip--top]:before { bottom: calc(100% - 0.375rem) }
+
+[class*=tooltip--top]:after { bottom: calc(100% + 0.375rem) }
+
+.tooltip--top:before {
+  left: 50%;
+  margin-left: -0.375rem;
+}
+
+.tooltip--top:after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+[class*=tooltip--bottom]:before { top: calc(100% - 0.375rem) }
+
+[class*=tooltip--bottom]:after { top: calc(100% + 0.375rem) }
+
+.tooltip--bottom:before { left: calc(50% - 0.375rem); }
+
+.tooltip--bottom:after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip--topLeft:after,
+.tooltip--bottomLeft:after { left: 0; }
+
+.tooltip--bottomLeft:before,
+.tooltip--topLeft:before { left: 0.75rem; }
+
+.tooltip--bottomRight:before,
+.tooltip--topRight:before { right: 0.75rem; }
+
+.tooltip--bottomRight:after,
+.tooltip--topRight:after { right: 0; }
+
+.tooltip--right:before { transform: translateX(-0.75rem); }
+
+.tooltip--left:before { transform: translateX(0.75rem); }
+
+.tooltip--left:before,
+.tooltip--right:before { margin-bottom: -0.375rem; }
+
+.tooltip--left:after,
+.tooltip--right:after { margin-bottom: -0.9375rem; }
+
+.tooltip--right:before,
+.tooltip--right:after { left: calc(100% + 0.3125rem); }
+
+.tooltip--left:before,
+.tooltip--left:after { right: calc(100% + 0.375rem); }
+
+.tooltip--left:before,
+.tooltip--left:after,
+.tooltip--right:before,
+.tooltip--right:after { bottom: 50%; }
+
+.tooltip--small:after,
+.tooltip--medium:after,
+.tooltip--large:after,
+.tooltip--full:after {
+  white-space: pre;
+  word-wrap: break-word;
+}
+
+.tooltip--small:after { width: 7rem; }
+
+.tooltip--medium:after { width: 10rem; }
+
+.tooltip--large:after { width: 20rem; }
+
+.tooltip--full:after { width: 100%; }
+

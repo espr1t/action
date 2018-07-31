@@ -25,7 +25,7 @@ class GamesPage extends Page {
     }
 
     public function getExtraStyles() {
-        return array('/styles/games.css');
+        return array('/styles/tooltips.css', '/styles/games.css');
     }
 
     private function getGameByName($name) {
@@ -742,46 +742,46 @@ class GamesPage extends Page {
                 $detailsTable .= '<br>';
             }
             $result = $submit->results[$i];
-            $title =
+            $tooltip =
                 'Тест ' . $i . PHP_EOL .
                 'Статус: ' . (is_numeric($result) ? 'OK' : $result) . PHP_EOL .
                 'Точки: ' . sprintf('%.1f', $points[$i]) . ' (' . $result . ')' . PHP_EOL .
                 'Време: ' . sprintf('%.2fs', $submit->exec_time[$i]) . PHP_EOL .
-                'Памет: ' .sprintf('%.2f MiB', $submit->exec_memory[$i])
+                'Памет: ' . sprintf('%.2f MiB', $submit->exec_memory[$i])
             ;
 
             $icon = 'WTF?';
-            $class = 'test-result background-';
+            $background = '';
             if (is_numeric($result)) {
                 $maxPoints = 100.0 / (count($points) - 1);
-                $class .= (abs($points[$i] - $maxPoints) < 0.001 ? 'dull-green' : 'dull-teal');
+                $background = (abs($points[$i] - $maxPoints) < 0.001 ? 'dull-green' : 'dull-teal');
                 $icon = '<i class="fa fa-check"></i>';
             } else if ($result == $GLOBALS['STATUS_WAITING'] || $result == $GLOBALS['STATUS_PREPARING'] || $result == $GLOBALS['STATUS_COMPILING']) {
-                $class .= 'dull-gray';
+                $background = 'dull-gray';
                 $icon = '<i class="fas fa-hourglass-start"></i>';
             } else if ($result == $GLOBALS['STATUS_TESTING']) {
-                $class .= 'dull-gray';
+                $background = 'dull-gray';
                 $icon = '<i class="fa fa-spinner fa-pulse"></i>';
             } else if ($result == $GLOBALS['STATUS_WRONG_ANSWER']) {
-                $class .= 'dull-red';
+                $background = 'dull-red';
                 $icon = '<i class="fa fa-times"></i>';
             } else if ($result == $GLOBALS['STATUS_TIME_LIMIT']) {
-                $class .= 'dull-red';
+                $background = 'dull-red';
                 $icon = '<i class="fa fa-clock"></i>';
             } else if ($result == $GLOBALS['STATUS_MEMORY_LIMIT']) {
-                $class .= 'dull-red';
+                $background = 'dull-red';
                 $icon = '<i class="fa fa-database"></i>';
             } else if ($result == $GLOBALS['STATUS_RUNTIME_ERROR']) {
-                $class .= 'dull-red';
+                $background = 'dull-red';
                 $icon = '<i class="fa fa-bug"></i>';
             } else if ($result == $GLOBALS['STATUS_COMPILATION_ERROR']) {
-                $class .= 'dull-red';
+                $background = 'dull-red';
                 $icon = '<i class="fa fa-code"></i>';
             } else if ($result == $GLOBALS['STATUS_INTERNAL_ERROR']) {
-                $class .= 'dull-black';
+                $background = 'dull-black';
                 $icon = '<i class="fa fa-warning"></i>';
             }
-            $detailsTable .= '<div class="' . $class . ' test-status-tooltip" data-title="' . $title . '">' . $icon . '</div>';
+            $detailsTable .= '<div class="test-result tooltip--top background-' . $background . '" data-tooltip="' . $tooltip . '">' . $icon . '</div>';
         }
         $detailsTable .= '</div>';
         $detailsTable = '<div class="test-result-wrapper">' . $detailsTable . '</div>';

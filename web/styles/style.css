@@ -1147,37 +1147,17 @@ div.test-result-wrapper {
 
 div.test-result {
     text-align: center;
+    font-size: 1rem;
     position: relative;
     display: inline-block;
-    min-height: 2rem;
-    min-width: 2rem;
-    line-height: 2rem;
-    border-radius: 1rem;
+    min-height: 2.25rem;
+    min-width: 2.25rem;
+    line-height: 2.25rem;
+    border-radius: 1.125rem;
     box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
     margin: 0.125rem 0.25rem;
     color: #EEEEEE;
     cursor: help;
-}
-
-.test-status-tooltip {
-    cursor: pointer;
-    overflow: visible;
-}
-
-.test-status-tooltip:hover:after {
-    content: attr(data-title);
-    background: rgba(0, 0, 0, 0.85);
-    /* background: rgba(0, 153, 255, 0.85); */
-    padding: 3px 7px;
-    color: #FFF;
-    border-radius: 3px;
-    margin-left: 7px;
-    margin-top: -3px;
-    width: 8rem;
-    white-space: pre-wrap;
-    position: fixed;
-    overflow: visible;
-    z-index: 1001;
 }
 
 table.bordered {
