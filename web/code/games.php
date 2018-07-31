@@ -37,44 +37,6 @@ class GamesPage extends Page {
         }
         return null;
     }
-
-    /*
-    public function getGameRanking($gameId) {
-        $brain = new Brain();
-        $gameMatches = $brain->getGameMatches($gameId, 'all');
-
-        $userPoints = array();
-        $userSubmit = array();
-        foreach ($gameMatches as $match) {
-            // Partial submission, skip it
-            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
-                continue;
-
-            // An actual match, update scores
-            for ($player = 1; $player <= 2; $player += 1) {
-                // Don't even get me started on why we must prepend with "User_"...
-                $user = 'User_' . $match[$player == 1 ? 'userOne' : 'userTwo'];
-                $score = floatval($match[$player == 1 ? 'scoreOne' : 'scoreTwo']);
-                $submit = intval($match[$player == 1 ? 'submitOne' : 'submitTwo']);
-                if (!array_key_exists($user, $userPoints))
-                    $userPoints[$user] = 0.0;
-                $userPoints[$user] += $score;
-                $userSubmit[$user] = $submit;
-            }
-        }
-        arsort($userPoints);
-        $ranking = array();
-        foreach ($userPoints as $user => $points) {
-            array_push($ranking, array(
-                'user' => intval(substr($user, 5)),
-                'points' => $points,
-                'submit' => $userSubmit[$user]
-            ));
-        }
-        return $ranking;
-    }
-    */
-
     public function getGameRanking($problem) {
         // Returns a sorted array of data:
         // {
