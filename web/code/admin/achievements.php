@@ -658,6 +658,31 @@ class AdminAchievementsPage extends Page {
         }
     }
 
+    public function achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, $lenLimit, $key) {
+        if (!in_array($key, $achieved)) {
+            $date = '';
+            $numSubmits = count($userProblemSubmits);
+            for ($i = 0; $i < $numSubmits; $i += 1) {
+                $length = substr_count($userProblemSources[$i]['source'], "\n") + 1;
+                if ($lenLimit < 0) {
+                    if ($length <= -$lenLimit) {
+                        $date = $userProblemSubmits[$i]['submitted'];
+                        break;
+                    }
+                } else {
+                    if ($length >= $lenLimit) {
+                        $date = $userProblemSubmits[$i]['submitted'];
+                        break;
+                    }
+                }
+            }
+            if ($date != '') {
+                $brain->addAchievement($user->id, $key, $date);
+            }
+        }
+    }
+
+
     public function updateAll($user, $games, $standings, $problems, $submits, $accepted, $sources, $ranking,
             $problemTags, $problemTagsCnt, $problemDifficulties, $problemDifficultiesCnt, $userAllSubmits, $userProblemSubmits, $userProblemSources) {
         $brain = new Brain();
@@ -826,6 +851,10 @@ class AdminAchievementsPage extends Page {
         $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '271SUB', $this->E_PREFIX_NUMBERS);
 
         // Code length achievements
+        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, -10, 'SHORTY');
+        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, 100, 'LONG01');
+        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, 500, 'LONG02');
+        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, 1000, 'LONG03');
     }
 
     private function recalcAll() {

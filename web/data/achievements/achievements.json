@@ -651,42 +651,66 @@
     "key": "PRMSUB",
     "title": "Prime ID",
     "description": "Събмит с ID просто число",
-    "icon": "fas fa-fingerprint"
+    "icon": "fab fa-product-hunt"
   },
   {
     "key": "FIBSUB",
     "title": "Fibonacci ID",
     "description": "Събмит с ID число на Фибоначи",
-    "icon": "fas fa-fingerprint"
+    "icon": "fas fa-signal"
   },
   {
     "key": "PRFSUB",
     "title": "Perfect ID",
     "description": "Събмит с ID перфектно число",
-    "icon": "fas fa-fingerprint"
+    "icon": "fas fa-star"
   },
   {
     "key": "124SUB",
     "title": "Binary ID",
     "description": "Събмит с ID степен на две",
-    "icon": "fas fa-fingerprint"
+    "icon": "fas fa-barcode"
   },
   {
     "key": "110SUB",
     "title": "Decimal ID",
     "description": "Събмит с ID степен на десет",
-    "icon": "fas fa-fingerprint"
+    "icon": "far fa-circle"
   },
   {
     "key": "314SUB",
     "title": "Pi ID",
     "description": "Събмит с ID префикс на Пи",
-    "icon": "fas fa-fingerprint"
+    "icon": "far fa-pi"
   },
   {
     "key": "271SUB",
     "title": "E ID",
     "description": "Събмит с ID префикс на Е",
-    "icon": "fas fa-fingerprint"
+    "icon": "fab fa-etsy"
+  },
+  {
+    "key": "SHORTY",
+    "title": "Size doesn't matter",
+    "description": "Мината задача с код под 10 реда",
+    "icon": "far fa-compress-alt"
+  },
+  {
+    "key": "LONG01",
+    "title": "Longer is better",
+    "description": "Предадено решение над 100 реда",
+    "icon": "far fa-grin-tongue"
+  },
+  {
+    "key": "LONG02",
+    "title": "Boilerplate",
+    "description": "Предадено решение над 500 реда",
+    "icon": "far fa-grin-tongue-wink"
+  },
+  {
+    "key": "LONG03",
+    "title": "Mother of Code",
+    "description": "Предадено решение над 1000 реда",
+    "icon": "far fa-grin-tongue-squint"
   }
 ]
