@@ -614,29 +614,27 @@ table.problem-sample {
     width: 100%;
     border-spacing: 0;
     border-collapse: collapse;
-    white-space: pre-wrap;
     margin-top: 1rem;
     margin-bottom: 0.0625rem;
 }
 
-table.problem-sample tr th {
-    font-weight: bold;
+table.problem-sample tr td, table.problem-sample tr th {
     width: 50%;
     max-width: 50%;
+    padding: 0.25rem 0.5rem;
+    page-break-inside: avoid;
+    border: 0.0625rem solid #666666;
+}
+
+table.problem-sample tr th {
+    font-weight: bold;
 }
 
 table.problem-sample tr td {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
     vertical-align: top;
     font-size: 0.8125rem;
-    width: 50%;
-    max-width: 50%;
-}
-
-table.problem-sample tr td, table.problem-sample tr th {
-    padding: 0.25rem 0.5rem;
-    page-break-inside: avoid;
-    border: 0.0625rem solid #666666;
+    white-space: pre-wrap;
 }
 
 table.register {
