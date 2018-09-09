@@ -8,12 +8,48 @@ require_once(__DIR__ . '/../entities/user.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
 class AdminAchievementsPage extends Page {
+    private $PRIME_NUMBERS = array();
+    private $FIBONACCI_NUMBERS = array();
+    private $PERFECT_NUMBERS = array();
+    private $POWER_OF_TWO_NUMBERS = array();
+    private $POWER_OF_TEN_NUMBERS = array();
+    private $PI_PREFIX_NUMBERS = array();
+    private $E_PREFIX_NUMBERS = array();
+
     public function getTitle() {
         return 'O(N)::Admin';
     }
 
     public function getExtraScripts() {
         return array('/scripts/admin.js');
+    }
+
+    public function initSpecialNumbers() {
+        $limit = 100000;
+        $isPrime = array_fill(0, $limit, true);
+        $isPrime[0] = $isPrime[1] = false;
+        for ($num = 2; $num * $num < $limit; $num += 1) {
+            if ($isPrime[$num]) {
+                for ($comp = $num * $num; $comp < $limit; $comp += $num)
+                    $isPrime[$comp] = false;
+            }
+        }
+
+        for ($num = 0; $num < $limit; $num += 1)
+            if ($isPrime[$num]) array_push($this->PRIME_NUMBERS, $num);
+
+        $this->FIBONACCI_NUMBERS = array(0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377,
+            610, 987, 1597, 2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393,
+            196418, 317811, 514229, 832040, 1346269, 2178309, 3524578, 5702887, 9227465,
+            14930352, 24157817, 39088169, 63245986, 102334155);
+
+        $this->PERFECT_NUMBERS = array(6, 28, 496, 8128, 33550336);
+        $this->POWER_OF_TWO_NUMBERS = array(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048,
+            4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304,
+            8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912);
+        $this->POWER_OF_TEN_NUMBERS = array(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000);
+        $this->PI_PREFIX_NUMBERS = array(3, 31, 314, 3141, 31415, 314159, 3141592, 31415926, 314159265);
+        $this->E_PREFIX_NUMBERS = array(2, 27, 271, 2718, 27182, 271828, 2718281, 27182818, 271828182);
     }
 
     // Has submitted X times
@@ -607,6 +643,21 @@ class AdminAchievementsPage extends Page {
         }
     }
 
+    public function achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, $key, $numbers) {
+        if (!in_array($key, $achieved)) {
+            $date = '';
+            foreach ($userAllSubmits as $submit) {
+                if (in_array($submit['id'], $numbers)) {
+                    $date = $submit['submitted'];
+                    break;
+                }
+            }
+            if ($date != '') {
+                $brain->addAchievement($user->id, $key, $date);
+            }
+        }
+    }
+
     public function updateAll($user, $games, $standings, $problems, $submits, $accepted, $sources, $ranking,
             $problemTags, $problemTagsCnt, $problemDifficulties, $problemDifficultiesCnt, $userAllSubmits, $userProblemSubmits, $userProblemSources) {
         $brain = new Brain();
@@ -764,10 +815,23 @@ class AdminAchievementsPage extends Page {
         $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'DTHSTR', 'Deathstars');
         $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'SNWCLN', 'Snow Cleaning');
         $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'SHADES', 'Shades');
+
+        // Submission ID achievements
+        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, 'PRMSUB', $this->PRIME_NUMBERS);
+        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, 'FIBSUB', $this->FIBONACCI_NUMBERS);
+        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, 'PRFSUB', $this->PERFECT_NUMBERS);
+        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '124SUB', $this->POWER_OF_TWO_NUMBERS);
+        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '110SUB', $this->POWER_OF_TEN_NUMBERS);
+        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '314SUB', $this->PI_PREFIX_NUMBERS);
+        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '271SUB', $this->E_PREFIX_NUMBERS);
+
+        // Code length achievements
     }
 
     private function recalcAll() {
         $start = microtime(true);
+
+        $this->initSpecialNumbers();
 
         $brain = new Brain();
         $games = $brain->getAllGames();
