@@ -242,13 +242,13 @@ class AdminAchievementsPage extends Page {
     }
 
     // Was the first to solve a problem
-    public function achievementVirgin($brain, $achieved, $user, $submits) {
+    public function achievementVirgin($brain, $achieved, $user, $accepted) {
         if (!in_array('VIRGIN', $achieved)) {
             $date = '';
             $solved = array();
-            foreach ($submits as $submit) {
+            foreach ($accepted as $submit) {
                 // Skip system and admin submissions
-                if ($submit['userId'] < 2 || $submit['status'] != 'AC')
+                if ($submit['userId'] < 2)
                     continue;
 
                 if (!array_key_exists($submit['problemId'], $solved)) {
@@ -607,7 +607,8 @@ class AdminAchievementsPage extends Page {
         }
     }
 
-    public function updateAll($user, $games, $standings, $problems, $submits, $sources, $ranking) {
+    public function updateAll($user, $games, $standings, $problems, $submits, $accepted, $sources, $ranking,
+            $problemTags, $problemTagsCnt, $problemDifficulties, $problemDifficultiesCnt, $userAllSubmits, $userProblemSubmits, $userProblemSources) {
         $brain = new Brain();
 
         // Already achieved
@@ -619,46 +620,6 @@ class AdminAchievementsPage extends Page {
 
         // Sent reports
         $userReports = $brain->getReports($user->id);
-
-        // Problems info
-        $problemTags = array();
-        $problemTagsCnt = array();
-        $problemDifficulties = array();
-        $problemDifficultiesCnt = array();
-        foreach ($problems as $problem) {
-            // Tags
-            $tags = explode(',', $problem['tags']);
-            $problemTags[$problem['id']] = $tags;
-            foreach ($tags as $tag) {
-                if (!array_key_exists($tag, $problemTagsCnt))
-                    $problemTagsCnt[$tag] = 0;
-                $problemTagsCnt[$tag] += 1;
-            }
-
-            // Difficulties
-            $difficulty = $problem['difficulty'];
-            $problemDifficulties[$problem['id']] = $difficulty;
-            if (!array_key_exists($difficulty, $problemDifficultiesCnt))
-                $problemDifficultiesCnt[$difficulty] = 0;
-            $problemDifficultiesCnt[$difficulty] += 1;
-        }
-
-        // Sent submissions on problems
-        $userAllSubmits = array();
-        $userProblemSubmits = array();
-        $userProblemSources = array();
-        $submitCount = count($submits);
-        for ($i = 0; $i < $submitCount; $i++) {
-            if ($submits[$i]['id'] != $sources[$i]['submitId'])
-                error_log('Mismatch in submits and sources at index ' . $i . '!');
-            if ($submits[$i]['userId'] == $user->id) {
-                array_push($userAllSubmits, $submits[$i]);
-                if (array_key_exists($submits[$i]['problemId'], $problemDifficulties)) {
-                    array_push($userProblemSubmits, $submits[$i]);
-                    array_push($userProblemSources, $sources[$i]);
-                }
-            }
-        }
 
         // Solved problems
         $userSolved = array();
@@ -780,7 +741,7 @@ class AdminAchievementsPage extends Page {
         $this->achievementTested($brain, $achieved, $user, $userProblemSubmits);
         $this->achievementRanked($brain, $achieved, $user, $ranking, 'RANK01', 1);
         $this->achievementRanked($brain, $achieved, $user, $ranking, 'RANK10', 10);
-        $this->achievementVirgin($brain, $achieved, $user, $submits);
+        $this->achievementVirgin($brain, $achieved, $user, $accepted);
         $this->achievementRainbow($brain, $achieved, $user, $userAllSubmits);
         $this->achievementOldtimer($brain, $achieved, $user);
         $this->achievementSoWrong($brain, $achieved, $user, $userProblemSubmits);
@@ -818,15 +779,73 @@ class AdminAchievementsPage extends Page {
         $standings = array();
         foreach ($games as $game) {
             $problem = Problem::instanceFromArray($game);
-            $standings[$game['id']] = GamesPage::getGameRanking($problem);
+            if ($problem->type == 'game') {
+                $standings[$game['id']] = GamesPage::getGameRanking($problem);
+            } else if ($problem->type == 'relative') {
+                $standings[$game['id']] = GamesPage::getRelativeRanking($problem);
+            }
+        }
+
+        $accepted = array();
+        foreach ($submits as $submit) {
+            if ($submit['status'] == 'AC') {
+                array_push($accepted, $submit);
+            }
         }
 
         $users = $brain->getUsers();
+
+        // Problems info
+        $problemTags = array();
+        $problemTagsCnt = array();
+        $problemDifficulties = array();
+        $problemDifficultiesCnt = array();
+        foreach ($problems as $problem) {
+            // Tags
+            $tags = explode(',', $problem['tags']);
+            $problemTags[$problem['id']] = $tags;
+            foreach ($tags as $tag) {
+                if (!array_key_exists($tag, $problemTagsCnt))
+                    $problemTagsCnt[$tag] = 0;
+                $problemTagsCnt[$tag] += 1;
+            }
+
+            // Difficulties
+            $difficulty = $problem['difficulty'];
+            $problemDifficulties[$problem['id']] = $difficulty;
+            if (!array_key_exists($difficulty, $problemDifficultiesCnt))
+                $problemDifficultiesCnt[$difficulty] = 0;
+            $problemDifficultiesCnt[$difficulty] += 1;
+        }
+
+        // Sent submissions on problems
+        $userAllSubmits = array();
+        $userProblemSubmits = array();
+        $userProblemSources = array();
+        foreach ($users as $user) {
+            $userAllSubmits[$user['id']] = array();
+            $userProblemSubmits[$user['id']] = array();
+            $userProblemSources[$user['id']] = array();
+        }
+
+        $submitCount = count($submits);
+        for ($i = 0; $i < $submitCount; $i++) {
+            if ($submits[$i]['id'] != $sources[$i]['submitId'])
+                error_log('Mismatch in submits and sources at index ' . $i . '!');
+            array_push($userAllSubmits[$submits[$i]['userId']], $submits[$i]);
+            if (array_key_exists($submits[$i]['problemId'], $problemDifficulties)) {
+                array_push($userProblemSubmits[$submits[$i]['userId']], $submits[$i]);
+                array_push($userProblemSources[$submits[$i]['userId']], $sources[$i]);
+            }
+        }
+
         // Skip service user and admin
         $userCount = count($users);
         for ($i = 2; $i < $userCount; $i += 1) {
             $user = User::instanceFromArray($users[$i]);
-            $this->updateAll($user, $games, $standings, $problems, $submits, $sources, $ranking);
+            $this->updateAll($user, $games, $standings, $problems, $submits, $accepted, $sources, $ranking,
+                $problemTags, $problemTagsCnt, $problemDifficulties, $problemDifficultiesCnt,
+                $userAllSubmits[$user->id], $userProblemSubmits[$user->id], $userProblemSources[$user->id]);
         }
         return microtime(true) - $start;
     }

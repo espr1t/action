@@ -41,7 +41,8 @@ class GamesPage extends Page {
         }
         return null;
     }
-    public function getGameRanking($problem) {
+
+    public static function getGameRanking($problem) {
         // Returns a sorted array of data:
         // {
         //     'user': <integer>,
@@ -128,7 +129,7 @@ class GamesPage extends Page {
         return $ranking;
     }
 
-    private function populateRelativePoints($problem, &$bestScores, &$userSubmits) {
+    private static function populateRelativePoints($problem, &$bestScores, &$userSubmits) {
         $brain = new Brain();
         $submits = $brain->getProblemSubmits($problem->id);
         // Take into account only the latest submission of each user
@@ -156,7 +157,7 @@ class GamesPage extends Page {
         }
     }
 
-    public function getRelativeRanking($problem) {
+    public static function getRelativeRanking($problem) {
         // Returns a sorted array of data:
         // {
         //     'user': <integer>,
@@ -168,7 +169,7 @@ class GamesPage extends Page {
 
         $bestScores = array();
         $userSubmits = array();
-        $this->populateRelativePoints($problem, $bestScores, $userSubmits);
+        GamesPage::populateRelativePoints($problem, $bestScores, $userSubmits);
 
         $testScore = 100.0 / (count($bestScores) - 1);
 
