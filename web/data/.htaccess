@@ -1,5 +1,5 @@
 # Secure problem tests
-<FilesMatch ".+\.(in|sol)$">
+<FilesMatch ".+\.(in|sol|cpp|py|java)$">
 	AuthName "Authorized Users Only"
 	AuthType Basic
 	AuthUserFile /path/to/htpasswd/dir/.htpasswd
