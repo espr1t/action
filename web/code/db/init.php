@@ -44,7 +44,7 @@ if ($db->tableExists('Users')) {
             password VARCHAR(32) NOT NULL,
             loginKey VARCHAR(32) NOT NULL,
             name VARCHAR(64) NOT NULL,
-            email VARCHAR(64) NOT NULL,
+            email VARCHAR(80) NOT NULL,
             town VARCHAR(32) NOT NULL,
             country VARCHAR(32) NOT NULL,
             gender VARCHAR(8) NOT NULL,
