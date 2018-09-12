@@ -155,6 +155,13 @@ class GamesPage extends Page {
                 }
             }
         }
+
+        // Hack to make Airports use the grader's score
+        // This, in fact, makes the task just a standard problem, but, oh well, I need it to be a game.
+        if ($problem->name == 'Airports') {
+            for ($i = 0; $i < count($bestScores); $i += 1)
+                $bestScores[$i] = 1.0;
+        }
     }
 
     public static function getRelativeRanking($problem) {
@@ -173,14 +180,18 @@ class GamesPage extends Page {
 
         $testScore = 100.0 / (count($bestScores) - 1);
 
+        // TODO: Make the formula be configurable per problem
+        $scoringPower = 1.0;
+        if ($problem->name == 'HyperWords')
+            $scoringPower = 2.0;
+
         $ranking = array();
         foreach ($userSubmits as $userKey => $submit) {
             $score = 0.0;
             for ($i = 1; $i < count($submit->results); $i += 1) {
                 if (is_numeric($submit->results[$i])) {
                     if (floatval($submit->results[$i]) > 0.0) {
-                        // TODO: Make the formula be configurable per problem
-                        $score += pow($submit->results[$i] / $bestScores[$i], 2.0) * $testScore;
+                        $score += pow($submit->results[$i] / $bestScores[$i], $scoringPower) * $testScore;
                     }
                 }
             }
@@ -451,7 +462,7 @@ class GamesPage extends Page {
             ';
         }
 
-        if ($problem->name == 'HyperWords') {
+        if ($problem->name == 'HyperWords' || $problem->name == 'Airports') {
             $visualizerButton = '';
         }
 
@@ -958,6 +969,8 @@ class GamesPage extends Page {
                 return array('espr1t', 'ThinkCreative');
             case 'HyperWords':
                 return array('espr1t', 'ThinkCreative', 'IvayloS', 'stuno');
+            case 'Airports':
+                return array('espr1t', 'kiv');
         }
         return array();
     }
