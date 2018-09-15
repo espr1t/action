@@ -23,13 +23,14 @@ if not platform.startswith("win32"):
 
 
 class RunResult:
-    def __init__(self, status, error_message, exit_code, exec_time, exec_memory, score):
+    def __init__(self, status, error_message, exit_code, exec_time, exec_memory, score, info):
         self.status = status
         self.error_message = error_message
         self.exit_code = exit_code
         self.exec_time = exec_time
         self.exec_memory = exec_memory
         self.score = score
+        self.info = info
 
 
 class Runner:
@@ -236,7 +237,7 @@ class Runner:
         out_file.close()
 
         # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
-        result.status, result.error_message, result.score =\
+        result.status, result.error_message, result.score, result.info =\
             self.determine_status(test, result, inp_file_path, out_file_path, sol_file_path, self.evaluator.floats)
 
         total_time = perf_counter() - start_time
@@ -255,7 +256,8 @@ class Runner:
             "error_message": result.error_message,
             "exec_time": result.exec_time,
             "exec_memory": round(result.exec_memory / 1048576.0, 2),  # Convert back to megabytes
-            "score": result.score
+            "score": result.score,
+            "info": result.info
         }]
         self.evaluator.update_frontend("", results)
         return result
@@ -285,19 +287,19 @@ class Runner:
         if result.error_message != "":
             self.logger.info("[Submission {}] Got error while executing test {}: \"{}\"".format(
                 self.evaluator.id, test["inpFile"], result.error_message))
-            return TestStatus.RUNTIME_ERROR, result.error_message, 0
+            return TestStatus.RUNTIME_ERROR, result.error_message, 0, ""
         elif result.exec_time > self.evaluator.time_limit:
-            return TestStatus.TIME_LIMIT, "", 0
+            return TestStatus.TIME_LIMIT, "", 0, ""
         elif result.exec_memory > self.evaluator.memory_limit:
-            return TestStatus.MEMORY_LIMIT, "", 0
+            return TestStatus.MEMORY_LIMIT, "", 0, ""
         elif result.exit_code != 0:
-            return TestStatus.RUNTIME_ERROR, "", 0
+            return TestStatus.RUNTIME_ERROR, "", 0, ""
         else:
-            error_message, score = self.validate_output(inp_file, out_file, sol_file, floats_comparison)
+            error_message, score, info = self.validate_output(inp_file, out_file, sol_file, floats_comparison)
             if error_message != "":
-                return TestStatus.WRONG_ANSWER, error_message, 0
+                return TestStatus.WRONG_ANSWER, error_message, 0, info
             else:
-                return TestStatus.ACCEPTED, "", score
+                return TestStatus.ACCEPTED, "", score, info
 
     # TODO: Limit network usage
 
@@ -452,7 +454,7 @@ class Runner:
         error_message = ""
 
         # Leave the parent function decide what the test status will be
-        return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0)
+        return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0, "")
 
     # TODO: Take this to a separate file (validator.py)
     def validate_output(self, inp_file, out_file, sol_file, floats_comparison):
@@ -468,7 +470,7 @@ class Runner:
                     out_line = out.readline()
                     sol_line = sol.readline()
                     if not out_line and not sol_line:
-                        return "", 1.0
+                        return "", 1.0, ""
 
                     out_line = out_line.strip() if out_line else ""
                     sol_line = sol_line.strip() if sol_line else ""
@@ -513,7 +515,7 @@ class Runner:
                         out_line = out_line[:17] + "..."
                     if len(sol_line) > 20:
                         sol_line = sol_line[:17] + "..."
-                    return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0
+                    return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0, ""
 
     def validate_output_with_checker(self, inp_file, out_file, sol_file):
         checker_binary_path = config.PATH_CHECKERS + self.evaluator.checker + config.EXECUTABLE_EXTENSION_CPP
@@ -524,21 +526,23 @@ class Runner:
         except psutil.TimeoutExpired:
             self.logger.error("Internal Error: Checker took more than the allowed {}s.".format(config.CHECKER_TIMEOUT))
             process.terminate()
-            return "Checker Timeout", 0.0
+            return "Checker Timeout", 0.0, ""
 
         if exit_code != 0:
             message = "Checker returned non-zero exit code. Error was: \"{error_message}\""\
                       .format(exit_code=exit_code, error_message=process.communicate()[1])
-            return message, 0.0
+            return message, 0.0, ""
 
-        result = process.communicate()[0]
-        result = result.decode("utf-8") if result is not None else "0.0"
-        lines = result.splitlines()
+        output = process.communicate()
+        result = output[0].decode("utf-8") if output[0] is not None else "0.0"
+        info = output[1].decode("utf-8") if output[1] is not None else ""
+
+        result_lines = result.splitlines()
 
         score = 0.0
         message = ""
-        if len(lines) > 0:
-            score = float(lines[0])
-        if len(lines) > 1:
-            message = lines[1] if lines[1] != "OK" else ""
-        return message, score
+        if len(result_lines) > 0:
+            score = float(result_lines[0])
+        if len(result_lines) > 1:
+            message = result_lines[1] if result_lines[1] != "OK" else ""
+        return message, score, info

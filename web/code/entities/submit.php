@@ -24,6 +24,7 @@ class Submit {
     public $full = true;
     public $hidden = false;
     public $ip = '';
+    public $info = '';
 
     public static function newSubmit($user, $problemId, $language, $source, $full, $hidden = false) {
         $brain = new Brain();
@@ -62,6 +63,7 @@ class Submit {
         $submit->hidden = $hidden;
 
         $submit->ip = $_SERVER['REMOTE_ADDR'];
+        $submit->info = '';
         return $submit;
     }
 
@@ -79,6 +81,7 @@ class Submit {
         $this->progress = 0;
         $this->status = $GLOBALS['STATUS_WAITING'];
         $this->message = '';
+        $this->info = '';
         $brain->updateSubmit($this);
         $brain->erasePending($this->id);
         $brain->eraseLatest($this->id);
@@ -307,6 +310,7 @@ class Submit {
         $submit->message = getValue($info, 'message');
         $submit->full = boolval(getValue($info, 'full'));
         $submit->hidden = boolval(getValue($info, 'hidden'));
+        $submit->info = getValue($info, 'info');
         return $submit;
     }
 

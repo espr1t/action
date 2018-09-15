@@ -380,7 +380,7 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, full, hidden, ip)
+            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, full, hidden, ip, info)
             VALUES (
                 '" . $submit->submitted . "',
                 '" . $submit->graded . "',
@@ -396,7 +396,8 @@ class Brain {
                 '" . $this->db->escape($submit->message) . "',
                 '" . ($submit->full ? 1 : 0) . "',
                 '" . ($submit->hidden ? 1 : 0) . "',
-                '" . $this->db->escape($submit->ip) . "'
+                '" . $this->db->escape($submit->ip) . "',
+                '" . $this->db->escape($submit->info) . "'
             )
         ");
         if (!$response) {
@@ -445,7 +446,8 @@ class Brain {
                 exec_time = '" . implode(',', $submit->exec_time) . "',
                 exec_memory = '" . implode(',', $submit->exec_memory) . "',
                 status = '" . $submit->status . "',
-                message = '" . $this->db->escape($submit->message) . "'
+                message = '" . $this->db->escape($submit->message) . "',
+                info = '" . $this->db->escape($submit->info) . "'
             WHERE id = " . $submit->id . "
         ");
         if (!$response) {

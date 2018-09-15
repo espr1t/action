@@ -117,6 +117,10 @@ class Grader {
         if (array_key_exists('exec_memory', $result)) {
             $submit->exec_memory[$result['position']] = floatval($result['exec_memory']);
         }
+        // Update the info fields for tests other than the sample
+        if (array_key_exists('info', $result) && $result['info'] != '' && $result['position'] > 0) {
+            $submit->info = $result['info'];
+        }
     }
 
     function update($submitId, $message, $results, $timestamp) {
