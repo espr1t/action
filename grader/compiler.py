@@ -76,8 +76,13 @@ class Compiler:
 
     @ staticmethod
     def cleanup_java_source(path_source):
+        # Ignore package directives
         with open(path_source, "rt") as inp:
             lines_left = [line for line in inp.readlines() if not line.strip().startswith("package")]
+        # Make all classes public
+        for i in range(len(lines_left)):
+            if lines_left[i].strip().startswith("class"):
+                lines_left[i] = "public " + lines_left[i]
         with open(path_source, "wt") as out:
             out.writelines(lines_left)
 
