@@ -248,7 +248,8 @@ Table::Submits
     "message": "Undefined variable 'foo'",
     "full": true,
     "hidden": false,
-    "ip": "2001:db8:0:0:0:ff00:42:8329"
+    "ip": "2001:db8:0:0:0:ff00:42:8329",
+    "info": "Either log or some info about the execution."
 }
 */
 output('');
@@ -275,6 +276,7 @@ if ($db->tableExists('Submits')) {
             full BOOLEAN NOT NULL DEFAULT FALSE,
             hidden BOOLEAN NOT NULL DEFAULT FALSE,
             ip VARCHAR(40) NOT NULL,
+            info TEXT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
