@@ -20,12 +20,15 @@ class GamesPage extends Page {
             '/scripts/games/uttt.js',
             '/scripts/games/hypersnakes.js',
             '/scripts/games/tetris.js',
-            '/scripts/games/connect.js'
+            '/scripts/games/connect.js',
+            '/scripts/jquery-3.3.1.min.js',
+            '/scripts/jquery-jvectormap-2.0.3.min.js',
+            '/scripts/jquery-jvectormap-world-mill.js'
         );
     }
 
     public function getExtraStyles() {
-        return array('/styles/tooltips.css', '/styles/games.css');
+        return array('/styles/tooltips.css', '/styles/games.css', '/styles/jquery-jvectormap-2.0.3.css');
     }
 
     public function onLoad() {
@@ -712,6 +715,12 @@ class GamesPage extends Page {
             return prettyPrintCompilationErrors($submit);
         }
 
+        if ($submit->problemName == 'Airports') {
+            if ($submit->status == $GLOBALS['STATUS_ACCEPTED']) {
+                return '<div id="world-map" style="width: 43rem; height: 20rem;"></div>';
+            }
+        }
+
         // Otherwise get information for each test and print it as a colored circle with
         // additional roll-over information
         $detailsTable = '<div class="centered">';
@@ -757,7 +766,7 @@ class GamesPage extends Page {
                 $icon = '<i class="fa fa-code"></i>';
             } else if ($result == $GLOBALS['STATUS_INTERNAL_ERROR']) {
                 $background = 'dull-black';
-                $icon = '<i class="fa fa-warning"></i>';
+                $icon = '<i class="fas fa-exclamation"></i>';
             }
             $detailsTable .= '<div class="test-result tooltip--top background-' . $background . '" data-tooltip="' . $tooltip . '">' . $icon . '</div>';
         }
@@ -774,14 +783,18 @@ class GamesPage extends Page {
         $userSubmits = array();
         $this->populateRelativePoints($problem, $bestScores, $userSubmits);
 
+        // TODO: Make the formula to be configurable per problem
+        $scoringPower = 1.0;
+        if ($problem->name == 'HyperWords')
+            $scoringPower = 2.0;
+
         $points = array();
         $testWeight = 100.0 / (count($bestScores) - 1);
         for ($i = 0; $i < count($bestScores); $i += 1) {
             if (!is_numeric($submit->results[$i]) || $submit->results[$i] == 0.0) {
                 array_push($points, 0.0);
             } else {
-                // TODO: Make the formula to be configurable per problem
-                $score = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], 2.0);
+                $score = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], $scoringPower);
                 array_push($points, $score * $testWeight);
             }
         }
@@ -835,6 +848,62 @@ class GamesPage extends Page {
         }
     }
 
+    private function getAirportsScript($problem, $submitId, $redirectUrl) {
+        $airportData = explode("\n", trim(file_get_contents($GLOBALS['PATH_PROBLEMS'] . '/Games.Airports/Misc/AirportData.csv')));
+        $airportInfo = array();
+        for ($i = 1; $i < count($airportData); $i += 1) {
+            $line = explode(',', trim($airportData[$i]));
+            $airportInfo[$line[0]] = array($line[1], $line[2]);
+        }
+
+        $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
+        $content = '';
+        $airports = explode(',', trim($submit->info));
+        $content .= 'var data = [';
+        foreach ($airports as $airport) {
+            $content .= '{name: "' . $airport . '", latLng:[' . $airportInfo[$airport][0] . ',' . $airportInfo[$airport][1] . ']},';
+        }
+        $content .= '];' . PHP_EOL;
+        $content .= '      $(function() {
+            $("#world-map").vectorMap({
+                map: "world_mill",
+                backgroundColor: "white",
+                zoomMin: 1,
+                zoomMax: 1,
+                regionStyle: {
+                    initial: {
+                        fill: "#9A9A9A",
+                        "fill-opacity": 1,
+                        stroke: "none",
+                        "stroke-width": 0,
+                        "stroke-opacity": 1
+                    },
+                    hover: {
+                        "fill-opacity": 0.8,
+                        cursor: "pointer"
+                    },
+                },
+                markerStyle: {
+                    initial: {
+                        fill: "#129D5A",
+                        stroke: "#505050",
+                        "fill-opacity": 1,
+                        "stroke-width": 1,
+                        "stroke-opacity": 1,
+                        r: 5
+                    },
+                    hover: {
+                        stroke: "#333333",
+                        "stroke-width": 2,
+                        cursor: "pointer"
+                    }
+                },
+                markers: data
+            });
+        });';
+        return $content;
+    }
+
     private function getSubmitInfoBox($problem, $submitId) {
         $redirectUrl = getGameLink($problem->name) . '/submits';
         if (isset($_SESSION['queueShortcut']))
@@ -850,13 +919,22 @@ class GamesPage extends Page {
             ';
         } else if ($problem->type == 'relative') {
             $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
-            $updatesUrl = getGameLink($problem->name) . '/submits/' . $submitId . '/updates';
-            return '
-                <script>
-                    showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
-                    subscribeForUpdates(\'' . $updatesUrl . '\');
-                </script>
-            ';
+            if ($problem->name != 'Airports') {
+                $updatesUrl = getGameLink($problem->name) . '/submits/' . $submitId . '/updates';
+                return '
+                    <script>
+                        showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
+                        subscribeForUpdates(\'' . $updatesUrl . '\');
+                    </script>
+                ';
+            } else {
+                return '
+                    <script>
+                        showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
+                        ' . $this->getAirportsScript($problem, $submitId, $redirectUrl) . '
+                    </script>
+                ';
+            }
         } else {
             error_log("ERROR: In games, but problem is neither 'game' nor 'relative'!");
             return '';
