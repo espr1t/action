@@ -131,6 +131,7 @@ function hideOverlay() {
     setTimeout(function() {
         document.body.removeChild(overlay);
     }, 300);
+    document.body.style.overflow = 'auto';
 }
 
 /*
