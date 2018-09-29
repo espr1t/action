@@ -388,7 +388,7 @@ class ProblemsPage extends Page {
                 $icon = '<i class="fa fa-code"></i>';
             } else if ($result == $GLOBALS['STATUS_INTERNAL_ERROR']) {
                 $background = 'dull-black';
-                $icon = '<i class="fa fa-warning"></i>';
+                $icon = '<i class="fas fa-exclamation"></i>';
             }
             $detailsTable .= '<div class="test-result tooltip--top background-' . $background . '" data-tooltip="' . $tooltip . '">' . $icon . '</div>';
         }
