@@ -676,13 +676,11 @@ class Brain {
     // Users
     function addUser($user) {
         $response = $this->db->query("
-            INSERT INTO `Users`(access, registered, username, password, loginKey, name, email, town, country, gender, birthdate, avatar)
+            INSERT INTO `Users`(access, registered, username, name, email, town, country, gender, birthdate, avatar)
             VALUES (
                 '" . $user->access . "',
                 '" . $user->registered . "',
                 '" . $user->username . "',
-                '" . $user->password . "',
-                '" . $user->loginKey . "',
                 '" . $user->name . "',
                 '" . $user->email . "',
                 '" . $user->town . "',
@@ -775,19 +773,6 @@ class Brain {
         return $this->getResult($response);
     }
 
-    function getUserByLoginKey($loginKey) {
-        $response = $this->db->query("
-            SELECT * FROM `Users`
-            WHERE loginKey = '" . $loginKey . "'
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getUserByLoginKey() query with loginKey = "' . $loginKey . '"!');
-            return null;
-        }
-        return $this->getResult($response);
-    }
-
     // Credentials
     function addCredentials($userId, $userName, $password, $loginKey) {
         $response = $this->db->query("
@@ -806,6 +791,49 @@ class Brain {
             return null;
         }
         return true;
+    }
+
+    function updateCreds($creds) {
+        $response = $this->db->query("
+            UPDATE `Credentials` SET
+                password = '" . $creds['password'] . "',
+                loginKey = '" . $creds['loginKey'] . "',
+                resetKey = '" . $creds['resetKey'] . "',
+                resetTime = '" . $creds['resetTime'] . "'
+            WHERE userId = " . $creds['userId'] . "
+        ");
+        if (!$response) {
+            error_log('Could not update credentials for user "' . $creds['username'] . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function getCreds($userId) {
+        $response = $this->db->query("
+            SELECT * FROM `Credentials`
+            WHERE userId = '" . $userId . "'
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getCreds() query with id = "' . $userId . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getCredsByLoginKey($loginKey) {
+        $response = $this->db->query("
+            SELECT * FROM `Credentials`
+            WHERE loginKey = '" . $loginKey . "'
+            LIMIT 1
+        ");
+
+        if (!$response) {
+            error_log('Could not execute getCredsByLoginKey() query with loginKey = "' . $loginKey . '"!');
+            return null;
+        }
+        return $this->getResult($response);
     }
 
     // Achievements

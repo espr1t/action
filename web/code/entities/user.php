@@ -10,8 +10,6 @@ class User {
     public $access = 0;
     public $registered = '1970-01-01';
     public $username = 'anonymous';
-    public $password = 'abracadabra';
-    public $loginKey = '';
     public $name = '';
     public $email = '';
     public $town = '';
@@ -22,7 +20,7 @@ class User {
     public $actions = 0;
     public $totalTime = 0;
     public $lastSeen = '2017-01-01 00:00:00';
-    
+
     public function logOut() {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
         session_destroy();
@@ -54,8 +52,6 @@ class User {
         $user->access = getValue($info, 'access');
         $user->registered = getValue($info, 'registered');
         $user->username = getValue($info, 'username');
-        $user->password = getValue($info, 'password');
-        $user->loginKey = getValue($info, 'loginKey');
         $user->name = getValue($info, 'name');
         $user->email = getValue($info, 'email');
         $user->town = getValue($info, 'town');
@@ -72,17 +68,17 @@ class User {
     public static function get($userKey) {
         $brain = new Brain();
         if (is_numeric($userKey)) {
-            $result = $brain->getUser($userKey);
+            $info = $brain->getUser($userKey);
         } else {
-            $result = $brain->getUserByUsername($userKey);
+            $info = $brain->getUserByUsername($userKey);
         }
-        return !$result ? null : User::instanceFromArray($result);
+        return !$info ? null : User::instanceFromArray($info);
     }
 
     public static function getByLoginKey($loginKey) {
         $brain = new Brain();
-        $result = $brain->getUserByLoginKey($loginKey);
-        return !$result ? null : User::instanceFromArray($result);
+        $creds = $brain->getCredsByLoginKey($loginKey);
+        return !$creds ? null : User::get($creds['userId']);
     }
 
     public static function createUser($username, $name, $surname, $password, $email, $birthdate, $town, $country, $gender) {
@@ -95,8 +91,6 @@ class User {
         $user->access = $GLOBALS['DEFAULT_USER_ACCESS'];
         $user->registered = date('Y-m-d');
         $user->username = $username;
-        $user->password = $password;
-        $user->loginKey = '';
         $user->name = $name . ' ' . $surname;
         $user->email = $email;
         $user->town = $town;
@@ -110,6 +104,9 @@ class User {
         if (!$user->id) {
             return null;
         }
+
+        // Add credentials entry
+        $brain->addCredentials($user->id, $username, $password, '');
 
         // Grant admin rights to the first user
         if ($user->id == 1) {

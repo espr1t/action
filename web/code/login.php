@@ -34,7 +34,9 @@ class LoginPage extends Page {
             if ($user == null) {
                 $error = 'Не съществува акаунт с това потребителско име!';
             } else {
-                if ($user->password != $saltedPassword) {
+                $brain = new Brain();
+                $creds = $brain->getCreds($user->id);
+                if ($creds['password'] != $saltedPassword) {
                     $error = 'Въведената парола е невалидна!';
                 }
             }
@@ -45,13 +47,14 @@ class LoginPage extends Page {
                 $_SESSION['userId'] = $user->id;
 
                 // Set cookie (avoid logging in again until cookie expires)
-                if ($user->loginKey == '') {
-                    $user->loginKey = str_shuffle(md5(microtime()));
-                    $user->update();
+                if ($creds['loginKey'] == '') {
+                    $creds['loginKey'] = str_shuffle(md5(microtime()));
+                    $brain = new Brain();
+                    $brain->updateCreds($creds);
                 }
                 # Sign the login key with the user's IP so it cannot be used on another computer even if stolen
                 # Note that this wouldn't work for two computers on the same subnet (behind a router)
-                $signedLoginKey = $user->loginKey . ':' . hash_hmac('md5', $user->loginKey, $_SERVER['REMOTE_ADDR']);
+                $signedLoginKey = $creds['loginKey'] . ':' . hash_hmac('md5', $creds['loginKey'], $_SERVER['REMOTE_ADDR']);
                 $expireTime = time() + 365 * 86400; // 365 days
                 setcookie($GLOBALS['COOKIE_NAME'], $signedLoginKey, $expireTime);
 
