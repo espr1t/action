@@ -5,21 +5,7 @@ require_once('common.php');
 
 session_start();
 
-$user = null;
-if (isset($_SESSION['userId'])) {
-    $user = User::get($_SESSION['userId']);
-} else if (isset($_COOKIE[$GLOBALS['COOKIE_NAME']])) {
-    // Scan all users for a one with a loginKey matching the one stored in the cookie
-    list($loginKey, $hmac) = explode(':', $_COOKIE[$GLOBALS['COOKIE_NAME']], 2);
-    // This, unfortunately, wouldn't work for non-static IPs =/
-    if ($hmac == hash_hmac('md5', $loginKey, $_SERVER['REMOTE_ADDR'])) {
-        $user = User::getByLoginKey($loginKey);
-        if ($user != null) {
-            $_SESSION['userId'] = $user->id;
-        }
-    }
-}
-
+$user = getCurrentUser();
 if ($user == null) {
     $user = new User();
 }

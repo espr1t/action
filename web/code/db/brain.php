@@ -788,6 +788,26 @@ class Brain {
         return $this->getResult($response);
     }
 
+    // Credentials
+    function addCredentials($userId, $userName, $password, $loginKey) {
+        $response = $this->db->query("
+            INSERT INTO `Credentials`(userId, username, password, loginKey, resetKey, resetTime)
+            VALUES (
+                '" . $userId . "',
+                '" . $userName . "',
+                '" . $password . "',
+                '" . $loginKey . "',
+                '',
+                ''
+            )
+        ");
+        if (!$response) {
+            error_log('Could not insert credentials entry for username "' . $userName . '"!');
+            return null;
+        }
+        return true;
+    }
+
     // Achievements
     function getAchievements($userId = -1) {
         $response = $this->db->query("

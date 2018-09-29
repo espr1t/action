@@ -59,6 +59,37 @@ if ($db->tableExists('Users')) {
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
 
+/*
+Table::Credentials
+============
+{
+    "userId": 42,
+    "username": "espr1t",
+    "password": "588e412333f6ab16379c62e1ba0c4d5a",
+    "loginKey": "189342e2ed9d23bb9a02ecbf8ed06762",
+    "resetKey": "edc2de439bb62d55a7ad977c2fd7e8e7",
+    "resetTime": "2017-12-29T01:48:19"
+}
+*/
+output('');
+output('Creating table Credentials...');
+
+if ($db->tableExists('Credentials')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Credentials`(
+            userId INT NOT NULL,
+            username VARCHAR(32) NOT NULL,
+            password VARCHAR(32) NOT NULL,
+            loginKey VARCHAR(32) NOT NULL,
+            resetKey VARCHAR(32) NOT NULL,
+            resetTime DATETIME NOT NULL,
+            PRIMARY KEY (userId)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
 
 /*
 Table::Problems
