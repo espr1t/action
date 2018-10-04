@@ -22,22 +22,18 @@ if (!passSpamProtection($user, $GLOBALS['SPAM_EMAIL_ID'], $GLOBALS['SPAM_EMAIL_L
 $brain = new Brain();
 $brain->addReport($user->id, $_POST['link'], $_POST['problem']);
 
-// Use double-quotes as single quotes have problems with \r and \n
-$headers = "MIME-Version: 1.0\r\n";
-$headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-$headers .= "From: action@informatika.bg\r\n";
 
-$address = "thinkcreative@outlook.com";
+$address = $GLOBALS['ADMIN_EMAIL'];
 $subject = "Problem report from " . $user->username;
-$text = "<html><body>" .
-        "<b>User:</b> " . $user->username . "<br>" .
-        "<b>Link:</b> " . $_POST['link'] . "<br>" .
-        "<b>Problem Description:</b><br> " .
-        "==================================================<br>" .
-        nl2br($_POST['problem']) .
-        "</body></html>";
+$content = "<html><body>" .
+           "<b>User:</b> " . $user->username . "<br>" .
+           "<b>Link:</b> " . $_POST['link'] . "<br>" .
+           "<b>Problem Description:</b><br> " .
+           "==================================================<br>" .
+           nl2br($_POST['problem']) .
+           "</body></html>";
 
-if (mail($address, $subject, $text, $headers)) {
+if (sendEmail($address, $subject, $content)) {
     printAjaxResponse(array(
         'status' => 'OK',
         'message' => 'Докладваният проблем беше изпратен успешно.'

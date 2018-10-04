@@ -28,28 +28,29 @@ class RegisterPage extends Page {
         return $this->getRegisterForm();
     }
 
-    private static $cities = array('Sofia', 'Plovdiv', 'Pleven', 'Varna', 'Burgas', 'Shumen', 'Yambol', 'Gabrovo', 'Haskovo', 'Vidin', 'Vratsa', 'Sliven');
-
     private function getRegisterForm() {
-        $index = rand(0, count(self::$cities) - 1);
-        $expected = md5(self::$cities[$index]);
-        $captcha = str_shuffle(self::$cities[$index]);
-        while ($captcha === self::$cities[$index]) {
-            $captcha = str_shuffle(self::$cities[$index]);
+        $index = rand(0, count($GLOBALS['CAPTCHA_CITIES']) - 1);
+        $expected = md5($GLOBALS['CAPTCHA_CITIES'][$index]);
+        $captcha = str_shuffle($GLOBALS['CAPTCHA_CITIES'][$index]);
+        while ($captcha === $GLOBALS['CAPTCHA_CITIES'][$index]) {
+            $captcha = str_shuffle($GLOBALS['CAPTCHA_CITIES'][$index]);
         }
+
+        $recaptchaKey = isProduction() ? $GLOBALS['RE_CAPTCHA_PROD_SITE_KEY'] : $GLOBALS['RE_CAPTCHA_TEST_SITE_KEY'];
 
         $content = '
             <div class="register centered">
                 <div class="box">
                     <h2>Регистрация на Потребител</h2>
-                    <form class="register" name="register" action="register" onsubmit="return validateRegistration() && saltHashRegisterPasswords()" method="post" accept-charset="utf-8">
+                    <form class="register" name="register" action="register" method="post" accept-charset="utf-8"
+                            onsubmit="return validateRegistration(\'register\') && saltHashTwoPasswords(\'register\')">
                         <table class="register">
                             <tr>
                                 <td class="left"><b>Име:</b></td>
                                 <td class="right">
                                     <input type="text" name="name" placeholder="First Name" class="text" minlength=1 maxlength=32 required
                                         title="Names must be between 1 and 32 characters long and can contain only Cyrillic or Lattin letters and dashes."
-                                        onkeyup="validateName()">
+                                        onkeyup="validateName(\'register\')">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconName"></i>
                                 </td>
                             </tr>
@@ -58,7 +59,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="text" name="surname" placeholder="Last Name" class="text" minlength=1 maxlength=32 required
                                         title="Names must be between 1 and 32 characters long and can contain only Cyrillic or Lattin letters and dashes."
-                                        onkeyup="validateSurname()">
+                                        onkeyup="validateSurname(\'register\')">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconSurname"></i>
                                 </td>
                             </tr>
@@ -67,7 +68,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="text" name="username" placeholder="Username" class="text" minlength=2 maxlength=16 required
                                         title="Username must be between 2 and 16 characters long and can contain only Lattin letters, digits, dots, and underscores. It cannot start with a dot."
-                                        onkeyup="validateUsername()">
+                                        onkeyup="validateUsername(\'register\')">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconUsername"></i>
                                 </td>
                             </tr>
@@ -76,7 +77,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="password" name="password1" placeholder="Password" class="text" minlength=1 maxlength=33 required
                                         title="Password must be between 1 and 32 characters long."
-                                        onkeyup="validatePassword1()">
+                                        onkeyup="validatePassword1(\'register\')">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconPassword1"></i>
                                 </td>
                             </tr>
@@ -85,7 +86,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="password" name="password2" placeholder="Repeat Password" class="text" minlength=1 maxlength=32 required
                                         title="Password must be between 1 and 32 characters long."
-                                        onkeyup="validatePassword2()">
+                                        onkeyup="validatePassword2(\'register\')">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconPassword2"></i>
                                 </td>
                             </tr>
@@ -95,7 +96,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="email" name="email" placeholder="example@mail.com" class="text" minlength=0 maxlength=32
                                         title="E-mail must look like a valid e-mail address."
-                                        onkeyup="validateEmail()">
+                                        onkeyup="validateEmail(\'register\')">
                                     <i class="fa fa-check-square" style="color: #53A93F;" id="validationIconEmail"></i>
                                 </td>
                             </tr>
@@ -104,7 +105,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="text" name="birthdate" placeholder="YYYY-MM-DD" class="text" minlength=0 maxlength=32
                                         title="The date of birth should follow the ISO format: YYYY-MM-DD."
-                                        onkeyup="validateBirthdate()">
+                                        onkeyup="validateBirthdate(\'register\')">
                                     <i class="fa fa-check-square" style="color: #53A93F;" id="validationIconBirthdate"></i>
                                 </td>
                             </tr>
@@ -113,7 +114,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="text" name="town" placeholder="Town" class="text" minlength=0 maxlength=32
                                         title="Town must be between 1 and 32 characters long and can contain only Cyrillic or Latin letters and spaces."
-                                        onkeyup="validateTown()">
+                                        onkeyup="validateTown(\'register\')">
                                     <i class="fa fa-check-square" style="color: #53A93F;" id="validationIconTown"></i>
                                 </td>
                             </tr>
@@ -122,7 +123,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="text" name="country" placeholder="Country" class="text" minlength=0 maxlength=32
                                         title="Country must be between 1 and 32 characters long and can contain only Cyrillic or Latin letters and spaces."
-                                        onkeyup="validateCountry()">
+                                        onkeyup="validateCountry(\'register\')">
                                     <i class="fa fa-check-square" style="color: #53A93F;" id="validationIconCountry"></i>
                                 </td>
                             </tr>
@@ -139,7 +140,7 @@ class RegisterPage extends Page {
                                 <td class="right">
                                     <input type="text" name="captcha" class="text" required
                                          title="For example the correct unscrambling of \'cveLho\' is \'Lovech\'."
-                                         onkeyup="validateCaptcha()">
+                                         onkeyup="validateCaptcha(\'register\')">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconCaptcha"></i>
                                     <input type="hidden" name="expected" value="' . $expected . '">
                                 </td>
@@ -147,7 +148,7 @@ class RegisterPage extends Page {
                         </table>
                         <br>
                         <div style="text-align: center;">
-                            <div class="g-recaptcha" style="display: inline-block" data-sitekey="6LdbRTUUAAAAAIDwF-v-BVCEpUzRZxyXLsFYzjMf"></div>
+                            <div class="g-recaptcha" style="display: inline-block" data-sitekey="' . $recaptchaKey . '"></div>
                         </div>
                         <input name="submit" type="submit" class="button button-color-blue" value="Регистрация">
                     </form>
@@ -170,7 +171,7 @@ class RegisterPage extends Page {
         if (md5($_POST['captcha']) != $_POST['expected']) {
             return 'Въведената captcha е невалидна!';
         }
-        if (!in_array($_POST['captcha'], self::$cities)) {
+        if (!in_array($_POST['captcha'], $GLOBALS['CAPTCHA_CITIES'])) {
             return 'Въведената captcha е невалидна!';
         }
         unset($_POST['captcha']);

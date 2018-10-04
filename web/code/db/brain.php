@@ -836,6 +836,20 @@ class Brain {
         return $this->getResult($response);
     }
 
+    function getCredsByResetKey($resetKey) {
+        $response = $this->db->query("
+            SELECT * FROM `Credentials`
+            WHERE resetKey = '" . $resetKey . "'
+            LIMIT 1
+        ");
+
+        if (!$response) {
+            error_log('Attempt to reset password with invalid resetKey: "' . $resetKey . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
     // Achievements
     function getAchievements($userId = -1) {
         $response = $this->db->query("

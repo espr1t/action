@@ -16,7 +16,10 @@ $DB_PASSWORD = 'password';
 $DB_DATABASE = 'action';
 
 // Google re-CAPTCHA secret key
-$RE_CAPTCHA_KEY = 'f4k3s3cr37k3y';
+$RE_CAPTCHA_PROD_SITE_KEY = 'f4k3pr0ds173k3y';
+$RE_CAPTCHA_PROD_SECRET_KEY = 'f4k3pr0ds3cr37k3y';
+$RE_CAPTCHA_TEST_SITE_KEY = 'f4k3t357s173k3y';
+$RE_CAPTCHA_TEST_SECRET_KEY = 'f4k3t357s3cr37k3y';
 
 // Session and cookie
 $COOKIE_NAME = 'action_informatika_bg';
@@ -24,7 +27,6 @@ $COOKIE_NAME = 'action_informatika_bg';
 // Grader
 //$GRADER_URL = 'localhost:5000';
 $GRADER_URL = '192.168.1.111:5000';
-
 
 // Will not work with random UTF-8 characters since the utf8_encode() algorithm
 // in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
@@ -151,5 +153,9 @@ $LANGUAGE_EXTENSIONS = array(
 );
 
 $PASSWORD_SALT = 'informatika.bg';
+$CAPTCHA_CITIES = array('Sofia', 'Plovdiv', 'Pleven', 'Varna', 'Burgas', 'Shumen', 'Yambol', 'Gabrovo', 'Haskovo', 'Vidin', 'Vratsa', 'Sliven');
+
+// Password Reset
+$RESET_PASSWORD_TIMEOUT = 7 * 24 * 60 * 60; // One week in seconds.
 
 ?>

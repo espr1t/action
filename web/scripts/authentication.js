@@ -15,14 +15,14 @@ function saltHashPassword(password) {
     return md5(password + 'frontendsalt');
 }
 
-function saltHashLoginPassword() {
-    document.forms['login']['password'].value = saltHashPassword(document.forms['login']['password'].value);
+function saltHashOnePassword(formName) {
+    document.forms[formName]['password'].value = saltHashPassword(document.forms[formName]['password'].value);
     return true;
 }
 
-function saltHashRegisterPasswords() {
-    document.forms['register']['password1'].value = saltHashPassword(document.forms['register']['password1'].value);
-    document.forms['register']['password2'].value = saltHashPassword(document.forms['register']['password2'].value);
+function saltHashTwoPasswords(formName) {
+    document.forms[formName]['password1'].value = saltHashPassword(document.forms[formName]['password1'].value);
+    document.forms[formName]['password2'].value = saltHashPassword(document.forms[formName]['password2'].value);
     return true;
 }
 
@@ -38,46 +38,46 @@ function setState(validationIcon, valid) {
     }
 }
 
-function validateUsername() {
+function validateUsername(formName) {
     // TODO: Check against already registered users.
-    var username = document.forms['register']['username'].value;
+    var username = document.forms[formName]['username'].value;
     var validationIcon = document.getElementById('validationIconUsername');
     return setState(validationIcon, usernameRe.test(username));
  }
 
-function validateName(name) {
-    var name = document.forms['register']['name'].value;
+function validateName(formName) {
+    var name = document.forms[formName]['name'].value;
     var validationIcon = document.getElementById('validationIconName');
     return setState(validationIcon, nameRe.test(name));
  }
 
-function validateSurname() {
-    var surname = document.forms['register']['surname'].value;
+function validateSurname(formName) {
+    var surname = document.forms[formName]['surname'].value;
     var validationIcon = document.getElementById('validationIconSurname');
     return setState(validationIcon, nameRe.test(surname));
 }
 
-function validatePassword1() {
-    var password1 = document.forms['register']['password1'].value;
+function validatePassword1(formName) {
+    var password1 = document.forms[formName]['password1'].value;
     var validationIcon = document.getElementById('validationIconPassword1');
     return setState(validationIcon, passwordRe.test(password1));
 }
 
-function validatePassword2() {
-    var password1 = document.forms['register']['password1'].value;
-    var password2 = document.forms['register']['password2'].value;
+function validatePassword2(formName) {
+    var password1 = document.forms[formName]['password1'].value;
+    var password2 = document.forms[formName]['password2'].value;
     var validationIcon = document.getElementById('validationIconPassword2');
     return setState(validationIcon, password1 == password2);
 }
 
-function validateEmail() {
-    var email = document.forms['register']['email'].value;
+function validateEmail(formName, allowEmpty=true) {
+    var email = document.forms[formName]['email'].value;
     var validationIcon = document.getElementById('validationIconEmail');
-    return setState(validationIcon, email == '' || emailRe.test(email));
+    return setState(validationIcon, emailRe.test(email) || (allowEmpty && email == ''));
 }
 
-function validateBirthdate() {
-    var birthdate = document.forms['register']['birthdate'].value;
+function validateBirthdate(formName) {
+    var birthdate = document.forms[formName]['birthdate'].value;
     var validationIcon = document.getElementById('validationIconBirthdate');
     var valid = true;
     if (birthdate && birthdate != '') {
@@ -104,35 +104,46 @@ function validateBirthdate() {
     return setState(validationIcon, valid);
 }
 
-function validateTown() {
-    var town = document.forms['register']['town'].value;
+function validateTown(formName) {
+    var town = document.forms[formName]['town'].value;
     var validationIcon = document.getElementById('validationIconTown');
     return setState(validationIcon, town == '' || placeRe.test(town));
 }
 
-function validateCountry() {
-    var country = document.forms['register']['country'].value;
+function validateCountry(formName) {
+    var country = document.forms[formName]['country'].value;
     var validationIcon = document.getElementById('validationIconCountry');
     return setState(validationIcon, country == '' || placeRe.test(country));
 }
 
-function validateCaptcha() {
-    var captcha = document.forms['register']['captcha'].value;
-    var expected = document.forms['register']['expected'].value;
+function validateCaptcha(formName) {
+    var captcha = document.forms[formName]['captcha'].value;
+    var expected = document.forms[formName]['expected'].value;
     var validationIcon = document.getElementById('validationIconCaptcha');
     return setState(validationIcon, md5(captcha) == expected);
 }
 
-function validateRegistration() {
-    return validateUsername() &&
-           validateName() &&
-           validateSurname() &&
-           validatePassword1() &&
-           validatePassword2() &&
-           validateEmail() &&
-           validateBirthdate() &&
-           validateTown() &&
-           validateCountry() &&
-           validateCaptcha();
+function validateRegistration(formName) {
+    return validateUsername(formName) &&
+           validateName(formName) &&
+           validateSurname(formName) &&
+           validatePassword1(formName) &&
+           validatePassword2(formName) &&
+           validateEmail(formName) &&
+           validateBirthdate(formName) &&
+           validateTown(formName) &&
+           validateCountry(formName) &&
+           validateCaptcha(formName);
 }
 
+function validatePasswordReset(formName) {
+    return validateUsername(formName) &&
+           validateEmail(formName, false) &&
+           validateCaptcha(formName);
+}
+
+function validatePasswordResetLast(formName) {
+    return validateUsername(formName) &&
+           validatePassword1(formName) &&
+           validatePassword2(formName);
+}

@@ -61,6 +61,10 @@ switch ($_GET['page']) {
         require_once('register.php');
         $page = new RegisterPage($user);
         break;
+    case 'reset':
+        require_once('reset.php');
+        $page = new ResetPage($user);
+        break;
     case 'about':
         require_once('about.php');
         $page = new AboutPage($user);

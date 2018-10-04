@@ -76,6 +76,8 @@ class User {
     }
 
     public static function getByLoginKey($loginKey) {
+        if ($loginKey == '')
+            return null;
         $brain = new Brain();
         $creds = $brain->getCredsByLoginKey($loginKey);
         return !$creds ? null : User::get($creds['userId']);

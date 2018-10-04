@@ -105,8 +105,11 @@ RewriteRule    ^users/(\w[\w.]{1,15})$                          /code/main.php?p
 RewriteRule    ^actions/update$                                 /code/actions/grader_update.php                                                     [NC,L,QSA]
 RewriteRule    ^actions/(\w+)$                                  /code/actions/dispatch.php?action=$1                                                [NC,L,QSA]
 
+#Reset Password
+RewriteRule    ^reset$                                          /code/main.php?page=reset                                                           [NC,L,QSA]
+RewriteRule    ^reset/(\w+)$                                    /code/main.php?page=reset&key=$1                                                    [NC,L,QSA]
+
 # Admin pages
-RewriteRule    ^admin/init$                                     /code/db/init.php                                                                   [NC,L,QSA]
 RewriteRule    ^admin/news$                                     /code/admin/admin.php?page=news                                                     [NC,L,QSA]
 RewriteRule    ^admin/news/(\d+|new)$                           /code/admin/admin.php?page=news&newsId=$1                                           [NC,L,QSA]
 RewriteRule    ^admin/problems$                                 /code/admin/admin.php?page=problems                                                 [NC,L,QSA]
@@ -118,3 +121,7 @@ RewriteRule    ^admin/retest/(\d+)$                             /code/admin/admi
 RewriteRule    ^admin/retest/(\d+)/latest$                      /code/admin/admin.php?page=retest&problemId=$1&latest=true                          [NC,L,QSA]
 RewriteRule    ^admin/achievements$                             /code/admin/admin.php?page=achievements                                             [NC,L,QSA]
 RewriteRule    ^admin/achievements/recalc$                      /code/admin/admin.php?page=achievements&recalc=true                                 [NC,L,QSA]
+
+# DB tools
+RewriteRule    ^admin/init$                                     /code/db/init.php                                                                   [NC,L,QSA]
+RewriteRule    ^admin/migrate$                                  /code/db/migrate.php                                                                [NC,L,QSA]

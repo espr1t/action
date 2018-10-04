@@ -38,13 +38,17 @@ function saltHashPassword($password) {
     return md5($password . $GLOBALS['PASSWORD_SALT']);
 }
 
+function isProduction() {
+    return !in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1'));
+}
+
 function validateReCaptcha() {
     if (!isset($_POST['g-recaptcha-response']))
         return false;
 
     $url = 'https://www.google.com/recaptcha/api/siteverify';
     $data = array(
-        'secret' => $GLOBALS['RE_CAPTCHA_KEY'],
+        'secret' => isProduction() ? $GLOBALS['RE_CAPTCHA_PROD_SECRET_KEY'] : $GLOBALS['RE_CAPTCHA_TEST_SECRET_KEY'],
         'response' => $_POST['g-recaptcha-response'],
         'remoteip' => $_SERVER['REMOTE_ADDR']
     );
@@ -303,6 +307,14 @@ function getCurrentUser() {
         }
     }
     return $user;
+}
+
+function sendEmail($address, $subject, $content) {
+    // Use double-quotes as single quotes have problems with \r and \n
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $headers .= "From: action@informatika.bg\r\n";
+    return mail($address, $subject, $content, $headers);
 }
 
 ?>
