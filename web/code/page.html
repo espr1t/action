@@ -19,7 +19,7 @@
             function reportProblem() {
                 <?php
                     if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
-                        echo "showMessage('ERROR', 'Трябва да се оторизирате за да съобщите за проблем.');";
+                        echo "showMessage('ERROR', 'Трябва да влезете в системата за да съобщите за проблем.');";
                     } else {
                         echo "showReportForm(`" . $reportFormContent . "`);";
                     }
