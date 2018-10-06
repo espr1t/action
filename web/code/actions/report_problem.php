@@ -36,7 +36,7 @@ $content = "<html><body>" .
 if (sendEmail($address, $subject, $content)) {
     printAjaxResponse(array(
         'status' => 'OK',
-        'message' => 'Докладваният проблем беше изпратен успешно.'
+        'message' => 'Съобщението беше изпратено успешно.'
     ));
 } else {
     printAjaxResponse(array(

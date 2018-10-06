@@ -2,7 +2,7 @@
 
 class Page {
     protected $user;
-    
+
     function __construct($user) {
         $this->user = $user;
     }
@@ -10,7 +10,7 @@ class Page {
     public function getTitle() {
         return 'O(N)::Page';
     }
-    
+
     public function getExtraStyles() {
         return array();
     }
@@ -18,7 +18,7 @@ class Page {
     public function getExtraScripts() {
         return array();
     }
-    
+
     public function getExtraCode() {
         return '';
     }

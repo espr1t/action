@@ -4,7 +4,8 @@
         <?php echo createHead($page); ?>
         <?php
             $reportFormContent = '
-                <h2>Съобщаване за Проблем</h2>
+                <h2>Съобщение до админ</h2>
+                При всякакви проблеми, които сте забелязали, или просто коментари за системата.<br><br>
                 <div class="italic right" style="font-size: 0.8em;">
                     На страница: http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '
                 </div>
@@ -143,9 +144,8 @@
                     </div>
                     <div class="footer-middle">
                         <a href="/help" class="white">помощ</a> |
-                        <a href="/about" class="white">за сайта</a> |
-                        <a href="/stats" class="white">статистики</a> |
-                        <div class="link white" onclick="reportProblem();">съобщи за проблем</div>
+                        <a href="/about" class="white">за системата</a> |
+                        <a href="/stats" class="white">статистики</a>
                     </div>
                     <div class="footer-right">
                         <a class="white" href="https://www.facebook.com/informatika.bg/" target="_blank"><i class="fab fa-facebook-square fa-fw"></i></a>
@@ -154,6 +154,11 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Feedback button -->
+            <div id="feedback" class="feedback" onclick="reportProblem();">Мрън!</div>
+
+            <!-- Extra code -->
             <?php echo $page->getExtraCode(); ?>
         </div>
         <?php if (isset($showMessage)) echo $showMessage; ?>
