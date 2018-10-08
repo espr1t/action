@@ -35,6 +35,8 @@ body, td, th, input {
 pre {
     font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
     display: inline;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 code {
@@ -42,6 +44,7 @@ code {
     display: inline;
     font-size: 0.8125rem;
     white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 var {
@@ -613,6 +616,7 @@ div.problem-stats-field-label {
 
 table.problem-sample {
     width: 100%;
+    max-width: 100%;
     border-spacing: 0;
     border-collapse: collapse;
     margin-top: 1rem;
