@@ -1,0 +1,240 @@
+/*
+ * Achievements
+ */
+
+div.achievement {
+    cursor: default;
+    display: inline-block;
+    height: 2rem;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.75rem;
+    line-height: 2rem;
+    font-size: 0.75rem;
+    color: #FFFFFF;
+    background-color: #0099FF;
+    border-radius: 1rem 1rem 1rem 1rem;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.24);
+}
+
+div.achievementWrapper {
+    opacity: 1;
+    transition: opacity 2s ease-in-out;
+}
+
+div.achievementBox {
+    height: 12rem;
+    min-height: 12rem;
+    width: 42rem;
+    min-width: 42rem;
+    top: 50%;
+    margin-top: -6rem;
+    left: 50%;
+    margin-left: -21rem;
+    position: fixed;
+    color: #FEFEFE;
+    text-align: center;
+    background-color: #0099FF;
+    z-index: 100;
+
+	background:
+		radial-gradient(circle at 0 0, transparent 2rem, #0099FF 2rem),
+		radial-gradient(circle at 100% 0, transparent 2rem, #0099FF 2rem),
+		radial-gradient(circle at 100% 100%, transparent 2rem, #0099FF 2rem),
+		radial-gradient(circle at 0 100%, transparent 2rem, #0099FF 2rem);
+    background-position: top left, top right, bottom right, bottom left;
+    background-size: 50% 50%;
+    background-repeat: no-repeat;
+}
+
+div.achievementBoxShadowTB {
+    height: 12rem;
+    min-height: 12rem;
+    width: 38rem;
+    min-width: 38rem;
+    position: fixed;
+    top: 50%;
+    margin-top: -6rem;
+    left: 50%;
+    margin-left: -19rem;
+    box-shadow: 0 0 0.5rem #999999;
+    z-index: 99;
+}
+
+div.achievementBoxShadowLR {
+    height: 8rem;
+    min-height: 8rem;
+    width: 42rem;
+    min-width: 42rem;
+    position: fixed;
+    top: 50%;
+    margin-top: -4rem;
+    left: 50%;
+    margin-left: -21rem;
+    box-shadow: 0 0 0.5rem #999999;
+    z-index: 99;
+}
+
+div.achievementBoxLeft {
+    height: 8rem;
+    min-height: 8rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    position: fixed;
+    top: 50%;
+    margin-top: -4rem;
+    left: 50%;
+    margin-left: -23.125rem;
+    background-image: url(/images/dividers/divider_06_left.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: 101;
+}
+
+div.achievementBoxLeftIn {
+    height: 8rem;
+    min-height: 8rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    position: fixed;
+    top: 50%;
+    margin-top: -4rem;
+    left: 50%;
+    margin-left: -21.6875rem;
+    background-image: url(/images/dividers/divider_06_left_in.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: 101;
+}
+
+div.achievementBoxRight {
+    height: 8rem;
+    min-height: 8rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    position: fixed;
+    top: 50%;
+    margin-top: -4rem;
+    left: 50%;
+    margin-left: 20.685rem;
+    background-image: url(/images/dividers/divider_06_right.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: 101;
+}
+
+div.achievementBoxRightIn {
+    height: 8rem;
+    min-height: 8rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    position: fixed;
+    top: 50%;
+    margin-top: -4rem;
+    left: 50%;
+    margin-left: 19.1875rem;
+    background-image: url(/images/dividers/divider_06_right_in.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: 101;
+}
+
+div.achievementTagLeft {
+    width: 40%;
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 1.125rem;
+    text-transform: capitalize;
+    text-align: right;
+    padding-right: 3rem;
+}
+
+div.achievementTagRight {
+    width: 40%;
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 1.125rem;
+    text-transform: capitalize;
+    text-align: left;
+    padding-left: 3rem;
+}
+
+div.achievementBadge {
+    height: 6rem;
+    min-height: 6rem;
+    width: 6rem;
+    min-width: 6rem;
+    position: relative;
+    top: 0;
+    margin-top: -5.75rem;
+    left: 50%;
+    margin-left: -3rem;
+    font-size: 5rem;
+    line-height: 6rem;
+    text-align: center;
+    color: #FFDF00;
+}
+
+div.achievementIcon {
+    height: 2rem;
+    min-height: 2rem;
+    width: 2rem;
+    min-width: 2rem;
+    position: relative;
+    font-size: 1.5rem;
+    color: #FEFEFE;
+    z-index: 1001;
+    margin-top: -6.75rem;
+    margin-left: 2.1rem;
+}
+
+div.achievementTitle {
+    width: 100%;
+    font-size: 3rem;
+    text-transform: capitalize;
+    font-family: "Ruthie";
+    text-align: center;
+}
+
+div.achievementDescription {
+    width: 100%;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+div.achievementTitleDividerTop {
+    width: 100%;
+    height: 15%;
+    background-image: url(/images/dividers/achievement_divider_top.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+div.achievementTitleDividerBottom {
+    width: 100%;
+    height: 15%;
+    background-image: url(/images/dividers/achievement_divider_bottom.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+div.achievementOverlay {
+    height: 24rem;
+    min-height: 24rem;
+    width: 92rem;
+    min-width: 92rem;
+    top: 50%;
+    margin-top: -12rem;
+    left: 50%;
+    margin-left: -46rem;
+    position: fixed;
+    z-index: 40;
+	background: radial-gradient(ellipse 50% 50% at center, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 75%, rgba(255, 255, 255, 0.0) 100%);
+}

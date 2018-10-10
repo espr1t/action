@@ -41,7 +41,7 @@
                                 <a href="/problems">
                                     <div class="button">
                                         <div class="button-icon">
-                                            <i class="fas fa-lightbulb"></i>
+                                            <i class="fas fa-lightbulb-on"></i>
                                         </div>
                                         <div class="button-text">задачи</div>
                                     </div>
@@ -158,9 +158,13 @@
             <!-- Feedback button -->
             <div id="feedback" class="feedback" onclick="reportProblem();">Мрън!</div>
 
+            <!-- Achievements -->
+            <?php echo $achievementsContent; ?>
+
             <!-- Extra code -->
             <?php echo $page->getExtraCode(); ?>
         </div>
+
         <?php if (isset($showMessage)) echo $showMessage; ?>
     </body>
 </html>

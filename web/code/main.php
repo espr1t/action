@@ -2,6 +2,7 @@
 require_once('entities/user.php');
 require_once('config.php');
 require_once('common.php');
+require_once('admin/achievements.php');
 
 session_start();
 
@@ -91,6 +92,67 @@ switch ($_GET['page']) {
         $page = new ErrorPage($user);
 }
 $content = $page->getContent();
+
+$achievementsContent = '';
+$newAchievements = AdminAchievementsPage::getNewAchievements($user);
+if (count($newAchievements) > 0) {
+    $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
+    $achievementsData = json_decode($achievementsFile, true);
+
+    foreach ($GLOBALS['newAchievements'] as $achievement) {
+        $icon = '';
+        $title = '';
+        $description = '';
+        foreach ($GLOBALS['achievementsData'] as $info) {
+            if ($info['key'] == $achievement) {
+                $icon = $info['icon'];
+                $title = $info['title'];
+                $description = $info['description'];
+                break;
+            }
+        }
+        if ($icon == '') {
+            error_log('Could not find achievement with key "' . $achievement . '"!');
+            continue;
+        }
+        $GLOBALS['achievementsContent'] .= '
+            <div class="achievementWrapper" id="' . $achievement . '">
+                <div class="achievementBoxLeft"></div>
+                <div class="achievementBoxLeftIn"></div>
+                <div class="achievementBox">
+                    <div class="achievementTagLeft">
+                        ACHIEVEMENT
+                    </div>
+                    <div class="achievementTagRight">
+                        UNLOCKED
+                    </div>
+
+                    <div class="achievementBadge">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="achievementTitleDividerTop"></div>
+                    <div class="achievementTitle">
+                        ' . $title . '
+                    </div>
+                    <div class="achievementTitleDividerBottom"></div>
+                    <div class="achievementDescription">
+                        -- ' . $description . ' --
+                    </div>
+                </div>
+                <div class="achievementBoxRightIn"></div>
+                <div class="achievementBoxRight"></div>
+                <div class="achievementBoxShadowTB"></div>
+                <div class="achievementBoxShadowLR"></div>
+                <div class="achievementOverlay"></div>
+
+                <script>
+                    registerAchievementHandlers(\'' . $achievement . '\');
+                    setTimeout(hideAchievements.bind(this, \'' . $achievement . '\'), 10000);
+                </script>
+            </div>
+        ';
+    }
+}
 
 require('page.html');
 ?>

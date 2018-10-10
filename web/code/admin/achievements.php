@@ -982,6 +982,10 @@ class AdminAchievementsPage extends Page {
         return $content;
     }
 
+    public static function getNewAchievements($user) {
+        return array();
+    }
+
     public function getContent() {
         $elapsed = '';
         if (isset($_GET['recalc']) && $_GET['recalc'] == 'true') {

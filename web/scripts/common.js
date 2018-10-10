@@ -42,7 +42,8 @@ function redirect(url) {
  */
 var keyDownEventStack = [];
 function identifyEscKeyPressedEvent(event, action) {
-    if (event.keyCode == 27) {
+    var keyCode = event.keyCode || event.which || 0;
+    if (keyCode == 27) {
         event.preventDefault();
         event.stopPropagation();
         action();
@@ -107,7 +108,7 @@ function hideMessage(className, id) {
         document.onkeydown = keyDownEventStack.pop();
         messageEl.className = className + ' fade-out';
         setTimeout(function() {
-            document.body.removeChild(messageEl);
+            messageEl.parentNode.removeChild(messageEl);
         }, 300);
     }
 }
@@ -129,7 +130,7 @@ function hideOverlay() {
     var overlay = document.getElementById('overlay');
     overlay.className = 'overlay fade-out-overlay';
     setTimeout(function() {
-        document.body.removeChild(overlay);
+        overlay.parentNode.removeChild(overlay);
     }, 300);
     document.body.style.overflow = 'auto';
 }
@@ -178,7 +179,7 @@ function hideActionForm(redirectUrl) {
     var form = document.getElementsByClassName('action-form')[0];
     form.className = 'action-form fade-out';
     setTimeout(function() {
-        document.body.removeChild(form);
+        form.parentNode.removeChild(form);
     }, 300);
     hideOverlay();
 }
@@ -499,5 +500,45 @@ function addPreTags() {
                 }
             }
         }
+    }
+}
+
+/*
+ * The next two functions deal with hiding an achievement through various ways.
+ * The ways to hide the achievement pop-up are:
+ *    >> wait 10 seconds (timeout may change in the future)
+ *    >> press ESC
+ *    >> click outside the achievement box
+ */
+function registerAchievementHandlers(id) {
+    var el = document.getElementById(id);
+    if (el != null) {
+        keyDownEventStack.push(document.onkeydown);
+        document.onkeydown = function(event) {
+            identifyEscKeyPressedEvent(event, function() {hideAchievements(id);});
+        }
+        document.onclick = function(event) {
+            var inAchievementBox = false;
+            for (var el = event.target; el != null; el = el.parentElement) {
+                if (el.className.includes('achievementBox')) {
+                    inAchievementBox = true;
+                    break;
+                }
+            }
+            if (!inAchievementBox) {
+                hideAchievements(id);
+            }
+        }
+    }
+}
+
+function hideAchievements(id) {
+    var el = document.getElementById(id);
+    if (el != null) {
+        el.style.opacity = 0;
+        document.onkeydown = keyDownEventStack.pop();
+        setTimeout(function() {
+            el.parentNode.removeChild(el);
+        }, 2000);
     }
 }
