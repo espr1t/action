@@ -550,6 +550,18 @@ class Brain {
         return $this->getIntResults($response);
     }
 
+    function getAllSolved() {
+        $response = $this->db->query("
+            SELECT DISTINCT problemId, userId FROM `Submits`
+            WHERE status = '" . $GLOBALS['STATUS_ACCEPTED'] . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllSolved() query!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
     // Pending
     function getPending() {
         $response = $this->db->query("

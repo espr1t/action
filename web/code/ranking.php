@@ -23,11 +23,31 @@ class RankingPage extends Page {
         // Remove system and admin accounts from ranking
         $usersInfo = array_splice($usersInfo, 2);
 
+        $numSolved = array();
+        $numAchievements = array();
+        foreach ($usersInfo as $info) {
+            $numSolved[$info['id']] = 0;
+            $numAchievements[$info['id']] = 0;
+        }
+
+        $solved = $brain->getAllSolved();
+        foreach ($solved as $submit) {
+            if (array_key_exists($submit['userId'], $numSolved))
+                $numSolved[$submit['userId']] += 1;
+        }
+
+        $achievements = $brain->getAchievements();
+        foreach ($achievements as $achievement) {
+            if (array_key_exists($achievement['user'], $numAchievements))
+                $numAchievements[$achievement['user']] += 1;
+        }
+
         for ($i = 0; $i < count($usersInfo); $i += 1) {
-            $usersInfo[$i]['solved'] = count($brain->getSolved($usersInfo[$i]['id']));
-            $usersInfo[$i]['achievements'] = count($brain->getAchievements($usersInfo[$i]['id']));
+            $usersInfo[$i]['solved'] = $numSolved[$usersInfo[$i]['id']];
+            $usersInfo[$i]['achievements'] = $numAchievements[$usersInfo[$i]['id']];
             $usersInfo[$i]['link'] = getUserLink($usersInfo[$i]['username']);
         }
+
         usort($usersInfo, array('RankingPage', 'userCmp'));
         return $usersInfo;
     }
@@ -81,7 +101,6 @@ class RankingPage extends Page {
         ';
         return inBox($content . $table);
     }
-    
 }
 
 ?>
