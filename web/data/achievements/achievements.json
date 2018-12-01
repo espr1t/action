@@ -712,5 +712,11 @@
     "title": "Mother of Code",
     "description": "Предадено решение над 1000 реда",
     "icon": "far fa-grin-tongue-squint"
+  },
+  {
+    "key": "WEDDED",
+    "title": "Married Sasho",
+    "description": "Голяма грешка.",
+    "icon": "far fa-gem"
   }
 ]
