@@ -265,6 +265,24 @@ class ProblemsPage extends Page {
         ';
     }
 
+    private function getTagsBox($problem) {
+        $tags = '';
+        foreach ($problem->tags as $tag) {
+            $tags .= ($tags == '' ? '' : ' | ') . $GLOBALS['PROBLEM_TAGS'][$tag];
+        }
+        $content = '
+            <h2><span class="blue">' . $problem->name . '</span> :: Тагове</h2>
+            <div class="centered">' . $tags . '</div>
+        ';
+
+        $redirect = '/problems/' . $problem->id;
+        return '
+            <script>
+                showActionForm(`' . $content . '`, \'' . $redirect . '\');
+            </script>
+        ';
+    }
+
     private function getStatement($problem) {
         $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
         $statement = file_get_contents($statementFile);
@@ -315,6 +333,8 @@ class ProblemsPage extends Page {
                 <a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><i class="fa fa-info-circle"></i> статистики</a>
                 &nbsp;
                 <a href="/problems/' . $problem->id . '/users" style="color: #333333;"><i class="fa fa-users"></i> решения</a>
+                &nbsp;
+                <a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><i class="fa fa-tags"></i> тагове</a>
             </div>
         ';
     }
@@ -541,6 +561,8 @@ class ProblemsPage extends Page {
                 $content .= $this->getStatsBox($problem);
             } else if (isset($_GET['users'])) {
                 $content .= $this->getUsersBox($problem);
+            } else if (isset($_GET['tags'])) {
+                $content .= $this->getTagsBox($problem);
             }
             return $content;
         }

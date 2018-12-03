@@ -55,6 +55,7 @@ RewriteRule    ^forbidden$                                      /code/main.php?p
 RewriteRule    ^problems/(\d+)$                                 /code/main.php?page=problems&problemId=$1                                           [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/stats$                           /code/main.php?page=problems&problemId=$1&stats=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/users$                           /code/main.php?page=problems&problemId=$1&users=true                                [NC,L,QSA]
+RewriteRule    ^problems/(\d+)/tags$                            /code/main.php?page=problems&problemId=$1&tags=true                                 [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits$                         /code/main.php?page=problems&problemId=$1&submits=true                              [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)$                   /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2                  [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)/updates$           /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2&updates=true     [NC,L,QSA]
