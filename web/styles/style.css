@@ -585,10 +585,10 @@ div.problem-explanation {
     font-style: italic;
 }
 
-div.problem-stats-link {
+div.problem-stats-links {
     font-size: smaller;
-    margin-top: -1.5rem;
-    margin-right: 0.25rem;
+    margin-top: -1.75rem;
+    margin-right: 0.5rem;
     text-align: right;
 }
 

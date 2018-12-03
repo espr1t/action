@@ -238,7 +238,7 @@ class ProblemsPage extends Page {
         }
 
         $content = '
-            <h2><span class="blue">' . $problem->name . '</span> :: Потребители</h2>
+            <h2><span class="blue">' . $problem->name . '</span> :: Решения</h2>
             <div class="centered">
                 <table class="default">
                     <thead>
@@ -311,9 +311,10 @@ class ProblemsPage extends Page {
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submitButtons . '
             </div>
-            <div class="problem-stats-link">
-                <a class="decorated" href="/problems/' . $problem->id . '/stats"><i class="fa fa-info-circle"></i></a>
-                <a class="decorated" href="/problems/' . $problem->id . '/users"><i class="fa fa-users"></i></a>
+            <div class="problem-stats-links">
+                <a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><i class="fa fa-info-circle"></i> статистики</a>
+                &nbsp;
+                <a href="/problems/' . $problem->id . '/users" style="color: #333333;"><i class="fa fa-users"></i> решения</a>
             </div>
         ';
     }
