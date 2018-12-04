@@ -25,7 +25,7 @@ $RE_CAPTCHA_TEST_SECRET_KEY = 'f4k3t357s3cr37k3y';
 $COOKIE_NAME = 'action_informatika_bg';
 
 // Grader
-//$GRADER_URL = 'localhost:5000';
+// # Use 192.168.1.XXX/ instead of localhost/ for this to work on dev
 $GRADER_URL = '192.168.1.111:5000';
 
 // Will not work with random UTF-8 characters since the utf8_encode() algorithm
@@ -124,7 +124,7 @@ $PROBLEM_TAGS = [
     'strings' => 'Strings',
     'geometry' => 'Geometry',
     'math' => 'Math',
-    'dp' => 'DP',
+    'dp' => 'Dynamic Programming',
     'ad-hoc' => 'Ad-Hoc',
     'np' => 'NP-Complete',
     'divconq' => 'Divide & Conquer',

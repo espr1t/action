@@ -168,8 +168,10 @@ function createHead($page) {
         <link rel="shortcut icon" type="image/x-icon" href="/images/favicon_blue_128.png">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link rel="stylesheet" type="text/css" href="/styles/style.css">
+        <link rel="stylesheet" type="text/css" href="/styles/achievements.css">
         <link rel="stylesheet" type="text/css" href="/styles/icons/css/fontawesome-all.min.css">
         <script src="/scripts/common.js"></script>
+        <script src="/scripts/achievements.js"></script>
     ';
     foreach($page->getExtraStyles() as $style) {
         $meta = $meta . '
@@ -315,6 +317,38 @@ function sendEmail($address, $subject, $content) {
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
     $headers .= "From: action@informatika.bg\r\n";
     return mail($address, $subject, $content, $headers);
+}
+
+function getAchievementsContent() {
+    $newAchievements = AdminAchievementsPage::getNewAchievements($GLOBALS['user']);
+    if (count($newAchievements) == 0) {
+        return '';
+    }
+    $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
+    $achievementsData = json_decode($achievementsFile, true);
+
+    $achievementsContent = '';
+    $shownAchievements = min(array(3, count($newAchievements)));
+    for ($i = 0; $i < $shownAchievements; $i += 1) {
+        $key = $newAchievements[$i];
+        $title = '';
+        $description = '';
+        foreach ($achievementsData as $info) {
+            if ($info['key'] == $key) {
+                $title = $info['title'];
+                $description = $info['description'];
+                break;
+            }
+        }
+        if ($title == '') {
+            error_log('Could not find achievement with key "' . $key . '"!');
+            continue;
+        }
+        $achievementsContent .= '
+            <script>showAchievement(\'' . $title . '\', \'' . $description . '\', ' . $i . ', ' . $shownAchievements . ');</script>
+        ';
+    }
+    return $achievementsContent;
 }
 
 ?>

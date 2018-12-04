@@ -105,7 +105,9 @@ function showMessage(type, message) {
 function hideMessage(className, id) {
     var messageEl = document.getElementById(id);
     if (messageEl) {
-        document.onkeydown = keyDownEventStack.pop();
+        if (!keyDownEventStack.empty) {
+            document.onkeydown = keyDownEventStack.pop();
+        }
         messageEl.className = className + ' fade-out';
         setTimeout(function() {
             messageEl.parentNode.removeChild(messageEl);
@@ -175,7 +177,9 @@ function hideActionForm(redirectUrl) {
         redirect(redirectUrl);
     }
     // Otherwise just hide the form box using a fade-out animation
-    document.onkeydown = keyDownEventStack.pop();
+    if (!keyDownEventStack.empty) {
+        document.onkeydown = keyDownEventStack.pop();
+    }
     var form = document.getElementsByClassName('action-form')[0];
     form.className = 'action-form fade-out';
     setTimeout(function() {
@@ -500,45 +504,5 @@ function addPreTags() {
                 }
             }
         }
-    }
-}
-
-/*
- * The next two functions deal with hiding an achievement through various ways.
- * The ways to hide the achievement pop-up are:
- *    >> wait 10 seconds (timeout may change in the future)
- *    >> press ESC
- *    >> click outside the achievement box
- */
-function registerAchievementHandlers(id) {
-    var el = document.getElementById(id);
-    if (el != null) {
-        keyDownEventStack.push(document.onkeydown);
-        document.onkeydown = function(event) {
-            identifyEscKeyPressedEvent(event, function() {hideAchievements(id);});
-        }
-        document.onclick = function(event) {
-            var inAchievementBox = false;
-            for (var el = event.target; el != null; el = el.parentElement) {
-                if (el.className.includes('achievementBox')) {
-                    inAchievementBox = true;
-                    break;
-                }
-            }
-            if (!inAchievementBox) {
-                hideAchievements(id);
-            }
-        }
-    }
-}
-
-function hideAchievements(id) {
-    var el = document.getElementById(id);
-    if (el != null) {
-        el.style.opacity = 0;
-        document.onkeydown = keyDownEventStack.pop();
-        setTimeout(function() {
-            el.parentNode.removeChild(el);
-        }, 2000);
     }
 }

@@ -7,7 +7,7 @@ class HomePage extends Page {
     public function getTitle() {
         return 'O(N)::Home';
     }
-    
+
     public function getContent() {
         $news = inBox('
             <h1>Новини</h1>

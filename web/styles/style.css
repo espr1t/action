@@ -765,7 +765,7 @@ div.overlay {
     height: 100%;
     background-color: #FFFFFF;
     opacity: 0.8;
-    z-index: 50;
+    z-index: 98;
 }
 
 div.action-form {
@@ -783,7 +783,7 @@ div.action-form {
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
     border-radius: 0.25rem;
     position: fixed;
-    z-index: 89;
+    z-index: 99;
 }
 
 div.larger-box {
@@ -1209,5 +1209,5 @@ div.feedback {
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.48);
     user-select: none;
     cursor: pointer;
-    z-index: 45;
+    z-index: 95;
 }

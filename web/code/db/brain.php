@@ -889,6 +889,19 @@ class Brain {
         return true;
     }
 
+    function markAsSeenAchievement($achievementId) {
+        $response = $this->db->query("
+            UPDATE `Achievements` SET
+                seen = TRUE
+            WHERE id = " . $achievementId . "
+        ");
+        if (!$response) {
+            error_log('Could not execute markAsSeenAchievement() query for achievement with id ' . $achievementId . '"!');
+            return null;
+        }
+        return true;
+    }
+
     // Spam counters
     function refreshSpamCounters($minTime) {
         $response = $this->db->query("

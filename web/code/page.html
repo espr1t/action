@@ -158,12 +158,13 @@
             <!-- Feedback button -->
             <div id="feedback" class="feedback" onclick="reportProblem();">Мрън!</div>
 
-            <!-- Achievements -->
-            <?php echo $achievementsContent; ?>
-
             <!-- Extra code -->
             <?php echo $page->getExtraCode(); ?>
         </div>
+
+        <!-- Achievements -->
+        <!-- These should be outside the wrapper element, because they self-attach to it (thus it needs to already be created). -->
+        <?php echo $achievementsContent; ?>
 
         <?php if (isset($showMessage)) echo $showMessage; ?>
     </body>

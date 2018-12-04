@@ -485,7 +485,8 @@ Table::Achievements
     "id": 1,
     "user": 1,
     "achievement": "RGSTRD",
-    "date": 2016-07-23
+    "date": 2016-07-23,
+    "seen": true
 }
 */
 output('');

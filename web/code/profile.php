@@ -287,7 +287,7 @@ class ProfilePage extends Page {
             for ($i = 0; $i < count($achInfo); $i = $i + 1) {
                 if ($achInfo[$i]['key'] == $achievement['achievement']) {
                     $content .= '
-                        <div class="achievement" title="' . $achInfo[$i]['description'] . '">
+                        <div class="achievement" onclick="showAchievement(\'' . addslashes($achInfo[$i]['title']) . '\', \'' .  addslashes($achInfo[$i]['description']) . '\', 0, 1, true);">
                             <i class="' . $achInfo[$i]['icon'] . ' fa-fw"></i>
                             <span style="font-weight: bold">' . $achInfo[$i]['title'] . ' | ' . $achievement['date'] . '</span>
                         </div>

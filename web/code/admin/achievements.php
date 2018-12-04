@@ -983,7 +983,22 @@ class AdminAchievementsPage extends Page {
     }
 
     public static function getNewAchievements($user) {
-        return array();
+        // If not logged in, return no achievements
+        if ($user->id == -1)
+            return array();
+
+        $brain = new Brain();
+        $achievements = $brain->getAchievements($user->id);
+        $unseen = array();
+        foreach ($achievements as $achievement) {
+            if (!$achievement['seen']) {
+                array_push($unseen, $achievement['achievement']);
+                $brain->markAsSeenAchievement($achievement['id']);
+                if (count($unseen) >= 3)
+                    break;
+            }
+        }
+        return $unseen;
     }
 
     public function getContent() {
