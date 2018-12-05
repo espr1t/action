@@ -199,7 +199,10 @@ function prettyPrintCompilationErrors($submit) {
         foreach (explode('source.cpp', $errors) as $error) {
             $error = ltrim($error, ':');
             if (strlen($error) > 1) {
-                $errorsList .= '<li><code>' . str_replace('\\', '\\\\', htmlspecialchars(trim($error))) . '</code></li>';
+                $error = str_replace('`', '\'', $error);
+                $error = str_replace('\\', '\\\\', $error);
+                $error = htmlspecialchars(trim($error));
+                $errorsList .= '<li><code>' . $error . '</code></li>';
             }
             if ($first) {
                 $errorsList .= '<ul>';
