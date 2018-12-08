@@ -345,11 +345,11 @@ class ProblemsPage extends Page {
                 ' . $submitButtons . '
             </div>
             <div class="problem-stats-links">
-                <a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><i class="fa fa-info-circle"></i> статистики</a>
+                <a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><div class="tooltip--top" data-tooltip="информация" style="display: inline-block;"><i class="fa fa-info-circle"></i></div></a>
                 &nbsp;
-                <a href="/problems/' . $problem->id . '/users" style="color: #333333;"><i class="fa fa-users"></i> решения</a>
+                <a href="/problems/' . $problem->id . '/users" style="color: #333333;"><div class="tooltip--top" data-tooltip="потребители" style="display: inline-block;"><i class="fa fa-users"></i></div></a>
                 &nbsp;
-                <a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><i class="fa fa-tags"></i> тагове</a>
+                <a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове" style="display: inline-block;"><i class="fa fa-tags"></i></div></a>
             </div>
         ';
     }
