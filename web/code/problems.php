@@ -350,7 +350,21 @@ class ProblemsPage extends Page {
                 <a href="/problems/' . $problem->id . '/users" style="color: #333333;"><div class="tooltip--top" data-tooltip="потребители" style="display: inline-block;"><i class="fa fa-users"></i></div></a>
                 &nbsp;
                 <a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове" style="display: inline-block;"><i class="fa fa-tags"></i></div></a>
+                &nbsp;
+                <a href="/problems/' . $problem->id . '/print" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="версия за печат" style="display: inline-block;"><i class="fa fa-print"></i></div></a>
             </div>
+        ';
+    }
+
+    private function getPrintStatement($problem) {
+        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
+        $statement = file_get_contents($statementFile);
+        return '
+            <div class="problem-title" id="problem-title">' . $problem->name . '</div>
+            <div class="problem-origin">' . $problem->origin . '</div>
+            <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
+            <div class="separator"></div>
+            <div class="problem-statement">' . $statement . '</div>
         ';
     }
 
@@ -578,6 +592,8 @@ class ProblemsPage extends Page {
                 $content .= $this->getUsersBox($problem);
             } else if (isset($_GET['tags'])) {
                 $content .= $this->getTagsBox($problem);
+            } else if (isset($_GET['print'])) {
+                $content = $this->getPrintStatement($problem);
             }
             return $content;
         }

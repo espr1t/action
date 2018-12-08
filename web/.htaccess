@@ -56,6 +56,7 @@ RewriteRule    ^problems/(\d+)$                                 /code/main.php?p
 RewriteRule    ^problems/(\d+)/stats$                           /code/main.php?page=problems&problemId=$1&stats=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/users$                           /code/main.php?page=problems&problemId=$1&users=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/tags$                            /code/main.php?page=problems&problemId=$1&tags=true                                 [NC,L,QSA]
+RewriteRule    ^problems/(\d+)/print$                           /code/main.php?page=problems&problemId=$1&print=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits$                         /code/main.php?page=problems&problemId=$1&submits=true                              [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)$                   /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2                  [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)/updates$           /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2&updates=true     [NC,L,QSA]
@@ -98,6 +99,7 @@ RewriteRule    ^games/([\w-]+)/submits/(\d+)/replays/(\d+)$     /code/main.php?p
 RewriteRule    ^games/([\w-]+)/visualizer$                      /code/main.php?page=games&game=$1&visualizer=true                                   [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/scoreboard$                      /code/main.php?page=games&game=$1&scoreboard=true                                   [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/demo$                            /code/main.php?page=games&game=$1&demo=true                                         [NC,L,QSA]
+RewriteRule    ^games/([\w-]+)/print$                           /code/main.php?page=games&game=$1&print=true                                        [NC,L,QSA]
 
 # User profile page
 RewriteRule    ^users/(\w[\w.]{1,15})$                          /code/main.php?page=profile&user=$1                                                 [NC,L,QSA]

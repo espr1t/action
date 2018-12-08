@@ -94,5 +94,9 @@ switch ($_GET['page']) {
 $content = $page->getContent();
 $achievementsContent = getAchievementsContent();
 
-require('page.html');
+if (!isset($_GET['print'])) {
+    require('page.html');
+} else {
+    require('print.html');
+}
 ?>
