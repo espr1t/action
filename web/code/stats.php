@@ -47,7 +47,7 @@ class StatsPage extends Page {
         ';
     }
 
-    private function createChart($type, $id, $title, $labels, $values, $width, $height, $percWidth, $percHeight, $legend) {
+    public static function createChart($type, $id, $title, $labels, $values, $width, $height, $percWidth, $percHeight, $legend) {
         $colors = ["#0099FF", "#DD4337", "#129D5A", "#FBCB43", "#8E44AD", "#E67E22", "#16A085", "#2C3E50",
                    "#78A8FC", "#E87467", "#34B67A", "#FCCC44", "#9B59B6", "#F39C12", "#1ABC9C", "#3D566E"];
 

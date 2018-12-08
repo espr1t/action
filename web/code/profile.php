@@ -2,6 +2,7 @@
 require_once('db/brain.php');
 require_once('common.php');
 require_once('page.php');
+require_once('stats.php');
 
 class ProfilePage extends Page {
     private $profile;
@@ -12,7 +13,9 @@ class ProfilePage extends Page {
 
     public function getExtraScripts() {
         return array(
-            '/scripts/d3.min.js', '/scripts/radarChart.js'
+            'https://www.gstatic.com/charts/loader.js',
+            '/scripts/d3.min.js',
+            '/scripts/radarChart.js'
         );
     }
 
@@ -124,22 +127,6 @@ class ProfilePage extends Page {
         }
         array_push($skillsData, $skills);
 
-        /*
-        // Top 10% of all users
-        $topUsersTags = $this->getTopUsersSkills($problems);
-        $skills = array();
-        $remain = 12; // Limit to 12 so the chart doesn't get overcrowded
-        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag => $name) {
-            if ($remain >= 0) {
-                $remain -= 1;
-                array_push($skills,
-                    array('axis' => $name, 'value' => $this->getPercentage($totalTags, $topUsersTags, $tag))
-                );
-            }
-        }
-        array_push($skillsData, $skills);
-        */
-
         // Invoke the JS code to generate the radar chart
         $content .= '
             <script>
@@ -147,7 +134,7 @@ class ProfilePage extends Page {
                 var options = {
                     w: 200,
                     h: 200,
-                    margin: {top: 40, right: 50, bottom: 50, left: 50},
+                    margin: {top: 40, right: 55, bottom: 40, left: 55},
                     maxValue: 1.0,
                     levels: 5,
                     roundStrokes: false,
@@ -164,6 +151,8 @@ class ProfilePage extends Page {
                 <h2>Предадени Решения</h2>
         ';
         $submits = $this->brain->getUserSubmits($this->profile->id);
+
+        // Submits dot chart
         $content .= '<div class="profile-dot-box">';
         foreach ($submits as $submit) {
             $color = 'gray';
@@ -195,6 +184,33 @@ class ProfilePage extends Page {
             $content .= '<div class="profile-dot background-' . $color . '" title="' . $submit['status'] . '"></div>';
         }
         $content .= '</div>';
+
+        // Submits activity over time
+        $lastDate = time();
+        // Make the interval be at least one year (useful for recently registered users)
+        $firstDate = min(strtotime($this->profile->registered), $lastDate - 365 * 24 * 60 * 60);
+        // Split into 16 data points
+        $timeOffset = floor(($lastDate - $firstDate) / 15);
+
+        $usersChartLabels = array('Дата');
+        $usersChartValues = array('Предадени решения');
+        $index = 0;
+        $targetDate = $firstDate;
+        for ($i = 0; $i < 16; $i++) {
+            $lastValue = $index;
+            while ($index < count($submits) && strtotime($submits[$index]['submitted']) <= $targetDate) {
+                $index += 1;
+            }
+            // The last point is the current number of submits
+            if ($i + 1 == 16) {
+                $index = count($submits);
+            }
+            array_push($usersChartLabels, gmdate('M. Y', $targetDate));
+            array_push($usersChartValues, $index - $lastValue);
+            $targetDate += $timeOffset;
+        }
+        $content .= StatsPage::createChart('LineChart', 'activityAreaChart', '',
+                $usersChartLabels, $usersChartValues, 700, 200, 90, 70, 'none');
         return $content;
     }
 
