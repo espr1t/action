@@ -503,7 +503,6 @@ class Brain {
             $response = $this->db->query("
                 SELECT * FROM `Submits`
                 WHERE problemId = " . $problemId . " AND status = '" . $status . "'
-                GROUP BY userId
                 ORDER BY submitted
             ");
         }

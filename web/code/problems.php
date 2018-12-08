@@ -159,7 +159,7 @@ class ProblemsPage extends Page {
 
     private function getStatsBox($problem) {
         $brain = new Brain();
-        $submits = $brain->getProblemSubmits($problem->id, 'all');
+        $submits = $brain->getProblemSubmits($problem->id);
 
         $bestTime = 1e10;
         $bestMemory = 1e10;
@@ -215,23 +215,38 @@ class ProblemsPage extends Page {
         $brain = new Brain();
         $submits = $brain->getProblemSubmits($problem->id, 'AC');
 
-        $tableContent = '';
-        $users = array();
+        $usersBest = array();
         foreach ($submits as $submit) {
             // Skip system user
             if ($submit['userId'] < 1)
                 continue;
 
-            if (array_key_exists($submit['userId'], $users))
-                continue;
-            $users[$submit['userId']] = true;
+            if (!array_key_exists($submit['userId'], $usersBest)) {
+                // If first AC for this user on this problem add it to the list
+                $usersBest[$submit['userId']] = $submit;
+            } else {
+                // Otherwise, see if this submission is better than the current best
+                $current = $usersBest[$submit['userId']];
+                $curWorstTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $current['exec_time'])));
+                $curWorstMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $current['exec_memory'])));
+                $newWorstTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time'])));
+                $newWorstMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory'])));
+                if ($newWorstTime < $curWorstTime || ($newWorstTime == $curWorstTime && $newWorstMemory < $curWorstMemory)) {
+                    $usersBest[$submit['userId']] = $submit;
+                }
+            }
+        }
 
+        $tableContent = '';
+        foreach ($usersBest as $user => $submit) {
+            $maxTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time'])));
+            $maxMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory'])));
             $tableContent .= '
                 <tr>
                     <td>' . getUserLink($submit['userName']) . '</td>
                     <td>' . $submit['language'] . '</td>
-                    <td>' . max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time']))) . '</td>
-                    <td>' . max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory']))) . '</td>
+                    <td>' . sprintf("%.2f", $maxTime) . '</td>
+                    <td>' . sprintf("%.2f", $maxMemory) . '</td>
                     <td>' . $submit['submitted'] . '</td>
                 </tr>
             ';
