@@ -69,7 +69,7 @@ function showAchievement(title, description, index, total, requested=false) {
     document.onkeydown = function(event) {
         identifyEscKeyPressedEvent(event, function() {hideAchievement(requested);});
     };
-    document.onclick = function(event) {
+    document.onclick = document.ontouchstart = function(event) {
         var inAchievementBox = false;
         for (var el = event.target; el != null; el = el.parentElement) {
             if (el.className.includes('achievementBox')) {
