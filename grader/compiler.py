@@ -12,7 +12,7 @@ import config
 
 
 class Compiler:
-    COMPILE_LINE_CPP = "g++ -O2 -std=c++14 -w -s -static -o {path_executable} {path_source}"
+    COMPILE_LINE_CPP = "g++ -O2 -std=c++17 -w -s -static -o {path_executable} {path_source}"
     COMPILE_LINE_JAVA = "javac -nowarn -d {path_executable} {path_source}"
     COMPILE_LINE_PYTHON = "python3 -m pyflakes {path_source}"
 

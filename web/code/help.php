@@ -10,7 +10,7 @@ class HelpPage extends Page {
     public function getContent() {
         $version = '
             <div class="help-version">
-                Версия на системата: <a href="https://github.com/espr1t/action/commit/093f859e9f3787e854079e3c0f21fe135e7ecbec" target="_blank">v.181010.093f859</a>
+                Версия на системата: <a href="https://github.com/espr1t/action/commit/03ced221a15130b927570e8cfe0de1088b05c995" target="_blank">v.181209.03ced22</a>
             </div>
         ';
 
@@ -75,9 +75,9 @@ class HelpPage extends Page {
             <h2 id="compilation"><a href="#compilation">Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 5.4.0):</b> <pre>g++ -O2 -std=c++14 -w -s -static -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
-                <li><b>Java (Oracle 1.8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
-                <li><b>Python (Python 3.5.2):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
+                <li><b>C++ (GCC 7.3.0):</b> <pre>g++ -O2 -std=c++17 -w -s -static -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>Java (OpenJDK 1.8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
+                <li><b>Python (Python 3.6.7):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
             Максималното време за компилация е 10 секунди.<br>
             Максималният размер на стека е 64 мегабайта.
@@ -89,7 +89,7 @@ class HelpPage extends Page {
                 <li><b>Рам:</b> DDR2 8GB :: 800MHz</li>
                 <li><b>Харддиск:</b> Corsair Force SSD :: 520MB/s</li>
             </ul>
-            Ползваната операционна система на тестовата машина е Ubuntu 16.04.
+            Ползваната операционна система на тестовата машина е Ubuntu 18.04.
         ') . inBox('
             <h2 id="system-status"><a href="#system-status">Опашка</a></h2>
             Чрез бутона "Опашка" в главното меню можете да видите текущите решения, които системата все още не е
