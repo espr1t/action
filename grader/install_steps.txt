@@ -6,6 +6,11 @@ Installation steps:
 4. Create a user with lower privileges and add its id in runner.py ("setuid(XXXX)").
 5. Allow the port (sudo ufw allow 5000)
 6. Run the service as root (sudo python3 server.py)
+7. Install PDF printing utility (https://wkhtmltopdf.org)
+7.1. wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.xenial_amd64.deb
+7.2. sudo apt install -y ./wkhtmltox_0.12.5-1.xenial_amd64.deb
+7.3. rm ./wkhtmltox_0.12.5-1.xenial_amd64.deb
+7.4. (optional) install fonts: "sudo cp fonts/* /usr/local/share/fonts"
 
 Optional:
 1. Make the grader run automatically on OS load:

@@ -351,7 +351,7 @@ class ProblemsPage extends Page {
                 &nbsp;
                 <a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове" style="display: inline-block;"><i class="fa fa-tags"></i></div></a>
                 &nbsp;
-                <a href="/problems/' . $problem->id . '/print" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="версия за печат" style="display: inline-block;"><i class="fa fa-print"></i></div></a>
+                <a href="/problems/' . $problem->id . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
             </div>
         ';
     }
@@ -559,10 +559,10 @@ class ProblemsPage extends Page {
         $this->problemName = null;
         if (isset($_GET['problemId'])) {
             $problem = Problem::get($_GET['problemId']);
-            $this->problemName = $problem->name;
             if ($problem == null) {
                 redirect('/problems', 'ERROR', 'Няма задача с такъв идентификатор.');
             }
+            $this->problemName = $problem->name;
             if (!canSeeProblem($this->user, $problem->visible, $problem->id)) {
                 redirect('/problems', 'ERROR', 'Нямате права да видите тази задача.');
             }

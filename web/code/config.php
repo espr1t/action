@@ -26,7 +26,7 @@ $COOKIE_NAME = 'action_informatika_bg';
 
 // Grader
 // # Use 192.168.1.XXX/ instead of localhost/ for this to work on dev
-$GRADER_URL = '192.168.1.111:5000';
+$GRADER_URL = '192.168.1.123:5000';
 
 // Will not work with random UTF-8 characters since the utf8_encode() algorithm
 // in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
@@ -37,6 +37,7 @@ $ADMIN_EMAIL = 'admin.email@example.com';
 
 $GRADER_ENDPOINT_AVAILABLE = '/available';
 $GRADER_ENDPOINT_EVALUATE = '/evaluate';
+$GRADER_ENDPOINT_PRINT_PDF = '/print-pdf';
 
 // Grader-exposed system endpoints
 $PROTOCOL = PHP_OS == 'WINNT' ? 'http' : 'https';

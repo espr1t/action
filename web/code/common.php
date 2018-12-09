@@ -131,6 +131,16 @@ function getGameLink($problemName) {
     return '/games/' . getGameUrlName($problemName);
 }
 
+function getGameByName($name) {
+    $brain = new Brain();
+    $gamesInfo = $brain->getAllGames();
+    foreach ($gamesInfo as $gameInfo) {
+        if (getGameUrlName($gameInfo['name']) == $name)
+            return Problem::get($gameInfo['id']);
+    }
+    return null;
+}
+
 function getUserLink($userName, $unofficial=array()) {
     $suffix = '';
     if (in_array($userName, $unofficial))

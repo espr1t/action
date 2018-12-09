@@ -35,16 +35,6 @@ class GamesPage extends Page {
         return 'addPreTags()';
     }
 
-    private function getGameByName($name) {
-        $brain = new Brain();
-        $gamesInfo = $brain->getAllGames();
-        foreach ($gamesInfo as $gameInfo) {
-            if (getGameUrlName($gameInfo['name']) == $name)
-                return Problem::get($gameInfo['id']);
-        }
-        return null;
-    }
-
     public static function getGameRanking($problem) {
         // Returns a sorted array of data:
         // {
@@ -404,7 +394,7 @@ class GamesPage extends Page {
                 ' . $controlButtons . '
             </div>
             <div class="problem-stats-links">
-                <a href="' . getGameLink($problem->name) . '/print" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="версия за печат" style="display: inline-block;"><i class="fa fa-print"></i></div></a>
+                <a href="' . getGameLink($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
             </div>
         ';
     }
@@ -493,7 +483,7 @@ class GamesPage extends Page {
                 ' . $controlButtons . '
             </div>
             <div class="problem-stats-links">
-                <a href="' . getGameLink($problem->name) . '/print" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="версия за печат" style="display: inline-block;"><i class="fa fa-print"></i></div></a>
+                <a href="' . getGameLink($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
             </div>
         ';
     }
@@ -1166,7 +1156,7 @@ class GamesPage extends Page {
         }
 
         if (isset($_GET['game'])) {
-            $problem = $this->getGameByName($_GET['game']);
+            $problem = getGameByName($_GET['game']);
             if ($problem == null) {
                 return $this->getMainPage();
             }

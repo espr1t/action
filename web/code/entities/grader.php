@@ -10,7 +10,7 @@ class Grader {
     private static $METHOD_GET = 'GET';
     private static $METHOD_POST = 'POST';
 
-    function call($path, $data, $method) {
+    function call($path, $data, $method, $json=true) {
         $curl = curl_init();
 
         // Setup the connection
@@ -33,10 +33,14 @@ class Grader {
         $response = curl_exec($curl);
 
         // Convert the response to array (no matter whether successful or not)
-        if (!$response) {
+        if ($response === false) {
             $response = [];
         } else {
-            $response = json_decode($response, true);
+            if ($json) {
+                $response = json_decode($response, true);
+            } else {
+                $response = array('data' => $response);
+            }
         }
 
         // Attach the HTTP status code to the response
@@ -168,6 +172,15 @@ class Grader {
                 $brain->trimLatest($submit->id);
             }
         }
+    }
+
+    function print_to_pdf($url) {
+        $response = $this->call($GLOBALS['GRADER_ENDPOINT_PRINT_PDF'], array("url" => $url), Grader::$METHOD_POST, false);
+        if ($response['status'] != 200) {
+            error_log('Could not print url ' . $url . ' to pdf.');
+            return null;
+        }
+        return $response['data'];
     }
 }
 
