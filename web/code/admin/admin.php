@@ -52,6 +52,7 @@ switch ($_GET['page']) {
         exit();
 }
 $content = $page->getContent();
+$achievementsContent = '';
 
 $isAdminPage = true;
 require('../page.html');

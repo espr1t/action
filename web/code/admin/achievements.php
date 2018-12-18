@@ -15,6 +15,7 @@ class AdminAchievementsPage extends Page {
     private $POWER_OF_TEN_NUMBERS = array();
     private $PI_PREFIX_NUMBERS = array();
     private $E_PREFIX_NUMBERS = array();
+    private $TRICKY_PROBLEMS = array();
 
     public function getTitle() {
         return 'O(N)::Admin';
@@ -28,14 +29,14 @@ class AdminAchievementsPage extends Page {
         $limit = 100000;
         $isPrime = array_fill(0, $limit, true);
         $isPrime[0] = $isPrime[1] = false;
-        for ($num = 2; $num * $num < $limit; $num += 1) {
+        for ($num = 2; $num * $num < $limit; $num++) {
             if ($isPrime[$num]) {
                 for ($comp = $num * $num; $comp < $limit; $comp += $num)
                     $isPrime[$comp] = false;
             }
         }
 
-        for ($num = 0; $num < $limit; $num += 1)
+        for ($num = 0; $num < $limit; $num++)
             if ($isPrime[$num]) array_push($this->PRIME_NUMBERS, $num);
 
         $this->FIBONACCI_NUMBERS = array(0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377,
@@ -52,154 +53,114 @@ class AdminAchievementsPage extends Page {
         $this->E_PREFIX_NUMBERS = array(2, 27, 271, 2718, 27182, 271828, 2718281, 27182818, 271828182);
     }
 
-    // Has submitted X times
-    public function achievementSubmitted($brain, $achieved, $user, $submits, $key, $limit) {
-        if (!in_array($key, $achieved)) {
-            if (count($submits) >= $limit) {
-                $brain->addAchievement($user->id, $key, $submits[$limit - 1]['submitted']);
+    public function initTrickyProblems() {
+        $trickyNames = array(
+            'Sheep', 'Ssssss', 'Bribes', 'Sequence Members', 'Wordrow', 'Next', 'Shades', 'Seats',
+            'Bazinga!', 'Crosses', 'Collatz', 'Passwords', 'Digit Holes', 'Directory Listing'
+        );
+        $brain = new Brain();
+        $problems = $brain->getAllProblems();
+        foreach ($problems as $problem) {
+            if (in_array($problem['name'], $trickyNames))
+                $this->TRICKY_PROBLEMS[$problem['id']] = true;
+        }
+    }
+
+    // Has submitted or solved X times/probems from a given type (tags, difficulty, or any)
+    public function achievementSubmits($user, $achieved, $key, $submitIds, $limit) {
+        if (!array_key_exists($key, $achieved)) {
+            if (count($submitIds) >= $limit) {
+                $date = $this->submits[$submitIds[$limit - 1]]['submitted'];
+                $this->brain->addAchievement($user->id, $key, $date);
+                $achieved[$key] = true;
             }
         }
     }
 
-    // Has solved X problems
-    public function achievementSolved($brain, $achieved, $user, $solved, $key, $limit) {
-        if (!in_array($key, $achieved)) {
-            if (count($solved) >= $limit) {
-                $brain->addAchievement($user->id, $key, $solved[$limit - 1]['submitted']);
-            }
-        }
-    }
-
-    // Has solved X trivial/easy/medium/hard/brutal problem(s)
-    public function achievementDifficulty($brain, $achieved, $user, $solved, $key, $difficulty, $limit) {
-        if (!in_array($key, $achieved)) {
-            if (count($solved[$difficulty]) >= $limit) {
-                $brain->addAchievement($user->id, $key, $solved[$difficulty][$limit - 1]['submitted']);
-            }
-        }
-    }
-
-    // Has solved problems of all difficulties
-    public function achievementAllDiff($brain, $achieved, $user, $solved) {
-        if (!in_array('ALLDIF', $achieved)) {
+    // Has solved problems of all tags or difficulties
+    public function achievementAllTagsDifficulties($user, $achieved, $key, $solvedPerType) {
+        if (!array_key_exists($key, $achieved)) {
             $date = '';
-            foreach ($solved as $diff => $submits) {
-                if (count($submits) == 0)
+            foreach ($solvedPerType as $type => $solvedIds) {
+                if (count($solvedIds) == 0)
                     return;
-                $date = max(array($date, $submits[0]['submitted']));
+                $date = max(array($date, $this->submits[$solvedIds[0]]['submitted']));
             }
-            $brain->addAchievement($user->id, 'ALLDIF', $date);
-        }
-    }
-
-    // Has solved X problem(s) by given tags
-    public function achievementTags($brain, $achieved, $user, $solved, $key, $tag, $limit) {
-        if (!in_array($key, $achieved)) {
-            if (count($solved[$tag]) >= $limit) {
-                $brain->addAchievement($user->id, $key, $solved[$tag][$limit - 1]['submitted']);
-            }
-        }
-    }
-
-    // Has solved problems of all tags
-    public function achievementAllTags($brain, $achieved, $user, $solved) {
-        if (!in_array('ALLTAG', $achieved)) {
-            $date = '';
-            foreach ($solved as $tag => $submits) {
-                if (count($submits) == 0)
-                    return;
-                $date = max(array($date, $submits[0]['submitted']));
-            }
-            $brain->addAchievement($user->id, 'ALLTAG', $date);
+            $this->brain->addAchievement($user->id, $key, $date);
+            $achieved[$key] = true;
         }
     }
 
     // Solved X problems in Y minutes
-    public function achievementSpeed($brain, $achieved, $user, $solved, $key, $count, $limit) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            $solvedCount = count($solved);
-            for ($i = 0; $i + $count <= $solvedCount; $i += 1) {
-                $ts1 = strtotime($solved[$i]['submitted']);
-                $ts2 = strtotime($solved[$i + $count - 1]['submitted']);
+    public function achievementSpeed($user, $achieved, $key, $acSubmitIds, $count, $limit) {
+        if (!array_key_exists($key, $achieved)) {
+            $solvedCount = count($acSubmitIds);
+            for ($i = 0; $i + $count <= $solvedCount; $i++) {
+                $ts1 = strtotime($this->submits[$acSubmitIds[$i]]['submitted']);
+                $ts2 = strtotime($this->submits[$acSubmitIds[$i + $count - 1]]['submitted']);
                 if ($ts2 - $ts1 <= $limit) {
-                    $date = $solved[$i + $count - 1]['submitted'];
-                    break;
+                    $date = $this->submits[$acSubmitIds[$i + $count - 1]]['submitted'];
+                    $this->brain->addAchievement($user->id, $key, $date);
+                    $achieved[$key] = true;
+                    return;
                 }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
             }
         }
     }
 
     // Solved various training sections
-    public function achievementTraining($brain, $achieved, $user, $solved, $training) {
-        $solvedDate = array();
-        foreach ($solved as $submit) {
-            $solvedDate[$submit['problemId']] = $submit['submitted'];
-        }
+    public function achievementsTraining($user, $achieved, $firstACSubmitPerProblem) {
         $completed = 0;
         $latestDate = '';
-        foreach ($training as $section) {
+        foreach ($this->training as $section) {
             $key = 'T_' . $section['key'];
-            if (!in_array($key, $achieved)) {
+            if (!array_key_exists($key, $achieved)) {
                 $date = '';
-                $problems = explode(',', $section['problems']);
-                foreach ($problems as $problemId) {
-                    if (!array_key_exists($problemId, $solvedDate)) {
+                $sectionProblems = explode(',', $section['problems']);
+                foreach ($sectionProblems as $problemId) {
+                    if (!array_key_exists($problemId, $firstACSubmitPerProblem)) {
                         $date = '';
                         break;
                     }
-                    if ($date == '' || $date < $solvedDate[$problemId])
-                        $date = $solvedDate[$problemId];
+                    $submit = $this->submits[$firstACSubmitPerProblem[$problemId]];
+                    if ($date == '' || $date < $submit['submitted'])
+                        $date = $submit['submitted'];
                 }
                 if ($date != '') {
-                    $brain->addAchievement($user->id, $key, $date);
-                    $completed += 1;
+                    $this->brain->addAchievement($user->id, $key, $date);
+                    $achieved[$key] = true;
+                    $completed++;
                     if ($latestDate == '' || $latestDate < $date)
                         $latestDate = $date;
                 }
             } else {
-                $completed += 1;
+                $completed++;
             }
         }
-        if (!in_array('GRADU8', $achieved)) {
-            if ($completed == count($training)) {
-                $brain->addAchievement($user->id, 'GRADU8', $latestDate);
-            }
-        }
-    }
-
-    // Has solved all problems
-    public function achievementAllTasks($brain, $achieved, $user, $solved, $problems) {
-        if (!in_array('ALLTSK', $achieved)) {
-            if (count($solved) == count($problems)) {
-                $brain->addAchievement($user->id, 'ALLTSK', $solved[count($solved) - 1]['submitted']);
+        if (!array_key_exists('GRADU8', $achieved)) {
+            if ($completed == count($this->training)) {
+                $this->brain->addAchievement($user->id, 'GRADU8', $latestDate);
+                $achieved['GRADU8'] = true;
             }
         }
     }
 
     // Has played X games
-    public function achievementPlayedGame($brain, $achieved, $user, $standings, $submits, $key, $limit) {
-        if (!in_array($key, $achieved)) {
-            $played = 0;
-            $submitId = -1;
-            foreach ($standings as $game => $ranking) {
-                foreach ($ranking as $player) {
-                    if ($player['user'] == $user->id) {
-                        $played += 1;
-                        $submitId = max(array($submitId, $player['submit']));
-                        if ($played >= $limit)
-                            break;
-                    }
-                }
-            }
-            if ($played >= $limit) {
-                foreach ($submits as $submit) {
-                    if ($submit['id'] == $submitId) {
-                        $brain->addAchievement($user->id, $key, $submit['submitted']);
-                        return;
+    public function achievementPlayedGame($user, $achieved, $key, $submitIds, $limit) {
+        if (!array_key_exists($key, $achieved)) {
+            $played = array();
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                if ($this->isGame[$submit['problemId']]) {
+                    if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                        if (!array_key_exists($submit['problemId'], $played)) {
+                            $played[$submit['problemId']] = true;
+                            if (count($played) >= $limit) {
+                                $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                                $achievement[$key] = true;
+                                return;
+                            }
+                        }
                     }
                 }
             }
@@ -207,13 +168,274 @@ class AdminAchievementsPage extends Page {
     }
 
     // Has won a game
-    public function achievementWonGame($brain, $achieved, $user, $standings, $submits) {
-        if (!in_array('WINNER', $achieved)) {
-            foreach ($standings as $game => $ranking) {
+    public function achievementWonGame($user, $achieved, $key, $submitIds) {
+        if (!array_key_exists($key, $achieved)) {
+            $date = '';
+            foreach ($this->standings as $game => $ranking) {
                 if ($ranking[0]['user'] == $user->id) {
-                    foreach ($submits as $submit) {
+                    foreach ($submitIds as $submitId) {
+                        $submit = $this->submits[$submitId];
                         if ($submit['id'] == $ranking[0]['submit']) {
-                            $brain->addAchievement($user->id, 'WINNER', $submit['submitted']);
+                            if ($date == '' || $date > $submit['submitted']) {
+                                $date = $submit['submitted'];
+                            }
+                        }
+                    }
+                }
+            }
+            // Iterate all games in order to find the earliest winning submit
+            if ($date != '') {
+                $this->brain->addAchievement($user->id, $key, $date);
+                $achieved[$key] = true;
+            }
+        }
+    }
+
+    // Has married Sasho
+    public function achievementMarried($user, $achieved, $key) {
+        if (!array_key_exists($key, $achieved)) {
+            if ($user->username == 'kopche') {
+                $this->brain->addAchievement($user->id, $key, '2018-09-02');
+                $achieved[$key] = true;
+            }
+        }
+    }
+
+    // Has registered
+    public function achievementRegistered($user, $achieved, $key) {
+        if (!array_key_exists($key, $achieved)) {
+            $this->brain->addAchievement($user->id, $key, $user->registered);
+            $achieved[$key] = true;
+        }
+    }
+
+    // Has reported a problem
+    public function achievementReported($user, $achieved, $key, $reportIds) {
+        if (!array_key_exists($key, $achieved)) {
+            if (count($reportIds) > 0) {
+                $date = $this->reports[$reportIds[0]]['date'];
+                $this->brain->addAchievement($user->id, $key, $date);
+                $achieved[$key] = true;
+            }
+        }
+    }
+
+    // Has over 1000 actions on the site
+    public function achievementActive($user, $achieved, $key) {
+        if (!array_key_exists($key, $achieved)) {
+            if ($user->actions >= 1000) {
+                $this->brain->addAchievement($user->id, $key, date('Y-m-d H:i:s'));
+                $achieved[$key] = true;
+            }
+        }
+    }
+
+    // Has ran over 10000 tests
+    public function achievementTested($user, $achieved, $key, $submitIds) {
+        if (!array_key_exists($key, $achieved)) {
+            $total = 0;
+            foreach ($submitIds as $submitId) {
+                $total += count(explode(',', $this->submits[$submitId]['results']));
+                if ($total >= 10000) {
+                    $date = $this->submits[$submitId]['submitted'];
+                    $this->brain->addAchievement($user->id, $key, $date);
+                    $achieved[$key] = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    // Ranked in top X
+    public function achievementRanked($user, $achieved, $key, $limit) {
+        if (!array_key_exists($key, $achieved)) {
+            $maxPos = min(array($limit, count($this->ranking)));
+            for ($pos = 0; $pos < $maxPos; $pos++) {
+                if ($this->ranking[$pos]['id'] == $user->id) {
+                    $this->brain->addAchievement($user->id, $key, date('Y-m-d H:i:s'));
+                    $achieved[$key] = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    // Was the first to solve a problem
+    public function achievementVirgin($user, $achieved, $key) {
+        if (!array_key_exists($key, $achieved)) {
+            $date = '';
+            foreach ($this->firstACSubmit as $problemId => $submitId) {
+                if ($this->submits[$submitId]['userId'] == $user->id) {
+                    if ($date == '' || $date > $this->submits[$submitId]['submitted'])
+                        $date = $this->submits[$submitId]['submitted'];
+                }
+            }
+            // Iterate all problems so we get the earliest virgin submit
+            if ($date != '') {
+                $this->brain->addAchievement($user->id, $key, $date);
+                $achieved[$key] = true;
+            }
+        }
+    }
+
+    // Submitted a problem in unusual time (late in the night or early in the morning)
+    public function achievementUnusualTime($user, $achieved, $key, $submitIds, $lower, $upper) {
+        if (!array_key_exists($key, $achieved)) {
+            foreach ($submitIds as $submitId) {
+                $hour = date('H', strtotime($this->submits[$submitId]['submitted']));
+                if ($hour >= $lower && $hour < $upper) {
+                    $date = $this->submits[$submitId]['submitted'];
+                    $this->brain->addAchievement($user->id, $key, $date);
+                    $achieved[$key] = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    // Solved problems in 3 different languages
+    public function achievementRainbow($user, $achieved, $key, $acSubmitIds) {
+        if (!array_key_exists($key, $achieved)) {
+            $langs = array();
+            foreach ($acSubmitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                if (!array_key_exists($submit['language'], $langs)) {
+                    $langs[$submit['language']] = true;
+                    if (count($langs) >= 3) {
+                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                        $achieved[$key] = true;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    // Registered more than a year ago
+    public function achievementOldtimer($user, $achieved, $key) {
+        if (!array_key_exists($key, $achieved)) {
+            $anniversary = strtotime($user->registered) + 365 * 24 * 60 * 60;
+            if (time() >= $anniversary) {
+                $date = date('Y-m-d', $anniversary);
+                $this->brain->addAchievement($user->id, $key, $date);
+                $achieved[$key] = true;
+            }
+        }
+    }
+
+    // Submit on Christmas, New Year, or user's birthday
+    public function achievementDate($user, $achieved, $key, $submitIds, $target) {
+        if (!array_key_exists($key, $achieved)) {
+            foreach ($submitIds as $submitId) {
+                if (date('m-d', strtotime($this->submits[$submitId]['submitted'])) == $target) {
+                    $date = $this->submits[$submitId]['submitted'];
+                    $this->brain->addAchievement($user->id, $key, $date);
+                    $achieved[$key] = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    // Got three different types of errors on a problem
+    public function achievementSoWrong($user, $achieved, $key, $submitIds) {
+        if (!array_key_exists($key, $achieved)) {
+            $errors = array();
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                $errorMask = 0;
+                if (array_key_exists($submit['problemId'], $errors))
+                    $errorMask = $errors[$submit['problemId']];
+                if ($submit['status'] == 'WA')
+                     $errorMask |= (1 << 0);
+                if ($submit['status'] == 'RE')
+                    $errorMask |= (1 << 1);
+                if ($submit['status'] == 'TL')
+                    $errorMask |= (1 << 2);
+                if ($submit['status'] == 'CE')
+                    $errorMask |= (1 << 3);
+                if ($submit['status'] == 'ML')
+                    $errorMask |= (1 << 4);
+                if ($submit['status'] == 'IE')
+                    $errorMask |= (1 << 5);
+                $errors[$submit['problemId']] = $errorMask;
+
+                if (popcount($errorMask) >= 3) {
+                    $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                    $achieved[$key] = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    // Got several different types of errors in a single submit
+    public function achievementDisaster($user, $achieved, $key, $submitIds, $limit) {
+        if (!array_key_exists($key, $achieved)) {
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                $results = explode(',', $submit['results']);
+                $errorMask = 0;
+                foreach($results as $result) {
+                    if (is_numeric($result))
+                        $errorMask |= (1 << 0);
+                    else if ($result == 'WA')
+                        $errorMask |= (1 << 1);
+                    else if ($result == 'RE')
+                        $errorMask |= (1 << 2);
+                    else if ($result == 'TL')
+                        $errorMask |= (1 << 3);
+                    else if ($result == 'CE')
+                        $errorMask |= (1 << 4);
+                    else if ($result == 'ML')
+                        $errorMask |= (1 << 5);
+                    else if ($result == 'IE')
+                        $errorMask |= (1 << 6);
+                }
+                if (popcount($errorMask) >= $limit) {
+                    $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                    $achieved[$key] = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    // X unsuccessful submits on a problem
+    public function achievementUnsuccess($user, $achieved, $key, $submitIds, $target) {
+        if (!array_key_exists($key, $achieved)) {
+            $unsuccessful = array();
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                if (!$this->isGame[$submit['problemId']]) {
+                    if (!array_key_exists($submit['problemId'], $unsuccessful))
+                        $unsuccessful[$submit['problemId']] = 0;
+                    if ($submit['status'] != $GLOBALS['STATUS_ACCEPTED'])
+                        $unsuccessful[$submit['problemId']]++;
+                    if ($unsuccessful[$submit['problemId']] >= $target) {
+                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                        $achieved[$key] = true;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    // Solved X tasks on the first try
+    public function achievementAccurate($user, $achieved, $key, $submitIds, $target) {
+        if (!array_key_exists($key, $achieved)) {
+            $onFirstTry = 0;
+            $submitted = array();
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                if (!array_key_exists($submit['problemId'], $submitted)) {
+                    $submitted[$submit['problemId']] = true;
+                    if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                        $onFirstTry++;
+                        if ($onFirstTry >= $target) {
+                            $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                            $achieved[$key] = true;
                             return;
                         }
                     }
@@ -222,322 +444,56 @@ class AdminAchievementsPage extends Page {
         }
     }
 
-    // Has registered
-    public function achievementRegistered($brain, $achieved, $user) {
-        if (!in_array('RGSTRD', $achieved)) {
-            $brain->addAchievement($user->id, 'RGSTRD', $user->registered);
-        }
-    }
-
-    // Has reported a problem
-    public function achievementReported($brain, $achieved, $user, $reports) {
-        if (!in_array('REPORT', $achieved)) {
-            if (count($reports) >= 1) {
-                $brain->addAchievement($user->id, 'REPORT', $reports[0]['date']);
-            }
-        }
-    }
-
-    // Has over 1000 actions on the site
-    public function achievementActive($brain, $achieved, $user) {
-        if (!in_array('ACTIVE', $achieved)) {
-            if ($user->actions >= 1000) {
-                $brain->addAchievement($user->id, 'ACTIVE', date('Y-m-d H:i:s'));
-            }
-        }
-    }
-
-    // Has ran over 10000 tests
-    public function achievementTested($brain, $achieved, $user, $submits) {
-        if (!in_array('TESTED', $achieved)) {
-            $total = $idx = 0;
-            $submitCount = count($submits);
-            while ($idx < $submitCount) {
-                $total += count(explode(',', $submits[$idx]['results']));
-                if ($total >= 10000)
-                    break;
-                $idx += 1;
-            }
-            if ($total >= 10000) {
-                $brain->addAchievement($user->id, 'TESTED', $submits[$idx]['submitted']);
-            }
-        }
-    }
-
-    // Ranked in top X
-    public function achievementRanked($brain, $achieved, $user, $ranking, $key, $limit) {
-        if (!in_array($key, $achieved)) {
-            $pos = 0;
-            $rankingCount = count($ranking);
-            while ($pos < $rankingCount && $ranking[$pos]['id'] != $user->id)
-                $pos++;
-            if ($pos < $rankingCount && $pos < $limit) {
-                $brain->addAchievement($user->id, $key, date('Y-m-d H:i:s'));
-            }
-        }
-    }
-
-    // Was the first to solve a problem
-    public function achievementVirgin($brain, $achieved, $user, $accepted) {
-        if (!in_array('VIRGIN', $achieved)) {
-            $date = '';
-            $solved = array();
-            foreach ($accepted as $submit) {
-                // Skip system and admin submissions
-                if ($submit['userId'] < 2)
-                    continue;
-
-                if (!array_key_exists($submit['problemId'], $solved)) {
-                    $solved[$submit['problemId']] = true;
-                    if ($submit['userId'] == $user->id) {
-                        $date = $submit['submitted'];
-                        break;
-                    }
-                }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, 'VIRGIN', $date);
-            }
-        }
-    }
-
-    // Submitted a problem in unusual time (late in the night or early in the morning)
-    public function achievementUnusualTime($brain, $achieved, $user, $submits, $key, $lower, $upper) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            foreach ($submits as $submit) {
-                $hour = date('H', strtotime($submit['submitted']));
-                if ($hour >= $lower && $hour < $upper) {
-                    $date = $submit['submitted'];
-                    break;
-                }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
-            }
-        }
-    }
-
-    // Solved problems in 3 different languages
-    public function achievementRainbow($brain, $achieved, $user, $submits) {
-        if (!in_array('3LANGS', $achieved)) {
-            $date = '';
-            $langs = array();
-            foreach ($submits as $submit) {
-                if ($submit['status'] == 'AC') {
-                    if (!array_key_exists($submit['language'], $langs)) {
-                        $langs[$submit['language']] = true;
-                        if (count($langs) >= 3) {
-                            $date = $submit['submitted'];
-                            break;
-                        }
-                    }
-                }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, '3LANGS', $date);
-            }
-        }
-    }
-
-    // Registered more than a year ago
-    public function achievementOldtimer($brain, $achieved, $user) {
-        if (!in_array('OLDREG', $achieved)) {
-            $anniversary = strtotime($user->registered) + 365 * 24 * 60 * 60;
-            if (time() >= $anniversary) {
-                $date = date('Y-m-d', $anniversary);
-                $brain->addAchievement($user->id, 'OLDREG', $date);
-            }
-        }
-    }
-
-    // Submit on Christmas, New Year, or user's birthday
-    public function achievementDate($brain, $achieved, $user, $submits, $key, $target) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            foreach ($submits as $submit) {
-                if (date('m-d', strtotime($submit['submitted'])) == $target) {
-                    $date = $submit['submitted'];
-                    break;
-                }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
-            }
-        }
-    }
-
-    // Got three different types of errors on a problem
-    public function achievementSoWrong($brain, $achieved, $user, $submits) {
-        if (!in_array('WARETL', $achieved)) {
-            $date = '';
-            $errors = array();
-            foreach ($submits as $submit) {
-                if (!array_key_exists($submit['problemId'], $errors))
-                    $errors[$submit['problemId']] = 0;
-                if ($submit['status'] == 'WA')
-                    $errors[$submit['problemId']] |= (1 << 0);
-                if ($submit['status'] == 'RE')
-                    $errors[$submit['problemId']] |= (1 << 1);
-                if ($submit['status'] == 'TL')
-                    $errors[$submit['problemId']] |= (1 << 2);
-                if ($submit['status'] == 'CE')
-                    $errors[$submit['problemId']] |= (1 << 3);
-                if ($submit['status'] == 'ML')
-                    $errors[$submit['problemId']] |= (1 << 4);
-                if ($submit['status'] == 'IE')
-                    $errors[$submit['problemId']] |= (1 << 5);
-
-                if (popcount($errors[$submit['problemId']]) >= 3) {
-                    $date = $submit['submitted'];
-                    break;
-                }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, 'WARETL', $date);
-            }
-        }
-    }
-
-    // Got several different types of errors in a single submission
-    public function achievementDisaster($brain, $achieved, $user, $submits) {
-        foreach ($submits as $submit) {
-            $results = explode(',', $submit['results']);
-            $errorMask = 0;
-            foreach($results as $result) {
-                if (is_numeric($result))
-                    $errorMask |= (1 << 0);
-                else if ($result == 'WA')
-                    $errorMask |= (1 << 1);
-                else if ($result == 'RE')
-                    $errorMask |= (1 << 2);
-                else if ($result == 'TL')
-                    $errorMask |= (1 << 3);
-                else if ($result == 'CE')
-                    $errorMask |= (1 << 4);
-                else if ($result == 'ML')
-                    $errorMask |= (1 << 5);
-                else if ($result == 'IE')
-                    $errorMask |= (1 << 6);
-            }
-            if (popcount($errorMask) >= 3 && !in_array('HATTRK', $achieved))
-                $brain->addAchievement($user->id, 'HATTRK', $submit['submitted']);
-            if (popcount($errorMask) >= 4 && !in_array('QUATRO', $achieved))
-                $brain->addAchievement($user->id, 'QUATRO', $submit['submitted']);
-            if (popcount($errorMask) >= 5 && !in_array('PNTGRM', $achieved))
-                $brain->addAchievement($user->id, 'PNTGRM', $submit['submitted']);
-        }
-    }
-
-    // 10 unsuccessful submits on a problem
-    public function achievementUnsuccess($brain, $achieved, $user, $submits, $key, $target) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            $unsuccessful = array();
-            foreach ($submits as $submit) {
-                if (!array_key_exists($submit['problemId'], $unsuccessful))
-                    $unsuccessful[$submit['problemId']] = 0;
-                if ($submit['status'] != 'AC')
-                    $unsuccessful[$submit['problemId']]++;
-                if ($unsuccessful[$submit['problemId']] >= $target) {
-                    $date = $submit['submitted'];
-                    break;
-                }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
-            }
-        }
-    }
-
-    // Solved 30 tasks from first try
-    public function achievementAccurate($brain, $achieved, $user, $submits, $key, $target) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            $first = 0;
-            $submitted = array();
-            foreach ($submits as $submit) {
-                if (!array_key_exists($submit['problemId'], $submitted)) {
-                    $submitted[$submit['problemId']] = true;
-                    if ($submit['status'] == 'AC') {
-                        $first += 1;
-                        if ($first >= $target) {
-                            $date = $submit['submitted'];
-                            break;
-                        }
-                    }
-                }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
-            }
-        }
-    }
-
     // Solved 5 tricky problems on the first try
-    public function achievementPedantic($brain, $achieved, $user, $submits, $problems) {
-        if (!in_array('TRICKY', $achieved)) {
-            $trickyNames = array(
-                'Sheep', 'Ssssss', 'Bribes', 'Sequence Members', 'Wordrow', 'Next', 'Shades', 'Seats',
-                'Bazinga!', 'Crosses', 'Collatz', 'Passwords', 'Digit Holes', 'Directory Listing'
-            );
-            $trickyIds = array();
-            foreach ($problems as $problem) {
-                if (in_array($problem['name'], $trickyNames))
-                    $trickyIds[$problem['id']] = true;
-            }
-            $date = '';
-            $first = 0;
+    public function achievementPedantic($user, $achieved, $key, $submitIds) {
+        if (!array_key_exists($key, $achieved)) {
+            $onFirstTry = 0;
             $submitted = array();
-            foreach ($submits as $submit) {
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
                 if (!array_key_exists($submit['problemId'], $submitted)) {
                     $submitted[$submit['problemId']] = true;
-                    if ($submit['status'] == 'AC') {
-                        if (array_key_exists($submit['problemId'], $trickyIds)) {
-                            $first += 1;
-                            if ($first >= 5) {
-                                $date = $submit['submitted'];
-                                break;
+                    if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                        if (array_key_exists($submit['problemId'], $this->TRICKY_PROBLEMS)) {
+                            $onFirstTry++;
+                            if ($onFirstTry >= 5) {
+                                $this->brain->addAchievement($user->id, $key, $$submit['submitted']);
+                                $achieved[$key] = true;
+                                return;
                             }
                         }
                     }
                 }
             }
-            if ($date != '') {
-                $brain->addAchievement($user->id, 'TRICKY', $date);
-            }
         }
     }
 
     // Filled all profile information
-    public function achievementProfile($brain, $achieved, $user) {
-        if (!in_array('PROFIL', $achieved)) {
-            if ($user->email != '' && $user->town != '' && $user->country != '' && $user->gender != '' && $user->birthdate != '0000-00-00') {
+    public function achievementProfile($user, $achieved, $key) {
+        if (!array_key_exists($key, $achieved)) {
+            if ($user->email && $user->town && $user->country && $user->gender && $user->birthdate != '0000-00-00') {
                 // TODO: Set the achievemnt date to the one this actually happened once info edit is available
-                $brain->addAchievement($user->id, 'PROFIL', $user->registered);
+                $this->brain->addAchievement($user->id, $key, $user->registered);
+                $achieved[$key] = true;
             }
         }
     }
 
     // Solved again an already accepted task with a new solution
-    public function achievementReimplemented($brain, $achieved, $user, $submits, $sources) {
-        if (!in_array('ACCAGN', $achieved)) {
-            $date = '';
-            $solved = array();
-            $submitCount = count($submits);
-            for ($i = 0; $i < $submitCount; $i += 1) {
-                if ($submits[$i]['status'] == 'AC') {
-                    if (array_key_exists($submits[$i]['problemId'], $solved)) {
-                        if ($solved[$submits[$i]['problemId']] != $sources[$i]) {
-                            $date = $submits[$i]['submitted'];
-                            break;
-                        }
+    public function achievementReimplemented($user, $achieved, $key, $acSubmitIds) {
+        if (!array_key_exists($key, $achieved)) {
+            $prevSource = array();
+            foreach ($acSubmitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                $source = $this->sources[$submitId];
+                if (array_key_exists($submit['problemId'], $prevSource)) {
+                    if ($prevSource[$submit['problemId']] != $source['source']) {
+                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                        $achieved[$key] = true;
+                        return;
                     }
-                    $solved[$submits[$i]['problemId']] = $sources[$i];
                 }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, 'ACCAGN', $date);
+                $prevSource[$submit['problemId']] = $source['source'];
             }
         }
     }
@@ -550,22 +506,22 @@ class AdminAchievementsPage extends Page {
 
         $idx1 = $idx2 = 0;
         while ($idx1 < $len1 && $idx2 < $len2 && $str1[$idx1] == $str2[$idx2]) {
-            $idx1 += 1;
-            $idx2 += 1;
+            $idx1++;
+            $idx2++;
         }
         if ($idx1 >= $len1 || $idx2 >= $len2)
             return true;
         if ($len1 > $len2) {
-            $idx2 += 1;
+            $idx2++;
         } else if ($len2 > $len1) {
-            $idx1 += 1;
+            $idx1++;
         } else {
-            $idx1 += 1;
-            $idx2 += 1;
+            $idx1++;
+            $idx2++;
         }
         while ($idx1 < $len1 && $idx2 < $len2 && $str1[$idx1] == $str2[$idx2]) {
-            $idx1 += 1;
-            $idx2 += 1;
+            $idx1++;
+            $idx2++;
         }
         if ($idx1 < $len1 || $idx2 < $len2)
             return false;
@@ -573,373 +529,384 @@ class AdminAchievementsPage extends Page {
     }
 
     // Fixed an off-by-one error to get a problem accepted
-    public function achievementOffByOne($brain, $achieved, $user, $submits, $sources) {
-        if (!in_array('OFFBY1', $achieved)) {
-            $date = '';
-            $byProblem = array();
-            $submitCount = count($submits);
-            for ($i = 0; $i < $submitCount; $i += 1) {
-                $submits[$i]['source'] = $sources[$i]['source'];
-                if (!array_key_exists($submits[$i]['problemId'], $byProblem))
-                    $byProblem[$submits[$i]['problemId']] = array();
-                array_push($byProblem[$submits[$i]['problemId']], $submits[$i]);
-            }
-            foreach ($byProblem as $id => $submits) {
-                $submitCount = count($submits);
-                for ($i = 1; $i < $submitCount; $i += 1) {
-                    if ($submits[$i]['status'] == 'AC' && $submits[$i - 1]['status'] != 'AC' && $submits[$i - 1]['status'] != 'CE') {
-                        if ($this->isOffByOne($submits[$i - 1]['source'], $submits[$i]['source'])) {
-                            if ($date == '' || $date > $submits[$i]['submitted']) {
-                                $date = $submits[$i]['submitted'];
-                            }
+    public function achievementOffByOne($user, $achieved, $key, $submitIds) {
+        if (!array_key_exists($key, $achieved)) {
+            $prevProblemSubmit = array();
+            foreach ($submitIds as $currId) {
+                $currSubmit = $this->submits[$currId];
+                if (array_key_exists($currSubmit['problemId'], $prevProblemSubmit)) {
+                    $prevId = $prevProblemSubmit[$currSubmit['problemId']];
+                    $prevSubmit = $this->submits[$prevId];
+                    if ($currSubmit['status'] == $GLOBALS['STATUS_ACCEPTED'] &&
+                        $prevSubmit['status'] != $GLOBALS['STATUS_ACCEPTED'] &&
+                        $prevSubmit['status'] != $GLOBALS['STATUS_COMPILATION_ERROR']) {
+                        $currSource = $this->sources[$currId]['source'];
+                        $prevSource = $this->sources[$prevId]['source'];
+                        if ($this->isOffByOne($currSource, $prevSource)) {
+                            $this->brain->addAchievement($user->id, $key, $currSubmit['submitted']);
+                            $achieved[$key] = true;
+                            return;
                         }
                     }
                 }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, 'OFFBY1', $date);
+                $prevProblemSubmit[$currSubmit['problemId']] = $currId;
             }
         }
     }
 
     // Sent solutions from 3 different IPs (hopefully locations, but not necessarily)
-    public function achievementDifferentLocations($brain, $achieved, $user, $submits) {
-        if (!in_array('3DIFIP', $achieved)) {
-            $date = '';
+    public function achievementDifferentLocations($user, $achieved, $key, $submitIds) {
+        if (!array_key_exists($key, $achieved)) {
             $ips = array();
-            foreach ($submits as $submit) {
-                if ($submit['ip'] != '' && !in_array($submit['ip'], $ips)) {
-                    array_push($ips, $submit['ip']);
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                if ($submit['ip'] && !array_key_exists($submit['ip'], $ips)) {
+                    $ips[$submit['ip']] = true;
                     if (count($ips) >= 3) {
-                        $date = $submit['submitted'];
-                        break;
+                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                        $achieved[$key] = true;
+                        return;
                     }
                 }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, '3DIFIP', $date);
             }
         }
     }
 
     // Solved a specific problem
-    public function achievementProblem($brain, $achieved, $user, $solved, $problems, $key, $name) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            foreach ($problems as $problem) {
-                if ($problem['name'] == $name) {
-                    foreach ($solved as $sol) {
-                        if ($problem['id'] == $sol['problemId']) {
-                            $date = $sol['submitted'];
-                            break;
+    public function achievementProblem($user, $achieved, $key, $acSubmitIds, $problemName) {
+        if (!array_key_exists($key, $achieved)) {
+            foreach ($this->problems as $problem) {
+                if ($problem['name'] == $problemName) {
+                    foreach ($acSubmitIds as $submitId) {
+                        $submit = $this->submits[$submitId];
+                        if ($submit['problemId'] == $problem['id']) {
+                            $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                            $achieved[$key] = true;
+                            return;
                         }
                     }
-                    break;
+                    return;
                 }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
             }
         }
     }
 
-    public function achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, $key, $numbers) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            foreach ($userAllSubmits as $submit) {
-                if (in_array($submit['id'], $numbers)) {
-                    $date = $submit['submitted'];
-                    break;
+    public function achievementSpecialIDSubmit($user, $achieved, $key, $submitIds, $special) {
+        if (!array_key_exists($key, $achieved)) {
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                if (in_array($submit['id'], $special)) {
+                    $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                    $achieved[$key] = true;
+                    return;
                 }
-            }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
             }
         }
     }
 
-    public function achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, $lenLimit, $key) {
-        if (!in_array($key, $achieved)) {
-            $date = '';
-            $numSubmits = count($userProblemSubmits);
-            for ($i = 0; $i < $numSubmits; $i += 1) {
-                $length = substr_count($userProblemSources[$i]['source'], "\n") + 1;
-                if ($lenLimit < 0) {
-                    if ($length <= -$lenLimit) {
-                        $date = $userProblemSubmits[$i]['submitted'];
-                        break;
-                    }
-                } else {
-                    if ($length >= $lenLimit) {
-                        $date = $userProblemSubmits[$i]['submitted'];
-                        break;
+    public function achievementCodeLength($user, $achieved, $key, $submitIds, $lenLimit) {
+        if (!array_key_exists($key, $achieved)) {
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                // Don't use userACSubmits as they don't include submits on games
+                if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                    $source = $this->sources[$submitId];
+                    $length = substr_count($source['source'], "\n") + 1;
+                    if (($lenLimit < 0 && $length <= -$lenLimit) || ($lenLimit > 0 && $length >= $lenLimit)) {
+                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
+                        $achieved[$key] = true;
+                        return;
                     }
                 }
             }
-            if ($date != '') {
-                $brain->addAchievement($user->id, $key, $date);
-            }
         }
     }
 
 
-    public function updateAll($user, $games, $standings, $problems, $submits, $accepted, $sources, $ranking,
-            $problemTags, $problemTagsCnt, $problemDifficulties, $problemDifficultiesCnt, $userAllSubmits, $userProblemSubmits, $userProblemSources) {
-        $brain = new Brain();
-
+    public function updateAll($user, $userSubmits, $userAchievements, $userReports) {
         // Already achieved
-        $userAchievements = $brain->getAchievements($user->id);
         $achieved = array();
-        foreach ($userAchievements as $achievement) {
-            array_push($achieved, $achievement['achievement']);
+        foreach ($userAchievements as $achievementId) {
+            $achievement = $this->achievements[$achievementId];
+            $achieved[$achievement['achievement']] = true;
         }
-
-        // Sent reports
-        $userReports = $brain->getReports($user->id);
 
         // Solved problems
-        $userSolved = array();
-        $userSolvedIds = array();
-        foreach ($userProblemSubmits as $submit) {
-            if ($submit['status'] == 'AC') {
-                if (!array_key_exists($submit['problemId'], $userSolvedIds)) {
-                    $userSolvedIds[$submit['problemId']] = true;
-                    array_push($userSolved, $submit);
+        $userACSubmits = array();
+        $userFirstACSubmits = array();
+        $userFirstACSubmitPerProblem = array();
+        foreach ($userSubmits as $submitId) {
+            $submit = $this->submits[$submitId];
+            // Skip games in this list
+            if ($this->isGame[$submit['problemId']])
+                continue;
+            if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                array_push($userACSubmits, $submitId);
+                if (!array_key_exists($submit['problemId'], $userFirstACSubmitPerProblem)) {
+                    $userFirstACSubmitPerProblem[$submit['problemId']] = $submitId;
+                    array_push($userFirstACSubmits, $submitId);
                 }
             }
         }
 
         // Solved per problem difficulty and tags
         $userSolvedPerTag = array();
-        foreach ($problemTagsCnt as $tag => $cnt)
+        foreach ($this->problemTagsCnt as $tag => $cnt)
             $userSolvedPerTag[$tag] = array();
 
         $userSolvedPerDiff = array();
-        foreach ($problemDifficultiesCnt as $difficulty => $cnt)
+        foreach ($this->problemDifficultiesCnt as $difficulty => $cnt)
             $userSolvedPerDiff[$difficulty] = array();
 
-        foreach ($userProblemSubmits as $submit) {
-            if ($submit['status'] == 'AC') {
-                // Tags
-                $tags = $problemTags[$submit['problemId']];
-                foreach ($tags as $tag) {
-                    $alreadyIn = false;
-                    foreach ($userSolvedPerTag[$tag] as $solved)
-                        $alreadyIn = $alreadyIn || $solved['problemId'] == $submit['problemId'];
-                    if (!$alreadyIn)
-                        array_push($userSolvedPerTag[$tag], $submit);
-                }
-
-                // Difficulties
-                $difficulty = $problemDifficulties[$submit['problemId']];
-                $alreadyIn = false;
-                foreach ($userSolvedPerDiff[$difficulty] as $solved)
-                    $alreadyIn = $alreadyIn || $solved['problemId'] == $submit['problemId'];
-                if (!$alreadyIn)
-                    array_push($userSolvedPerDiff[$difficulty], $submit);
-            }
+        foreach ($userFirstACSubmits as $submitId) {
+            $submit = $this->submits[$submitId];
+            // Tags
+            foreach ($this->problemTags[$submit['problemId']] as $tag)
+                array_push($userSolvedPerTag[$tag], $submitId);
+            // Difficulty
+            $difficulty = $this->problemDifficulties[$submit['problemId']];
+            array_push($userSolvedPerDiff[$difficulty], $submitId);
         }
 
-        // Training sections and problems
-        $training = $brain->getTrainingTopics();
+        // Achievements that cannot be recalculated accurately (date is lost):
+        // ACTIVE, RANK01, RANK10
 
         // Number of submits and solutions achievements
-        $this->achievementSubmitted($brain, $achieved, $user, $userProblemSubmits, 'SUB1E0', 1);
-        $this->achievementSubmitted($brain, $achieved, $user, $userProblemSubmits, 'SUB1E1', 10);
-        $this->achievementSubmitted($brain, $achieved, $user, $userProblemSubmits, 'SUB1E2', 100);
-        $this->achievementSubmitted($brain, $achieved, $user, $userProblemSubmits, 'SUB1E3', 1000);
-        $this->achievementSolved($brain, $achieved, $user, $userSolved, 'SOL1E0', 1);
-        $this->achievementSolved($brain, $achieved, $user, $userSolved, 'SOL1E1', 10);
-        $this->achievementSolved($brain, $achieved, $user, $userSolved, 'SOL1E2', 100);
+        $this->achievementSubmits($user, $achieved, 'SUB1E0', $userSubmits, 1);
+        $this->achievementSubmits($user, $achieved, 'SUB1E1', $userSubmits, 10);
+        $this->achievementSubmits($user, $achieved, 'SUB1E2', $userSubmits, 100);
+        $this->achievementSubmits($user, $achieved, 'SUB1E3', $userSubmits, 1000);
+        $this->achievementSubmits($user, $achieved, 'SOL1E0', $userFirstACSubmits, 1);
+        $this->achievementSubmits($user, $achieved, 'SOL1E1', $userFirstACSubmits, 10);
+        $this->achievementSubmits($user, $achieved, 'SOL1E2', $userFirstACSubmits, 100);
+        $this->achievementSubmits($user, $achieved, 'ALLTSK', $userFirstACSubmits, count($this->problems));
 
         // Problems difficulty achievements
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, '1TRIVL', 'trivial', 1);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, '1EASYY', 'easy', 1);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, '1MEDIU', 'medium', 1);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, '1HARDD', 'hard', 1);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, '1BRUTL', 'brutal', 1);
+        $this->achievementSubmits($user, $achieved, '1TRIVL', $userSolvedPerDiff['trivial'], 1);
+        $this->achievementSubmits($user, $achieved, '1EASYY', $userSolvedPerDiff['easy'], 1);
+        $this->achievementSubmits($user, $achieved, '1MEDIU', $userSolvedPerDiff['medium'], 1);
+        $this->achievementSubmits($user, $achieved, '1HARDD', $userSolvedPerDiff['hard'], 1);
+        $this->achievementSubmits($user, $achieved, '1BRUTL', $userSolvedPerDiff['brutal'], 1);
 
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, 'ALLTRV', 'trivial', $problemDifficultiesCnt['trivial']);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, 'ALLESY', 'easy', $problemDifficultiesCnt['easy']);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, 'ALLMED', 'medium', $problemDifficultiesCnt['medium']);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, 'ALLHRD', 'hard', $problemDifficultiesCnt['hard']);
-        $this->achievementDifficulty($brain, $achieved, $user, $userSolvedPerDiff, 'ALLBRL', 'brutal', $problemDifficultiesCnt['brutal']);
-        $this->achievementAllDiff($brain, $achieved, $user, $userSolvedPerDiff);
+        $this->achievementSubmits($user, $achieved, 'ALLTRV', $userSolvedPerDiff['trivial'], $this->problemDifficultiesCnt['trivial']);
+        $this->achievementSubmits($user, $achieved, 'ALLESY', $userSolvedPerDiff['easy'], $this->problemDifficultiesCnt['easy']);
+        $this->achievementSubmits($user, $achieved, 'ALLMED', $userSolvedPerDiff['medium'], $this->problemDifficultiesCnt['medium']);
+        $this->achievementSubmits($user, $achieved, 'ALLHRD', $userSolvedPerDiff['hard'], $this->problemDifficultiesCnt['hard']);
+        $this->achievementSubmits($user, $achieved, 'ALLBRL', $userSolvedPerDiff['brutal'], $this->problemDifficultiesCnt['brutal']);
+        $this->achievementAllTagsDifficulties($user, $achieved, 'ALLDIF', $userSolvedPerDiff);
 
         // Problems tags achievements
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLIMP', 'implement', $problemTagsCnt['implement']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLSRC', 'search', $problemTagsCnt['search']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLDPR', 'dp', $problemTagsCnt['dp']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLGRF', 'graph', $problemTagsCnt['graph']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLMAT', 'math', $problemTagsCnt['math']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLGEO', 'geometry', $problemTagsCnt['geometry']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLADH', 'ad-hoc', $problemTagsCnt['ad-hoc']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLFLW', 'flow', $problemTagsCnt['flow']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLDAC', 'divconq', $problemTagsCnt['divconq']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLSTR', 'strings', $problemTagsCnt['strings']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLSOR', 'sorting', $problemTagsCnt['sorting']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLGRD', 'greedy', $problemTagsCnt['greedy']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLGAM', 'game', $problemTagsCnt['game']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLDST', 'datastruct', $problemTagsCnt['datastruct']);
-        $this->achievementTags($brain, $achieved, $user, $userSolvedPerTag, 'ALLPNP', 'np', $problemTagsCnt['np']);
-        $this->achievementAllTags($brain, $achieved, $user, $userSolvedPerTag);
+        $this->achievementSubmits($user, $achieved, 'ALLIMP', $userSolvedPerTag['implement'], $this->problemTagsCnt['implement']);
+        $this->achievementSubmits($user, $achieved, 'ALLSRC', $userSolvedPerTag['search'], $this->problemTagsCnt['search']);
+        $this->achievementSubmits($user, $achieved, 'ALLDPR', $userSolvedPerTag['dp'], $this->problemTagsCnt['dp']);
+        $this->achievementSubmits($user, $achieved, 'ALLGRF', $userSolvedPerTag['graph'], $this->problemTagsCnt['graph']);
+        $this->achievementSubmits($user, $achieved, 'ALLMAT', $userSolvedPerTag['math'], $this->problemTagsCnt['math']);
+        $this->achievementSubmits($user, $achieved, 'ALLGEO', $userSolvedPerTag['geometry'], $this->problemTagsCnt['geometry']);
+        $this->achievementSubmits($user, $achieved, 'ALLADH', $userSolvedPerTag['ad-hoc'], $this->problemTagsCnt['ad-hoc']);
+        $this->achievementSubmits($user, $achieved, 'ALLFLW', $userSolvedPerTag['flow'], $this->problemTagsCnt['flow']);
+        $this->achievementSubmits($user, $achieved, 'ALLDAC', $userSolvedPerTag['divconq'], $this->problemTagsCnt['divconq']);
+        $this->achievementSubmits($user, $achieved, 'ALLSTR', $userSolvedPerTag['strings'], $this->problemTagsCnt['strings']);
+        $this->achievementSubmits($user, $achieved, 'ALLSOR', $userSolvedPerTag['sorting'], $this->problemTagsCnt['sorting']);
+        $this->achievementSubmits($user, $achieved, 'ALLGRD', $userSolvedPerTag['greedy'], $this->problemTagsCnt['greedy']);
+        $this->achievementSubmits($user, $achieved, 'ALLGAM', $userSolvedPerTag['game'], $this->problemTagsCnt['game']);
+        $this->achievementSubmits($user, $achieved, 'ALLDST', $userSolvedPerTag['datastruct'], $this->problemTagsCnt['datastruct']);
+        $this->achievementSubmits($user, $achieved, 'ALLPNP', $userSolvedPerTag['np'], $this->problemTagsCnt['np']);
+        $this->achievementAllTagsDifficulties($user, $achieved, 'ALLTAG', $userSolvedPerTag);
 
         // Solving speed achievements
-        $this->achievementSpeed($brain, $achieved, $user, $userSolved, 'TWOTEN', 2, 10 * 60);
-        $this->achievementSpeed($brain, $achieved, $user, $userSolved, '03IN24', 3, 24 * 60 * 60);
-        $this->achievementSpeed($brain, $achieved, $user, $userSolved, '05IN24', 5, 24 * 60 * 60);
-        $this->achievementSpeed($brain, $achieved, $user, $userSolved, '10IN24', 10, 24 * 60 * 60);
+        $this->achievementSpeed($user, $achieved, 'TWOTEN', $userFirstACSubmits, 2, 10 * 60);
+        $this->achievementSpeed($user, $achieved, '03IN24', $userFirstACSubmits, 3, 24 * 60 * 60);
+        $this->achievementSpeed($user, $achieved, '05IN24', $userFirstACSubmits, 5, 24 * 60 * 60);
+        $this->achievementSpeed($user, $achieved, '10IN24', $userFirstACSubmits, 10, 24 * 60 * 60);
 
         // Training section achievements
-        $this->achievementTraining($brain, $achieved, $user, $userSolved, $training);
+        $this->achievementsTraining($user, $achieved, $userFirstACSubmitPerProblem);
 
         // Games
-        $this->achievementPlayedGame($brain, $achieved, $user, $standings, $userAllSubmits, 'PLAYED', 1);
-        $this->achievementPlayedGame($brain, $achieved, $user, $standings, $userAllSubmits, 'GAMERR', count($standings));
-        $this->achievementWonGame($brain, $achieved, $user, $standings, $userAllSubmits);
+        $this->achievementPlayedGame($user, $achieved, 'PLAYED', $userSubmits, 1);
+        $this->achievementPlayedGame($user, $achieved, 'GAMERR', $userSubmits, count($this->standings));
+        $this->achievementWonGame($user, $achieved, 'WINNER', $userSubmits);
 
         // TODO: Competitions
 
         // Unusual dates
-        $this->achievementDate($brain, $achieved, $user, $userProblemSubmits, 'BIRTHD', date('m-d', strtotime($user->birthdate)));
-        $this->achievementDate($brain, $achieved, $user, $userProblemSubmits, 'CHRSTM', '12-25');
-        $this->achievementDate($brain, $achieved, $user, $userProblemSubmits, 'NUYEAR', '01-01');
+        $this->achievementDate($user, $achieved, 'BIRTHD', $userSubmits, date('m-d', strtotime($user->birthdate)));
+        $this->achievementDate($user, $achieved, 'CHRSTM', $userSubmits, '12-25');
+        $this->achievementDate($user, $achieved, 'NUYEAR', $userSubmits, '01-01');
 
         // Unusual times
-        $this->achievementUnusualTime($brain, $achieved, $user, $userAllSubmits, 'NIGHTY', 2, 6);
-        $this->achievementUnusualTime($brain, $achieved, $user, $userAllSubmits, 'MORNIN', 6, 10);
+        $this->achievementUnusualTime($user, $achieved, 'NIGHTY', $userSubmits, 2, 6);
+        $this->achievementUnusualTime($user, $achieved, 'MORNIN', $userSubmits, 6, 10);
 
         // Ad-hoc achievements
-        $this->achievementAllTasks($brain, $achieved, $user, $userSolved, $problemDifficulties);
-        $this->achievementRegistered($brain, $achieved, $user);
-        $this->achievementReported($brain, $achieved, $user, $userReports);
-        $this->achievementActive($brain, $achieved, $user);
-        $this->achievementTested($brain, $achieved, $user, $userProblemSubmits);
-        $this->achievementRanked($brain, $achieved, $user, $ranking, 'RANK01', 1);
-        $this->achievementRanked($brain, $achieved, $user, $ranking, 'RANK10', 10);
-        $this->achievementVirgin($brain, $achieved, $user, $accepted);
-        $this->achievementRainbow($brain, $achieved, $user, $userAllSubmits);
-        $this->achievementOldtimer($brain, $achieved, $user);
-        $this->achievementSoWrong($brain, $achieved, $user, $userProblemSubmits);
-        $this->achievementDisaster($brain, $achieved, $user, $userProblemSubmits);
-        $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits, '10FAIL', 10);
-        $this->achievementUnsuccess($brain, $achieved, $user, $userProblemSubmits, '20FAIL', 20);
-        $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '20FRST', 20);
-        $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '50FRST', 50);
-        $this->achievementAccurate($brain, $achieved, $user, $userProblemSubmits, '100FST', 100);
-        $this->achievementPedantic($brain, $achieved, $user, $userProblemSubmits, $problems);
+        $this->achievementMarried($user, $achieved, 'WEDDED');
+        $this->achievementRegistered($user, $achieved, 'RGSTRD');
+        $this->achievementReported($user, $achieved, 'REPORT', $userReports);
+        $this->achievementActive($user, $achieved, 'ACTIVE');
+        $this->achievementTested($user, $achieved, 'TESTED', $userSubmits);
+        $this->achievementRanked($user, $achieved, 'RANK01', 1);
+        $this->achievementRanked($user, $achieved, 'RANK10', 10);
+        $this->achievementVirgin($user, $achieved, 'VIRGIN');
+        $this->achievementRainbow($user, $achieved, '3LANGS', $userACSubmits);
+        $this->achievementOldtimer($user, $achieved, 'OLDREG');
+        $this->achievementSoWrong($user, $achieved, 'WARETL', $userSubmits);
+        $this->achievementDisaster($user, $achieved, 'HATTRK', $userSubmits, 3);
+        $this->achievementDisaster($user, $achieved, 'QUATRO', $userSubmits, 4);
+        $this->achievementDisaster($user, $achieved, 'PNTGRM', $userSubmits, 5);
+        $this->achievementUnsuccess($user, $achieved, '10FAIL', $userSubmits, 10);
+        $this->achievementUnsuccess($user, $achieved, '20FAIL', $userSubmits, 20);
+        $this->achievementAccurate($user, $achieved, '20FRST', $userSubmits, 20);
+        $this->achievementAccurate($user, $achieved, '50FRST', $userSubmits, 50);
+        $this->achievementAccurate($user, $achieved, '100FST', $userSubmits, 100);
+        $this->achievementPedantic($user, $achieved, 'TRICKY', $userSubmits);
         // TODO: AVATAR
-        $this->achievementProfile($brain, $achieved, $user);
-        $this->achievementReimplemented($brain, $achieved, $user, $userProblemSubmits, $userProblemSources);
-        $this->achievementOffByOne($brain, $achieved, $user, $userProblemSubmits, $userProblemSources);
-        $this->achievementDifferentLocations($brain, $achieved, $user, $userProblemSubmits);
+        $this->achievementProfile($user, $achieved, 'PROFIL');
+        $this->achievementReimplemented($user, $achieved, 'ACCAGN', $userACSubmits);
+        $this->achievementOffByOne($user, $achieved, 'OFFBY1', $userSubmits);
+        $this->achievementDifferentLocations($user, $achieved, '3DIFIP', $userSubmits);
 
         // Problem-specific achievements
-        $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'SHEEPS', 'Sheep');
-        $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'TOWERS', 'Radio Towers');
-        $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'DTHSTR', 'Deathstars');
-        $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'SNWCLN', 'Snow Cleaning');
-        $this->achievementProblem($brain, $achieved, $user, $userSolved, $problems, 'SHADES', 'Shades');
+        $this->achievementProblem($user, $achieved, 'SHEEPS', $userACSubmits, 'Sheep');
+        $this->achievementProblem($user, $achieved, 'TOWERS', $userACSubmits, 'Radio Towers');
+        $this->achievementProblem($user, $achieved, 'DTHSTR', $userACSubmits, 'Deathstars');
+        $this->achievementProblem($user, $achieved, 'SNWCLN', $userACSubmits, 'Snow Cleaning');
+        $this->achievementProblem($user, $achieved, 'SHADES', $userACSubmits, 'Shades');
 
         // Submission ID achievements
-        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, 'PRMSUB', $this->PRIME_NUMBERS);
-        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, 'FIBSUB', $this->FIBONACCI_NUMBERS);
-        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, 'PRFSUB', $this->PERFECT_NUMBERS);
-        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '124SUB', $this->POWER_OF_TWO_NUMBERS);
-        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '110SUB', $this->POWER_OF_TEN_NUMBERS);
-        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '314SUB', $this->PI_PREFIX_NUMBERS);
-        $this->achievementSpecialIDSubmit($brain, $achieved, $user, $userAllSubmits, '271SUB', $this->E_PREFIX_NUMBERS);
+        $this->achievementSpecialIDSubmit($user, $achieved, 'PRMSUB', $userSubmits, $this->PRIME_NUMBERS);
+        $this->achievementSpecialIDSubmit($user, $achieved, 'FIBSUB', $userSubmits, $this->FIBONACCI_NUMBERS);
+        $this->achievementSpecialIDSubmit($user, $achieved, 'PRFSUB', $userSubmits, $this->PERFECT_NUMBERS);
+        $this->achievementSpecialIDSubmit($user, $achieved, '124SUB', $userSubmits, $this->POWER_OF_TWO_NUMBERS);
+        $this->achievementSpecialIDSubmit($user, $achieved, '110SUB', $userSubmits, $this->POWER_OF_TEN_NUMBERS);
+        $this->achievementSpecialIDSubmit($user, $achieved, '314SUB', $userSubmits, $this->PI_PREFIX_NUMBERS);
+        $this->achievementSpecialIDSubmit($user, $achieved, '271SUB', $userSubmits, $this->E_PREFIX_NUMBERS);
 
         // Code length achievements
-        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, -10, 'SHORTY');
-        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, 100, 'LONG01');
-        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, 500, 'LONG02');
-        $this->achievementCodeLength($brain, $achieved, $user, $userProblemSubmits, $userProblemSources, 1000, 'LONG03');
+        $this->achievementCodeLength($user, $achieved, 'SHORTY', $userSubmits, -10);
+        $this->achievementCodeLength($user, $achieved, 'LONG01', $userSubmits, 100);
+        $this->achievementCodeLength($user, $achieved, 'LONG02', $userSubmits, 500);
+        $this->achievementCodeLength($user, $achieved, 'LONG03', $userSubmits, 1000);
     }
 
     private function recalcAll() {
         $start = microtime(true);
 
         $this->initSpecialNumbers();
+        $this->initTrickyProblems();
 
-        $brain = new Brain();
-        $games = $brain->getAllGames();
-        $problems = $brain->getAllProblems();
-        $submits = $brain->getAllSubmits();
-        $sources = $brain->getAllSources();
-        $ranking = RankingPage::getRanking();
+        $this->brain = new Brain();
+        $this->users = $this->brain->getUsers();
+        $this->games = $this->brain->getAllGames();
+        $this->problems = $this->brain->getAllProblems();
+        $this->ranking = RankingPage::getRanking();
+        $this->reports = $this->brain->getReports();
+        $this->achievements = $this->brain->getAchievements();
+        $this->training = $this->brain->getTrainingTopics();
 
-        $standings = array();
-        foreach ($games as $game) {
+
+        // Consider only user submits (exclude system and admin ones)
+        $allSubmits = $this->brain->getAllSubmits();
+        $allSources = $this->brain->getAllSources();
+        $this->submits = array();
+        $this->sources = array();
+        $submitCount = count($allSubmits);
+        for ($i = 0; $i < $submitCount; $i++) {
+            if ($allSubmits[$i]['id'] != $allSources[$i]['submitId'])
+                error_log('Mismatch in submits and sources at index ' . $i . '!');
+            // Ignore system and admin subits
+            if ($allSubmits[$i]['userId'] >= 2) {
+                array_push($this->submits, $allSubmits[$i]);
+                array_push($this->sources, $allSources[$i]);
+            }
+        }
+
+
+        $this->standings = array();
+        foreach ($this->games as $game) {
             $problem = Problem::instanceFromArray($game);
             if ($problem->type == 'game') {
-                $standings[$game['id']] = GamesPage::getGameRanking($problem);
+                $this->standings[$game['id']] = GamesPage::getGameRanking($problem);
             } else if ($problem->type == 'relative') {
-                $standings[$game['id']] = GamesPage::getRelativeRanking($problem);
+                $this->standings[$game['id']] = GamesPage::getRelativeRanking($problem);
+            } else {
+                echo 'WARNING: Unknown type of game: ' . $problem->type . PHP_EOL;
+                error_log('WARNING: Unknown type of game: ' . $problem->type);
             }
         }
 
-        $accepted = array();
-        foreach ($submits as $submit) {
-            if ($submit['status'] == 'AC') {
-                array_push($accepted, $submit);
+        $this->firstACSubmit = array();
+        $submitCount = count($this->submits);
+        for ($i = 0; $i < $submitCount; $i++) {
+            $submit = $this->submits[$i];
+            if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                if (!array_key_exists($submit['problemId'], $this->firstACSubmit))
+                    $this->firstACSubmit[$submit['problemId']] = $i;
             }
         }
-
-        $users = $brain->getUsers();
 
         // Problems info
-        $problemTags = array();
-        $problemTagsCnt = array();
-        $problemDifficulties = array();
-        $problemDifficultiesCnt = array();
-        foreach ($problems as $problem) {
+        $this->isGame = array();
+        foreach ($this->problems as $problem)
+            $this->isGame[$problem['id']] = false;
+        foreach ($this->games as $game)
+            $this->isGame[$game['id']] = true;
+
+        $this->problemTags = array();
+        $this->problemTagsCnt = array();
+        $this->problemDifficulties = array();
+        $this->problemDifficultiesCnt = array();
+        foreach ($this->problems as $problem) {
             // Tags
             $tags = explode(',', $problem['tags']);
-            $problemTags[$problem['id']] = $tags;
+            $this->problemTags[$problem['id']] = $tags;
             foreach ($tags as $tag) {
-                if (!array_key_exists($tag, $problemTagsCnt))
-                    $problemTagsCnt[$tag] = 0;
-                $problemTagsCnt[$tag] += 1;
+                if (!array_key_exists($tag, $this->problemTagsCnt))
+                    $this->problemTagsCnt[$tag] = 0;
+                $this->problemTagsCnt[$tag]++;
             }
 
             // Difficulties
             $difficulty = $problem['difficulty'];
-            $problemDifficulties[$problem['id']] = $difficulty;
-            if (!array_key_exists($difficulty, $problemDifficultiesCnt))
-                $problemDifficultiesCnt[$difficulty] = 0;
-            $problemDifficultiesCnt[$difficulty] += 1;
+            $this->problemDifficulties[$problem['id']] = $difficulty;
+            if (!array_key_exists($difficulty, $this->problemDifficultiesCnt))
+                $this->problemDifficultiesCnt[$difficulty] = 0;
+            $this->problemDifficultiesCnt[$difficulty]++;
         }
 
-        // Sent submissions on problems
-        $userAllSubmits = array();
-        $userProblemSubmits = array();
-        $userProblemSources = array();
-        foreach ($users as $user) {
-            $userAllSubmits[$user['id']] = array();
-            $userProblemSubmits[$user['id']] = array();
-            $userProblemSources[$user['id']] = array();
+        $userSubmits = array();
+        $userAchievements = array();
+        $userReports = array();
+        foreach ($this->users as $user) {
+            $userSubmits[$user['id']] = array();
+            $userAchievements[$user['id']] = array();
+            $userReports[$user['id']] = array();
         }
 
-        $submitCount = count($submits);
+        // Sent submission IDs on problems (per-user)
+        $submitCount = count($this->submits);
         for ($i = 0; $i < $submitCount; $i++) {
-            if ($submits[$i]['id'] != $sources[$i]['submitId'])
-                error_log('Mismatch in submits and sources at index ' . $i . '!');
-            array_push($userAllSubmits[$submits[$i]['userId']], $submits[$i]);
-            if (array_key_exists($submits[$i]['problemId'], $problemDifficulties)) {
-                array_push($userProblemSubmits[$submits[$i]['userId']], $submits[$i]);
-                array_push($userProblemSources[$submits[$i]['userId']], $sources[$i]);
-            }
+            array_push($userSubmits[$this->submits[$i]['userId']], $i);
+        }
+
+        // Sent reports (per-user)
+        $reportCount = count($this->reports);
+        for ($i = 0; $i < $reportCount; $i++) {
+            array_push($userReports[$this->reports[$i]['user']], $i);
+        }
+
+        // Already achieved (per-user)
+        $achievementCount = count($this->achievements);
+        for ($i = 0; $i < $achievementCount; $i++) {
+            array_push($userAchievements[$this->achievements[$i]['user']], $i);
         }
 
         // Skip service user and admin
-        $userCount = count($users);
-        for ($i = 2; $i < $userCount; $i += 1) {
-            $user = User::instanceFromArray($users[$i]);
-            $this->updateAll($user, $games, $standings, $problems, $submits, $accepted, $sources, $ranking,
-                $problemTags, $problemTagsCnt, $problemDifficulties, $problemDifficultiesCnt,
-                $userAllSubmits[$user->id], $userProblemSubmits[$user->id], $userProblemSources[$user->id]);
+        $userCount = count($this->users);
+        for ($i = 2; $i < $userCount; $i++) {
+            $user = User::instanceFromArray($this->users[$i]);
+            $this->updateAll($user, $userSubmits[$user->id], $userAchievements[$user->id], $userReports[$user->id]);
         }
+
         return microtime(true) - $start;
     }
 
@@ -964,7 +931,7 @@ class AdminAchievementsPage extends Page {
         $content = '<div>';
         foreach ($achievementsData as $achievement) {
             $users = '';
-            for ($i = 0; $i < min(5, count($perType[$achievement['key']])); $i += 1) {
+            for ($i = 0; $i < min(5, count($perType[$achievement['key']])); $i++) {
                 if ($i > 0) $users .= ', ';
                 $users .= $perType[$achievement['key']][$i];
             }

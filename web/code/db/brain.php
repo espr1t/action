@@ -121,10 +121,10 @@ class Brain {
         return $this->db->lastId();
     }
 
-    function getReports($userId) {
+    function getReports($userId = -1) {
         $response = $this->db->query("
             SELECT * FROM `Reports`
-            WHERE user = " . $userId . "
+            " . ($userId != -1 ? ("WHERE user = " . $userId) : "") . "
         ");
         if (!$response) {
             error_log('Could not execute getReports(' . $userId . ') query properly!');
