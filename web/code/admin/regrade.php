@@ -27,10 +27,34 @@ class AdminRegradePage extends Page {
         }
     }
 
+    private function regradeStuck() {
+        $stuckStatus = array(
+            $GLOBALS['STATUS_WAITING'],
+            $GLOBALS['STATUS_PREPARING'],
+            $GLOBALS['STATUS_COMPILING'],
+            $GLOBALS['STATUS_TESTING']
+        );
+
+        $brain = new Brain();
+        $stuckSubmits = array();
+        foreach ($stuckStatus as $status) {
+            $stuckOfType = $brain->getAllSubmits($status);
+            if ($stuckOfType != null) {
+                $stuckSubmits = array_merge($stuckSubmits, $stuckOfType);
+            }
+        }
+
+        foreach ($stuckSubmits as $submit) {
+            $this->regradeSubmit($submit['id']);
+        }
+    }
+
     public function getContent() {
         if (isset($_GET['submitId'])) {
             if ($_GET['submitId'] == 'pending') {
                 $this->regradePending();
+            } else if ($_GET['submitId'] == 'stuck') {
+                $this->regradeStuck();
             } else {
                 $this->regradeSubmit($_GET['submitId']);
             }

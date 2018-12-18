@@ -120,7 +120,7 @@ RewriteRule    ^admin/news/(\d+|new)$                           /code/admin/admi
 RewriteRule    ^admin/problems$                                 /code/admin/admin.php?page=problems                                                 [NC,L,QSA]
 RewriteRule    ^admin/problems/(\d+|new)$                       /code/admin/admin.php?page=problems&problemId=$1                                    [NC,L,QSA]
 RewriteRule    ^admin/regrade$                                  /code/admin/admin.php?page=regrade                                                  [NC,L,QSA]
-RewriteRule    ^admin/regrade/(\d+|pending)$                    /code/admin/admin.php?page=regrade&submitId=$1                                      [NC,L,QSA]
+RewriteRule    ^admin/regrade/(\d+|pending|stuck)$              /code/admin/admin.php?page=regrade&submitId=$1                                      [NC,L,QSA]
 RewriteRule    ^admin/retest$                                   /code/admin/admin.php?page=retest                                                   [NC,L,QSA]
 RewriteRule    ^admin/retest/(\d+)$                             /code/admin/admin.php?page=retest&problemId=$1                                      [NC,L,QSA]
 RewriteRule    ^admin/retest/(\d+)/latest$                      /code/admin/admin.php?page=retest&problemId=$1&latest=true                          [NC,L,QSA]
