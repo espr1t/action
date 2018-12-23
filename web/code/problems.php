@@ -483,10 +483,10 @@ class ProblemsPage extends Page {
             // If nothing to wait for, stop the updates
             if (strpos($content, 'fa-hourglass-start') === false && strpos($content, 'fa-spinner') === false) {
                 terminateServerEventStream();
-                return;
+                exit();
             }
-            // Sleep for 0.5 seconds until next check for changes
-            sleep(0.5);
+            // Sleep for 0.2 seconds until next check for changes
+            usleep(200000);
         }
     }
 
