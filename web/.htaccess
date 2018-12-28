@@ -3,12 +3,6 @@ Options -Indexes
 ErrorDocument 403 /error
 ErrorDocument 404 /error
 
-# PHP Version Configuration
-<IfModule mod_fcgid.c>
-AddHandler fcgid-script .php
-FcgidWrapper /home/espr1tn/public_html/action/php.fcgi .php
-</IfModule>
-
 #
 # Cache configuration
 #
@@ -50,6 +44,9 @@ RewriteRule    ^help$                                           /code/main.php?p
 RewriteRule    ^stats$                                          /code/main.php?page=stats                                                           [NC,L,QSA]
 RewriteRule    ^error$                                          /code/main.php?page=error                                                           [NC,L,QSA]
 RewriteRule    ^forbidden$                                      /code/main.php?page=forbidden                                                       [NC,L,QSA]
+
+# Test page
+RewriteRule    ^test$											/code/main.php?page=test														    [NC,L,QSA]
 
 # Problem pages
 RewriteRule    ^problems/(\d+)$                                 /code/main.php?page=problems&problemId=$1                                           [NC,L,QSA]
