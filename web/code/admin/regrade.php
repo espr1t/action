@@ -18,15 +18,6 @@ class AdminRegradePage extends Page {
         $submit->send();
     }
 
-    private function regradePending() {
-        $brain = new Brain();
-        $pending = $brain->getPendingSubmits();
-        echo "Regrading " . count($pending) . " submissions.";
-        foreach ($pending as $submit) {
-            $this->regradeSubmit($submit['id']);
-        }
-    }
-
     private function regradeStuck() {
         $stuckStatus = array(
             $GLOBALS['STATUS_WAITING'],
@@ -51,9 +42,7 @@ class AdminRegradePage extends Page {
 
     public function getContent() {
         if (isset($_GET['submitId'])) {
-            if ($_GET['submitId'] == 'pending') {
-                $this->regradePending();
-            } else if ($_GET['submitId'] == 'stuck') {
+            if ($_GET['submitId'] == 'stuck' || $_GET['submitId'] == 'pending') {
                 $this->regradeStuck();
             } else {
                 $this->regradeSubmit($_GET['submitId']);
