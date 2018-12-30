@@ -64,7 +64,7 @@ class Runner:
                                          player_two_id, player_two_name, player_two_executable):
         # Prepare the run input and output data
         self.logger.info("[Submission {}]       ++ test {}: {} vs {} (run_id = {})...".format(
-                self.evaluator.id, test['position'], player_one_name, player_two_name, run_id))
+                self.evaluator.id, test["position"], player_one_name, player_two_name, run_id))
 
         inp_file_name, _, _, sandbox, _ = self.prepare_run(test)
 
@@ -207,7 +207,7 @@ class Runner:
             "player_two_exec_memory": round(player_two_exec_memory / 1048576.0, 2),  # Convert back to megabytes
             "match_log": match_log
         }]
-        self.evaluator.update_frontend("", results)
+        self.evaluator.updater.add_info("", results)
         return
 
     def run(self, run_id, test):
@@ -218,7 +218,7 @@ class Runner:
             "status": TestStatus.TESTING.name,
             "score": 0
         }]
-        self.evaluator.update_frontend("", results)
+        self.evaluator.updater.add_info("", results)
 
         start_time = perf_counter()
 
@@ -248,7 +248,7 @@ class Runner:
         if result.status == TestStatus.WRONG_ANSWER:
             self.logger.info("[Submission {}]      == {}".format(self.evaluator.id, result.error_message))
 
-        # Update the frontend once again that we the testing has been completed (along with TL, ML, and score this time)
+        # Update the frontend once again that the testing has been completed (along with TL, ML, and score this time)
         results = [{
             "id": run_id,
             "position": test["position"],
@@ -259,7 +259,7 @@ class Runner:
             "score": result.score,
             "info": result.info
         }]
-        self.evaluator.update_frontend("", results)
+        self.evaluator.updater.add_info("", results)
         return result
 
     """

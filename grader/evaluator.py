@@ -6,18 +6,18 @@
 #     3. The solution is being executed against each test case in a sandbox.
 # Updates the frontend after each test case, but no more often than 0.5 sec (with the last test being an exception).
 #
-import json
 import logging
 
-from os import path, makedirs
-from time import perf_counter, sleep, time
-import config
 import shutil
-from compiler import Compiler
+from os import path, makedirs
+from time import perf_counter, sleep
+
+import config
 import common
+from updater import Updater
+from compiler import Compiler
 from status import TestStatus
 from runner import Runner
-from threading import Timer, Lock
 
 
 class Evaluator:
@@ -32,7 +32,7 @@ class Evaluator:
         self.time_limit = data["timeLimit"]
         self.memory_limit = data["memoryLimit"] * 1048576  # Given in MiB, convert to bytes
 
-        # Server endpoint (for status updates)
+        # Front-end endpoint
         self.update_url = data["updateEndpoint"]
 
         # List of tests and endpoint where to download them from
@@ -51,22 +51,16 @@ class Evaluator:
         # Whether to use relative or absolute floating point comparison
         self.floats = data["floats"]
 
-        # Update Timer
-        self.update_timer = -1
-        self.update_message = ""
-        self.update_results = []
-        self.update_scheduled_event = None
-
         # Path to sandbox and files inside
         self.path_sandbox = config.PATH_SANDBOX + "submit_{:06d}/".format(self.id)
         self.path_source = self.path_sandbox + config.SOURCE_NAME + common.get_source_extension(self.language)
         self.path_executable = self.path_sandbox + config.EXECUTABLE_NAME + common.get_executable_extension(self.language)
 
+        # Frontend server update logic
+        self.updater = Updater(self.update_url, self.id, self.tests)
+
         # Configure logger
         self.logger = logging.getLogger("evltr")
-
-        # Configure locking mechanism
-        self.lock = Lock()
 
     def __del__(self):
         # Clean up remaining files
@@ -75,56 +69,56 @@ class Evaluator:
     def evaluate(self):
         # Send an update that preparation has been started for executing this submission
         self.logger.info("[Submission {}] Evaluating submission {}".format(self.id, self.id))
-        self.update_frontend("", self.set_results(TestStatus.PREPARING))
+        self.updater.add_info("", None, TestStatus.PREPARING)
 
         # Create sandbox directory
         self.logger.info("[Submission {}]   >> creating sandbox directory...".format(self.id))
         if not self.create_sandbox_dir():
-            self.update_frontend("Error while creating sandbox directory!", self.set_results(TestStatus.INTERNAL_ERROR))
+            self.updater.add_info("Error while creating sandbox directory!", None, TestStatus.INTERNAL_ERROR)
             return
 
         # Download the test files (if not downloaded already)
         self.logger.info("[Submission {}]   >> downloading test files...".format(self.id))
         if not self.download_tests():
-            self.update_frontend("Error while downloading test files!", self.set_results(TestStatus.INTERNAL_ERROR))
+            self.updater.add_info("Error while downloading test files!", None, TestStatus.INTERNAL_ERROR)
             return
 
         # Download and compile the checker (if not already available)
         if self.checker is not None and not path.exists(config.PATH_CHECKERS + self.checker):
             self.logger.info("[Submission {}]   >> updating checker file...".format(self.id))
             if not self.download_and_compile_utility_file(config.PATH_CHECKERS, self.checker, self.checker_url):
-                self.update_frontend("Error while setting up checker!", self.set_results(TestStatus.INTERNAL_ERROR))
+                self.updater.add_info("Error while setting up checker!", None, TestStatus.INTERNAL_ERROR)
                 return
 
         # Download and compile the tester (if not already available)
         if self.tester is not None and not path.exists(config.PATH_TESTERS + self.tester):
             self.logger.info("[Submission {}]   >> updating tester file...".format(self.id))
             if not self.download_and_compile_utility_file(config.PATH_TESTERS, self.tester, self.tester_url):
-                self.update_frontend("Error while setting up tester!", self.set_results(TestStatus.INTERNAL_ERROR))
+                self.updater.add_info("Error while setting up tester!", None, TestStatus.INTERNAL_ERROR)
                 return
 
         # Save the source to a file so we can compile it later
         self.logger.info("[Submission {}]   >> writing source code to file...".format(self.id))
         if not self.write_source(self.source, self.path_source):
-            self.update_frontend("Error while writing the source to a file!", self.set_results(TestStatus.INTERNAL_ERROR))
+            self.updater.add_info("Error while writing the source to a file!", None, TestStatus.INTERNAL_ERROR)
             return
 
         # Send an update that the compilation has been started for this submission
-        self.update_frontend("", self.set_results(TestStatus.COMPILING))
+        self.updater.add_info("", None, TestStatus.COMPILING)
 
         # Compile
         self.logger.info("[Submission {}]   >> compiling solution...".format(self.id))
         compilation_status = self.compile(self.language, self.path_source, self.path_executable)
         if compilation_status != "":
             self.logger.info("[Submission {}] Compilation error! Aborting...".format(self.id))
-            self.update_frontend(compilation_status, self.set_results(TestStatus.COMPILATION_ERROR))
+            self.updater.add_info(compilation_status, None, TestStatus.COMPILATION_ERROR)
             return
 
         # If a standard task, just run the solution on the given tests
         self.logger.info("[Submission {}]   >> starting evaluation of solution...".format(self.id))
         if not self.run_solution():
             self.logger.info("[Submission {}] Error while processing the solution! Aborting...".format(self.id))
-            self.update_frontend("Error while processing the solution!", self.set_results(TestStatus.INTERNAL_ERROR))
+            self.updater.add_info("Error while processing the solution!", None, TestStatus.INTERNAL_ERROR)
             return
 
         # Finished with this submission
@@ -132,67 +126,7 @@ class Evaluator:
         # TODO: Fix this by requiring the update to be acknowledged (response code from the POST)
         sleep(config.UPDATE_INTERVAL)
         self.logger.info("[Submission {}]   >> done with {}!".format(self.id, self.id))
-        self.update_frontend("DONE")
-
-    def update_frontend(self, message="", results=None):
-        self.lock.acquire()
-        # Merge current message and results with previous ones
-        self.update_message = message
-        if results is not None:
-            for result in results:
-                found = False
-                for i in range(len(self.update_results)):
-                    if self.update_results[i]["id"] == result["id"]:
-                        self.update_results[i] = result
-                        found = True
-                        break
-                if not found:
-                    self.update_results.append(result)
-
-        # Update every UPDATE_INTERVAL seconds so we don't spam the frontend too much
-        # We're using time() instead of perf_counter() so we get a UNIX timestamp (with parts of seconds)
-        # This info helps figure out WHEN exactly (date + hour) the solution was graded.
-        if time() - self.update_timer > config.UPDATE_INTERVAL or self.update_message != "":
-            # Cancel delayed update if any pending
-            if self.update_scheduled_event is not None:
-                self.update_scheduled_event.cancel()
-                self.update_scheduled_event = None
-
-            data = {
-                "id": self.id,
-                "message": self.update_message,
-                "results": json.dumps(self.update_results),
-                "timestamp": time()
-            }
-            # We intentionally make the update synchronous so we're absolutely sure it is processed
-            # before we send the next one (the lock ensures this).
-            common.send_request("POST", self.update_url, data)
-            # Clear update_results so we don't send them with every update
-            # TODO: Do we lose the results if there is a race condition and the previous update wasn't applied?
-            self.update_results = []
-            # Finally update the timer until next update
-            self.update_timer = time()
-        else:
-            # Schedule a dummy update event if not already scheduled
-            if self.update_scheduled_event is None:
-                remaining_time = max(0.0, config.UPDATE_INTERVAL - (time() - self.update_timer))
-                self.update_scheduled_event = Timer(remaining_time, self.update_frontend)
-                self.update_scheduled_event.start()
-
-        self.lock.release()
-
-    def set_results(self, status):
-        results = []
-        next_id = 0
-        for test in self.tests:
-            results.append({
-                "id": next_id,
-                "position": test["position"],
-                "status": status.name,
-                "score": 0
-            })
-            next_id += 1
-        return results
+        self.updater.add_info("DONE", None, None)
 
     def create_sandbox_dir(self):
         try:
@@ -287,8 +221,7 @@ class Evaluator:
             test_futures.append([test, common.executor.submit(runner.run, next_id, test)])
             next_id += 1
 
-        for test_future in test_futures:
-            test, future = test_future
+        for test, future in test_futures:
             try:
                 # Wait for the test to be executed
                 future.result()
