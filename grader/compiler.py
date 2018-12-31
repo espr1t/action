@@ -13,7 +13,7 @@ import config
 
 class Compiler:
     COMPILE_LINE_CPP = "g++ -O2 -std=c++17 -w -s -static -o {path_executable} {path_source}"
-    COMPILE_LINE_JAVA = "javac -nowarn -d {path_executable} {path_source}"
+    COMPILE_LINE_JAVA = "javac -nowarn -d {path_executable_dir} {path_source}"
     COMPILE_LINE_PYTHON = "python3 -m pyflakes {path_source}"
 
     @staticmethod
@@ -93,10 +93,10 @@ class Compiler:
 
         # Javac expects directory, not complete path
         name_executable = os.path.basename(path_executable)
-        path_executable = os.path.dirname(path_executable)
+        path_executable_dir = os.path.dirname(path_executable)
         class_name = os.path.basename(path_source).replace(".java", "")
 
-        command = Compiler.COMPILE_LINE_JAVA.format(path_executable=path_executable, path_source=path_source)
+        command = Compiler.COMPILE_LINE_JAVA.format(path_executable_dir=path_executable_dir, path_source=path_source)
         exit_code, stdout_output, stderr_output, compilation_time = Compiler.run_command(command)
 
         if compilation_time > config.MAX_COMPILATION_TIME:
@@ -110,10 +110,9 @@ class Compiler:
             copyfile(path_source, path_source_new)
 
             # Let's try this again...
-            command = Compiler.COMPILE_LINE_JAVA.format(path_executable=path_executable, path_source=path_source_new)
+            command = Compiler.COMPILE_LINE_JAVA.format(
+                path_executable_dir=path_executable_dir, path_source=path_source_new)
             exit_code, stdout_output, stderr_output, compilation_time = Compiler.run_command(command)
-            # Remove temporary file
-            os.remove(path_source_new)
 
         if stderr_output != "":
             return "Compilation error: " + stderr_output
@@ -124,33 +123,20 @@ class Compiler:
         if exit_code != 0:
             return "Compilation exited with a non-zero exit code: {}".format(exit_code)
 
-        # We need to be in the sandbox dir to create the class file
-        working_dir = os.getcwd()
-        os.chdir(path_executable)
-
-        # Create a jar with the compiled class file
-        class_file = class_name + ".class"
-
+        # Create a jar with the compiled class file(s)
         # If there is no class file, there was some problem with the compilation (e.g. empty source)
-        if os.path.exists(class_file):
-            manifest_file = "manifest.mf"
-            jar_file = name_executable
+        if os.path.exists(os.path.join(path_executable_dir, class_name + ".class")):
+            manifest_file = os.path.join(path_executable_dir, "manifest.mf")
+            jar_file = os.path.join(path_executable_dir, name_executable)
 
             with open(manifest_file, "wt") as manifest:
                 manifest.write("Manifest-version: 1.0\n")
                 manifest.write("Main-Class: {}\n".format(class_name))
 
-            command = "jar cfm {} {} *.class".format(jar_file, manifest_file)
+            command = "jar cfm {} {} -C {}/ .".format(jar_file, manifest_file, path_executable_dir)
             exit_code, stdout_output, stderr_output, compilation_time = Compiler.run_command(command)
-
-            # Remove left-over files
-            os.remove(class_file)
-            os.remove(manifest_file)
         else:
             stderr_output = "Empty or buggy file provided."
-
-        # Revert to original working dir
-        os.chdir(working_dir)
 
         return stderr_output
 

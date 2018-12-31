@@ -64,27 +64,28 @@ def create_response(status, message, data=None):
 def send_request(method, url, data=None):
     username = config.AUTH_USERNAME
     password = config.AUTH_PASSWORD
+    logger = logging.getLogger("commn")
+
     response = None
-    if method == "GET":
-        response = requests.get(url, data, auth=(username, password), stream=True)
-    elif method == "POST":
-        response = requests.post(url, data, auth=(username, password))
-    else:
-        logger = logging.getLogger("commn")
-        logger.error("Could not send request: unsupported request method '{}'!".format(method))
-    if response.status_code != requests.codes.ok:
-        logger = logging.getLogger("commn")
-        logger.error("Could not complete request to {}: got response code {}!".format(url, response.status_code))
+    try:
+        if method == "GET":
+            response = requests.get(url, data, auth=(username, password), stream=True)
+        elif method == "POST":
+            response = requests.post(url, data, auth=(username, password))
+        else:
+            logger.error("Could not send request: unsupported request method '{}'!".format(method))
+        if response.status_code != requests.codes.ok:
+            logger.error("Could not complete request to {}: got response code {}!".format(url, response.status_code))
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError) as ex:
+        logger.error("Could not complete request to {}: got exception {}".format(url, ex))
+
     return response
 
 
 def download_file(url, destination):
     response = send_request("GET", url)
     if response.status_code != 200:
-        logger = logging.getLogger("commn")
-        logger.error("Could not download file from URL {}: got response code '{}'!".format(url, response.status_code))
         raise RuntimeError("Got response code different than 200!")
-
     try:
         with open(destination, "wb") as file:
             # Write 1MB chunks from the file at a time

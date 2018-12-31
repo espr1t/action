@@ -226,8 +226,14 @@ class Runner:
         inp_file_path, out_file_path, sol_file_path, sandbox, executable = self.prepare_run(test)
 
         # Open the input and output files
-        inp_file = open(inp_file_path, "rt")
-        out_file = open(out_file_path, "wt")
+        try:
+            inp_file = open(inp_file_path, "rt")
+            out_file = open(out_file_path, "wt")
+        except OSError as ex:
+            self.logger.error("[Submission {}] Could not open file! Got exception: {}".format(self.evaluator.id, ex))
+            results[0]["status"] = TestStatus.INTERNAL_ERROR
+            self.evaluator.updater.add_info("", results)
+            return
 
         # Execute the solution
         result = self.exec_solution(sandbox, executable, inp_file, out_file)
