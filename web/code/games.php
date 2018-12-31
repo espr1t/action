@@ -834,9 +834,9 @@ class GamesPage extends Page {
         while (true) {
             $content = '';
             if ($problem->type == 'game') {
-                $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+                $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, '');
             } else if ($problem->type == 'relative') {
-                $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
+                $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, '');
             }
 
             if ($content != $lastContent) {
