@@ -134,16 +134,20 @@ class Grader {
             exit();
         }
 
-        // If already updated, skip it
-        // TODO: This logic still imposes some risk of a race condition (between this check and the updateSubmit() call)
+        // If already updated, skip this update
+        // NOTE: This logic still imposes some small risk of a race condition
+        // (between this check and the updateSubmit() call bellow)
         if ($submit->graded > $timestamp) {
             error_log(sprintf('Skipping update: requested update for %f, but already at %f.',
                     $timestamp, $submit->graded));
-            return;
+            exit();
         }
+        // Update the timestamp of the latest submit
         $submit->graded = $timestamp;
-        $submit->message = $message;
+        $brain = new Brain();
+        $brain->updateSubmit($submit);
 
+        $submit->message = $message;
         $problem = Problem::get($submit->problemId);
         foreach ($results as $result) {
             // If a game and the match is already played, update the scoreboard and its info in the database
@@ -158,7 +162,6 @@ class Grader {
         $submit->status = $submit->calcStatus();
 
         // Save the updated submit info in the database
-        $brain = new Brain();
         $brain->updateSubmit($submit);
 
         // Update Pending and Latest lists if the submission is not hidden

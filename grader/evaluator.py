@@ -122,9 +122,6 @@ class Evaluator:
             return
 
         # Finished with this submission
-        # Sleep a bit so we decrease chance of overwriting last update (due to network race condition)
-        # TODO: Fix this by requiring the update to be acknowledged (response code from the POST)
-        sleep(config.UPDATE_INTERVAL)
         self.logger.info("[Submission {}]   >> done with {}!".format(self.id, self.id))
         self.updater.add_info("DONE", None, None)
 
@@ -215,22 +212,19 @@ class Evaluator:
         runner = Runner(self)
         errors = ""
 
-        next_id = 0
         test_futures = []
-        for test in self.tests:
-            test_futures.append([test, common.executor.submit(runner.run, next_id, test)])
-            next_id += 1
+        for result_id in range(len(self.tests)):
+            test_futures.append([self.tests[result_id],
+                                 common.executor.submit(runner.run, result_id, self.tests[result_id])])
 
         for test, future in test_futures:
             try:
                 # Wait for the test to be executed
                 future.result()
-            except ValueError as ex:
-                errors += "Internal error on test " + test["inpFile"] + "(" + test["inpHash"] + "): " + str(ex)
-                self.logger.error("[Submission {}] {}".format(self.id, str(ex)))
-                break
             except Exception as ex:
+                errors += "Internal error on test " + test["inpFile"] + "(" + test["inpHash"] + "): " + str(ex)
                 self.logger.error("[Submission {}] Got exception: {}".format(self.id, str(ex)))
+                break
 
         self.logger.info("[Submission {}]    -- executed {} tests in {:.3f}s.".format(
             self.id, len(self.tests), perf_counter() - start_time))
@@ -241,7 +235,7 @@ class Evaluator:
         runner = Runner(self)
         errors = ""
 
-        next_id = 0
+        result_id = 0
         for match in self.matches:
             self.logger.info("[Submission {}]     -- running game {} vs {}...".format(
                 self.id, match["player_one_name"], match["player_two_name"]))
@@ -266,18 +260,18 @@ class Evaluator:
             test_futures = []
             for test in self.tests:
                 # Play forward game
-                future = common.executor.submit(runner.play, next_id, test, self.tester,
+                future = common.executor.submit(runner.play, result_id, test, self.tester,
                         match["player_one_id"], match["player_one_name"], self.path_executable,
                         match["player_two_id"], match["player_two_name"], opponent_path_executable)
                 test_futures.append([test, future])
-                next_id += 1
+                result_id += 1
 
                 # Play also reversed game (first player as second) so it is fair
-                future = common.executor.submit(runner.play, next_id, test, self.tester,
+                future = common.executor.submit(runner.play, result_id, test, self.tester,
                         match["player_two_id"], match["player_two_name"], opponent_path_executable,
                         match["player_one_id"], match["player_one_name"], self.path_executable)
                 test_futures.append([test, future])
-                next_id += 1
+                result_id += 1
 
             for test_future in test_futures:
                 test, future = test_future

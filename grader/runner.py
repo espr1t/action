@@ -60,11 +60,11 @@ class Runner:
         output.replace("\r", "")
         return output
 
-    def play(self, run_id, test, tester, player_one_id, player_one_name, player_one_executable,
-                                         player_two_id, player_two_name, player_two_executable):
+    def play(self, result_id, test, tester, player_one_id, player_one_name, player_one_executable,
+                                            player_two_id, player_two_name, player_two_executable):
         # Prepare the run input and output data
-        self.logger.info("[Submission {}]       ++ test {}: {} vs {} (run_id = {})...".format(
-                self.evaluator.id, test["position"], player_one_name, player_two_name, run_id))
+        self.logger.info("[Submission {}]       ++ test {}: {} vs {} (result_id = {})...".format(
+                self.evaluator.id, test["position"], player_one_name, player_two_name, result_id))
 
         inp_file_name, _, _, sandbox, _ = self.prepare_run(test)
 
@@ -193,7 +193,7 @@ class Runner:
 
         # Update the frontend
         results = [{
-            "id": run_id,
+            "id": result_id,
             "position": test["position"],
             "status": TestStatus.ACCEPTED.name,
             "message": message,
@@ -210,10 +210,10 @@ class Runner:
         self.evaluator.updater.add_info("", results)
         return
 
-    def run(self, run_id, test):
+    def run(self, result_id, test):
         # Update the frontend that we are running this test
         results = [{
-            "id": run_id,
+            "id": result_id,
             "position": test["position"],
             "status": TestStatus.TESTING.name,
             "score": 0
@@ -256,7 +256,7 @@ class Runner:
 
         # Update the frontend once again that the testing has been completed (along with TL, ML, and score this time)
         results = [{
-            "id": run_id,
+            "id": result_id,
             "position": test["position"],
             "status": result.status.name,
             "error_message": result.error_message,
