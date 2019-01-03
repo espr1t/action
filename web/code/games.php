@@ -830,8 +830,11 @@ class GamesPage extends Page {
     }
 
     private function getSubmitUpdates($problem, $submitId) {
+        $UPDATE_DELAY = 500000; // 0.5s (in microseconds)
+        $MAX_UPDATES = 180 * 1000000 / $UPDATE_DELAY; // 180 seconds
+
         $lastContent = '';
-        while (true) {
+        for ($updateId = 0; $updateId < $MAX_UPDATES; $updateId++) {
             $content = '';
             if ($problem->type == 'game') {
                 $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, '');
@@ -839,7 +842,7 @@ class GamesPage extends Page {
                 $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, '');
             }
 
-            if ($content != $lastContent) {
+            if (strcmp($content, $lastContent) != 0) {
                 sendServerEventData('content', $content);
                 $lastContent = $content;
             }
@@ -849,10 +852,14 @@ class GamesPage extends Page {
                          strpos($content, 'fa-question-circle') == false;
             if ($allTested) {
                 terminateServerEventStream();
-                return;
+                exit();
             }
-            // Sleep for 0.5 seconds until next check for changes
-            sleep(0.5);
+            // Stop updating if connection was terminated by the client
+            if ($updateId % 10 == 0 && !checkServerEventClient()) {
+                exit();
+            }
+            // Sleep until next check for changes
+            usleep($UPDATE_DELAY);
         }
     }
 

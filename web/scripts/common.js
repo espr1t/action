@@ -480,10 +480,18 @@ function subscribeForUpdates(url) {
                 document.getElementById('action-form-content').innerHTML = data['content'];
             }
             if (data.hasOwnProperty('eos')) {
-                eventSource.close();
                 console.log('Closing server-sent events connection.');
+                eventSource.close();
             }
         }, false);
+        eventSource.addEventListener('error', function() {
+            console.log('Encountered an SSE error. Closing the connection...');
+            eventSource.close();
+        }, false);
+        window.addEventListener('beforeunload', function() {
+            console.log('Closing server-sent events connection.');
+            eventSource.close();
+        });
     } else {
         console.log('Cannot subscribe to automatic updates. Use page refresh instead.');
     }

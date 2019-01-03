@@ -473,10 +473,13 @@ class ProblemsPage extends Page {
     }
 
     private function getSubmitUpdates($problem, $submitId) {
+        $UPDATE_DELAY = 200000; // 0.2s (in microseconds)
+        $MAX_UPDATES = 180 * 1000000 / $UPDATE_DELAY; // 180 seconds
+
         $lastContent = '';
-        while (true) {
+        for ($updateId = 0; $updateId < $MAX_UPDATES; $updateId++) {
             $content = $this->getSubmitInfoBoxContent($problem, $submitId, '');
-            if ($content != $lastContent) {
+            if (strcmp($content, $lastContent) != 0) {
                 sendServerEventData('content', $content);
                 $lastContent = $content;
             }
@@ -485,8 +488,12 @@ class ProblemsPage extends Page {
                 terminateServerEventStream();
                 exit();
             }
-            // Sleep for 0.2 seconds until next check for changes
-            usleep(200000);
+            // Stop updating if connection was terminated by the client
+            if ($updateId % 10 == 0 && !checkServerEventClient()) {
+                exit();
+            }
+            // Sleep until next check for changes
+            usleep($UPDATE_DELAY);
         }
     }
 

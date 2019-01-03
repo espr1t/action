@@ -4,6 +4,7 @@ $sse_headers_sent = false;
 
 // SSE Events (https://www.html5rocks.com/en/tutorials/eventsource/basics/)
 function sendServerEventData($label, $message) {
+    // If this is the first response, send the headers
     if (!$GLOBALS['sse_headers_sent']) {
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
@@ -11,6 +12,9 @@ function sendServerEventData($label, $message) {
         // header('Transfer-Encoding: chunked');
         // header('X-Accel-Buffering: no');
         $GLOBALS['sse_headers_sent'] = true;
+
+        // Also release the session lock so the user can make other requests
+        session_write_close();
     }
 
     $data = json_encode(array($label => $message));
@@ -18,6 +22,12 @@ function sendServerEventData($label, $message) {
     echo 'data: ' . $data . $junk . PHP_EOL . PHP_EOL;
     ob_flush();
     flush();
+}
+
+function checkServerEventClient() {
+    // Please note we need to send something in order to see that the client has disconnected
+    sendServerEventData('heartbeat', 'PING');
+    return !connection_aborted();
 }
 
 function terminateServerEventStream() {
