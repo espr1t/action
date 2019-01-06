@@ -1,4 +1,5 @@
 <?php
+require_once('actions/print_pdf.php');
 require_once('db/brain.php');
 require_once('entities/problem.php');
 require_once('entities/submit.php');
@@ -1212,6 +1213,8 @@ class GamesPage extends Page {
                 $content = $this->getDemo($problem);
             } else if (isset($_GET['print'])) {
                 $content = $this->getPrintStatement($problem);
+            } else if (isset($_GET['pdf'])) {
+                return_pdf_file($problem);
             }
             return $content;
         }

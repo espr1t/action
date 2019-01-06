@@ -4,15 +4,8 @@ require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../entities/grader.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
-$problem = null;
-if (isset($_GET['problemId'])) {
-    $problem = Problem::get($_GET['problemId']);
-}
-if (isset($_GET['game'])) {
-    $problem = getGameByName($_GET['game']);
-}
-if ($problem != null) {
-    $problemName = 'action-' . getGameUrlName($problem->name);
+function return_pdf_file($problem) {
+    $problemName = 'action-' . getGameUrlName($problem->name) . '.pdf';
 
     // Get current page URI and replace pdf with print
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";

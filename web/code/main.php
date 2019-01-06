@@ -21,11 +21,6 @@ if (isset($_SESSION['messageType']) && isset($_SESSION['messageText'])) {
     unset($_SESSION['messageText']);
 }
 
-// Return a file (PDF) if requested
-if (isset($_GET['pdf']) && $_GET['pdf'] == true) {
-    require_once('actions/print_pdf.php');
-}
-
 switch ($_GET['page']) {
     case 'home':
         require_once('home.php');

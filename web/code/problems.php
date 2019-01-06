@@ -1,4 +1,5 @@
 <?php
+require_once('actions/print_pdf.php');
 require_once('db/brain.php');
 require_once('entities/problem.php');
 require_once('entities/submit.php');
@@ -6,6 +7,7 @@ require_once('config.php');
 require_once('common.php');
 require_once('page.php');
 require_once('events.php');
+
 
 class ProblemsPage extends Page {
     private $problem;
@@ -601,6 +603,8 @@ class ProblemsPage extends Page {
                 $content .= $this->getTagsBox($problem);
             } else if (isset($_GET['print'])) {
                 $content = $this->getPrintStatement($problem);
+            } else if (isset($_GET['pdf'])) {
+                return_pdf_file($problem);
             }
             return $content;
         }
