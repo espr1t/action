@@ -96,7 +96,7 @@ $STATUS_DISPLAY_NAME = array(
 $SUPPORTED_LANGUAGES = [
     'cpp' => 'C++',
     'java' => 'Java',
-    'python' => 'Python'
+    'py' => 'Python'
 ];
 
 // Problems
