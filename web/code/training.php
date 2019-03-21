@@ -910,7 +910,6 @@ class TrainingPage extends Page {
 
     private function getSection($key) {
         $brain = new Brain();
-        $submits = $brain->getAllSubmits('AC');
         $topic = $brain->getTopic($key);
         $problemIds = explode(',', $topic['problems']);
 
@@ -919,7 +918,15 @@ class TrainingPage extends Page {
         $problemClass = new ProblemsPage($this->user);
         foreach ($problemIds as $problemId) {
             $problemInfo = $brain->getProblem($problemId);
-            $problemSubmits = $brain->getProblemSubmits($problemId, $GLOBALS['STATUS_ACCEPTED']);
+            $problemAllACSubmits = $brain->getProblemSubmits($problemId, $GLOBALS['STATUS_ACCEPTED']);
+            $problemSubmits = array();
+            $problemAuthors = array();
+            foreach ($problemAllACSubmits as $submit) {
+                if (!in_array($submit['userId'], $problemAuthors)) {
+                    array_push($problemSubmits, $submit);
+                    array_push($problemAuthors, $submit['userId']);
+                }
+            }
             $sectionProblems .= $problemClass->getProblemBox($problemInfo, $problemSubmits);
         }
         return $sectionInfo . $sectionProblems;
