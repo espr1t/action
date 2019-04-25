@@ -682,7 +682,7 @@ class TrainingPage extends Page {
             Всички задачи в темата ползват под един или друг вид meet-in-the-middle подхода, като ползват различни
             структури данни за "комбиниране" на двете части.
         ';
-        $problems = '80,207,79,3,11';
+        $problems = '80,207,79,3,11,257';
         $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
