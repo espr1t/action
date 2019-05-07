@@ -314,13 +314,13 @@ class GamesPage extends Page {
         $fullSubmitButton = '';
         $seeSubmissionsLink = '';
         $visualizerButton = '
-                    <a href="' . getGameLink($problem->name) . '/visualizer">
+                    <a href="' . getGameUrl($problem->name) . '/visualizer">
                         <input type="submit" value="Визуализатор" class="button button-color-blue button-large" title="Визуализатор на играта">
                     </a>
         ';
         $scoreboardButton = '
                     <br>
-                    <a href="' . getGameLink($problem->name) . '/scoreboard">
+                    <a href="' . getGameUrl($problem->name) . '/scoreboard">
                         <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на всички участници">
                     </a>
         ';
@@ -360,7 +360,7 @@ class GamesPage extends Page {
             // See previous submissions link
             $seeSubmissionsLink = '
                     <br>
-                    <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
+                    <a style="font-size: smaller;" href="' . getGameUrl($problem->name) . '/submits">Предадени решения</a>
             ';
         } else {
             $partSubmitButton = '
@@ -395,7 +395,7 @@ class GamesPage extends Page {
                 ' . $controlButtons . '
             </div>
             <div class="problem-stats-links">
-                <a href="' . getGameLink($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
+                <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
             </div>
         ';
     }
@@ -418,13 +418,13 @@ class GamesPage extends Page {
         $submitButton = '';
         $seeSubmissionsLink = '';
         $visualizerButton = '
-                    <a href="' . getGameLink($problem->name) . '/visualizer">
+                    <a href="' . getGameUrl($problem->name) . '/visualizer">
                         <input type="submit" value="Визуализатор" class="button button-color-blue button-large">
                     </a>
         ';
         $scoreboardButton = '
                     <br>
-                    <a href="' . getGameLink($problem->name) . '/scoreboard">
+                    <a href="' . getGameUrl($problem->name) . '/scoreboard">
                         <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на участниците.">
                     </a>
         ';
@@ -450,7 +450,7 @@ class GamesPage extends Page {
             // See previous submissions link
             $seeSubmissionsLink = '
                     <br>
-                    <a style="font-size: smaller;" href="' . getGameLink($problem->name) . '/submits">Предадени решения</a>
+                    <a style="font-size: smaller;" href="' . getGameUrl($problem->name) . '/submits">Предадени решения</a>
             ';
         } else {
             $submitButton = '
@@ -484,7 +484,7 @@ class GamesPage extends Page {
                 ' . $controlButtons . '
             </div>
             <div class="problem-stats-links">
-                <a href="' . getGameLink($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
+                <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
             </div>
         ';
     }
@@ -603,7 +603,7 @@ class GamesPage extends Page {
                 }
                 $perTestStatus .= '
                     <td>
-                        ' . ($showLink ? '<a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '/replays/' . $result['id'] .'">' : '') . '
+                        ' . ($showLink ? '<a href="' . getGameUrl($problem->name) . '/submits/' . $submit->id . '/replays/' . $result['id'] .'">' : '') . '
                             <i class="' . $classes . '" title="' . $message . '"></i>
                         ' . ($showLink ? '</a>' : '') . '
                     </td>
@@ -921,7 +921,7 @@ class GamesPage extends Page {
     }
 
     private function getSubmitInfoBox($problem, $submitId) {
-        $redirectUrl = getGameLink($problem->name) . '/submits';
+        $redirectUrl = getGameUrl($problem->name) . '/submits';
         if (isset($_SESSION['queueShortcut']))
             $redirectUrl = '/queue';
 
@@ -936,7 +936,7 @@ class GamesPage extends Page {
         } else if ($problem->type == 'relative') {
             $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
             if ($problem->name != 'Airports') {
-                $updatesUrl = getGameLink($problem->name) . '/submits/' . $submitId . '/updates';
+                $updatesUrl = getGameUrl($problem->name) . '/submits/' . $submitId . '/updates';
                 return '
                     <script>
                         showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
@@ -969,7 +969,7 @@ class GamesPage extends Page {
         $submitList = '';
         for ($i = 0; $i < count($submits); $i = $i + 1) {
             $submit = $submits[$i];
-            $submitLink = '<a href="' . getGameLink($problem->name) . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
+            $submitLink = '<a href="' . getGameUrl($problem->name) . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
             $submitList .= '
                 <tr>
                     <td>' . ($i + 1) . '</td>
@@ -997,7 +997,7 @@ class GamesPage extends Page {
             </table>
         ';
 
-        $returnUrl = getGameLink($problem->name);
+        $returnUrl = getGameUrl($problem->name);
 
         return '
             <script>
@@ -1015,7 +1015,7 @@ class GamesPage extends Page {
     }
 
     private function getReplay($problem, $submitId, $matchId) {
-        $returnUrl = getGameLink($problem->name) . '/submits/' . $submitId;
+        $returnUrl = getGameUrl($problem->name) . '/submits/' . $submitId;
 
         $match = Match::getById($matchId);
 
@@ -1089,7 +1089,7 @@ class GamesPage extends Page {
             $user = User::get($ranking[$pos]['user']);
             $submitId = $ranking[$pos]['submit'];
             if ($user->id == $this->user->id || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
-                $submitId = '<a href="' . getGameLink($problem->name) . '/submits/' . $ranking[$pos]['submit'] . '">' . $ranking[$pos]['submit'] . '</a>';
+                $submitId = '<a href="' . getGameUrl($problem->name) . '/submits/' . $ranking[$pos]['submit'] . '">' . $ranking[$pos]['submit'] . '</a>';
             }
 
             $shownTitle = $scoreIsFloat ? sprintf('%.9f', $ranking[$pos]['score']) : '';
@@ -1123,7 +1123,7 @@ class GamesPage extends Page {
             </div>
         ';
 
-        $returnUrl = getGameLink($problem->name);
+        $returnUrl = getGameUrl($problem->name);
         return '
             <script>
                 showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
@@ -1193,7 +1193,7 @@ class GamesPage extends Page {
                 $content .= $this->getScoreboard($problem);
             } else if (isset($_GET['submits'])) {
                 if ($this->user->id == -1) {
-                    redirect(getGameLink($problem->name), 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
+                    redirect(getGameUrl($problem->name), 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
                 } else if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {

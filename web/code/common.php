@@ -127,8 +127,20 @@ function getGameUrlName($problemName) {
     return $urlName;
 }
 
-function getGameLink($problemName) {
+function getGameUrl($problemName) {
     return '/games/' . getGameUrlName($problemName);
+}
+
+function getProblemUrl($problemId) {
+    return '/problems/' . $problemId;
+}
+
+function getGameLink($problemName) {
+    return '<a href="' . getGameUrl($problemName) . '"><div class="problem">' . $problemName . '</div></a>';
+}
+
+function getProblemLink($problemId, $problemName) {
+    return '<a href="' . getproblemUrl($problemId) . '"><div class="problem">' . $problemName . '</div></a>';
 }
 
 function getGameByName($name) {
@@ -148,9 +160,6 @@ function getUserLink($userName, $unofficial=array()) {
     return '<a href="/users/' . $userName . '"><div class="user">' . $userName . $suffix . '</div></a>';
 }
 
-function getProblemLink($problemId, $problemName) {
-    return '<a href="/problems/' . $problemId . '"><div class="problem">' . $problemName . '</div></a>';
-}
 
 function userInfo($user) {
     if ($user->username != 'anonymous') {

@@ -103,7 +103,7 @@ class ProfilePage extends Page {
 
         foreach ($problems as $problem) {
             $tags = explode(',', $problem['tags']);
-            foreach ($tags as $tag) {
+            foreach ($tags as $tag) if ($tag != '') {
                 $totalTags[$tag] += 1;
                 if (in_array($problem['id'], $solved)) {
                     $solvedTags[$tag] += 1;

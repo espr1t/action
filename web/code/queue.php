@@ -37,6 +37,26 @@ class QueuePage extends Page {
             if (in_array($entry['problemId'], $hidden) && !canSeeProblem($this->user, false, $entry['problemId']))
                 continue;
 
+            // The ID of the submit with possibly a link if accessible by the user
+            $submitEl = $entry['submitId'];
+            if ($this->user->id == $entry['userId'] || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
+                $submitLink = getProblemUrl($entry['problemId']) . '/submits/' . $entry['submitId'];
+                if (in_array(intval($entry['problemId']), $games)) {
+                    $submitLink = getGameUrl($entry['problemName']) . '/submits/' . $entry['submitId'];
+                }
+                $submitEl = '<a href="' . $submitLink . '">' . $entry['submitId'] . '</a>';
+            }
+
+            // The user's nickname with a link to his/her profile
+            $userEl = getUserLink($entry['userName']);
+
+            // The problem's name with a link to the problem
+            $problemEl = getProblemLink($entry['problemId'], $entry['problemName']);
+            if (in_array(intval($entry['problemId']), $games)) {
+                $problemEl = getGameLink($entry['problemName']);
+            }
+
+            // Optional regrade button shown to privileged users
             $regradeSubmission = '';
             if ($this->user->access >= $GLOBALS['ACCESS_REGRADE_SUBMITS']) {
                 $regradeSubmission = '
@@ -48,17 +68,11 @@ class QueuePage extends Page {
                 ';
             }
 
-            $submitLink = '/problems/' . $entry['problemId'] . '/submits/' . $entry['submitId'];
-            $problemLink = getProblemLink($entry['problemId'], $entry['problemName']);
-            if (in_array(intval($entry['problemId']), $games)) {
-                $submitLink = getGameLink($entry['problemName']) . '/submits/' . $entry['submitId'];
-                $problemLink = '<a href="' . getGameLink($entry['problemName']) . '"><div class="problem">' . $entry['problemName'] . '</div></a>';
-            }
             $listEntry = '
                 <tr' . (in_array($entry['problemId'], $hidden) ? ' style="opacity: 0.33"' : '') . '>
-                    <td><a href="' . $submitLink . '">' . $entry['submitId'] . '</a></td>
-                    <td>' . getUserLink($entry['userName']) . '</td>
-                    <td>' . $problemLink . '</td>
+                    <td>' . $submitEl . '</td>
+                    <td>' . $userEl . '</td>
+                    <td>' . $problemEl . '</td>
                     <td title="' . $entry['time'] . '">' . explode(' ', $entry['time'])[1] . '</td>
                     <td>' . intval($entry['progress'] * 100) . '%</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$entry['status']] . '</td>
