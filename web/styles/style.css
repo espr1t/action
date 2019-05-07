@@ -210,14 +210,12 @@ div.footer {
 }
 
 div.footer-left {
-    display: inline-block;
     float: left;
     width: 6.25rem;
     text-align: left;
 }
 
 div.footer-middle {
-    display: inline-block;
     float: left;
     font-size: 0.6875rem;
     width: 37.5rem;
@@ -225,7 +223,6 @@ div.footer-middle {
 }
 
 div.footer-right {
-    display: inline-block;
     float: left;
     width: 6.25rem;
     text-align: right;
@@ -792,7 +789,6 @@ div.larger-box {
 }
 
 div.action-form-close {
-    display: inline-block;
     position: relative;
     float: right;
     right: -1.75rem;
@@ -881,7 +877,6 @@ div.message-text {
 }
 
 div.message-close {
-    display: inline-block;
     float: right;
     color: #FFFFFF;
     margin-left: 0.5rem;
