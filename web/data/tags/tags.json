@@ -1,0 +1,567 @@
+[
+    {
+        "key": "trivial",
+        "name": "Trivial",
+        "search_prefixes": ["trivial", "very easy"],
+        "search_translations": ["много проста", "много лесна", "тривиална", "елементарна"]
+    },
+    {
+        "key": "easy",
+        "name": "Easy",
+        "search_prefixes": ["easy"],
+        "search_translations": ["проста", "лесна"]
+    },
+    {
+        "key": "medium",
+        "name": "Medium",
+        "search_prefixes": ["medium"],
+        "search_translations": ["средно сложна", "средно трудна", "средна"]
+    },
+    {
+        "key": "hard",
+        "name": "Hard",
+        "search_prefixes": ["hard", "complex"],
+        "search_translations": ["сложна", "трудна"]
+    },
+    {
+        "key": "brutal",
+        "name": "Brutal",
+        "search_prefixes": ["brutal", "very hard"],
+        "search_translations": ["много сложна", "много трудна", "брутална"]
+    },
+    {
+        "key": "game",
+        "name": "Game",
+        "search_prefixes":["game", "games"],
+        "search_translations": ["игра", "игри"]
+    },
+    {
+        "key": "relative",
+        "name": "Relative Scoring",
+        "search_prefixes": ["relative scoring"],
+        "search_translations": ["релативно оценяване", "релативна"]
+    },
+    {
+        "key": "interview",
+        "name": "Interview Problem",
+        "search_prefixes": ["interview problem"],
+        "search_translations": ["интервюта", "задачи от интервюта"]
+    },
+    {
+        "key": "implementation",
+        "name": "Implementation",
+        "search_prefixes": ["implementation"],
+        "search_translations": ["имплементационна"]
+    },
+    {
+        "key": "tricky",
+        "name": "Tricky",
+        "search_prefixes": ["tricky", "corner cases"],
+        "search_translations": ["измамна", "лукава", "подвеждаща", "частни случаи"]
+    },
+    {
+        "key": "trololo",
+        "name": "Trololo",
+        "search_prefixes": ["trololo", "troll problem"],
+        "search_translations": ["тролска", "трололо"]
+    },
+    {
+        "key": "recursion",
+        "name": "Recursion",
+        "search_prefixes": ["recursion"],
+        "search_translations": ["рекурсия"]
+    },
+    {
+        "key": "backtrack",
+        "name": "Backtrack",
+        "search_prefixes": ["backtrack"],
+        "search_translations": ["бектрек", "търсене с връщане"]
+    },
+    {
+        "key": "bruteforce",
+        "name": "Bruteforce",
+        "search_prefixes": ["bruteforce", "brute force"],
+        "search_translations": ["брутфорс", "изчерпване"]
+    },
+    {
+        "key": "permutations",
+        "name": "Permutations",
+        "search_prefixes": ["permutations"],
+        "search_translations": ["пермутации"]
+    },
+    {
+        "key": "greedy",
+        "name": "Greedy",
+        "search_prefixes": ["greedy algorithm"],
+        "search_translations": ["грийди", "алчен алгоритъм", "алчна стратегия"]
+    },
+    {
+        "key": "sorting",
+        "name": "Sorting",
+        "search_prefixes": ["sorting"],
+        "search_translations": ["сортиране"]
+    },
+    {
+        "key": "counting_sort",
+        "name": "Counting Sort",
+        "search_prefixes": ["counting sort"],
+        "search_translations": ["сортиране чрез броене"]
+    },
+    {
+        "key": "quick_sort",
+        "name": "Quick Sort",
+        "search_prefixes": ["quicksort", "quick sort"],
+        "search_translations": ["бързо сортиране", "куиксорт"]
+    },
+    {
+        "key": "merge_sort",
+        "name": "Merge Sort",
+        "search_prefixes": ["mergesort", "merge sort"],
+        "search_translations": ["сортиране чрез сливане", "мърджсорт"]
+    },
+    {
+        "key": "heap_sort",
+        "name": "Heap Sort",
+        "search_prefixes": ["heapsort", "heap sort"],
+        "search_translations": ["пирамидално сортиране", "хийпсорт"]
+    },
+    {
+        "key": "math",
+        "name": "Math",
+        "search_prefixes": ["math"],
+        "search_translations": ["математика"]
+    },
+    {
+        "key": "geometry",
+        "name": "Geometry",
+        "search_prefixes": ["geometry"],
+        "search_translations": ["геометрия"]
+    },
+    {
+        "key": "primes",
+        "name": "Prime Numbers",
+        "search_prefixes": ["prime numbers", "primes"],
+        "search_translations": ["прости числа"]
+    },
+    {
+        "key": "sieve",
+        "name": "Sieve of Eratosthenes",
+        "search_prefixes": ["eratosthenes' sieve", "sieve of eratosthenes"],
+        "search_translations": ["сито на ератостен"]
+    },
+    {
+        "key": "gcd",
+        "name": "Greatest Common Divisor",
+        "search_prefixes": ["gcd", "greatest common divisor"],
+        "search_translations": ["нод", "най-голям общ делител"]
+    },
+    {
+        "key": "lcm",
+        "name": "Least Common Multiple",
+        "search_prefixes": ["lcm", "least common multiple", "lowest common multiple"],
+        "search_translations": ["нок", "най-малко общо кратно"]
+    },
+    {
+        "key": "fastexp",
+        "name": "Fast Exponentiation",
+        "search_prefixes": ["fast exponentiation", "quick exponentiation", "exponentiation by squaring"],
+        "search_translations": ["бързо вдигане на степен", "вдигане на степен", "бързо степенуване"]
+    },
+    {
+        "key": "combinatorics",
+        "name": "Combinatorics",
+        "search_prefixes": ["combinatorics"],
+        "search_translations": ["комбинаторика"]
+    },
+    {
+        "key": "probability",
+        "name": "Probability",
+        "search_prefixes": ["probability", "chance"],
+        "search_translations": ["вероятности"]
+    },
+    {
+        "key": "moddiv",
+        "name": "Modular Division",
+        "search_prefixes": ["modular division", "moddiv"],
+        "search_translations": ["деление по модул"]
+    },
+    {
+        "key": "bigints",
+        "name": "Big Integers",
+        "search_prefixes": ["big integers", "long numbers", "big numbers"],
+        "search_translations": ["дълги числа"]
+    },
+    {
+        "key": "divconq",
+        "name": "Divide & Conquer",
+        "search_prefixes": ["divide and conquer"],
+        "search_translations": ["разделяй и владей"]
+    },
+    {
+        "key": "binary_search",
+        "name": "Binary Search",
+        "search_prefixes": ["binary search", "bsearch", "binsearch"],
+        "search_translations": ["двоично търсене", "бинарно търсене"]
+    },
+    {
+        "key": "ternary_search",
+        "name": "Tеrnary Search",
+        "search_prefixes": ["ternary search", "tsearch"],
+        "search_translations": ["троично търсене", "тернарно търсене"]
+    },
+    {
+        "key": "mitm",
+        "name": "Meet in the Middle",
+        "search_prefixes": ["meet-in-the-middle", "meet in the middle", "mitm"],
+        "search_translations": ["срещане в средата"]
+    },
+    {
+        "key": "stl",
+        "name": "STL",
+        "search_prefixes": ["standard template library", "stl"],
+        "search_translations": ["стандартна библиотека", "стл"]
+    },
+    {
+        "key": "dp",
+        "name": "Dynamic Programming",
+        "search_prefixes": ["dp", "dynamic programming"],
+        "search_translations": ["динамично оптимиране", "динамично програмиране"]
+    },
+    {
+        "key": "iterative_dp",
+        "name": "Iterative DP",
+        "search_prefixes": ["iterative dp", "iterative dynamic programming"],
+        "search_translations": ["итеративно динамично", "итеративно динамично оптимиране", "итеративно динамично програмиране"]
+    },
+    {
+        "key": "bitmask_dp",
+        "name": "Bitmask DP",
+        "search_prefixes": ["bitmask dp", "bitmask dynamic programming"],
+        "search_translations": ["динамично по битова маска", "динамично с битова маска", "динамично оптимиране по битова маска", "динамично програмиране по битова маска"]
+    },
+    {
+        "key": "inner_cycle_optimization",
+        "name": "Inner Cycle Optimization",
+        "search_prefixes": ["inner cycle optimization"],
+        "search_translations": ["оптимизация на вътрешния цикъл"]
+    },
+    {
+        "key": "game_theory",
+        "name": "Game Theory",
+        "search_prefixes": ["game theory", "nim", "sg", "sprague", "grundy numbers"],
+        "search_translations": ["теория на игрите", "ним"]
+    },
+    {
+        "key": "strings",
+        "name": "Strings",
+        "search_prefixes": ["strings"],
+        "search_translations": ["стрингове", "символни низове"]
+    },
+    {
+        "key": "hashing",
+        "name": "Hashing",
+        "search_prefixes": ["hashing"],
+        "search_translations": ["хеширане", "хешове"]
+    },
+    {
+        "key": "kmp",
+        "name": "Knuth-Morris-Pratt",
+        "search_prefixes": ["knuth-morris-pratt", "kmp"],
+        "search_translations": ["кнут-морис-прат", "алгоритъм на кнут-морис-прат", "кмп"]
+    },
+    {
+        "key": "aho_corasick",
+        "name": "Aho-Corasick",
+        "search_prefixes": ["aho-corasick"],
+        "search_translations": ["ахо-корасик", "алгоритъм на ахо-корасик"]
+    },
+    {
+        "key": "adhoc",
+        "name": "Ad-hoc",
+        "search_prefixes": ["ad-hoc"],
+        "search_translations": ["нестандартни"]
+    },
+    {
+        "key": "buckets",
+        "name": "Buckets",
+        "search_prefixes": ["buckets", "bucketing"],
+        "search_translations": ["бъкети", "кофи"]
+    },
+    {
+        "key": "sweep_line",
+        "name": "Sweep Line",
+        "search_prefixes": ["sweep line"],
+        "search_translations": ["метод на метлата", "помитаща права", "помитаща линия", "метод на помитащата права", "замитаща права"]
+    },
+    {
+        "key": "window",
+        "name": "Sliding Window",
+        "search_prefixes": ["sliding window", "window"],
+        "search_translations": ["плъзгащ се прозорец", "прозорец"]
+    },
+    {
+        "key": "randomized",
+        "name": "Randomized Algorithm",
+        "search_prefixes": ["randomized algorithm", "monte carlo algorithm"],
+        "search_translations": ["рандомизиран алгоритъм", "монте карло алгоритъм"]
+    },
+    {
+        "key": "bithacks",
+        "name": "Bitwise Operations",
+        "search_prefixes": ["bitwise operations", "bithacks"],
+        "search_translations": ["побитови операции"]
+    },
+    {
+        "key": "graphs",
+        "name": "Graphs",
+        "search_prefixes": ["graphs"],
+        "search_translations": ["графи"]
+    },
+    {
+        "key": "shortest_path",
+        "name": "Shortest Path",
+        "search_prefixes": ["shortest path"],
+        "search_translations": ["най-къс път"]
+    },
+    {
+        "key": "bfs",
+        "name": "Breadth-First Search",
+        "search_prefixes": ["breadth-first search", "bfs"],
+        "search_translations": ["търсене в ширина", "бфс"]
+    },
+    {
+        "key": "dfs",
+        "name": "Depth-First Search",
+        "search_prefixes": ["depth-first search", "dfs"],
+        "search_translations": ["търсене в дълбочина", "дфс"]
+    },
+    {
+        "key": "mst",
+        "name": "Minimal Spanning Tree",
+        "search_prefixes": ["minimal spanning tree", "spanning tree", "mst"],
+        "search_translations": ["минимално покриващо дърво", "покриващо дърво", "мст"]
+    },
+    {
+        "key": "dijkstra",
+        "name": "Dijkstra's Algorithm",
+        "search_prefixes": ["dijkstra's algorithm"],
+        "search_translations": ["алгоритъм на дейкстра", "дейкстра", "дийкстра"]
+    },
+    {
+        "key": "floyd",
+        "name": "Floyd's Algorithm",
+        "search_prefixes": ["floyd's algorithm"],
+        "search_translations": ["алгоритъм на флойд", "флойд"]
+    },
+    {
+        "key": "topsort",
+        "name": "Topological Sorting",
+        "search_prefixes": ["topological sorting", "topsort"],
+        "search_translations": ["топологично сортиране"]
+    },
+    {
+        "key": "graph_expansion",
+        "name": "Graph Expansion",
+        "search_prefixes": ["graph expansion", "expansion of the graph"],
+        "search_translations": ["разширяване на графа"]
+    },
+    {
+        "key": "scc",
+        "name": "Strongly-Connected Components",
+        "search_prefixes": ["strongly-connected components", "connected components", "scc"],
+        "search_translations": ["силно-свързани компоненти", "свързани компоненти"]
+    },
+    {
+        "key": "artic_points",
+        "name": "Articulation Points",
+        "search_prefixes": ["articulation points", "cut vertices"],
+        "search_translations": ["артикулационни точки"]
+    },
+    {
+        "key": "bridges",
+        "name": "Graph Bridges",
+        "search_prefixes": ["bridges", "graph bridges", "cut edges"],
+        "search_translations": ["мостове в граф"]
+    },
+    {
+        "key": "lca",
+        "name": "Lowest Common Ancestor",
+        "search_prefixes": ["lowest common ancestor", "common ancestor", "lca"],
+        "search_translations": ["най-близък общ родител", "най-нисък общ родител"]
+    },
+    {
+        "key": "eulerian_path",
+        "name": "Eulerian Path",
+        "search_prefixes": ["eulerian path", "eulerian tour"],
+        "search_translations": ["ойлеров път", "ойлеров цикъл", "ойлеров тур"]
+    },
+    {
+        "key": "matrix_exp",
+        "name": "Matrix Exponentiation",
+        "search_prefixes": ["matrix exponentiation"],
+        "search_translations": ["вдигане на матрица на степен", "матрици"]
+    },
+    {
+        "key": "2sat",
+        "name": "2-SAT",
+        "search_prefixes": ["2-sat", "2sat", "sat"],
+        "search_translations": ["удовлетворяване на булеви изрази", "булеви изрази"]
+    },
+    {
+        "key": "matching",
+        "name": "Bipartite Matching",
+        "search_prefixes": ["bipartite matching", "matching"],
+        "search_translations": ["мачинг", "двойкосъчетание", "максимално двойкосъчетание", "оптимално двойкосъчетание", "сдвояване"]
+    },
+    {
+        "key": "flow",
+        "name": "Network Flow",
+        "search_prefixes": ["network flow", "flow"],
+        "search_translations": ["флоу", "поток в граф", "потоци"]
+    },
+    {
+        "key": "cut",
+        "name": "Minimum Cut",
+        "search_prefixes": ["minimum cut", "min-cut"],
+        "search_translations": ["мин-кът", "минимален разрез", "разрез"]
+    },
+    {
+        "key": "mcmf",
+        "name": "Min-Cost Max-Flow",
+        "search_prefixes": ["mcmf", "min-cost max flow", "min-cost flow", "minimum cost flow"],
+        "search_translations": ["поток с минимална цена", "максимален поток с минимална цена"]
+    },
+    {
+        "key": "hungarian",
+        "name": "Hungarian Algorithm",
+        "search_prefixes": ["hungarian algorithm", "kuhn's algorithm", "weighted bipartite matching", "assignment problem"],
+        "search_translations": ["унгарски алгоритъм", "алгоритъм на Кун"]
+    },
+    {
+        "key": "np",
+        "name": "NP Problems",
+        "search_prefixes": ["np-complete", "np-hard", "np complete", "np hard", "np problems"],
+        "search_translations": ["неполиномиални задачи"]
+    },
+    {
+        "key": "data_structures",
+        "name": "Data Structures",
+        "search_prefixes": ["data structures"],
+        "search_translations": ["структури данни"]
+    },
+    {
+        "key": "prefix_array",
+        "name": "Prefix Array",
+        "search_prefixes": ["prefix array"],
+        "search_translations": ["префиксен масив"]
+    },
+    {
+        "key": "list",
+        "name": "List",
+        "search_prefixes": ["list", "linked list"],
+        "search_translations": ["списък", "свързан списък"]
+    },
+    {
+        "key": "stack",
+        "name": "Stack",
+        "search_prefixes": ["stack"],
+        "search_translations": ["стек"]
+    },
+    {
+        "key": "queue",
+        "name": "Queue",
+        "search_prefixes": ["queue"],
+        "search_translations": ["опашка"]
+    },
+    {
+        "key": "deque",
+        "name": "Double-ended Queue",
+        "search_prefixes": ["deque", "double-ended queue"],
+        "search_translations": ["двустранна опашка", "дек"]
+    },
+    {
+        "key": "disjoint_set_forest",
+        "name": "Disjoint-Set Forest",
+        "search_prefixes": ["disjoint-set forest"],
+        "search_translations": ["несвързани множества"]
+    },
+    {
+        "key": "priority_queue",
+        "name": "Priority Queue",
+        "search_prefixes": ["priority queue", "heap"],
+        "search_translations": ["приоритетна опашка", "пирамида"]
+    },
+    {
+        "key": "hashmap",
+        "name": "Hash Map",
+        "search_prefixes": ["hashmap", "hash map", "hashset", "hash set"],
+        "search_translations": ["хештаблица", "хеш таблица", "хешсет", "хеш сет"]
+    },
+    {
+        "key": "trie",
+        "name": "Trie",
+        "search_prefixes": ["trie", "prefix tree"],
+        "search_translations": ["префиксно дърво", "трай"]
+    },
+    {
+        "key": "suffix_tree",
+        "name": "Suffix Tree",
+        "search_prefixes": ["suffix tree"],
+        "search_translations": ["суфиксно дърво"]
+    },
+    {
+        "key": "prefix_array",
+        "name": "Prefix Array",
+        "search_prefixes": ["prefix array"],
+        "search_translations": ["префиксен масив"]
+    },
+    {
+        "key": "binary_tree",
+        "name": "Binary Tree",
+        "search_prefixes": ["binary tree", "binary search tree"],
+        "search_translations": ["двоично дърво", "двоично дърво за търсене"]
+    },
+    {
+        "key": "balanced_tree",
+        "name": "Balanced Tree",
+        "search_prefixes": ["balanced tree", "red-black tree", "avl tree"],
+        "search_translations": ["балансирано дърво", "балансирано двоично дърво", "червено-черно дърво"]
+    },
+    {
+        "key": "index_tree",
+        "name": "Binary Indexed Tree",
+        "search_prefixes": ["index tree", "binary indexed tree", "fenwick tree"],
+        "search_translations": ["индексно дърво", "дърво на фенуик"]
+    },
+    {
+        "key": "segment_tree",
+        "name": "Segment Tree",
+        "search_prefixes": ["segment tree"],
+        "search_translations": ["сегментно дърво"]
+    },
+    {
+        "key": "interval_tree",
+        "name": "Interval Tree",
+        "search_prefixes": ["interval tree"],
+        "search_translations": ["интервално дърво"]
+    },
+    {
+        "key": "rmq",
+        "name": "Range Minimum Query",
+        "search_prefixes": ["range minimum query", "range maximum query", "rmq"],
+        "search_translations": ["минимум в интервал", "максимум в интервал"]
+    },
+    {
+        "key": "tiered_vector",
+        "name": "Tiered Vector",
+        "search_prefixes": ["tiered vector"],
+        "search_translations": ["квадратична опашка"]
+    },
+    {
+        "key": "kd_tree",
+        "name": "K-D Tree",
+        "search_prefixes": ["k-d tree", "kd tree"],
+        "search_translations": ["к-д дърво", "кд дърво"]
+    }
+]
+
