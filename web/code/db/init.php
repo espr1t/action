@@ -64,7 +64,8 @@ Table::Credentials
     "password": "588e412333f6ab16379c62e1ba0c4d5a",
     "loginKey": "189342e2ed9d23bb9a02ecbf8ed06762",
     "resetKey": "edc2de439bb62d55a7ad977c2fd7e8e7",
-    "resetTime": "2017-12-29T01:48:19"
+    "resetTime": "2019-05-12T13:49:33",
+    "lastReset": "2017-12-29T01:48:19"
 }
 */
 output('');
@@ -81,6 +82,7 @@ if ($db->tableExists('Credentials')) {
             loginKey VARCHAR(32) NOT NULL,
             resetKey VARCHAR(32) NOT NULL,
             resetTime DATETIME NOT NULL,
+            lastReset DATETIME NOT NULL,
             PRIMARY KEY (userId)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

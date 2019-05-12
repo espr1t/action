@@ -109,6 +109,7 @@ class ResetPage extends Page {
         $creds['password'] = saltHashPassword($_POST['password1']);
         $creds['resetKey'] = '';
         $creds['resetTime'] = '0000-00-00 00:00:00';
+        $creds['lastReset'] = date('Y-m-d H:i:s');
         if ($brain->updateCreds($creds)) {
             error_log('User ' . $_POST['username'] . ' changed his/her password.');
             return true;

@@ -810,7 +810,8 @@ class Brain {
                 password = '" . $creds['password'] . "',
                 loginKey = '" . $creds['loginKey'] . "',
                 resetKey = '" . $creds['resetKey'] . "',
-                resetTime = '" . $creds['resetTime'] . "'
+                resetTime = '" . $creds['resetTime'] . "',
+                lastReset = '" . $creds['lastReset'] . "'
             WHERE userId = " . $creds['userId'] . "
         ");
         if (!$response) {
