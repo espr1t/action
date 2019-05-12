@@ -8,6 +8,7 @@ require_once(__DIR__ . '/../entities/user.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
 class AdminAchievementsPage extends Page {
+    private $achievementTitle = array();
     private $PRIME_NUMBERS = array();
     private $FIBONACCI_NUMBERS = array();
     private $PERFECT_NUMBERS = array();
@@ -24,6 +25,17 @@ class AdminAchievementsPage extends Page {
     public function getExtraScripts() {
         return array('/scripts/admin.js');
     }
+
+    public function addAchievement($user, $achived, $key, $time) {
+        // Add the achievement to the DB
+        $this->brain->addAchievement($user->id, $key, $time);
+        // Mark the achievement as achieved for the user
+        $achieved[$key] = true;
+        // Record the achievement in the logs
+        $logMessage = sprintf('User %s unlocked achievement "%s".', $user->username, $this->achievementTitle[$key]);
+        write_log($GLOBALS['LOG_ACHIEVEMENTS'], $logMessage);
+    }
+
 
     public function initSpecialNumbers() {
         $limit = 100000;
@@ -71,8 +83,7 @@ class AdminAchievementsPage extends Page {
         if (!array_key_exists($key, $achieved)) {
             if (count($submitIds) >= $limit) {
                 $date = $this->submits[$submitIds[$limit - 1]]['submitted'];
-                $this->brain->addAchievement($user->id, $key, $date);
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, $date);
             }
         }
     }
@@ -86,8 +97,7 @@ class AdminAchievementsPage extends Page {
                     return;
                 $date = max(array($date, $this->submits[$solvedIds[0]]['submitted']));
             }
-            $this->brain->addAchievement($user->id, $key, $date);
-            $achieved[$key] = true;
+            $this->addAchievement($user, $achieved, $key, $date);
         }
     }
 
@@ -100,8 +110,7 @@ class AdminAchievementsPage extends Page {
                 $ts2 = strtotime($this->submits[$acSubmitIds[$i + $count - 1]]['submitted']);
                 if ($ts2 - $ts1 <= $limit) {
                     $date = $this->submits[$acSubmitIds[$i + $count - 1]]['submitted'];
-                    $this->brain->addAchievement($user->id, $key, $date);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $date);
                     return;
                 }
             }
@@ -127,8 +136,7 @@ class AdminAchievementsPage extends Page {
                         $date = $submit['submitted'];
                 }
                 if ($date != '') {
-                    $this->brain->addAchievement($user->id, $key, $date);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $date);
                     $completed++;
                     if ($latestDate == '' || $latestDate < $date)
                         $latestDate = $date;
@@ -139,8 +147,7 @@ class AdminAchievementsPage extends Page {
         }
         if (!array_key_exists('GRADU8', $achieved)) {
             if ($completed == count($this->training)) {
-                $this->brain->addAchievement($user->id, 'GRADU8', $latestDate);
-                $achieved['GRADU8'] = true;
+                $this->addAchievement($user, $achieved, 'GRADU8', $latestDate);
             }
         }
     }
@@ -156,8 +163,7 @@ class AdminAchievementsPage extends Page {
                         if (!array_key_exists($submit['problemId'], $played)) {
                             $played[$submit['problemId']] = true;
                             if (count($played) >= $limit) {
-                                $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                                $achievement[$key] = true;
+                                $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                                 return;
                             }
                         }
@@ -185,8 +191,7 @@ class AdminAchievementsPage extends Page {
             }
             // Iterate all games in order to find the earliest winning submit
             if ($date != '') {
-                $this->brain->addAchievement($user->id, $key, $date);
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, $date);
             }
         }
     }
@@ -195,8 +200,7 @@ class AdminAchievementsPage extends Page {
     public function achievementMarried($user, $achieved, $key) {
         if (!array_key_exists($key, $achieved)) {
             if ($user->username == 'kopche') {
-                $this->brain->addAchievement($user->id, $key, '2018-09-02');
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, '2018-09-02');
             }
         }
     }
@@ -204,8 +208,7 @@ class AdminAchievementsPage extends Page {
     // Has registered
     public function achievementRegistered($user, $achieved, $key) {
         if (!array_key_exists($key, $achieved)) {
-            $this->brain->addAchievement($user->id, $key, $user->registered);
-            $achieved[$key] = true;
+            $this->addAchievement($user, $achieved, $key, $user->registered);
         }
     }
 
@@ -214,8 +217,7 @@ class AdminAchievementsPage extends Page {
         if (!array_key_exists($key, $achieved)) {
             if (count($reportIds) > 0) {
                 $date = $this->reports[$reportIds[0]]['date'];
-                $this->brain->addAchievement($user->id, $key, $date);
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, $date);
             }
         }
     }
@@ -224,8 +226,7 @@ class AdminAchievementsPage extends Page {
     public function achievementActive($user, $achieved, $key) {
         if (!array_key_exists($key, $achieved)) {
             if ($user->actions >= 1000) {
-                $this->brain->addAchievement($user->id, $key, date('Y-m-d H:i:s'));
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, date('Y-m-d H:i:s'));
             }
         }
     }
@@ -238,8 +239,7 @@ class AdminAchievementsPage extends Page {
                 $total += count(explode(',', $this->submits[$submitId]['results']));
                 if ($total >= 10000) {
                     $date = $this->submits[$submitId]['submitted'];
-                    $this->brain->addAchievement($user->id, $key, $date);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $date);
                     return;
                 }
             }
@@ -252,8 +252,7 @@ class AdminAchievementsPage extends Page {
             $maxPos = min(array($limit, count($this->ranking)));
             for ($pos = 0; $pos < $maxPos; $pos++) {
                 if ($this->ranking[$pos]['id'] == $user->id) {
-                    $this->brain->addAchievement($user->id, $key, date('Y-m-d H:i:s'));
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, date('Y-m-d H:i:s'));
                     return;
                 }
             }
@@ -272,8 +271,7 @@ class AdminAchievementsPage extends Page {
             }
             // Iterate all problems so we get the earliest virgin submit
             if ($date != '') {
-                $this->brain->addAchievement($user->id, $key, $date);
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, $date);
             }
         }
     }
@@ -285,8 +283,7 @@ class AdminAchievementsPage extends Page {
                 $hour = date('H', strtotime($this->submits[$submitId]['submitted']));
                 if ($hour >= $lower && $hour < $upper) {
                     $date = $this->submits[$submitId]['submitted'];
-                    $this->brain->addAchievement($user->id, $key, $date);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $date);
                     return;
                 }
             }
@@ -302,8 +299,7 @@ class AdminAchievementsPage extends Page {
                 if (!array_key_exists($submit['language'], $langs)) {
                     $langs[$submit['language']] = true;
                     if (count($langs) >= 3) {
-                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                        $achieved[$key] = true;
+                        $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                         return;
                     }
                 }
@@ -317,8 +313,7 @@ class AdminAchievementsPage extends Page {
             $anniversary = strtotime($user->registered) + 365 * 24 * 60 * 60;
             if (time() >= $anniversary) {
                 $date = date('Y-m-d', $anniversary);
-                $this->brain->addAchievement($user->id, $key, $date);
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, $date);
             }
         }
     }
@@ -329,8 +324,7 @@ class AdminAchievementsPage extends Page {
             foreach ($submitIds as $submitId) {
                 if (date('m-d', strtotime($this->submits[$submitId]['submitted'])) == $target) {
                     $date = $this->submits[$submitId]['submitted'];
-                    $this->brain->addAchievement($user->id, $key, $date);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $date);
                     return;
                 }
             }
@@ -361,8 +355,7 @@ class AdminAchievementsPage extends Page {
                 $errors[$submit['problemId']] = $errorMask;
 
                 if (popcount($errorMask) >= 3) {
-                    $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                     return;
                 }
             }
@@ -393,8 +386,7 @@ class AdminAchievementsPage extends Page {
                         $errorMask |= (1 << 6);
                 }
                 if (popcount($errorMask) >= $limit) {
-                    $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                     return;
                 }
             }
@@ -413,8 +405,7 @@ class AdminAchievementsPage extends Page {
                     if ($submit['status'] != $GLOBALS['STATUS_ACCEPTED'])
                         $unsuccessful[$submit['problemId']]++;
                     if ($unsuccessful[$submit['problemId']] >= $target) {
-                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                        $achieved[$key] = true;
+                        $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                         return;
                     }
                 }
@@ -434,8 +425,7 @@ class AdminAchievementsPage extends Page {
                     if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
                         $onFirstTry++;
                         if ($onFirstTry >= $target) {
-                            $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                            $achieved[$key] = true;
+                            $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                             return;
                         }
                     }
@@ -457,8 +447,7 @@ class AdminAchievementsPage extends Page {
                         if (array_key_exists($submit['problemId'], $this->TRICKY_PROBLEMS)) {
                             $onFirstTry++;
                             if ($onFirstTry >= 5) {
-                                $this->brain->addAchievement($user->id, $key, $$submit['submitted']);
-                                $achieved[$key] = true;
+                                $this->addAchievement($user, $achieved, $key, $$submit['submitted']);
                                 return;
                             }
                         }
@@ -473,8 +462,7 @@ class AdminAchievementsPage extends Page {
         if (!array_key_exists($key, $achieved)) {
             if ($user->email && $user->town && $user->country && $user->gender && $user->birthdate != '0000-00-00') {
                 // TODO: Set the achievemnt date to the one this actually happened once info edit is available
-                $this->brain->addAchievement($user->id, $key, $user->registered);
-                $achieved[$key] = true;
+                $this->addAchievement($user, $achieved, $key, $user->registered);
             }
         }
     }
@@ -488,8 +476,7 @@ class AdminAchievementsPage extends Page {
                 $source = $this->sources[$submitId];
                 if (array_key_exists($submit['problemId'], $prevSource)) {
                     if ($prevSource[$submit['problemId']] != $source['source']) {
-                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                        $achieved[$key] = true;
+                        $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                         return;
                     }
                 }
@@ -543,8 +530,7 @@ class AdminAchievementsPage extends Page {
                         $currSource = $this->sources[$currId]['source'];
                         $prevSource = $this->sources[$prevId]['source'];
                         if ($this->isOffByOne($currSource, $prevSource)) {
-                            $this->brain->addAchievement($user->id, $key, $currSubmit['submitted']);
-                            $achieved[$key] = true;
+                            $this->addAchievement($user, $achieved, $key, $currSubmit['submitted']);
                             return;
                         }
                     }
@@ -563,8 +549,7 @@ class AdminAchievementsPage extends Page {
                 if ($submit['ip'] && !array_key_exists($submit['ip'], $ips)) {
                     $ips[$submit['ip']] = true;
                     if (count($ips) >= 3) {
-                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                        $achieved[$key] = true;
+                        $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                         return;
                     }
                 }
@@ -580,8 +565,7 @@ class AdminAchievementsPage extends Page {
                     foreach ($acSubmitIds as $submitId) {
                         $submit = $this->submits[$submitId];
                         if ($submit['problemId'] == $problem['id']) {
-                            $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                            $achieved[$key] = true;
+                            $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                             return;
                         }
                     }
@@ -596,8 +580,7 @@ class AdminAchievementsPage extends Page {
             foreach ($submitIds as $submitId) {
                 $submit = $this->submits[$submitId];
                 if (in_array($submit['id'], $special)) {
-                    $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                    $achieved[$key] = true;
+                    $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                     return;
                 }
             }
@@ -613,8 +596,7 @@ class AdminAchievementsPage extends Page {
                     $source = $this->sources[$submitId];
                     $length = substr_count($source['source'], "\n") + 1;
                     if (($lenLimit < 0 && $length <= -$lenLimit) || ($lenLimit > 0 && $length >= $lenLimit)) {
-                        $this->brain->addAchievement($user->id, $key, $submit['submitted']);
-                        $achieved[$key] = true;
+                        $this->addAchievement($user, $achieved, $key, $submit['submitted']);
                         return;
                     }
                 }
@@ -910,10 +892,7 @@ class AdminAchievementsPage extends Page {
         return microtime(true) - $start;
     }
 
-    private function getAchievementsList() {
-        $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
-        $achievementsData = json_decode($achievementsFile, true);
-
+    private function getAchievementsList($achievementsData) {
         $brain = new Brain();
 
         $userName = array();
@@ -969,12 +948,19 @@ class AdminAchievementsPage extends Page {
     }
 
     public function getContent() {
+        // First load the achievement data
+        $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
+        $achievementsData = json_decode($achievementsFile, true);
+        foreach ($achievementsData as $achievement) {
+            $this->achievementTitle[$achievement['key']] = $achievement['title'];
+        }
+
         $elapsed = '';
         if (isset($_GET['recalc']) && $_GET['recalc'] == 'true') {
             $execTime = $this->recalcAll();
             $elapsed = sprintf('<p>Calculated in %.2f seconds.</p>', $execTime);
         }
-        $allAchievements = $this->getAchievementsList();
+        $allAchievements = $this->getAchievementsList($achievementsData);
         $content = inBox('
             <h1>Админ::Постижения</h1>
             ' . $elapsed . '

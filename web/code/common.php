@@ -2,6 +2,15 @@
 require_once('config.php');
 require_once('db/brain.php');
 
+function write_log($logName, $message) {
+    $logPath = str_replace('\\', '/', realpath(__DIR__ . '/../')) . '/logs/' . $logName;
+    // TODO: It may be a good idea to leave this to the default (UTC)
+    $logTime = DateTime::createFromFormat('U.u', microtime(true));
+    $logTime->setTimezone(new DateTimeZone('Europe/Sofia'));
+    $logLine = sprintf('[%s] %s%s', $logTime->format("Y-m-d H:i:s.u"), $message, PHP_EOL);
+    file_put_contents($logPath, $logLine, FILE_APPEND | LOCK_EX);
+}
+
 function swap(&$var1, &$var2) {
     $temp = $var1;
     $var1 = $var2;

@@ -159,4 +159,16 @@ $CAPTCHA_CITIES = array('Sofia', 'Plovdiv', 'Pleven', 'Varna', 'Burgas', 'Shumen
 // Password Reset
 $RESET_PASSWORD_TIMEOUT = 7 * 24 * 60 * 60; // One week in seconds.
 
+// Logging
+$LOG_LOGINS = 'signin.log';
+$LOG_LOGOUTS = 'signin.log';
+$LOG_REGISTERS = 'user.log';
+$LOG_PASS_RESETS = 'user.log';
+$LOG_PROFILE_UPDATES = 'user.log';
+$LOG_SUBMITS = 'submit.log';
+$LOG_ACHIEVEMENTS = 'achievement.log';
+$LOG_PAGE_VIEWS = 'page_view.log';
+$LOG_PROFILE_VIEWS = 'profile_view.log';
+$LOG_GRADER = 'grader.log';
+
 ?>

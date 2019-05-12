@@ -14,6 +14,11 @@ if ($user == null) {
 // Update activity statistics
 $user->updateStats();
 
+// Log the opened page
+$logMessage = sprintf('User %s opened page "%s".', $user->username, $_SERVER['REQUEST_URI']);
+write_log($GLOBALS['LOG_PAGE_VIEWS'], $logMessage);
+
+// Show messages (if any)
 $showMessage = '';
 if (isset($_SESSION['messageType']) && isset($_SESSION['messageText'])) {
     $showMessage .= '<script>showMessage("' . $_SESSION['messageType'] . '", "' . $_SESSION['messageText'] . '");</script>';
@@ -21,6 +26,7 @@ if (isset($_SESSION['messageType']) && isset($_SESSION['messageText'])) {
     unset($_SESSION['messageText']);
 }
 
+// Decide which Page should generate the content
 switch ($_GET['page']) {
     case 'home':
         require_once('home.php');

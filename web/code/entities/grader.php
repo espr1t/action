@@ -175,13 +175,22 @@ class Grader {
                 $brain->trimLatest($submit->id);
             }
         }
+
+        // Record the completed test run in the logs
+        if ($submit->message != '') {
+            $logMessage = sprintf('Submit %d has been processed.', $submit->id);
+            write_log($GLOBALS['LOG_SUBMITS'], $logMessage);
+        }
     }
 
     function print_to_pdf($url) {
         $response = $this->call($GLOBALS['GRADER_ENDPOINT_PRINT_PDF'], array("url" => $url), Grader::$METHOD_POST, false);
         if ($response['status'] != 200) {
-            error_log('Could not print url ' . $url . ' to pdf.');
-            return null;
+            // Try a second time?
+            $response = $this->call($GLOBALS['GRADER_ENDPOINT_PRINT_PDF'], array("url" => $url), Grader::$METHOD_POST, false);
+            if ($response['status'] != 200) {
+                return null;
+            }
         }
         return $response['data'];
     }

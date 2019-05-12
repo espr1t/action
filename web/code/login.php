@@ -58,6 +58,10 @@ class LoginPage extends Page {
                 $expireTime = time() + 365 * 86400; // 365 days
                 setcookie($GLOBALS['COOKIE_NAME'], $signedLoginKey, $expireTime);
 
+                // Record the login to the logs
+                $logMessage = sprintf('User %s has logged in.', $user->username);
+                write_log($GLOBALS['LOG_LOGINS'], $logMessage);
+
                 // Redirect to home page with a success message
                 redirect('/home', 'INFO', 'Влязохте успешно в системата.');
             }

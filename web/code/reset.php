@@ -111,7 +111,9 @@ class ResetPage extends Page {
         $creds['resetTime'] = '0000-00-00 00:00:00';
         $creds['lastReset'] = date('Y-m-d H:i:s');
         if ($brain->updateCreds($creds)) {
-            error_log('User ' . $_POST['username'] . ' changed his/her password.');
+            // Record the updated password in the logs
+            $logMessage = sprintf('User %s has updated his/her password.', $creds['username']);
+            write_log($GLOBALS['LOG_PASS_RESETS'], $logMessage);
             return true;
         }
         return false;

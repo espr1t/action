@@ -106,6 +106,10 @@ class Submit {
             $brain->addPending($this);
         }
 
+        // Record invoking this test run in the logs
+        $logMessage = sprintf('Sending submit %d for grading...', $this->id);
+        write_log($GLOBALS['LOG_SUBMITS'], $logMessage);
+
         $problem = Problem::get($this->problemId);
         if ($problem->type == 'game') {
             return $this->sendGame($problem);

@@ -25,6 +25,11 @@ class User {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
         session_destroy();
         session_start();
+
+        // Record the logout to the logs
+        $logMessage = sprintf('User %s has logged out.', $this->username);
+        write_log($GLOBALS['LOG_LOGOUTS'], $logMessage);
+
         redirect('/login', 'INFO', 'Успешно излязохте от системата.');
     }
 
@@ -115,6 +120,10 @@ class User {
             $user->access = $GLOBALS['ADMIN_USER_ACCESS'];
             $user->update();
         }
+
+        // Record the user creation in the logs
+        $logMessage = sprintf('User %s has been registered.', $user->username);
+        write_log($GLOBALS['LOG_REGISTERS'], $logMessage);
 
         return $user;
    }

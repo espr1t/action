@@ -367,6 +367,10 @@ class ProfilePage extends Page {
         // ====================================================================
         $content .= $this->getAchievements();
 
+        // Record the profile view in the logs
+        $logMessage = sprintf('User %s viewed %s\'s profile.', $this->user->username, $this->profile->username);
+        write_log($GLOBALS['LOG_PROFILE_VIEWS'], $logMessage);
+
         return inBox($content);
     }
 }
