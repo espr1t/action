@@ -11,8 +11,8 @@ from concurrent.futures import ThreadPoolExecutor
 from hashlib import sha1
 
 # Use static scheduler and executor
-scheduler = ThreadPoolExecutor(config.WORKER_COUNT)
-executor = ThreadPoolExecutor(config.WORKER_COUNT)
+scheduler = ThreadPoolExecutor(max_workers=config.WORKER_COUNT)
+executor = ThreadPoolExecutor(max_workers=config.WORKER_COUNT)
 
 
 def get_language_by_exec_name(executable):

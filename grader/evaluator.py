@@ -214,8 +214,8 @@ class Evaluator:
 
         test_futures = []
         for result_id in range(len(self.tests)):
-            test_futures.append([self.tests[result_id],
-                                 common.executor.submit(runner.run, result_id, self.tests[result_id])])
+            future = common.executor.submit(runner.run, result_id, self.tests[result_id])
+            test_futures.append((self.tests[result_id], future))
 
         for test, future in test_futures:
             try:
@@ -224,7 +224,6 @@ class Evaluator:
             except Exception as ex:
                 errors += "Internal error on test " + test["inpFile"] + "(" + test["inpHash"] + "): " + str(ex)
                 self.logger.error("[Submission {}] Got exception: {}".format(self.id, str(ex)))
-                break
 
         self.logger.info("[Submission {}]    -- executed {} tests in {:.3f}s.".format(
             self.id, len(self.tests), perf_counter() - start_time))
