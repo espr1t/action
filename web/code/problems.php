@@ -336,6 +336,14 @@ class ProblemsPage extends Page {
         }
 
         $visibilityRestriction = $problem->visible ? '' : '<i class="fa fa-eye-slash" title="This problem is hidden."></i>';
+        $statsButton = '<a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><div class="tooltip--top" data-tooltip="информация" style="display: inline-block;"><i class="fa fa-info-circle"></i></div></a>';
+        $usersButton = '<a href="/problems/' . $problem->id . '/users" style="color: #333333;"><div class="tooltip--top" data-tooltip="потребители" style="display: inline-block;"><i class="fa fa-users"></i></div></a>';
+        $tagsButton = '<a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове" style="display: inline-block;"><i class="fa fa-tags"></i></div></a>';
+        $pdfButton = '<a href="/problems/' . $problem->id . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>';
+        // Remove PDF link for logged-out users (bots tend to click on it and generate PDFs for all problems)
+        if ($this->user->id <= 0) {
+            $pdfButton = '<div class="tooltip--top" data-tooltip="PDF" title="Трябва да влезете в системата за да изтеглите условието като PDF." style="display: inline-block;"><i class="fas fa-file-pdf" style="opacity: 0.5;"></i></div>';
+        }
         return '
             <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
                 <div class="problem-visibility">' . $visibilityRestriction . '</div>
@@ -347,13 +355,13 @@ class ProblemsPage extends Page {
                 ' . $submitButtons . '
             </div>
             <div class="problem-stats-links">
-                <a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><div class="tooltip--top" data-tooltip="информация" style="display: inline-block;"><i class="fa fa-info-circle"></i></div></a>
+                ' . $statsButton . '
                 &nbsp;
-                <a href="/problems/' . $problem->id . '/users" style="color: #333333;"><div class="tooltip--top" data-tooltip="потребители" style="display: inline-block;"><i class="fa fa-users"></i></div></a>
+                ' . $usersButton . '
                 &nbsp;
-                <a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове" style="display: inline-block;"><i class="fa fa-tags"></i></div></a>
+                ' . $tagsButton . '
                 &nbsp;
-                <a href="/problems/' . $problem->id . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
+                ' . $pdfButton . '
             </div>
         ';
     }
@@ -604,7 +612,12 @@ class ProblemsPage extends Page {
             } else if (isset($_GET['print'])) {
                 $content = $this->getPrintStatement($problem);
             } else if (isset($_GET['pdf'])) {
-                return_pdf_file($problem);
+                // Disallow this action for signed-out users.
+                if ($this->user->access >= $GLOBALS['ACCESS_DOWNLOAD_AS_PDF']) {
+                    return_pdf_file($problem);
+                } else {
+                    redirect('/problems/' . $problem->id, 'ERROR', 'Трябва да влезете в системата за да изтеглите условието.');
+                }
             }
             return $content;
         }
