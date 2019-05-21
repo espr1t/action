@@ -40,20 +40,23 @@ class Updater:
         # Make sure only one update is happening at a time
         self.lock.acquire()
 
-        # Update the time of the last sent update
-        self.last_update = time()
-
         # Indicate that there is no scheduled update
         self.scheduled_event = None
 
         # Only send updates if there was some new information
         if self.updated:
+            # Update the time of the last sent update
+            self.last_update = time()
+
+            # Actually send the update
             common.send_request("POST", self.endpoint, {
                 "id": self.submit_id,
                 "message": self.message,
                 "results": json.dumps(self.results),
                 "timestamp": self.last_update
             })
+
+            # Mark that there is no new information
             self.updated = False
 
         self.lock.release()
