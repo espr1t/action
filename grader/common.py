@@ -10,6 +10,18 @@ from flask import jsonify, request, make_response
 from concurrent.futures import ThreadPoolExecutor
 from hashlib import sha1
 
+
+class RunResult:
+    def __init__(self, status, error_message, exit_code, exec_time, exec_memory, score, info):
+        self.status = status
+        self.error_message = error_message
+        self.exit_code = exit_code
+        self.exec_time = exec_time
+        self.exec_memory = exec_memory
+        self.score = score
+        self.info = info
+
+
 # Use static scheduler and executor
 scheduler = ThreadPoolExecutor(max_workers=config.WORKER_COUNT)
 executor = ThreadPoolExecutor(max_workers=config.WORKER_COUNT)
