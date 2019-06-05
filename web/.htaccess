@@ -1,6 +1,6 @@
 Options -Indexes
 
-ErrorDocument 403 /error
+ErrorDocument 403 /forbidden
 ErrorDocument 404 /error
 
 #
@@ -56,6 +56,7 @@ RewriteRule    ^problems/(\d+)/tags$                            /code/main.php?p
 RewriteRule    ^problems/(\d+)/print$                           /code/main.php?page=problems&problemId=$1&print=true                                [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits$                         /code/main.php?page=problems&problemId=$1&submits=true                              [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)$                   /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2                  [NC,L,QSA]
+RewriteRule    ^problems/(\d+)/submits/(\d+)/source$            /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2&source=true      [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/submits/(\d+)/updates$           /code/main.php?page=problems&problemId=$1&submits=true&submitId=$2&updates=true     [NC,L,QSA]
 RewriteRule    ^problems/(\d+)/pdf$                             /code/main.php?page=problems&problemId=$1&pdf=true                                  [NC,L,QSA]
 
@@ -92,6 +93,7 @@ RewriteRule    ^training/various$								/code/main.php?page=training&section=VA
 RewriteRule    ^games/([\w-]+)$                                 /code/main.php?page=games&game=$1                                                   [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/submits$                         /code/main.php?page=games&game=$1&submits=true                                      [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/submits/(\d+)$                   /code/main.php?page=games&game=$1&submits=true&submitId=$2                          [NC,L,QSA]
+RewriteRule    ^games/([\w-]+)/submits/(\d+)/source$            /code/main.php?page=games&game=$1&submits=true&submitId=$2&source=true              [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/submits/(\d+)/updates$           /code/main.php?page=games&game=$1&submits=true&submitId=$2&updates=true             [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/submits/(\d+)/replays/(\d+)$     /code/main.php?page=games&game=$1&submits=true&submitId=$2&matchId=$3               [NC,L,QSA]
 RewriteRule    ^games/([\w-]+)/visualizer$                      /code/main.php?page=games&game=$1&visualizer=true                                   [NC,L,QSA]

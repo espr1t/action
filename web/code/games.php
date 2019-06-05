@@ -684,7 +684,7 @@ class GamesPage extends Page {
             $author = '(' . $submit->userName . ')';
         }
 
-        $source = getSourceSection($submit);
+        $source = getSourceSection($problem, $submit);
 
         return '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
@@ -816,7 +816,7 @@ class GamesPage extends Page {
             $author = '(' . $submit->userName . ')';
         }
 
-        $source = getSourceSection($submit, false);
+        $source = getSourceSection($problem, $submit);
 
         return '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
@@ -918,6 +918,13 @@ class GamesPage extends Page {
             });
         });';
         return $content;
+    }
+
+    private function getSource($problem, $submitId) {
+        $redirectUrl = getGameUrl($problem->name) . '/submits';
+        $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
+        echo '<plaintext>' . $submit->source;
+        exit(0);
     }
 
     private function getSubmitInfoBox($problem, $submitId) {
@@ -1197,7 +1204,9 @@ class GamesPage extends Page {
                 } else if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    if (isset($_GET['updates'])) {
+                    if (isset($_GET['source'])) {
+                        $this->getSource($problem, $_GET['submitId']);
+                    } else if (isset($_GET['updates'])) {
                         $this->getSubmitUpdates($problem, $_GET['submitId']);
                     } else {
                         if ($queueShortcut)

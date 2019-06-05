@@ -307,23 +307,16 @@ function getStatusColor($status) {
     return $color;
 }
 
-function getSourceSection($submit, $addslashes=true) {
-    $source = $submit->source;
-    $source = htmlspecialchars($source, ENT_NOQUOTES | ENT_HTML5);
-    if ($addslashes) {
-        $source = addslashes($source);
+function getSourceSection($problem, $submit) {
+    $url = getProblemUrl($problem->id);
+    if ($problem->type == 'game' || $problem->type == 'relative') {
+        $url = getGameUrl($problem->name);
     }
-    $source = str_replace('`', '&#96;', $source);
+    $url = $url . '/submits/' . $submit->id . '/source';
 
     return '
         <div class="centered" id="sourceLink">
-            <a onclick="displaySource();">Виж кода</a>
-        </div>
-        <div style="display: none;" id="sourceField">
-            <div class="right smaller"><a onclick="copyToClipboard();">копирай</a></div>
-            <div class="show-source-box">
-                <code id="source">' . $source . '</code>
-            </div>
+            <a href="' . $url . '" target="_blank">Виж кода</a>
         </div>
     ';
 }

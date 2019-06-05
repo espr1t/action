@@ -341,7 +341,7 @@ class ProblemsPage extends Page {
         $tagsButton = '<a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове" style="display: inline-block;"><i class="fa fa-tags"></i></div></a>';
         $pdfButton = '<a href="/problems/' . $problem->id . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>';
         // Remove PDF link for logged-out users (bots tend to click on it and generate PDFs for all problems)
-        if ($this->user->id <= 0) {
+        if ($this->user->access < $GLOBALS['ACCESS_DOWNLOAD_AS_PDF']) {
             $pdfButton = '<div class="tooltip--top" data-tooltip="PDF" title="Трябва да влезете в системата за да изтеглите условието като PDF." style="display: inline-block;"><i class="fas fa-file-pdf" style="opacity: 0.5;"></i></div>';
         }
         return '
@@ -458,6 +458,13 @@ class ProblemsPage extends Page {
         return $detailsTable;
     }
 
+    private function getSource($problem, $submitId) {
+        $redirectUrl = getProblemUrl($problem->id) . '/submits';
+        $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
+        echo '<plaintext>' . $submit->source;
+        exit(0);
+    }
+
     function getSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
         $statusTable = $this->getStatusTable($submit);
@@ -468,7 +475,7 @@ class ProblemsPage extends Page {
             $author = '(' . $submit->userName . ')';
         }
 
-        $source = getSourceSection($submit, false);
+        $source = getSourceSection($problem, $submit);
 
         return '
             <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
@@ -595,7 +602,9 @@ class ProblemsPage extends Page {
                 if (!isset($_GET['submitId'])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    if (isset($_GET['updates'])) {
+                    if (isset($_GET['source'])) {
+                        $this->getSource($problem, $_GET['submitId']);
+                    } else if (isset($_GET['updates'])) {
                         $this->getSubmitUpdates($problem, $_GET['submitId']);
                     } else {
                         if ($queueShortcut)
@@ -613,10 +622,10 @@ class ProblemsPage extends Page {
                 $content = $this->getPrintStatement($problem);
             } else if (isset($_GET['pdf'])) {
                 // Disallow this action for signed-out users.
-                if ($this->user->access >= $GLOBALS['ACCESS_DOWNLOAD_AS_PDF']) {
-                    return_pdf_file($problem);
-                } else {
+                if ($this->user->access < $GLOBALS['ACCESS_DOWNLOAD_AS_PDF']) {
                     redirect('/problems/' . $problem->id, 'ERROR', 'Трябва да влезете в системата за да изтеглите условието.');
+                } else {
+                    return_pdf_file($problem);
                 }
             }
             return $content;

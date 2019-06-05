@@ -339,29 +339,6 @@ function orderRanking(orderBy) {
 }
 
 /*
- * Source-code
- */
-function displaySource() {
-    document.getElementById('sourceLink').style.display = 'none';
-    document.getElementById('sourceField').style.display = 'block';
-    reposition();
-}
-
-/*
- * Copy to clipboard
- */
-function copyToClipboard() {
-    if (document.getSelection) {
-        var range = document.createRange();
-        range.selectNode(document.getElementById('source'));
-        var selection = document.getSelection();
-        selection.empty();
-        selection.addRange(range);
-        document.execCommand('copy');
-    }
-}
-
-/*
  * Circular progress bar
  */
 function circularProgress(parentId, done, total) {
