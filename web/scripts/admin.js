@@ -190,6 +190,46 @@ function deleteTest(position) {
     }
 }
 
+function deleteAllTests() {
+    if (window.confirm('Сигурни ли сте, че искате да изтриете всички тестове?')) {
+        var remainingResponses = tests.length;
+        var successfullyDeleted = [];
+        for (var i = 0; i < tests.length; i++) {
+            var data = {
+                'problemId': getLastUrlToken(),
+                'inpFile': tests[i]['inpFile'],
+                'solFile': tests[i]['solFile'],
+                'position': tests[i]['position']
+            };
+
+            var callback = function(testId, response) {
+                remainingResponses--;
+                try {
+                    response = JSON.parse(response);
+                    if (response['status'] == 'OK') {
+                        successfullyDeleted.push(testId);
+                    }
+                } catch(ex) {
+                    showMessage('ERROR', 'Тест ' + testId + ' не беше изтрит успешно.');
+                }
+                if (remainingResponses == 0) {
+                    if (successfullyDeleted.length == tests.length) {
+                        showMessage('INFO', 'Всички тестове бяха успешно изтрити.');
+                    } else {
+                        showMessage('ERROR', 'Някои от тестовете не бяха изтрити.');
+                    }
+                    successfullyDeleted = successfullyDeleted.sort(function(a, b) {return b - a;});
+                    for (var c = 0; c < successfullyDeleted.length; c++) {
+                        tests.splice(successfullyDeleted[c], 1);
+                    }
+                    updateTestTable();
+                }
+            }
+            ajaxCall('/actions/deleteTest', data, callback.bind(null, i));
+        }
+    }
+}
+
 function uploadTest(problemId, position, testFile) {
     var fileReader = new FileReader();
     fileReader.addEventListener('load', function() {

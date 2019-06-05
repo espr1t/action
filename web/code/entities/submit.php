@@ -395,13 +395,19 @@ class Submit {
 
         $scores = [];
         $maxScore = 0.0;
-        for ($i = 0; $i < count($this->results); $i = $i + 1) {
+        for ($i = 0; $i < count($tests); $i++) {
             $maxScore += $tests[$i]['score'];
-            // The grader assigns 0/1 value for each test of IOI- and ACM-style problems and [0, 1] real fraction of the score
-            // for games and relative problems. In both cases, multiplying the score of the test by this value is correct.
-            array_push($scores, (is_numeric($this->results[$i]) ? $this->results[$i] : 0.0) * $tests[$i]['score']);
+            if ($tests[$i]['position'] < count($this->results)) {
+                $result = $this->results[$tests[$i]['position']];
+                // The grader assigns 0/1 value for each test of IOI- and ACM-style problems and [0, 1] real fraction of the score
+                // for games and relative problems. In both cases, multiplying the score of the test by this value is correct.
+                array_push($scores, (is_numeric($result) ? $result : 0.0) * $tests[$i]['score']);
+            }
         }
-        return array_map(function($num) use($maxScore) {return 100.0 * $num / $maxScore;}, $scores);
+        if ($maxScore > 0.0) {
+            $scores = array_map(function($num) use($maxScore) {return 100.0 * $num / $maxScore;}, $scores);
+        }
+        return $scores;
     }
 
     public function calcScore() {
