@@ -3,6 +3,10 @@ require_once('config.php');
 require_once('db/brain.php');
 
 function write_log($logName, $message) {
+    if ($GLOBALS['user']->id == -1) {
+        // Logs for anonymous users go to separate files.
+        $logName = explode('.', $logName)[0] . '_anonymous.log';
+    }
     $logPath = str_replace('\\', '/', realpath(__DIR__ . '/../')) . '/logs/' . $logName;
     // TODO: It may be a good idea to leave this to the default (UTC)
     $logTime = DateTime::createFromFormat('U.u', microtime(true));
