@@ -30,6 +30,10 @@ function checkServerEventClient() {
     return !connection_aborted();
 }
 
+function restartEventStream() {
+    sendServerEventData('res', 'RES');
+}
+
 function terminateServerEventStream() {
     sendServerEventData('eos', 'EOS');
 }

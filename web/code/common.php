@@ -3,6 +3,12 @@ require_once('config.php');
 require_once('db/brain.php');
 
 function write_log($logName, $message) {
+    if (!isset($GLOBALS['user'])) {
+        error_log('User is not set when printing a log!');
+        error_log('  >> logName = ' . $logName);
+        error_log('  >> message = ' . $message);
+        return;
+    }
     if ($GLOBALS['user']->id == -1) {
         // Logs for anonymous users go to separate files.
         $logName = explode('.', $logName)[0] . '_anonymous.log';
@@ -30,6 +36,15 @@ function popcount($num) {
     for (; $num > 0; $num &= ($num - 1))
         $bits += 1;
     return $bits;
+}
+
+function randomString($len, $alpha) {
+    $randomString = '';
+    $alphaSize = strlen($alpha);
+    for ($i = 0; $i < $len; $i++) {
+        $randomString .= $alpha[rand(0, $alphaSize - 1)];
+    }
+    return $randomString;
 }
 
 function showMessage($type, $message) {

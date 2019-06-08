@@ -53,7 +53,7 @@ function identifyEscKeyPressedEvent(event, action) {
 /*
  * Butter bars (pop-up messages)
  */
-function showMessage(type, message) {
+function showMessage(type, message, timeout=3 /* seconds */) {
     var messageEl = document.createElement('div');
 
     var id = "i" + Date.now();
@@ -99,7 +99,7 @@ function showMessage(type, message) {
     // Hide the message after several seconds
     setTimeout(function() {
         hideMessage(className, id);
-    }, 3000);
+    }, timeout * 1000);
 }
 
 function hideMessage(className, id) {
@@ -307,7 +307,7 @@ function regradeSubmission(id) {
     var callback = function(response) {
         showMessage('INFO', 'Събмит ' + id + ' беше пратен за ретестване.');
     }
-    ajaxCall('/admin/regrade/' + id, {}, callback);
+    ajaxCall('/admin/regrade/submit/' + id, {}, callback);
 }
 
 /*
@@ -447,26 +447,38 @@ function circularProgress(parentId, done, total) {
  * Subscribe for SSE events
  * https://www.html5rocks.com/en/tutorials/eventsource/basics/
  */
-function subscribeForUpdates(url) {
+function subscribeForUpdates(url, targetElement, level=0) {
+    if (level >= 10) {
+        console.log('Reached maximum update time. Use page refresh instead.');
+        showMessage('WARNING', 'Reached maximum auto-update time. Please refresh.', 1000000);
+        return;
+    }
+
     if (!!window.EventSource) {
+        console.log('Initiating a new SSE connection.');
         var eventSource = new EventSource(url);
         eventSource.addEventListener('message', function(e) {
             console.log('Received new data at ' + ((new Date()).getTime()) + '.');
             var data = JSON.parse(e.data);
             if (data.hasOwnProperty('content')) {
-                document.getElementById('action-form-content').innerHTML = data['content'];
+                document.getElementById(targetElement).innerHTML = data['content'];
             }
             if (data.hasOwnProperty('eos')) {
-                console.log('Closing server-sent events connection.');
+                console.log('Closing the SSE connection.');
                 eventSource.close();
+            }
+            if (data.hasOwnProperty('res')) {
+                eventSource.close();
+                subscribeForUpdates(url, targetElement, level + 1);
             }
         }, false);
         eventSource.addEventListener('error', function() {
             console.log('Encountered an SSE error. Closing the connection...');
+            showMessage('WARNING', 'Auto-updating failed. Please refresh.', 1000000);
             eventSource.close();
         }, false);
         window.addEventListener('beforeunload', function() {
-            console.log('Closing server-sent events connection.');
+            console.log('Closing the SSE connection.');
             eventSource.close();
         });
     } else {

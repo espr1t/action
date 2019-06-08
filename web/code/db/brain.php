@@ -595,17 +595,9 @@ class Brain {
     }
 
     function updatePending($submit) {
-        $executed = 0;
-        foreach ($submit->results as $result) {
-            if (is_numeric($result) || strlen($result) == 2) {
-                $executed = $executed + 1;
-            }
-        }
-        $progress = count($submit->results) == 0 ? 0.0 : 1.0 * $executed / count($submit->results);
-
         $response = $this->db->query("
             UPDATE `Pending` SET
-                progress = '" . $progress . "'
+                progress = '" . $submit->calcProgress() . "'
             WHERE submitId = " . $submit->id . "
         ");
 
@@ -1051,6 +1043,74 @@ class Brain {
             return null;
         }
         return $this->getResults($response);
+    }
+
+    // Regrading
+    function getRegradeList($id) {
+        $response = $this->db->query("
+            SELECT * FROM `Regrades`
+            WHERE id = '" . $id . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getRegradeList() query for regradeId "' . $id . '"!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function getRegradeSubmit($id, $submit) {
+        $response = $this->db->query("
+            SELECT * FROM `Regrades`
+            WHERE id = '" . $id . "' AND submitId = '" . $submit->id . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getRegradeSubmit() query for regradeId "' . $id . '" and submitId "' . $submit->id . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function addRegradeSubmit($id, $submit) {
+        $maxTime = max($submit->exec_time);
+        $maxMemory = max($submit->exec_memory);
+        $response = $this->db->query("
+            INSERT INTO `Regrades` (id, submitId, userName, problemName, submitted, regraded, oldTime, newTime, oldMemory, newMemory, oldStatus, newStatus)
+            VALUES('" . $id . "',
+                   '" . $submit->id . "',
+                   '" . $submit->userName . "',
+                   '" . $submit->problemName . "',
+                   '" . $submit->submitted . "',
+                   '" . date('Y-m-d H:i:s') . "',
+                   '" . $maxTime . "',
+                   '" . -1.0 . "',
+                   '" . $maxMemory . "',
+                   '" . -1.0 . "',
+                   '" . $submit->status . "',
+                   '" . $GLOBALS['STATUS_WAITING'] . "'
+            )
+        ");
+        if (!$response) {
+            error_log('Could not execute addRegradeSubmit() query for regradeId "' . $id . '" and submitId "' . $submit->id . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function updateRegradeSubmit($id, $submit) {
+        $maxTime = max($submit->exec_time);
+        $maxMemory = max($submit->exec_memory);
+        $response = $this->db->query("
+            UPDATE `Regrades` SET
+                newTime = '" . $maxTime . "',
+                newMemory = '" . $maxMemory . "',
+                newStatus = '" . $submit->status . "'
+            WHERE id = '" . $id . "' AND submitId = '" . $submit->id . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute updateRegradeSubmit() query for regradeId "' . $id . '" and submitId "' . $submit->id . '"!');
+            return null;
+        }
+        return true;
     }
 }
 

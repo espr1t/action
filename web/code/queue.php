@@ -120,7 +120,7 @@ class QueuePage extends Page {
         }
 
         $time = '
-            <div class="help-version"">
+            <div class="help-version">
                 Текущо време на системата: ' . date('H:i') . $graderStatus .'
             </div>
         ';

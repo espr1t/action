@@ -947,7 +947,7 @@ class GamesPage extends Page {
                 return '
                     <script>
                         showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
-                        subscribeForUpdates(\'' . $updatesUrl . '\');
+                        subscribeForUpdates(\'' . $updatesUrl . '\', \'action-form-content\');
                     </script>
                 ';
             } else {

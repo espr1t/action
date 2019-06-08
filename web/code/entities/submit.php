@@ -18,7 +18,6 @@ class Submit {
     public $results = array();
     public $exec_time = array();
     public $exec_memory = array();
-    public $progress = 0;
     public $status = -1;
     public $message = '';
     public $full = true;
@@ -55,7 +54,6 @@ class Submit {
             $submit->exec_time[$i] = 0;
             $submit->exec_memory[$i] = 0;
         }
-        $submit->progress = 0;
         $submit->status = $GLOBALS['STATUS_WAITING'];
         $submit->message = '';
 
@@ -78,7 +76,6 @@ class Submit {
             $this->exec_time[$i] = 0;
             $this->exec_memory[$i] = 0;
         }
-        $this->progress = 0;
         $this->status = $GLOBALS['STATUS_WAITING'];
         $this->message = '';
         $this->info = '';
@@ -412,6 +409,18 @@ class Submit {
 
     public function calcScore() {
         return array_sum($this->calcScores());
+    }
+
+    public function calcProgress() {
+        if (count($this->results) == 0)
+            return 0.0;
+        $executed = 0;
+        foreach ($this->results as $result) {
+            if (is_numeric($result) || strlen($result) == 2) {
+                $executed++;
+            }
+        }
+        return 1.0 * $executed / count($this->results);
     }
 }
 

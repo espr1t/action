@@ -138,8 +138,8 @@ class Grader {
         // NOTE: This logic still imposes some small risk of a race condition
         // (between this check and the updateSubmit() call bellow)
         if ($submit->graded > $timestamp) {
-            error_log(sprintf('Skipping update: requested update for %f, but already at %f.',
-                    $timestamp, $submit->graded));
+            error_log(sprintf('Skipping update on submit %d with message "%s": requested update for %f, but already at %f.',
+                    $submitId, $message, $timestamp, $submit->graded));
             exit();
         }
         // Update the timestamp of the latest submit

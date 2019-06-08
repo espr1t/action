@@ -260,6 +260,10 @@ div.narrow {
     padding: 0.625rem 3.125rem;
 }
 
+div.narrower {
+    padding: 0.5rem 1rem;
+}
+
 div.boxlink:hover {
     background-color: #FAFAFA;
     cursor: pointer;
@@ -1206,4 +1210,20 @@ div.feedback {
     user-select: none;
     cursor: pointer;
     z-index: 95;
+}
+
+table.regradeList {
+    width: 100%;
+    line-height: 1.5rem;
+}
+
+table.regradeList th {
+    text-align: center;
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+
+table.regradeList td {
+    text-align: center;
+    padding: 0 0.125rem;
 }

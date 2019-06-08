@@ -419,6 +419,50 @@ if ($db->tableExists('Latest')) {
 }
 
 /*
+Table::Regrade
+==============
+{
+    "id": "pxrqa",
+    "submitId": 1337,
+    "userName": "ThinkCreative",
+    "problemName": "Names",
+    "submitted": "2017-04-15 12:58:38",
+    "regraded": "2019-06-07 23:16:38",
+    "oldTime": 0.483,
+    "newTime": 0.511,
+    "oldMemory": 72.331,
+    "newMemory": 72.331,
+    "oldStatus": "OK",
+    "newStatus": "TL"
+}
+*/
+output('');
+output('Creating table Regrades...');
+
+if ($db->tableExists('Regrades')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Regrades`(
+            id VARCHAR(8) NOT NULL,
+            submitId INT NOT NULL,
+            userName VARCHAR(32) NOT NULL,
+            problemName VARCHAR(32) NOT NULL,
+            submitted DATETIME NOT NULL,
+            regraded DATETIME NOT NULL,
+            oldTime DOUBLE NOT NULL,
+            newTime DOUBLE NOT NULL,
+            oldMemory DOUBLE NOT NULL,
+            newMemory DOUBLE NOT NULL,
+            oldStatus VARCHAR(2) NOT NULL,
+            newStatus VARCHAR(2) NOT NULL,
+            PRIMARY KEY (id, submitId)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
+/*
 Table::News
 ===========
 {
