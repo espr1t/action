@@ -331,7 +331,7 @@ class AdminProblemsPage extends Page {
                     <div class="right" onclick="toggleStatementHTML();"><a>edit html</a>&nbsp;</div>
                 </div>
                 <div>
-                    <div contenteditable id="statement">
+                    <div contenteditable id="editStatement">
                     ' . $problem->statement . '
                     </div>
                 </div>
@@ -408,10 +408,10 @@ class AdminProblemsPage extends Page {
                 <h2>' . $headerText . '</h2>
             </div>
             <div class="edit-problem-tab">
-                <div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button underline" id="optionsTab">Настройки</div> |
-                <div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button" id="statementTab">Условие</div> |
-                <div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div> |
-                <div onclick="changeTab(\'solutionsTab\');" class="edit-problem-tab-button" id="solutionsTab">Решения</div>
+                <a href="#options"><div onclick="changeTab(\'optionsTab\');" class="edit-problem-tab-button underline" id="optionsTab">Настройки</div></a> |
+                <a href="#statement"><div onclick="changeTab(\'statementTab\');" class="edit-problem-tab-button" id="statementTab">Условие</div></a> |
+                <a href="#tests"><div onclick="changeTab(\'testsTab\');" class="edit-problem-tab-button" id="testsTab">Тестове</div></a> |
+                <a href="#solutions"><div onclick="changeTab(\'solutionsTab\');" class="edit-problem-tab-button" id="solutionsTab">Решения</div></a>
             </div>
 
             ' . $this->getOptionsTab($problem) . '
@@ -453,6 +453,11 @@ class AdminProblemsPage extends Page {
             $content .= '
                 <script>
                     showEditProblemForm(`' . $this->getEditProblemForm($problem) . '`, `' . $redirect . '`);
+                    var anchor = (document.URL.split(\'#\').length > 1) ? document.URL.split(\'#\')[1] : \'\';
+                    if (anchor === \'options\') changeTab(\'optionsTab\');
+                    if (anchor === \'statement\') changeTab(\'statementTab\');
+                    if (anchor === \'tests\') changeTab(\'testsTab\');
+                    if (anchor === \'solutions\') changeTab(\'solutionsTab\');
                 </script>
             ';
             $content .= $this->getEditProblemScript($problem);

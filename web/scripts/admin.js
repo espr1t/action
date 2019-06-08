@@ -436,7 +436,7 @@ function addSolutions() {
 }
 
 function toggleStatementHTML() {
-    var statementEl = document.getElementById('statement');
+    var statementEl = document.getElementById('editStatement');
     var statementHTML = statementEl.innerHTML || statementEl.value;
     var statementParent = statementEl.parentNode;
     statementParent.removeChild(statementEl);
@@ -444,14 +444,14 @@ function toggleStatementHTML() {
     if (statementEl.nodeName == 'DIV') {
         var numLines = Math.max(20, statementHTML.split(/\r\n|\r|\n/).length);
         var textArea = document.createElement('TEXTAREA');
-        textArea.id = 'statement';
+        textArea.id = 'editStatement';
         textArea.className = 'edit-problem-statement';
         textArea.rows = numLines;
         textArea.value = statementHTML.trim();
         statementParent.appendChild(textArea);
     } else {
         var editableDiv = document.createElement('DIV');
-        editableDiv.id = 'statement';
+        editableDiv.id = 'editStatement';
         editableDiv.contentEditable = true;
         editableDiv.innerHTML = statementHTML;
         statementParent.appendChild(editableDiv);
@@ -469,7 +469,7 @@ function submitEditProblemForm() {
     var memoryLimit = document.getElementById('problemML').value;
     var type = document.getElementById('problemType').value;
     var difficulty = document.getElementById('problemDifficulty').value;
-    var statement = (document.getElementById('statement').innerHTML || document.getElementById('statement').value).trim();
+    var statement = (document.getElementById('editStatement').innerHTML || document.getElementById('editStatement').value).trim();
 
     var tags = '';
     var tagCheckboxes = document.getElementsByName('problemTags');
