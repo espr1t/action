@@ -13,13 +13,8 @@ function getLocalTime() {
 }
 
 function write_log($logName, $message) {
-    if (!isset($GLOBALS['user'])) {
-        error_log('User is not set when printing a log!');
-        error_log('  >> logName = ' . $logName);
-        error_log('  >> message = ' . $message);
-        return;
-    }
-    if ($GLOBALS['user']->id == -1) {
+    // User can be not set if the log is comming from an action (e.g., grader update)
+    if (isset($GLOBALS['user']) && $GLOBALS['user']->id == -1) {
         // Logs for anonymous users go to separate files.
         $logName = explode('.', $logName)[0] . '_anonymous.log';
     }

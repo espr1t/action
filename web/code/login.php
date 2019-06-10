@@ -44,6 +44,7 @@ class LoginPage extends Page {
             // Authorized user, update login key and redirect to home page
             if ($error == '') {
                 // Set session (use until browser close)
+                $GLOBALS['user'] = $user;
                 $_SESSION['userId'] = $user->id;
 
                 // Set cookie (avoid logging in again until cookie expires)
