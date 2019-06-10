@@ -777,7 +777,8 @@ class AdminAchievementsPage extends Page {
         $this->initTrickyProblems();
 
         $this->brain = new Brain();
-        $this->users = $this->brain->getUsers();
+        $this->users = $this->brain->getAllUsers();
+        $this->usersInfo = $this->brain->getAllUsersInfo();
         $this->games = $this->brain->getAllGames();
         $this->problems = $this->brain->getAllProblems();
         $this->ranking = RankingPage::getRanking();
@@ -885,7 +886,7 @@ class AdminAchievementsPage extends Page {
         // Skip service user and admin
         $userCount = count($this->users);
         for ($i = 2; $i < $userCount; $i++) {
-            $user = User::instanceFromArray($this->users[$i]);
+            $user = User::instanceFromArray($this->users[$i], $this->usersInfo[$i]);
             $this->updateAll($user, $userSubmits[$user->id], $userAchievements[$user->id], $userReports[$user->id]);
         }
 
@@ -896,7 +897,7 @@ class AdminAchievementsPage extends Page {
         $brain = new Brain();
 
         $userName = array();
-        foreach ($brain->getUsers() as $user)
+        foreach ($brain->getAllUsers() as $user)
             $userName[$user['id']] = $user['username'];
 
         $perType = array();

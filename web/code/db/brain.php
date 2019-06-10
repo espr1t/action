@@ -724,32 +724,6 @@ class Brain {
         return true;
     }
 
-    function updateUserActivity($user) {
-        $response = $this->db->query("
-            UPDATE `Users` SET
-                actions = '" . $user->actions . "',
-                totalTime = '" . $user->totalTime . "',
-                lastSeen = '" . $user->lastSeen . "'
-            WHERE id = " . $user->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update activity info for user "' . $user->username . '"!');
-            return null;
-        }
-        return true;
-    }
-
-    function getUsers() {
-        $response = $this->db->query("
-            SELECT * FROM `Users` ORDER BY id
-        ");
-        if (!$response) {
-            error_log('Could not execute getUsers() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
     function getUser($userId) {
         $response = $this->db->query("
             SELECT * FROM `Users`
@@ -774,6 +748,81 @@ class Brain {
             return null;
         }
         return $this->getResult($response);
+    }
+
+    function getAllUsers() {
+        $response = $this->db->query("
+            SELECT * FROM `Users` ORDER BY id
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllUsers() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    // User Info
+    function addUserInfo($user) {
+        $response = $this->db->query("
+            INSERT INTO `UsersInfo`(id, username, actions, totalTime, lastSeen, profileViews, lastViewers, loginCount)
+            VALUES (
+                '" . $user->id . "',
+                '" . $user->username . "',
+                '" . $user->actions . "',
+                '" . $user->totalTime . "',
+                '" . $user->lastSeen . "',
+                '" . $user->profileViews . "',
+                '" . $user->lastViewers . "',
+                '" . $user->loginCount . "'
+            )
+        ");
+        if (!$response) {
+            error_log('Could not add user info for user "' . $user->username . '"!');
+            return false;
+        }
+        return true;
+    }
+
+    function updateUserInfo($user) {
+        $response = $this->db->query("
+            UPDATE `UsersInfo` SET
+                actions = '" . $user->actions . "',
+                totalTime = '" . $user->totalTime . "',
+                lastSeen = '" . $user->lastSeen . "',
+                profileViews = '" . $user->profileViews . "',
+                lastViewers = '" . $user->lastViewers . "',
+                loginCount = '" . $user->loginCount . "'
+            WHERE id = " . $user->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update activity info for user "' . $user->username . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function getUserInfo($userId) {
+        $response = $this->db->query("
+            SELECT * FROM `UsersInfo`
+            WHERE id = '" . $userId . "'
+            LIMIT 1
+        ");
+        if (!$response) {
+            error_log('Could not execute getUserInfo() query with id = "' . $userId . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getAllUsersInfo() {
+        $response = $this->db->query("
+            SELECT * FROM `UsersInfo` ORDER BY id
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllUsersInfo() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
     }
 
     // Credentials

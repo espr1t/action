@@ -18,7 +18,7 @@ class RankingPage extends Page {
 
     public static function getRanking() {
         $brain = new Brain();
-        $usersInfo = $brain->getUsers();
+        $usersInfo = $brain->getAllUsers();
 
         // Remove system and admin accounts from ranking
         $usersInfo = array_splice($usersInfo, 2);

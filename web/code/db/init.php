@@ -11,7 +11,7 @@ function output($message) {
 Table::Users
 ============
 {
-    "id": 1,
+    "id": 42,
     "access": 100,
     "registered": "2016-05-23",
     "username": "espr1t",
@@ -46,9 +46,42 @@ if ($db->tableExists('Users')) {
             gender VARCHAR(8) NOT NULL,
             birthdate DATE NOT NULL,
             avatar VARCHAR(255) NOT NULL,
+            PRIMARY KEY (id)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
+/*
+Table::UsersInfo
+============
+{
+    "id": 42,
+    "username": "espr1t",
+    "actions": 1337,
+    "totalTime": 42666, // Seconds
+    "lastSeen": "2016-05-23T21:29:13",
+    "profileViews": 666,
+    "lastViewers": "espr1t,ThinkCreative,kopche",
+    "loginCount": 123
+}
+*/
+output('');
+output('Creating table UsersInfo...');
+
+if ($db->tableExists('UsersInfo')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `UsersInfo`(
+            id INT NOT NULL,
+            username VARCHAR(32) NOT NULL,
             actions INT NOT NULL,
             totalTime INT NOT NULL,
             lastSeen DATETIME NOT NULL,
+            profileViews INT NOT NULL,
+            lastViewers TEXT NOT NULL,
+            loginCount INT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

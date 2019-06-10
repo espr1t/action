@@ -260,7 +260,7 @@ class StatsPage extends Page {
     private function userStats() {
         $genders = array();
 
-        $users = $this->brain->getUsers();
+        $users = $this->brain->getAllUsers();
 
         $content = '
             <h2>Потребители</h2>

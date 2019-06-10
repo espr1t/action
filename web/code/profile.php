@@ -40,7 +40,7 @@ class ProfilePage extends Page {
 
     private function getTopUsersSkills($problems) {
         // Get average stats for top 10% of the users
-        $allUsers = $this->brain->getUsers();
+        $allUsers = $this->brain->getAllUsers();
         $allSolved = array();
         for ($i = 0; $i < count($allUsers); $i = $i + 1) {
             $allUsers[$i]['solved'] = $this->brain->getSolved($allUsers[$i]['id']);

@@ -20,6 +20,9 @@ class User {
     public $actions = 0;
     public $totalTime = 0;
     public $lastSeen = '2017-01-01 00:00:00';
+    public $profileViews = 0;
+    public $lastViewers = '';
+    public $loginCount = 0;
 
     public function logOut() {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
@@ -47,37 +50,45 @@ class User {
             $this->totalTime += min(array(time() - strtotime($this->lastSeen), 15 * 60));
             $this->lastSeen = date('Y-m-d H:i:s', time());
             $brain = new Brain();
-            $brain->updateUserActivity($this);
+            $brain->updateUserInfo($this);
         }
     }
 
-    public static function instanceFromArray($info) {
+    public static function instanceFromArray($main, $info) {
         $user = new User;
-        $user->id = getValue($info, 'id');
-        $user->access = getValue($info, 'access');
-        $user->registered = getValue($info, 'registered');
-        $user->username = getValue($info, 'username');
-        $user->name = getValue($info, 'name');
-        $user->email = getValue($info, 'email');
-        $user->town = getValue($info, 'town');
-        $user->country = getValue($info, 'country');
-        $user->gender = getValue($info, 'gender');
-        $user->birthdate = getValue($info, 'birthdate');
-        $user->avatar = getValue($info, 'avatar');
+        $user->id = getValue($main, 'id');
+        $user->access = getValue($main, 'access');
+        $user->registered = getValue($main, 'registered');
+        $user->username = getValue($main, 'username');
+        $user->name = getValue($main, 'name');
+        $user->email = getValue($main, 'email');
+        $user->town = getValue($main, 'town');
+        $user->country = getValue($main, 'country');
+        $user->gender = getValue($main, 'gender');
+        $user->birthdate = getValue($main, 'birthdate');
+        $user->avatar = getValue($main, 'avatar');
+        // $user->actions = intval(getValue($main, 'actions'));
+        // $user->totalTime = intval(getValue($main, 'totalTime'));
+        // $user->lastSeen = getValue($main, 'lastSeen');
         $user->actions = intval(getValue($info, 'actions'));
         $user->totalTime = intval(getValue($info, 'totalTime'));
         $user->lastSeen = getValue($info, 'lastSeen');
+        $user->profileViews = intval(getValue($info, 'profileViews'));
+        $user->lastViewers = getValue($info, 'lastViewers');
+        $user->loginCount = intval(getValue($info, 'loginCount'));
         return $user;
     }
 
     public static function get($userKey) {
         $brain = new Brain();
         if (is_numeric($userKey)) {
-            $info = $brain->getUser($userKey);
+            $main = $brain->getUser($userKey);
         } else {
-            $info = $brain->getUserByUsername($userKey);
+            $main = $brain->getUserByUsername($userKey);
         }
-        return !$info ? null : User::instanceFromArray($info);
+        if (!$main) return null;
+        $info = $brain->getUserInfo($main['id']);
+        return User::instanceFromArray($main, $info);
     }
 
     public static function getByLoginKey($loginKey) {
@@ -111,6 +122,9 @@ class User {
         if (!$user->id) {
             return null;
         }
+
+        // Add user info entry
+        $brain->addUserInfo($user);
 
         // Add credentials entry
         $brain->addCredentials($user->id, $username, $password, '');
