@@ -2,6 +2,16 @@
 require_once('config.php');
 require_once('db/brain.php');
 
+function getLocalTime() {
+    $localTime = DateTime::createFromFormat('U.u', microtime(true));
+    if ($localTime) {
+        $localTime->setTimezone(new DateTimeZone('Europe/Sofia'));
+        return $localTime->format("Y-m-d H:i:s.u");
+    } else {
+        return NULL;
+    }
+}
+
 function write_log($logName, $message) {
     if (!isset($GLOBALS['user'])) {
         error_log('User is not set when printing a log!');
@@ -15,10 +25,9 @@ function write_log($logName, $message) {
     }
     $logPath = str_replace('\\', '/', realpath(__DIR__ . '/../')) . '/logs/' . $logName;
     // TODO: It may be a good idea to leave this to the default (UTC)
-    $logTime = DateTime::createFromFormat('U.u', microtime(true));
-    if ($logTime) {
-        $logTime->setTimezone(new DateTimeZone('Europe/Sofia'));
-        $logLine = sprintf('[%s] %s%s', $logTime->format("Y-m-d H:i:s.u"), $message, PHP_EOL);
+    $logTime = getLocalTime();
+    if ($logTime != NULL) {
+        $logLine = sprintf('[%s] %s%s', $logTime, $message, PHP_EOL);
         file_put_contents($logPath, $logLine, FILE_APPEND | LOCK_EX);
     } else {
         error_log('Couldn\'t log message "' . $message . '". DateTime failed.');
