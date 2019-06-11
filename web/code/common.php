@@ -29,6 +29,24 @@ function write_log($logName, $message) {
     }
 }
 
+function isValidIP($ip) {
+    if ($ip == null || $ip == '' || strtolower($ip) == 'unknown')
+        return false;
+    // This will not work for IPv6
+    $firstOctet = explode('.', $ip)[0];
+    if ($firstOctet == '10' || $firstOctet == '172' || $firstOctet == '192')
+        return false;
+    return true;
+}
+
+function getUserIP() {
+    if (isset($_SERVER['HTTP_CLIENT_IP']) && isValidIP($_SERVER['HTTP_CLIENT_IP']))
+        return $_SERVER['HTTP_CLIENT_IP'];
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && isValidIP($_SERVER['HTTP_X_FORWARDED_FOR']))
+        return $_SERVER['HTTP_X_FORWARDED_FOR'];
+    return $_SERVER['REMOTE_ADDR'];
+}
+
 function swap(&$var1, &$var2) {
     $temp = $var1;
     $var1 = $var2;
@@ -86,7 +104,7 @@ function validateReCaptcha() {
     $data = array(
         'secret' => isProduction() ? $GLOBALS['RE_CAPTCHA_PROD_SECRET_KEY'] : $GLOBALS['RE_CAPTCHA_TEST_SECRET_KEY'],
         'response' => $_POST['g-recaptcha-response'],
-        'remoteip' => $_SERVER['REMOTE_ADDR']
+        'remoteip' => getUserIP()
     );
     $options = array(
         'http' => array(
@@ -352,7 +370,7 @@ function getCurrentUser() {
         // Scan all users for a one with a loginKey matching the one stored in the cookie
         list($loginKey, $hmac) = explode(':', $_COOKIE[$GLOBALS['COOKIE_NAME']], 2);
         // This, unfortunately, wouldn't work for non-static IPs =/
-        if ($hmac == hash_hmac('md5', $loginKey, $_SERVER['REMOTE_ADDR'])) {
+        if ($hmac == hash_hmac('md5', $loginKey, getUserIP())) {
             $user = User::getByLoginKey($loginKey);
             if ($user != null) {
                 $_SESSION['userId'] = $user->id;

@@ -791,7 +791,8 @@ class Brain {
                 lastSeen = '" . $user->lastSeen . "',
                 profileViews = '" . $user->profileViews . "',
                 lastViewers = '" . $user->lastViewers . "',
-                loginCount = '" . $user->loginCount . "'
+                loginCount = '" . $user->loginCount . "',
+                lastIP = '" . $user->lastIP . "'
             WHERE id = " . $user->id . "
         ");
         if (!$response) {

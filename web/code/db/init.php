@@ -63,7 +63,8 @@ Table::UsersInfo
     "lastSeen": "2016-05-23T21:29:13",
     "profileViews": 666,
     "lastViewers": "espr1t,ThinkCreative,kopche",
-    "loginCount": 123
+    "loginCount": 123,
+    "lastIP": "192.168.1.123"
 }
 */
 output('');
@@ -82,6 +83,7 @@ if ($db->tableExists('UsersInfo')) {
             profileViews INT NOT NULL,
             lastViewers TEXT NOT NULL,
             loginCount INT NOT NULL,
+            lastIP VARCHAR(50) NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

@@ -23,6 +23,7 @@ class User {
     public $profileViews = 0;
     public $lastViewers = '';
     public $loginCount = 0;
+    public $lastIP = '';
 
     public function logOut() {
         setcookie($GLOBALS['COOKIE_NAME'], null, -1);
@@ -49,6 +50,7 @@ class User {
             // activity, otherwise add the difference between now and then.
             $this->totalTime += min(array(time() - strtotime($this->lastSeen), 15 * 60));
             $this->lastSeen = date('Y-m-d H:i:s', time());
+            $this->lastIP = getUserIP();
             $brain = new Brain();
             $brain->updateUserInfo($this);
         }
@@ -67,15 +69,13 @@ class User {
         $user->gender = getValue($main, 'gender');
         $user->birthdate = getValue($main, 'birthdate');
         $user->avatar = getValue($main, 'avatar');
-        // $user->actions = intval(getValue($main, 'actions'));
-        // $user->totalTime = intval(getValue($main, 'totalTime'));
-        // $user->lastSeen = getValue($main, 'lastSeen');
         $user->actions = intval(getValue($info, 'actions'));
         $user->totalTime = intval(getValue($info, 'totalTime'));
         $user->lastSeen = getValue($info, 'lastSeen');
         $user->profileViews = intval(getValue($info, 'profileViews'));
         $user->lastViewers = getValue($info, 'lastViewers');
         $user->loginCount = intval(getValue($info, 'loginCount'));
+        $user->lastIP = getValue($info, 'lastIP');
         return $user;
     }
 

@@ -60,7 +60,7 @@ class Submit {
         $submit->full = $full;
         $submit->hidden = $hidden;
 
-        $submit->ip = $_SERVER['REMOTE_ADDR'];
+        $submit->ip = getUserIP();
         $submit->info = '';
         return $submit;
     }

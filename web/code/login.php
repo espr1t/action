@@ -30,11 +30,11 @@ class LoginPage extends Page {
         if (isset($_POST['username']) && isset($_POST['password'])) {
             $saltedPassword = saltHashPassword($_POST['password']);
 
+            $brain = new Brain();
             $user = User::get($_POST['username']);
             if ($user == null) {
                 $error = 'Не съществува акаунт с това потребителско име!';
             } else {
-                $brain = new Brain();
                 $creds = $brain->getCreds($user->id);
                 if ($creds['password'] != $saltedPassword) {
                     $error = 'Въведената парола е невалидна!';
@@ -50,18 +50,19 @@ class LoginPage extends Page {
                 // Set cookie (avoid logging in again until cookie expires)
                 if ($creds['loginKey'] == '') {
                     $creds['loginKey'] = str_shuffle(md5(microtime()));
-                    $brain = new Brain();
                     $brain->updateCreds($creds);
                 }
                 # Sign the login key with the user's IP so it cannot be used on another computer even if stolen
                 # Note that this wouldn't work for two computers on the same subnet (behind a router)
-                $signedLoginKey = $creds['loginKey'] . ':' . hash_hmac('md5', $creds['loginKey'], $_SERVER['REMOTE_ADDR']);
+                $signedLoginKey = $creds['loginKey'] . ':' . hash_hmac('md5', $creds['loginKey'], getUserIP());
                 $expireTime = time() + 365 * 86400; // 365 days
                 setcookie($GLOBALS['COOKIE_NAME'], $signedLoginKey, $expireTime);
 
                 // Record the login to the logs
                 $logMessage = sprintf('User %s has logged in.', $user->username);
                 write_log($GLOBALS['LOG_LOGINS'], $logMessage);
+                $user->loginCount++;
+                $brain->updateUserInfo($user);
 
                 // Redirect to home page with a success message
                 redirect('/home', 'INFO', 'Влязохте успешно в системата.');
