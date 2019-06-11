@@ -331,6 +331,27 @@ class ProfilePage extends Page {
         return $content;
     }
 
+    private function updateProfileViews() {
+        if ($this->user->id < 1)
+            return;
+
+        $lastViewers = array();
+        if ($this->profile->lastViewers != '')
+            $lastViewers = explode(',', $this->profile->lastViewers);
+        for ($i = 0; $i < count($lastViewers); $i++) {
+            if ($lastViewers[$i] == $this->user->username) {
+                return;
+            }
+        }
+        array_unshift($lastViewers, $this->user->username);
+        if (count($lastViewers) > 3) {
+            $lastViewers = array_slice($lastViewers, 0, 3);
+        }
+        $this->profile->lastViewers = implode(',', $lastViewers);
+        $this->profile->profileViews++;
+        $this->brain->updateUserInfo($this->profile);
+    }
+
     public function getContent() {
         $content = '';
 
@@ -370,6 +391,7 @@ class ProfilePage extends Page {
         // Record the profile view in the logs
         $logMessage = sprintf('User %s viewed %s\'s profile.', $this->user->username, $this->profile->username);
         write_log($GLOBALS['LOG_PROFILE_VIEWS'], $logMessage);
+        $this->updateProfileViews();
 
         return inBox($content);
     }
