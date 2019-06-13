@@ -244,6 +244,7 @@ div.noselect {
 }
 
 div.box {
+    position: relative;
     margin: 0.5rem auto;
     padding: 1.5rem 3.5rem 2rem 3.5rem;
     background: #FFFFFF;
@@ -254,6 +255,16 @@ div.box {
 
 div.box-problem {
     padding-bottom: 1rem;
+}
+
+div.box-footer {
+    position: absolute;
+    display: inline-block;
+    font-size: smaller;
+    right: 0;
+    margin-right: 0.75rem;
+    bottom: 0;
+    margin-bottom: 0.5rem;
 }
 
 div.narrow {
@@ -585,13 +596,6 @@ div.problem-explanation {
     font-size: 0.75rem;
     text-align: center;
     font-style: italic;
-}
-
-div.problem-stats-links {
-    font-size: smaller;
-    margin-top: -1.75rem;
-    margin-right: 0.5rem;
-    text-align: right;
 }
 
 div.problem-stats-field {

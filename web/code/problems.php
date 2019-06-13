@@ -345,7 +345,7 @@ class ProblemsPage extends Page {
             $pdfButton = '<div class="tooltip--top" data-tooltip="PDF" title="Трябва да влезете в системата за да изтеглите условието като PDF." style="display: inline-block;"><i class="fas fa-file-pdf" style="opacity: 0.5;"></i></div>';
         }
         return '
-            <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
+            <div class="box box-problem">
                 <div class="problem-visibility">' . $visibilityRestriction . '</div>
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
@@ -353,15 +353,15 @@ class ProblemsPage extends Page {
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $submitButtons . '
-            </div>
-            <div class="problem-stats-links">
-                ' . $statsButton . '
-                &nbsp;
-                ' . $usersButton . '
-                &nbsp;
-                ' . $tagsButton . '
-                &nbsp;
-                ' . $pdfButton . '
+                <div class="box-footer">
+                    ' . $statsButton . '
+                    &nbsp;
+                    ' . $usersButton . '
+                    &nbsp;
+                    ' . $tagsButton . '
+                    &nbsp;
+                    ' . $pdfButton . '
+                </div>
             </div>
         ';
     }
