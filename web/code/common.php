@@ -238,8 +238,7 @@ function createHead($page) {
         <meta name="author" content="Alexander Georgiev">
         <meta name="keywords" content="Програмиране,Информатика,Алгоритми,Структури Данни,Задачи,' .
                                       'Programming,Informatics,Algorithms,Data Structures,Problems">
-        <link rel="shortcut icon" type="image/x-icon" href="/images/favicon_blue_128.png">
-        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" type="image/png" href="/images/favicon_blue_512.png">
         <link rel="stylesheet" type="text/css" href="/styles/style.css">
         <link rel="stylesheet" type="text/css" href="/styles/achievements.css">
         <link rel="stylesheet" type="text/css" href="/styles/icons/css/fontawesome-all.min.css">
@@ -418,6 +417,23 @@ function getAchievementsContent() {
         ';
     }
     return $achievementsContent;
+}
+
+function getPrimaryStatsCircle($statName, $statValue, $statInfo) {
+    return '
+        <div class="tooltip--top" data-tooltip="' . $statInfo . '" style="display: inline-block;">
+            <div class="primary-stats-circle">
+                <div class="primary-stats-circle-content">
+                    <div class="primary-stats-circle-line1">
+                        ' . $statName . '
+                    </div>
+                    <div class="primary-stats-circle-line2">
+                        ' . $statValue . '
+                    </div>
+                </div>
+            </div>
+        </div>
+    ';
 }
 
 ?>

@@ -3,12 +3,17 @@ require_once('db/brain.php');
 require_once('common.php');
 require_once('page.php');
 require_once('stats.php');
+require_once('ranking.php');
 
 class ProfilePage extends Page {
     private $profile;
 
     public function getTitle() {
         return 'O(N)::' . $this->profile->username;
+    }
+
+    public function getExtraStyles() {
+        return array('/styles/tooltips.css');
     }
 
     public function getExtraScripts() {
@@ -147,10 +152,13 @@ class ProfilePage extends Page {
     }
 
     private function submissionDotChart() {
+        $submits = $this->brain->getUserSubmits($this->profile->id);
+        if (count($submits) == 0)
+            return '';
+
         $content = '
                 <h2>Предадени Решения</h2>
         ';
-        $submits = $this->brain->getUserSubmits($this->profile->id);
 
         // Submits dot chart
         $content .= '<div class="profile-dot-box">';
@@ -184,6 +192,14 @@ class ProfilePage extends Page {
             $content .= '<div class="profile-dot background-' . $color . '" title="' . $submit['status'] . '"></div>';
         }
         $content .= '</div>';
+        return $content . '<br>';
+    }
+
+    private function submissionActivity() {
+        $content = '
+                <h2>Активност</h2>
+        ';
+        $submits = $this->brain->getUserSubmits($this->profile->id);
 
         // Submits activity over time
         $lastDate = time();
@@ -211,33 +227,29 @@ class ProfilePage extends Page {
         }
         $content .= StatsPage::createChart('LineChart', 'activityAreaChart', '',
                 $usersChartLabels, $usersChartValues, 700, 200, 90, 70, 'none');
-        return $content;
+        return $content . '<br>';
+    }
+
+    private function getDateStr($date) {
+        $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни",
+                        "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
+        $date = explode('-', $date);
+        if (count($date) != 3)
+            return null;
+        $day = intval($date[2]);
+        $month = $months[intval($date[1]) - 1];
+        $year = intval($date[0]);
+        return $day . '. ' . $month . ', ' . $year;
     }
 
     private function generalInformation() {
         $content = '
                 <h2>Информация</h2>
         ';
-        $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни", "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
 
         $content .= '<b>Име:</b> ' . $this->profile->name . '<br>';
 
-        // Birthdate
-        if ($this->profile->birthdate != '0000-00-00') {
-            $birthdate = explode('-', $this->profile->birthdate);
-            $birthdateString = $this->profile->gender== 'female' ? 'Родена на:' : 'Роден на:';
-            $day = intval($birthdate[2]);
-            $month = $months[intval($birthdate[1]) - 1];
-            $year = intval($birthdate[0]);
-            $content .= '<b>' . $birthdateString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
-        }
-
-        // Gender
-        $gender = $this->profile->gender;
-        $gender = ($gender == 'male' ? 'мъж' : ($gender == 'female' ? 'жена' : ''));
-        if ($gender != '') {
-            $content .= '<b>Пол:</b> ' . $gender . '<br>';
-        }
+        $genderSuffix = $this->profile->gender == 'female' ? 'а' : '';
 
         // Location
         $location = $this->profile->town;
@@ -251,15 +263,131 @@ class ProfilePage extends Page {
             $content .= '<b>Град:</b> ' . $location . '<br>';
         }
 
-        // Registered
-        $registered = explode('-', $this->profile->registered);
-        if (count($registered) == 3) {
-            $registeredString = $this->profile->gender == 'female' ? 'Регистрирана на:' : 'Регистриран на:';
-            $day = intval($registered[2]);
-            $month = $months[intval($registered[1]) - 1];
-            $year = intval($registered[0]);
-            $content .= '<b>' . $registeredString . '</b> ' . $day . '. ' . $month . ', ' . $year . '<br>';
+        // Birthdate
+        if ($this->profile->birthdate != '0000-00-00') {
+            $birthdateText = 'Роден' . $genderSuffix . ' на:';
+            $birthdateDate = $this->getDateStr($this->profile->birthdate);
+            $content .= '<b>' . $birthdateText . '</b> ' . $birthdateDate . '<br>';
         }
+
+        // Registered
+        if ($this->profile->registered != '0000-00-00') {
+            $registeredText = 'Регистриран' . $genderSuffix . ' на:';
+            $registeredDate = $this->getDateStr($this->profile->registered);
+            $content .= '<b>' . $registeredText . '</b> ' . $registeredDate . '<br>';
+        }
+
+        // Last seen
+        $lastSeen = $this->getDateStr($this->profile->lastSeen);
+        if ($lastSeen != null) {
+            $content .= '<b>Последно видян' . $genderSuffix . ' на:</b> ' . $lastSeen . '<br>';
+        }
+
+        return $content . '<br>';
+    }
+
+    private function additionalInformation() {
+        $content = '
+                <h2>Разни</h2>
+        ';
+
+        $submits = $this->brain->getUserSubmits($this->profile->id);
+        if (count($submits) == 0)
+            return '';
+
+        $problems = $this->brain->getAllProblems();
+        $problemDifficulty = array();
+        foreach ($problems as $problem) {
+            $problemDifficulty[$problem['id']] = $problem['difficulty'];
+            $problemType[$problem['id']] = $problem['type'];
+        }
+
+        $langCnt = array();
+        $hourCnt = array();
+        $submitCnt = array();
+        $totalTests = 0;
+        $totalTime = 0.0;
+        $maxSubmits = 0;
+
+        $difficulties = array(
+            'none' => 0,
+            'trivial' => 1,
+            'easy' => 2,
+            'medium' => 3,
+            'hard' => 4,
+            'brutal' => 5
+        );
+        $hardest = 'none';
+
+        // Gather stats from all user submits
+        foreach ($submits as $submit) {
+            // Skip submits on games
+            if (!array_key_exists($submit['problemId'], $problemType))
+                continue;
+
+            $exec_time = explode(',', $submit['exec_time']);
+            $totalTests += count($exec_time);
+            $totalTime += array_sum($exec_time);
+
+            if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                if (array_key_exists($submit['problemId'], $problemDifficulty)) {
+                    $difficulty = $problemDifficulty[$submit['problemId']];
+                    if ($difficulties[$hardest] < $difficulties[$difficulty])
+                        $hardest = $difficulty;
+                }
+            }
+
+            if (!array_key_exists($submit['problemId'], $submitCnt))
+                $submitCnt[$submit['problemId']] = 0;
+            $submitCnt[$submit['problemId']]++;
+            $maxSubmits = max(array($maxSubmits, $submitCnt[$submit['problemId']]));
+
+            if (!array_key_exists($submit['language'], $langCnt))
+                $langCnt[$submit['language']] = 0;
+            $langCnt[$submit['language']]++;
+
+            $hour = intval(explode(':', explode(' ', $submit['submitted'])[1])[0]);
+            if (!array_key_exists($hour, $hourCnt))
+                $hourCnt[$hour] = 0;
+            $hourCnt[$hour]++;
+        }
+        if ($totalTests == 0)
+            return '';
+
+        // Determine favorite language
+        $languages = array('C++', 'Java', 'Python');
+        $favoriteLang = 0;
+        while (!array_key_exists($languages[$favoriteLang], $langCnt))
+            $favoriteLang++;
+        for ($i = $favoriteLang + 1; $i < count($languages); $i++)
+            if (array_key_exists($languages[$i], $langCnt))
+                if ($langCnt[$languages[$i]] > $langCnt[$languages[$favoriteLang]])
+                    $favoriteLang = $i;
+        $favoriteLang = $languages[$favoriteLang];
+
+        // Determine favorite hour of the day
+        $favoriteTime = 0;
+        while (!array_key_exists($favoriteTime, $hourCnt))
+            $favoriteTime++;
+        for ($hour = $favoriteTime + 1; $hour < 24; $hour++) {
+            if (array_key_exists($hour, $hourCnt))
+                if ($hourCnt[$hour] > $hourCnt[$favoriteTime])
+                    $favoriteTime = $hour;
+        }
+        $favoriteTime = sprintf("%02d:00-%02d:59", $favoriteTime, $favoriteTime);
+
+        $hardestProblem = $GLOBALS['PROBLEM_DIFFICULTIES'][$hardest];
+
+        $mostSubmits = $maxSubmits;
+        $numExecutedTests = $totalTests;
+        $totalProcessorTime = $totalTime;
+
+        $content .= '<b>Любим програмен език:</b> ' . $favoriteLang . '<br>';
+        $content .= '<b>Любим час за решаване:</b> ' . $favoriteTime . '<br>';
+        $content .= '<b>Най-голяма сложност:</b> ' . $hardestProblem . '<br>';
+        $content .= '<b>Най-много събмити по задача:</b> ' . $mostSubmits . '<br>';
+        $content .= '<b>Брой изпълнени тестове:</b> ' . $numExecutedTests . '<br>';
+        $content .= '<b>Изразходвано процесорно време:</b> ' . $totalProcessorTime . 's<br>';
 
         return $content . '<br>';
     }
@@ -331,6 +459,99 @@ class ProfilePage extends Page {
         return $content;
     }
 
+    private function primaryStats() {
+        $submits = $this->brain->getUserSubmits($this->profile->id);
+        if (count($submits) == 0)
+            return '';
+
+        $content = '
+                <h2>Статистики</h2>
+        ';
+
+        // Calculate percentile
+        $ranking = RankingPage::getRanking();
+        $position = 0;
+        while ($position < count($ranking) && $ranking[$position]['id'] != $this->profile->id)
+            $position++;
+        if ($position >= count($ranking)) {
+            $position = 0;
+        }
+
+        $percentileStat = '100%';
+        if ($position <= count($ranking) / 100) {
+            $percentileStat = '1%';
+        } else if ($position <= count($ranking) / 10) {
+            $percentileStat = '10%';
+        } else if ($position <= count($ranking) / 4) {
+            $percentileStat = '25%';
+        } else if ($position <= count($ranking) / 2) {
+            $percentileStat = '50%';
+        }
+
+        // Calculate accuracy
+        $accuracyStat = "0%";
+        $accuracy = 0;
+        $problemSubmits = array();
+        $acceptedProblems = array();
+        foreach ($submits as $submit) {
+            if (!array_key_exists($submit['problemId'], $acceptedProblems)) {
+                if (!array_key_exists($submit['problemId'], $problemSubmits))
+                    $problemSubmits[$submit['problemId']] = 0;
+                $problemSubmits[$submit['problemId']]++;
+                if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                    $acceptedProblems[$submit['problemId']] = true;
+                    $accuracy += 1.0 / $problemSubmits[$submit['problemId']];
+                }
+            }
+        }
+        if (count($acceptedProblems) > 0) {
+            $accuracy /= count($acceptedProblems);
+            $accuracyStat = sprintf("%.0f%%", 100.0 * $accuracy);
+        }
+
+        // Calculate number of solved problems
+        $problemsStat = count($acceptedProblems);
+
+        // Calculate number of submits
+        $submitsStat = count($submits);
+
+        // Calculate number of actions
+        $actionsStat = $this->profile->actions;
+
+        // Fill in the titles and info
+        $percentileTitle = 'персентил';
+        $percentileInfo = 'В най-добрите ' . $percentileStat . ' от потребителите.';
+
+        $accuracyTitle = 'точност';
+        $accuracyInfo = 'Предадените събмити до решаване на задача са верни в ' . $accuracyStat . ' от случаите.';
+
+        $problemsTitle = $problemsStat == 1 ? 'задача' : 'задачи';
+        $problemsInfo = $problemsStat == 1 ? 'Решена 1 задача.' : 'Решени ' . $problemsStat . ' задачи.';
+
+        $submitsTitle = $submitsStat == 1 ? 'събмит' : 'събмита';
+        $submitsInfo = $submitsStat == 1 ? 'Предадено 1 решение.' : 'Предадени ' . $submitsStat . ' решения.';
+
+        $actionsTitle = $actionsStat == 1 ? 'действие' : 'действия';
+        $actionsInfo = $actionsStat == 1 ? 'Направено 1 действие на сайта.' : 'Направени ' . $actionsStat . ' действия на сайта.';
+
+        $percentileStats = getPrimaryStatsCircle($percentileStat, $percentileTitle, $percentileInfo);
+        $accuracyStats = getPrimaryStatsCircle($accuracyStat, $accuracyTitle, $accuracyInfo);
+        $problemsStats = getPrimaryStatsCircle($problemsStat, $problemsTitle, $problemsInfo);
+        $submitsStats = getPrimaryStatsCircle($submitsStat, $submitsTitle, $submitsInfo);
+        $actionsStats = getPrimaryStatsCircle($actionsStat, $actionsTitle, $actionsInfo);
+
+        $content .= '
+            <div class="profile-primary-stats">
+                ' . $percentileStats . '
+                ' . $accuracyStats . '
+                ' . $problemsStats . '
+                ' . $submitsStats . '
+                ' . $actionsStats . '
+            </div>
+        ';
+        return $content . '<br>';
+    }
+
     private function updateProfileViews() {
         if ($this->user->id < 1)
             return;
@@ -359,30 +580,37 @@ class ProfilePage extends Page {
         // ====================================================================
         $content .= $this->profileHead();
 
-        // Percentile
-        // ====================================================================
-        // TODO
-
         // Skills radar chart
         // ====================================================================
         $content .= $this->skillRadarChart();
 
-        // General information
+        // User information
         // ====================================================================
         $content .= $this->generalInformation();
+        $content .= $this->additionalInformation();
 
+        /*
         // Training progress
         // ====================================================================
         // TODO
         $content .= $this->trainingProgress();
+        */
 
         // Activity per day
         // ====================================================================
         // TODO
 
-        // Submission information
+        // Submissions dot information
         // ====================================================================
         $content .= $this->submissionDotChart();
+
+        // Primary stats
+        // ====================================================================
+        $content .= $this->primaryStats();
+
+       // Submissions over time information
+        // ====================================================================
+        $content .= $this->submissionActivity();
 
         // Achievements
         // ====================================================================
@@ -393,6 +621,14 @@ class ProfilePage extends Page {
         write_log($GLOBALS['LOG_PROFILE_VIEWS'], $logMessage);
         $this->updateProfileViews();
 
+        $content .= '
+            <div class="box-footer">
+                <div class="tooltip--top" data-tooltip="разглеждания" style="display: inline-block;">
+                    <i class="far fa-eye"></i>
+                </div>
+                <span style="font-size: 0.75rem;">' . $this->profile->profileViews . '</span>
+            </div>
+        ';
         return inBox($content);
     }
 }
