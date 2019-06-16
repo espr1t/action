@@ -3,7 +3,7 @@
  */
 function getLastUrlToken() {
     var urlTokens = window.location.href.split('/');
-    return urlTokens[urlTokens.length - 1];
+    return urlTokens[urlTokens.length - 1].split('#')[0];
 }
 
 /*
