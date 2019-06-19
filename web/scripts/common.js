@@ -84,17 +84,13 @@ function showMessage(type, message, timeout=3 /* seconds */) {
         identifyEscKeyPressedEvent(event, function() {hideMessage(className, id);});
     }
 
-    // If the menu is visible, don't cover it with the message.
-    // Here we calculate the top scroll in such a way, that we show it 20 pixels bellow either the menu or the top of the screen.
-    var scrollTop = (document.documentElement.scrollTop || document.body.scrollTop);
-    var topDistancePixels = Math.max(20, 110 - scrollTop);
-    messageEl.style = 'top: ' + topDistancePixels + 'px;';
-
-    document.body.appendChild(messageEl);
+    var wrapperEl = document.getElementById('wrapper');
+    var headerEl = document.getElementById('head');
+    wrapperEl.insertBefore(messageEl, headerEl.nextSibling);
 
     // Center the message horizontally
     // Please note that this has to be done after it is appended to the DOM, since otherwise its width will be 0 (it is not visible)
-    messageEl.style.marginLeft = -messageEl.offsetWidth / 2 + 'px';
+    messageEl.style.marginLeft = (wrapperEl.offsetWidth / 2 - messageEl.offsetWidth / 2) + 'px';
 
     // Hide the message after several seconds
     setTimeout(function() {

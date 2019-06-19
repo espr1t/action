@@ -194,7 +194,7 @@ div.header {
 
 div.main {
     width: 100%;
-    overflow-x: auto;
+    /* overflow-x: auto; */
     top: 5.75rem;
     padding-bottom: 1.875rem;
 }
@@ -893,10 +893,11 @@ textarea.news-form-content {
 }
 
 div.message {
-    position: fixed;
+    position: sticky;
+    float: left;
     min-width: 20rem;
-    top: 7rem;
-    left: 50%;
+    margin-top: 1.325rem;
+    top: 1rem;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
     border-radius: 1rem;
     z-index: 100;
