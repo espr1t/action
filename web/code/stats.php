@@ -33,8 +33,6 @@ class StatsPage extends Page {
             <div id="wordcloud"></div>
             <script>
                 var words = ' . json_encode($words) . ';
-                console.log(words);
-
                 d3.wordcloud()
                     .size([700, 350])
                     .font("Century Gothic")
@@ -53,7 +51,7 @@ class StatsPage extends Page {
 
         $data = array();
         // Actual data
-        for ($i = 0; $i < count($labels); $i += 1) {
+        for ($i = 0; $i < count($labels); $i++) {
             array_push($data, array($labels[$i], $values[$i]));
         }
 
@@ -127,7 +125,7 @@ class StatsPage extends Page {
             $cnt = 0;
             foreach ($problems as $problem) {
                 if ($problem['difficulty'] == $difficulty) {
-                    $cnt += 1;
+                    $cnt++;
                 }
             }
             array_push($difficultyChartLabels, $name);
@@ -144,7 +142,7 @@ class StatsPage extends Page {
             foreach ($problems as $problem) {
                 $tags = explode(',', $problem['tags']);
                 if (in_array($tag, $tags)) {
-                    $cnt += 1;
+                    $cnt++;
                 }
             }
             array_push($tagsChartLabels, $name);
@@ -171,10 +169,10 @@ class StatsPage extends Page {
         $submits = $this->brain->getAllSubmits();
 
         foreach ($submits as $submit) {
-            $languages[$submit['language']] += 1;
-            $statuses[$submit['status']] += 1;
-            $hourHistogram[intval(substr($submit['submitted'], 11, 2))] += 1;
-            $monthHistogram[intval(substr($submit['submitted'], 5, 2)) - 1] += 1;
+            $languages[$submit['language']]++;
+            $statuses[$submit['status']]++;
+            $hourHistogram[intval(substr($submit['submitted'], 11, 2))]++;
+            $monthHistogram[intval(substr($submit['submitted'], 5, 2)) - 1]++;
         }
 
         $content = '
@@ -210,7 +208,7 @@ class StatsPage extends Page {
         // Per-hour activity histogram
         $hourlyActivityHistogramLabels = array('Час');
         $hourlyActivityHistogramValues = array('Брой');
-        for ($i = 0; $i < 24; $i += 1) {
+        for ($i = 0; $i < 24; $i++) {
             array_push($hourlyActivityHistogramValues, $hourHistogram[$i]);
             array_push($hourlyActivityHistogramLabels, sprintf("%d:00", $i));
         }
@@ -221,7 +219,7 @@ class StatsPage extends Page {
         $months = array('Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември');
         $monthlyActivityHistogramLabels = array('Месец');
         $monthlyActivityHistogramValues = array('Брой');
-        for ($i = 0; $i < 12; $i += 1) {
+        for ($i = 0; $i < 12; $i++) {
             array_push($monthlyActivityHistogramValues, $monthHistogram[$i]);
             array_push($monthlyActivityHistogramLabels, $months[$i]);
         }
@@ -258,13 +256,18 @@ class StatsPage extends Page {
     );
 
     private function userStats() {
-        $genders = array();
+        $usersArr = $this->brain->getAllUsers();
+        $usersInfoArr = $this->brain->getAllUsersInfo();
+        $numUsers = count($usersArr);
 
-        $users = $this->brain->getAllUsers();
+        $users = array();
+        for ($i = 0; $i < $numUsers; $i++) {
+            array_push($users, User::instanceFromArray($usersArr[$i], $usersInfoArr[$i]));
+        }
 
         $content = '
             <h2>Потребители</h2>
-            <b>Брой потребители:</b> ' . count($users) . '<br>
+            <b>Брой потребители:</b> ' . $numUsers . '<br>
 
             <br><br>
         ';
@@ -272,10 +275,10 @@ class StatsPage extends Page {
         // Pie chart by gender
         $genders = array('male' => 0, 'female' => 0, 'unknown' => 0);
         foreach ($users as $user) {
-            if ($user['gender'] == '') {
-                $genders['unknown'] += 1;
+            if ($user->gender == '') {
+                $genders['unknown']++;
             } else {
-                $genders[$user['gender']] += 1;
+                $genders[$user->gender]++;
             }
         }
 
@@ -288,8 +291,8 @@ class StatsPage extends Page {
         $towns = array();
         foreach ($users as $user) {
             // Make the town in proper First Letter Uppercase style
-            $town = ucwords(strtolower($user['town']));
-            // Convert it ot Cyrillic if a town in Bulgaria
+            $town = ucwords(mb_strtolower($user->town));
+            // Convert it to Cyrillic if a town in Bulgaria
             if (array_key_exists($town, $this->TOWN_ALIASES))
                 $town = $this->TOWN_ALIASES[$town];
             // Uncomment this if you want to see all Latin-lettered towns
@@ -298,7 +301,7 @@ class StatsPage extends Page {
             if (!array_key_exists($town, $towns)) {
                 $towns[$town] = 0;
             }
-            $towns[$town] += 1;
+            $towns[$town]++;
         }
         arsort($towns);
 
@@ -318,22 +321,22 @@ class StatsPage extends Page {
                 $townChartLabels, $townChartValues, 340, 300, 90, 85, 'right');
 
         // Line chart for number of users in time
-        $firstDate = strtotime($users[0]['registered']);
-        // $lastDate = strtotime($users[count($users) - 1]['registered']);
+        $NUM_TIME_POINTS = 10;
+        $firstDate = strtotime($users[0]->registered);
         $lastDate = time();
-        $timeOffset = floor(($lastDate - $firstDate) / 9);
+        $timeOffset = floor(($lastDate - $firstDate) / ($NUM_TIME_POINTS - 1));
 
         $usersChartLabels = array('Дата');
         $usersChartValues = array('Брой');
         $index = 0;
-        for ($i = 0; $i < 10; $i += 1) {
+        for ($i = 0; $i < $NUM_TIME_POINTS; $i++) {
             $targetDate = gmdate('Y-m-d', $firstDate);
-            while ($index < count($users) && $users[$index]['registered'] <= $targetDate) {
-                $index += 1;
+            while ($index < $numUsers && $users[$index]->registered <= $targetDate) {
+                $index++;
             }
             // The last point is the current number of users
-            if ($i + 1 == 10) {
-                $index = count($users);
+            if ($i == $NUM_TIME_POINTS - 1) {
+                $index = $numUsers;
             }
             array_push($usersChartLabels, $targetDate);
             array_push($usersChartValues, $index);
@@ -343,24 +346,32 @@ class StatsPage extends Page {
                 $usersChartLabels, $usersChartValues, 700, 300, 90, 70, 'none');
 
         // Histogram of user's age
+        // Instead of simply taking the current time and subtracting the birthday, we'll do
+        // something more elaborate - we'll consider the "current time" the time of their last
+        // action, thus preventing "aging" of accounts if they are inactive. Thus, a person who
+        // last visited the site 4 years ago when he/she was 16 years old will be considered as
+        // 16 year old (instead of 20, which he/she currently is).
         $ageHistogram = array_fill(0, 81, 0);
         foreach ($users as $user) {
-            if ($user['birthdate'] == '0000-00-00')
+            if ($user->birthdate == '0000-00-00')
                 continue;
-            $lastAction = explode(' ', $user['lastSeen'])[0];
+            $lastAction = explode(' ', $user->lastSeen)[0];
+            // Safe guard in case lastSeen is not populated for some reason
+            // (it should be after http://espr1t.net/bugs/view.php?id=510 is done)
             if ($lastAction == '0000-00-00')
-                $lastAction = $user['registered'];
-            if ($user['birthdate'] >= $lastAction)
+                $lastAction = $user->registered;
+            // User added birthdate in the future
+            if ($user->birthdate >= $lastAction)
                 continue;
-            $age = floor((strtotime($lastAction) - strtotime($user['birthdate'])) / (365 * 24 * 60 * 60));
+            $age = floor((strtotime($lastAction) - strtotime($user->birthdate)) / (365 * 24 * 60 * 60));
             if ($age <= 80) {
-                $ageHistogram[$age] += 1;
+                $ageHistogram[$age]++;
             }
         }
 
         $ageHistogramLabels = array('Възраст');
         $ageHistogramValues = array('Брой');
-        for ($i = 0; $i <= 80; $i += 1) {
+        for ($i = 0; $i <= 80; $i++) {
             array_push($ageHistogramValues, $ageHistogram[$i]);
             array_push($ageHistogramLabels, sprintf("%d", $i));
         }
