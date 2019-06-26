@@ -291,7 +291,7 @@ class StatsPage extends Page {
         $towns = array();
         foreach ($users as $user) {
             // Make the town in proper First Letter Uppercase style
-            $town = ucwords(mb_strtolower($user->town));
+            $town = mb_convert_case(mb_strtolower($user->town), MB_CASE_TITLE, 'utf-8');
             // Convert it to Cyrillic if a town in Bulgaria
             if (array_key_exists($town, $this->TOWN_ALIASES))
                 $town = $this->TOWN_ALIASES[$town];
