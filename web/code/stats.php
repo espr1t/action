@@ -9,6 +9,10 @@ class StatsPage extends Page {
         return 'O(N)::Stats';
     }
 
+    public function getExtraStyles() {
+        return array('/styles/tooltips.css');
+    }
+
     public function getExtraScripts() {
         return array(
             'https://www.gstatic.com/charts/loader.js',
@@ -20,6 +24,7 @@ class StatsPage extends Page {
 
     public function init() {
         $this->brain = new Brain();
+        $this->FIRST_DATE = $this->brain->getUser(1)['registered'];
     }
 
     private function createWordCloud($wordCounts) {
@@ -106,14 +111,63 @@ class StatsPage extends Page {
         ';
     }
 
+    private function mainStats() {
+        $content = '
+            <h1>Статистики</h1>
+            Произволни статистики за системата и потребителите.
+        ';
+
+        $problems = $this->brain->getAllProblems();
+        $games = $this->brain->getAllGames();
+        $users = $this->brain->getAllUsers();
+        $usersInfo = $this->brain->getAllUsersInfo();
+        $submits = $this->brain->getAllSubmits();
+
+        $problemStat = count($problems);
+        $problemTitle = 'задачи';
+        $problemInfo = 'Брой задачи на системата.';
+
+        $gameStat = count($games);
+        $gameTitle = 'игри';
+        $gameInfo = 'Брой игри на системата.';
+
+        $userStat = count($users);
+        $userTitle = 'потребители';
+        $userInfo = 'Брой потребители на системата.';
+
+        $submitStat = count($submits);
+        $submitTitle = 'решения';
+        $submitInfo = 'Брой предадени решения.';
+
+        $actionStat = 0;
+        foreach ($usersInfo as $info) {
+            $actionStat += $info['actions'];
+        }
+        $actionStat = sprintf("%dK", $actionStat / 1000);
+        $actionTitle = 'действия';
+        $actionInfo = 'Брой действия, направени от потребителите.';
+
+        $problemStats = getPrimaryStatsCircle($problemStat, $problemTitle, $problemInfo);
+        $gameStats = getPrimaryStatsCircle($gameStat, $gameTitle, $gameInfo);
+        $userStats = getPrimaryStatsCircle($userStat, $userTitle, $userInfo);
+        $submitStats = getPrimaryStatsCircle($submitStat, $submitTitle, $submitInfo);
+        $actionStats = getPrimaryStatsCircle($actionStat, $actionTitle, $actionInfo);
+
+        $content .= '
+            <div class="profile-primary-stats">
+                ' . $problemStats . '
+                ' . $gameStats . '
+                ' . $userStats . '
+                ' . $submitStats . '
+                ' . $actionStats . '
+            </div>
+        ';
+        return inBox($content);
+    }
+
     private function problemStats() {
         $content = '
             <h2>Задачи</h2>
-        ';
-
-        $content .= '
-            <b>Брой задачи:</b> ' . $this->brain->getCount('Problems') . '
-            <br><br>
         ';
 
         $problems = $this->brain->getAllProblems();
@@ -155,6 +209,10 @@ class StatsPage extends Page {
     }
 
     private function submissionStats() {
+        $content = '
+            <h2>Решения</h2>
+        ';
+
         $languages = array();
         foreach ($GLOBALS['SUPPORTED_LANGUAGES'] as $lang => $name) {
             $languages[$name] = 0;
@@ -167,6 +225,7 @@ class StatsPage extends Page {
         $monthHistogram = array_fill(0, 12, 0);
 
         $submits = $this->brain->getAllSubmits();
+        $numSubmits = count($submits);
 
         foreach ($submits as $submit) {
             $languages[$submit['language']]++;
@@ -174,12 +233,6 @@ class StatsPage extends Page {
             $hourHistogram[intval(substr($submit['submitted'], 11, 2))]++;
             $monthHistogram[intval(substr($submit['submitted'], 5, 2)) - 1]++;
         }
-
-        $content = '
-            <h2>Решения</h2>
-            <b>Брой предадени решения:</b> ' . count($submits) . '
-            <br><br>
-        ';
 
         // Most used programming languages
         $langsChartLabels = array('Език');
@@ -226,6 +279,33 @@ class StatsPage extends Page {
         $content .= $this->createChart('ColumnChart', 'monthlyActivityHistogram', 'Предадени решения по месец в годината',
                 $monthlyActivityHistogramLabels, $monthlyActivityHistogramValues, 700, 300, 90, 70, 'none');
 
+        // Activity over time line chart
+        $NUM_TIME_POINTS = 15;
+        $firstDate = strtotime($this->FIRST_DATE);
+        $lastDate = time();
+        $timeOffset = floor(($lastDate - $firstDate) / ($NUM_TIME_POINTS - 1));
+
+        $totalActivityChartLabels = array('Дата');
+        $totalActivityChartValues = array('Брой');
+        $index = 0;
+        for ($i = 0; $i < $NUM_TIME_POINTS; $i++) {
+            $lastIndex = $index;
+            $targetDate = gmdate('Y-m-d', $firstDate);
+            $shownDate = gmdate('M Y', $firstDate);
+            while ($index < $numSubmits && $submits[$index]['submitted'] <= $targetDate) {
+                $index++;
+            }
+            // The last point is the current number of users
+            if ($i == $NUM_TIME_POINTS - 1) {
+                $index = $numSubmits;
+            }
+            array_push($totalActivityChartLabels, $shownDate);
+            array_push($totalActivityChartValues, $index - $lastIndex);
+            $firstDate += $timeOffset;
+        }
+        $content .= $this->createChart('AreaChart', 'totalActivityAreaChart', 'Предадени решения през времето',
+                $totalActivityChartLabels, $totalActivityChartValues, 700, 300, 90, 70, 'none');
+
         return inBox($content);
     }
 
@@ -256,6 +336,10 @@ class StatsPage extends Page {
     );
 
     private function userStats() {
+        $content = '
+            <h2>Потребители</h2>
+        ';
+
         $usersArr = $this->brain->getAllUsers();
         $usersInfoArr = $this->brain->getAllUsersInfo();
         $numUsers = count($usersArr);
@@ -264,13 +348,6 @@ class StatsPage extends Page {
         for ($i = 0; $i < $numUsers; $i++) {
             array_push($users, User::instanceFromArray($usersArr[$i], $usersInfoArr[$i]));
         }
-
-        $content = '
-            <h2>Потребители</h2>
-            <b>Брой потребители:</b> ' . $numUsers . '<br>
-
-            <br><br>
-        ';
 
         // Pie chart by gender
         $genders = array('male' => 0, 'female' => 0, 'unknown' => 0);
@@ -321,8 +398,8 @@ class StatsPage extends Page {
                 $townChartLabels, $townChartValues, 340, 300, 90, 85, 'right');
 
         // Line chart for number of users in time
-        $NUM_TIME_POINTS = 10;
-        $firstDate = strtotime($users[0]->registered);
+        $NUM_TIME_POINTS = 15;
+        $firstDate = strtotime($this->FIRST_DATE);
         $lastDate = time();
         $timeOffset = floor(($lastDate - $firstDate) / ($NUM_TIME_POINTS - 1));
 
@@ -330,6 +407,7 @@ class StatsPage extends Page {
         $usersChartValues = array('Брой');
         $index = 0;
         for ($i = 0; $i < $NUM_TIME_POINTS; $i++) {
+            $shownDate = gmdate('M Y', $firstDate);
             $targetDate = gmdate('Y-m-d', $firstDate);
             while ($index < $numUsers && $users[$index]->registered <= $targetDate) {
                 $index++;
@@ -338,11 +416,11 @@ class StatsPage extends Page {
             if ($i == $NUM_TIME_POINTS - 1) {
                 $index = $numUsers;
             }
-            array_push($usersChartLabels, $targetDate);
+            array_push($usersChartLabels, $shownDate);
             array_push($usersChartValues, $index);
             $firstDate += $timeOffset;
         }
-        $content .= $this->createChart('LineChart', 'usersAreaChart', 'Брой регистрирани потребители',
+        $content .= $this->createChart('AreaChart', 'usersAreaChart', 'Брой регистрирани потребители',
                 $usersChartLabels, $usersChartValues, 700, 300, 90, 70, 'none');
 
         // Histogram of user's age
@@ -411,10 +489,10 @@ class StatsPage extends Page {
     }
 
     public function getContent() {
-        $content = inBox('
-            <h1>Статистики</h1>
-            Произволни статистики за системата и потребителите.
-        ');
+        $content = '';
+
+        // Main stats
+        $content .= $this->mainStats();
 
         // Problem statistics
         $content .= $this->problemStats();
