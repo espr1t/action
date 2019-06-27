@@ -6,6 +6,7 @@
 
 [class*=tooltip--] {
   position: relative;
+  display: inline-block;
 }
 
 [class*=tooltip--]:before,

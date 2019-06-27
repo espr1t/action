@@ -36,37 +36,54 @@ class ProblemsPage extends Page {
         $serviceUserSolutions = 0;
         foreach ($problemSolutions as $problemSolution) {
             if ($problemSolution['userId'] == $this->user->id) {
-                $statusIcon = '<i class="fa fa-check green" title="Вече сте решили успешно тази задача!."></i>';
+                $statusIcon = '
+                    <div class="tooltip--top" data-tooltip="Вече сте решили успешно тази задача!">
+                        <i class="fa fa-check green"></i>
+                    </div>
+                ';
             }
             if ($problemSolution['userId'] <= 1) {
                 $serviceUserSolutions |= (1 << $problemSolution['userId']);
             }
         }
 
-        $difficulty = '';
+        $iconInfo = 'Unknown';
+        $iconType = 'fa fa-question';
         switch ($problemInfo['difficulty']) {
             case 'trivial':
-                $difficulty = '<i class="fa fa-leaf" title="Trivial"></i>';
+                $iconInfo = 'Много лесна';
+                $iconType = 'fa fa-leaf';
                 break;
             case 'easy':
-                $difficulty = '<i class="fa fa-paper-plane" title="Easy"></i>';
+                $iconInfo = 'Лесна';
+                $iconType = 'fa fa-paper-plane';
                 break;
             case 'medium':
-                $difficulty = '<i class="fa fa-balance-scale" title="Medium"></i>';
+                $iconInfo = 'Средна';
+                $iconType = 'fa fa-balance-scale';
                 break;
             case 'hard':
-                $difficulty = '<i class="fa fa-tint" title="Hard"></i>';
+                $iconInfo = 'Трудна';
+                $iconType = 'fa fa-tint';
                 break;
             case 'brutal':
-                $difficulty = '<i class="fa fa-paw" title="Brutal"></i>';
+                $iconInfo = 'Много трудна';
+                $iconType = 'fa fa-paw';
                 break;
-            default:
-                $difficulty = '<i class="fa fa-question" title="Unknown"></i>';
         }
+        $difficulty = '
+            <div class="tooltip--top" data-tooltip="' . $iconInfo . '">
+                <i class="fa ' . $iconType . '"></i>
+            </div>
+        ';
 
         $problemInfo['solutions'] = (count($problemSolutions) - popcount($serviceUserSolutions));
-        $solutions = '<span style="font-weight: bold;" title="Решена от ' . $problemInfo['solutions'] .
-                        ' човек' . ($problemInfo['solutions'] != 1 ? 'a' : '') . '">' . $problemInfo['solutions'] . '</span>';
+        $solutionsInfo = 'Решена от ' . $problemInfo['solutions'] . ' човек' . ($problemInfo['solutions'] != 1 ? 'a' : '');
+        $solutions = '
+            <div class="tooltip--top" data-tooltip="' . $solutionsInfo . '">
+                <span style="font-weight: bold;">' . $problemInfo['solutions'] . '</span>
+            </div>
+        ';
 
         $box = '
             <a href="/problems/' . $problemInfo['id'] . '" class="decorated">

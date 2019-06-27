@@ -421,7 +421,7 @@ function getAchievementsContent() {
 
 function getPrimaryStatsCircle($statName, $statValue, $statInfo) {
     return '
-        <div class="tooltip--top" data-tooltip="' . $statInfo . '" style="display: inline-block;">
+        <div class="tooltip--top" data-tooltip="' . $statInfo . '">
             <div class="primary-stats-circle">
                 <div class="primary-stats-circle-content">
                     <div class="primary-stats-circle-line1">

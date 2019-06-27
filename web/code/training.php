@@ -10,6 +10,10 @@ class TrainingPage extends Page {
         return 'O(N)::Training';
     }
 
+    public function getExtraStyles() {
+        return array('/styles/tooltips.css');
+    }
+
     private function initIMPL($position) {
         $brain = new Brain();
         $key = 'IMPL';
@@ -915,7 +919,7 @@ class TrainingPage extends Page {
 
         $sectionInfo = inBox('<h1>' . $topic['title'] . '</h1>' . $topic['expanded']);
         $sectionProblems = '';
-        $problemClass = new ProblemsPage($this->user);
+        $problemsPage = new ProblemsPage($this->user);
         foreach ($problemIds as $problemId) {
             $problemInfo = $brain->getProblem($problemId);
             $problemAllACSubmits = $brain->getProblemSubmits($problemId, $GLOBALS['STATUS_ACCEPTED']);
@@ -927,7 +931,7 @@ class TrainingPage extends Page {
                     array_push($problemAuthors, $submit['userId']);
                 }
             }
-            $sectionProblems .= $problemClass->getProblemBox($problemInfo, $problemSubmits);
+            $sectionProblems .= $problemsPage->getProblemBox($problemInfo, $problemSubmits);
         }
         return $sectionInfo . $sectionProblems;
     }
