@@ -383,9 +383,9 @@ class GamesPage extends Page {
                 </div>
         ';
 
-        $visibilityRestriction = $problem->visible ? '' : '<i class="fa fa-eye-slash" title="This problem is hidden."></i>';
+        $visibilityRestriction = $problem->visible ? '' : '<div class="tooltip--bottom" data-tooltip="Задачата е скрита."><i class="fa fa-eye-slash"></i></div>';
         return '
-            <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
+            <div class="box box-problem">
                 <div class="problem-visibility">' . $visibilityRestriction . '</div>
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
@@ -393,9 +393,13 @@ class GamesPage extends Page {
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $controlButtons . '
-            </div>
-            <div class="problem-stats-links">
-                <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
+                <div class="box-footer">
+                    <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank">
+                        <div class="tooltip--top" data-tooltip="PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                    </a>
+                </div>
             </div>
         ';
     }
@@ -472,9 +476,9 @@ class GamesPage extends Page {
                 </div>
         ';
 
-        $visibilityRestriction = $problem->visible ? '' : '<i class="fa fa-eye-slash" title="This problem is hidden."></i>';
+        $visibilityRestriction = $problem->visible ? '' : '<div class="tooltip--bottom" data-tooltip="Задачата е скрита."><i class="fa fa-eye-slash"></i></div>';
         return '
-            <div class="box' . ($GLOBALS['user']->id == -1 ? '' : ' box-problem') . '">
+            <div class="box box-problem">
                 <div class="problem-visibility">' . $visibilityRestriction . '</div>
                 <div class="problem-title" id="problem-title">' . $problem->name . '</div>
                 <div class="problem-origin">' . $problem->origin . '</div>
@@ -482,9 +486,13 @@ class GamesPage extends Page {
                 <div class="separator"></div>
                 <div class="problem-statement">' . $statement . '</div>
                 ' . $controlButtons . '
-            </div>
-            <div class="problem-stats-links">
-                <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>
+                <div class="box-footer">
+                    <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank">
+                        <div class="tooltip--top" data-tooltip="PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                    </a>
+                </div>
             </div>
         ';
     }

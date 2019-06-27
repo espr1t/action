@@ -352,14 +352,14 @@ class ProblemsPage extends Page {
             ';
         }
 
-        $visibilityRestriction = $problem->visible ? '' : '<i class="fa fa-eye-slash" title="This problem is hidden."></i>';
-        $statsButton = '<a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><div class="tooltip--top" data-tooltip="информация" style="display: inline-block;"><i class="fa fa-info-circle"></i></div></a>';
-        $usersButton = '<a href="/problems/' . $problem->id . '/users" style="color: #333333;"><div class="tooltip--top" data-tooltip="потребители" style="display: inline-block;"><i class="fa fa-users"></i></div></a>';
-        $tagsButton = '<a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове" style="display: inline-block;"><i class="fa fa-tags"></i></div></a>';
-        $pdfButton = '<a href="/problems/' . $problem->id . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF" style="display: inline-block;"><i class="fas fa-file-pdf"></i></div></a>';
+        $visibilityRestriction = $problem->visible ? '' : '<div class="tooltip--bottom" data-tooltip="Задачата е скрита."><i class="fa fa-eye-slash"></i></div>';
+        $statsButton = '<a href="/problems/' . $problem->id . '/stats" style="color: #333333;"><div class="tooltip--top" data-tooltip="информация"><i class="fa fa-info-circle"></i></div></a>';
+        $usersButton = '<a href="/problems/' . $problem->id . '/users" style="color: #333333;"><div class="tooltip--top" data-tooltip="потребители"><i class="fa fa-users"></i></div></a>';
+        $tagsButton = '<a href="/problems/' . $problem->id . '/tags" style="color: #333333;"><div class="tooltip--top" data-tooltip="тагове"><i class="fa fa-tags"></i></div></a>';
+        $pdfButton = '<a href="/problems/' . $problem->id . '/pdf" style="color: #333333;" target="_blank"><div class="tooltip--top" data-tooltip="PDF"><i class="fas fa-file-pdf"></i></div></a>';
         // Remove PDF link for logged-out users (bots tend to click on it and generate PDFs for all problems)
         if ($this->user->access < $GLOBALS['ACCESS_DOWNLOAD_AS_PDF']) {
-            $pdfButton = '<div class="tooltip--top" data-tooltip="PDF" title="Трябва да влезете в системата за да изтеглите условието като PDF." style="display: inline-block;"><i class="fas fa-file-pdf" style="opacity: 0.5;"></i></div>';
+            $pdfButton = '<div class="tooltip--top" data-tooltip="PDF" title="Трябва да влезете в системата за да изтеглите условието като PDF."><i class="fas fa-file-pdf" style="opacity: 0.5;"></i></div>';
         }
         return '
             <div class="box box-problem">
