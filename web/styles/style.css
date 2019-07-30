@@ -893,6 +893,7 @@ textarea.news-form-content {
 }
 
 div.message {
+    position: -webkit-sticky;
     position: sticky;
     float: left;
     min-width: 20rem;
@@ -900,7 +901,7 @@ div.message {
     top: 1rem;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
     border-radius: 1rem;
-    z-index: 100;
+    z-index: 101;
     background-color: #0099FF;
 }
 
