@@ -5,7 +5,7 @@ require_once(__DIR__ . '/../entities/user.php');
 
 session_start();
 
-$user = !isset($_SESSION['userId']) ? new User() : User::get($_SESSION['userId']);
+$user = getCurrentUser();
 if ($user == null || $user->access < $GLOBALS['ACCESS_ADMIN_PAGES']) {
     header('Location: /forbidden');
     exit();
