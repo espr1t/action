@@ -604,6 +604,26 @@ class AdminAchievementsPage extends Page {
         }
     }
 
+    public function achievementPersistence($user, $achieved, $key, $submitIds, $dayLimit) {
+        if (!array_key_exists($key, $achieved)) {
+            $consecutive = 1;
+            $previous = (int)(strtotime('1970-01-01 00:00:00') / (24 * 60 * 60));
+            foreach ($submitIds as $submitId) {
+                $submit = $this->submits[$submitId];
+                $current = (int)(strtotime($submit['submitted']) / (24 * 60 * 60));
+                if ($current - $previous == 1) {
+                    $consecutive++;
+                    if ($consecutive >= $dayLimit) {
+                        $this->addAchievement($user, $achieved, $key, $submit['submitted']);
+                        return;
+                    }
+                } else if ($current - $previous > 1) {
+                    $consecutive = 1;
+                }
+                $previous = $current;
+            }
+        }
+    }
 
     public function updateAll($user, $userSubmits, $userAchievements, $userReports) {
         // Already achieved
@@ -768,6 +788,11 @@ class AdminAchievementsPage extends Page {
         $this->achievementCodeLength($user, $achieved, 'LONG01', $userSubmits, 100);
         $this->achievementCodeLength($user, $achieved, 'LONG02', $userSubmits, 500);
         $this->achievementCodeLength($user, $achieved, 'LONG03', $userSubmits, 1000);
+
+        // Persistence achievements
+        $this->achievementPersistence($user, $achieved, 'PERS01', $userSubmits, 3);
+        $this->achievementPersistence($user, $achieved, 'PERS02', $userSubmits, 7);
+        $this->achievementPersistence($user, $achieved, 'PERS03', $userSubmits, 30);
     }
 
     private function recalcAll() {

@@ -714,6 +714,24 @@
     "icon": "far fa-grin-tongue-squint"
   },
   {
+    "key": "PERS01",
+    "title": "Persistent",
+    "description": "Предадени решения в три поредни дни",
+    "icon": "far fa-grin-beam-sweat"
+  },
+  {
+    "key": "PERS02",
+    "title": "Weekly solver",
+    "description": "Предадени решения в седем поредни дни",
+    "icon": "far fa-grin-beam-sweat"
+  },
+  {
+    "key": "PERS03",
+    "title": "A month ago",
+    "description": "Предадени решения в тридесет поредни дни",
+    "icon": "far fa-grin-beam-sweat"
+  },
+  {
     "key": "WEDDED",
     "title": "Married Sasho",
     "description": "Голяма грешка.",
