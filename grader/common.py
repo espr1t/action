@@ -1,18 +1,18 @@
 #
 # Miscellaneous functions
 #
+import os
 import requests
 
 import config
 import logging
-from functools import wraps
-from flask import jsonify, request, make_response
+import logging.handlers
 from concurrent.futures import ThreadPoolExecutor
-from hashlib import sha1
+from queue import Queue
 
 
 class RunResult:
-    def __init__(self, status, error_message, exit_code, exec_time, exec_memory, score, info):
+    def __init__(self, status, error_message="", exit_code=0, exec_time=0.0, exec_memory=0.0, score=0.0, info="", output=""):
         self.status = status
         self.error_message = error_message
         self.exit_code = exit_code
@@ -20,11 +20,45 @@ class RunResult:
         self.exec_memory = exec_memory
         self.score = score
         self.info = info
+        self.output = output
 
 
 # Use static scheduler and executor
 scheduler = ThreadPoolExecutor(max_workers=config.WORKER_COUNT)
 executor = ThreadPoolExecutor(max_workers=config.WORKER_COUNT)
+containers = Queue(maxsize=config.WORKER_COUNT)
+
+
+def get_logger(name):
+    fmt = "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+    formatter = logging.Formatter(fmt=fmt)
+
+    log_file_path = os.path.abspath(config.PATH_LOG_FILE)
+    if not os.path.exists(os.path.dirname(log_file_path)):
+        # Create the directory
+        os.mkdir(os.path.dirname(log_file_path))
+
+        # Create and chmod the file
+        open(log_file_path, "w").close()
+        os.chmod(log_file_path, 0o0664)
+
+    file_output = logging.handlers.RotatingFileHandler(
+        filename=log_file_path, encoding="utf-8", maxBytes=1048576, backupCount=5)
+    file_output.setLevel(logging.INFO)
+    file_output.setFormatter(formatter)
+
+    console_output = logging.StreamHandler()
+    console_output.setLevel(logging.INFO)
+    console_output.setFormatter(formatter)
+
+    ret_logger = logging.getLogger(name)
+    ret_logger.setLevel(logging.INFO)
+    ret_logger.addHandler(file_output)
+    ret_logger.addHandler(console_output)
+    return ret_logger
+
+
+logger = get_logger(__name__)
 
 
 def get_language_by_exec_name(executable):
@@ -35,7 +69,6 @@ def get_language_by_exec_name(executable):
     elif executable.endswith(config.EXECUTABLE_EXTENSION_PYTHON):
         return "Python"
     else:
-        logger = logging.getLogger("commn")
         logger.error("Could not determine language by executable name: '{}'!".format(executable))
         return "Unknown"
 
@@ -48,7 +81,6 @@ def get_source_extension(language):
     elif language == "Python":
         return config.SOURCE_EXTENSION_PYTHON
     else:
-        logger = logging.getLogger("commn")
         logger.error("Requested source extension for unknown language: '{}'!".format(language))
         return ".unk"
 
@@ -61,22 +93,33 @@ def get_executable_extension(language):
     elif language == "Python":
         return config.EXECUTABLE_EXTENSION_PYTHON
     else:
-        logger = logging.getLogger("commn")
         logger.error("Requested executable extension for unknown language: '{}'!".format(language))
         return ".unk"
 
 
-def create_response(status, message, data=None):
-    if data is None:
-        data = {}
-    data["message"] = message
-    return make_response(jsonify(**data), status, {"Content-Type": "application/json"})
+def get_time_offset(language):
+    if language == config.LANGUAGE_CPP:
+        return config.TIME_OFFSET_CPP
+    if language == config.LANGUAGE_JAVA:
+        return config.TIME_OFFSET_JAVA
+    if language == config.LANGUAGE_PYTHON:
+        return config.TIME_OFFSET_PYTHON
+    raise Exception("Unsupported language")
+
+
+def get_memory_offset(language):
+    if language == config.LANGUAGE_CPP:
+        return config.MEMORY_OFFSET_CPP
+    if language == config.LANGUAGE_JAVA:
+        return config.MEMORY_OFFSET_JAVA
+    if language == config.LANGUAGE_PYTHON:
+        return config.MEMORY_OFFSET_PYTHON
+    raise Exception("Unsupported language")
 
 
 def send_request(method, url, data=None):
     username = config.AUTH_USERNAME
     password = config.AUTH_PASSWORD
-    logger = logging.getLogger("commn")
 
     response = None
     try:
@@ -107,25 +150,3 @@ def download_file(url, destination):
         raise RuntimeError("Could not write downloaded data to file!")
 
 
-def hashed_auth_token(token):
-    return sha1(token.encode("utf-8")).hexdigest()
-
-
-def authorized(auth):
-    if auth is None or auth.username is None or auth.password is None:
-        return False
-    if auth.username != hashed_auth_token(config.AUTH_USERNAME):
-        return False
-    if auth.password != hashed_auth_token(config.AUTH_PASSWORD):
-        return False
-    return True
-
-
-def requires_auth(fun):
-    @wraps(fun)
-    def decorated(*args, **kwargs):
-        if not authorized(request.authorization):
-            logging.warning("Unauthorized user trying to access " + fun.__name__ + "()!")
-            return create_response(401, "Please use authentication.")
-        return fun(*args, **kwargs)
-    return decorated

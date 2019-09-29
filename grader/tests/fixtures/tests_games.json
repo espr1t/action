@@ -26,5 +26,6 @@
     ],
     "updateEndpoint": "http://localhost/actions/update",
     "testsEndpoint": "http://localhost/data/problems/Games.Snakes/Tests/",
-    "testerEndpoint": "http://localhost/data/problems/Games.Snakes/Tests/Tester/SnakesTester.cpp"
+    "testerEndpoint": "http://localhost/data/problems/Games.Snakes/Tests/Tester/SnakesTester.cpp",
+    "floats": false
 }

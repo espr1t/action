@@ -11,7 +11,7 @@ KEYWORDS: Tester
 #include <algorithm>
 
 using namespace std;
-FILE* in = stdin; FILE* out = stdout;
+FILE* in = stdin; FILE* out = stdout; FILE* err = stderr;
 
 mt19937 mt;
 int rand() {
@@ -21,7 +21,7 @@ int rand() {
 
 const int INF = 1000000001;
 const int MAX_BUFF_SIZE = 20000000;
-char buff[MAX_BUFF_SIZE];
+char dir[MAX_BUFF_SIZE], buff[MAX_BUFF_SIZE];
 
 const double SCORE_WIN = 1.0;
 const double SCORE_LOSS = 0.0;
@@ -34,7 +34,7 @@ int numRows, numCols;
 char board[MAX_ROWS][MAX_COLS];
 int curMove = 0, curPlayer = 0;
 int lastPlayerWhoAteAnApple = -1;
-int lastMoveWhenAnAppleWasEaten = INF;
+int lastMoveWhenAnAppleWasEaten = 0;
 int lengthPlayerOne = 1, lengthPlayerTwo = 1;
 
 void printInput() {
@@ -52,19 +52,23 @@ void placeApple() {
         col = rand() % numCols;
     }
     board[row][col] = '@';
+    fprintf(err, "(%d,%d)", row, col);
+    fflush(err);
 }
 
 void gameCycle() {
-    fscanf(in, "%s", buff);
+    buff[0] = 0;
+    fgets(buff, MAX_BUFF_SIZE, in);
+    sscanf(buff, "%s", dir);
 
     int deltaRow = 0, deltaCol = 0;
-    if (!strcmp(buff, "Up")) {
+    if (!strcmp(dir, "Up")) {
         deltaRow = -1, deltaCol = 0;
-    } else if (!strcmp(buff, "Right")) {
+    } else if (!strcmp(dir, "Right")) {
         deltaRow = 0, deltaCol = +1;
-    } else if (!strcmp(buff, "Down")) {
+    } else if (!strcmp(dir, "Down")) {
         deltaRow = +1, deltaCol = 0;
-    } else if (!strcmp(buff, "Left")) {
+    } else if (!strcmp(dir, "Left")) {
         deltaRow = 0, deltaCol = -1;
     } else {
         fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_LOSS : SCORE_WIN);
@@ -73,6 +77,8 @@ void gameCycle() {
         fprintf(out, "'%s'\n", buff);
         exit(0);
     }
+    fprintf(err, "%c", buff[0]);
+    fflush(err);
     
     vector < pair <char, pair <int, int> > > snake1;
     vector < pair <char, pair <int, int> > > snake2;
@@ -126,7 +132,7 @@ void gameCycle() {
         if ((int)snake1.size() == numApples + 1) {
             fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_WIN : SCORE_LOSS);
             fprintf(out, "%.2lf\n", curPlayer == 1 ? SCORE_WIN : SCORE_LOSS);
-            fprintf(out, "%s player ate %d apples.\n", !curPlayer ? "First" : "Second", numApples);
+            fprintf(out, "%s player ate %d apples first.\n", !curPlayer ? "First" : "Second", numApples);
             exit(0);
         }
         placeApple();
@@ -161,6 +167,7 @@ void gameCycle() {
         board[snake2[i].second.first][snake2[i].second.second] = snake2[i].first - 32;
     
     curPlayer = !curPlayer;
+    curMove++;
     printInput();
 }
 
@@ -186,6 +193,13 @@ int main(void) {
     fscanf(in, "%d %d", &startRowPlayer1, &startColPlayer1);
     int startRowPlayer2, startColPlayer2;
     fscanf(in, "%d %d", &startRowPlayer2, &startColPlayer2);
+    // Read and of line of standard input. The rest of the input is coming from players
+    fgets(buff, MAX_BUFF_SIZE, in);
+    
+    // Print log to stderr
+    fprintf(err, "%d,%d,%d,%d,%d,%d,%d|", numRows, numCols, numApples,
+            startRowPlayer1, startColPlayer1, startRowPlayer2, startColPlayer2);
+    fflush(err);
 
     setupBoard(startRowPlayer1, startColPlayer1, startRowPlayer2, startColPlayer2);
 

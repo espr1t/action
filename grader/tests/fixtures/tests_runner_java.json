@@ -2,8 +2,9 @@
     "id": 42,
     "source": "ThreeSum.java",
     "language": "Java",
-    "timeLimit": 0.2,
-    "memoryLimit": 16,
+    "timeLimit": 0.3,
+    "memoryLimit": 32,
+    "floats": false,
     "tests": [
         {
             "position": 0,
@@ -81,9 +82,44 @@
             "inpHash": "Hash_ThreeSum_10_in",
             "solFile": "ThreeSum.10.sol",
             "solHash": "Hash_ThreeSum_10_sol"
+        },
+        {
+            "position": 11,
+            "inpFile": "ThreeSum.11.in",
+            "inpHash": "Hash_ThreeSum_11_in",
+            "solFile": "ThreeSum.11.sol",
+            "solHash": "Hash_ThreeSum_11_sol"
+        },
+        {
+            "position": 12,
+            "inpFile": "ThreeSum.12.in",
+            "inpHash": "Hash_ThreeSum_12_in",
+            "solFile": "ThreeSum.12.sol",
+            "solHash": "Hash_ThreeSum_12_sol"
+        },
+        {
+            "position": 13,
+            "inpFile": "ThreeSum.13.in",
+            "inpHash": "Hash_ThreeSum_13_in",
+            "solFile": "ThreeSum.13.sol",
+            "solHash": "Hash_ThreeSum_13_sol"
+        },
+        {
+            "position": 14,
+            "inpFile": "ThreeSum.14.in",
+            "inpHash": "Hash_ThreeSum_14_in",
+            "solFile": "ThreeSum.14.sol",
+            "solHash": "Hash_ThreeSum_14_sol"
+        },
+        {
+            "position": 15,
+            "inpFile": "ThreeSum.15.in",
+            "inpHash": "Hash_ThreeSum_15_in",
+            "solFile": "ThreeSum.15.sol",
+            "solHash": "Hash_ThreeSum_15_sol"
         }
     ],
     "updateEndpoint": "http://localhost/actions/update",
-    "testsEndpoint": "http://localhost/data/problems/Trivial.ABProblem/Tests/",
+    "testsEndpoint": "http://localhost/data/problems/Action.ThreeSum/Tests/",
     "checkerEndpoint": ""
 }

@@ -1,185 +1,159 @@
 """
 Executes a binary in a sandbox environment limiting its resources.
 It limits the time and memory consumption, hard disk access, network access, thread/process creation.
+Uses Docker containers as a sandbox (slow but secure; also relatively cross-platform solution)
 """
 
-import psutil
-from os import getcwd, path
-from sys import platform
+import os
+import subprocess
+from signal import SIGKILL
 from time import sleep, perf_counter
 
+import docker
+import docker.errors
+import docker.types
+from docker.utils.socket import frames_iter, consume_socket_output, demux_adaptor
+
+import common
 import config
-from status import TestStatus
-from common import RunResult
-from common import get_language_by_exec_name
+
+# Assumes we are currently in the docker folder (/action/grader/docker)
+# DOCKER_BUILD_COMMAND = "docker build --tag=action_sandbox --file action_sandbox.docker ."
+
+# DOCKER_RUN_COMMAND = "docker run"
+# DOCKER_RUN_COMMAND += " --name {container}"                 # Set the name of the container
+# DOCKER_RUN_COMMAND += " --ipc private"                      # Limit the shared memory namespace
+# DOCKER_RUN_COMMAND += " --network none"                     # Disable the network
+# DOCKER_RUN_COMMAND += " --restart unless-stopped"           # Restart the container on fail or exit
+# DOCKER_RUN_COMMAND += " --security-opt no-new-privileges"   # Prevent the processes to gain additional privileges
+# DOCKER_RUN_COMMAND += " --memory 2048M"                     # Limit the total container memory to 2GB
+# DOCKER_RUN_COMMAND += " --kernel-memory 1024M"              # Allow the kernel at most 1GB of the memory
+# DOCKER_RUN_COMMAND += " --memory-swap 2048M"                # Disable the swap (use only memory)
+# DOCKER_RUN_COMMAND += " --memory-swappiness 0"              # Disable the swap (in a second way)
+# DOCKER_RUN_COMMAND += " --cpus 1"                           # Allow using only a single core
+# DOCKER_RUN_COMMAND += " --detach"                           # Run container in the background
+# DOCKER_RUN_COMMAND += " --tty"                              # Allocate a pseudo-TTY
+# DOCKER_RUN_COMMAND += " --interactive"                      # Keep STDIN open
+# DOCKER_RUN_COMMAND += " --ulimit nproc=20"                  # Limit the number of processes
+# DOCKER_RUN_COMMAND += " --ulimit nofile=7"                  # Limit the number of open extra files
+# DOCKER_RUN_COMMAND += " --ulimit stack=67108864"            # Limit the stack size to 64MB
+# DOCKER_RUN_COMMAND += " --ulimit fsize=16777216"            # Limit the maximum output to 16MB
+# DOCKER_RUN_COMMAND += " --ulimit msgqueue=0"                # Disallow message queues
+# DOCKER_RUN_COMMAND += " --ulimit core=0"                    # Disallow creation of core dump files
+# DOCKER_RUN_COMMAND += " --ulimit data=1073741824"           # Limit the max memory the process can use to 1GB
+# DOCKER_RUN_COMMAND += " action_sandbox"                     # Image name
+
+# Note: add --interactive to be able to pipe stdin
+# DOCKER_EXEC_COMMAND = "docker exec --user {user} --workdir {workdir} {container} /bin/bash -c \"{command}\""
+# DOCKER_COPY_COMMAND = "docker cp {file} {container}:/home/{container}/{name}"
 
 
-if not platform.startswith("win32"):
-    import resource
-    from os import setuid
-
-# TODO: Limit network usage
-# TODO: Use Docker
-# TODO: Add unit tests for network access
-# TODO: Add unit tests for harddrive access
-# TODO: Add unit tests for thread/process creation
+docker_client = docker.from_env()
+logger = common.get_logger(__name__)
 
 
 class Executor:
-    KILLED_TIME_LIMIT = 1
-    KILLED_MEMORY_LIMIT = 2
-    KILLED_RUNTIME_ERROR = 3
+    @staticmethod
+    def setup_containers(num_workers):
+        for sandbox_id in range(1, num_workers + 1):
+            container_id = "sandbox{:02d}".format(sandbox_id)
 
-    # Use the resource library to limit process resources when on UNIX
-    if not platform.startswith("win32"):
-        @staticmethod
-        def set_restrictions(time_limit, java):
-            # Set the user to a low-privileged one, if we have the privileges for this
             try:
-                setuid(1001)
-            except OSError:
-                pass
+                container = docker_client.containers.get(container_id=container_id)
+                if container.status == "running":
+                    logger.info("Container {container_id} already running.".format(container_id=container_id))
+                else:
+                    logger.info("Container {container_id} was stopped. Restarting...".format(container_id=container_id))
+                    container.restart()
 
-            # Kill the solution if it exceeds twice the time limit of the problem (wall-clock)
-            resource.setrlimit(resource.RLIMIT_CPU, (time_limit * 2, time_limit * 2))
-
-            # Kill the solution if it exceeds 1GB of memory
-            if not java:
-                resource.setrlimit(resource.RLIMIT_AS, (1073741824, 1073741824))
-
-            # Set the stack to be 64MB
-            resource.setrlimit(resource.RLIMIT_STACK, (67108864, 67108864))
-
-            # Kill the solution if it writes more than 16MB of output to stdout/stderr
-            resource.setrlimit(resource.RLIMIT_FSIZE, (16777216, 16777216))
-
-            # Although setting a limit on the file handles doesn't quite work, it seems the programs cannot write
-            # to files anyway. We create the sandbox dir with the user running the grader (typically root),
-            # and since they are owned by a more privileged user, the program cannot write in it. It can, however,
-            # write in its own home directory, so we should chroot the process.
-            if not java:
-                resource.setrlimit(resource.RLIMIT_NOFILE, (4, 4))
-
-            # Deny creation of new processes and threads
-            if not java:
-                resource.setrlimit(resource.RLIMIT_NPROC, (1, 1))
-            else:
-                resource.setrlimit(resource.RLIMIT_NPROC, (999, 999))
-
-            # Deny creation of core dump files
-            resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
-
-            # Deny writing to message queues
-            resource.setrlimit(resource.RLIMIT_MSGQUEUE, (0, 0))
+            except docker.errors.NotFound:
+                logger.info("Spinning up container {container_id}.".format(container_id=container_id))
+                container = docker_client.containers.create(
+                    image="action_sandbox",
+                    name=container_id,
+                    user=container_id,
+                    detach=True,
+                    tty=True,
+                    stdin_open=True,
+                    ipc_mode="private",
+                    network_disabled=True,
+                    restart_policy={"Name": "on-failure", "MaximumRetryCount": 3},
+                    security_opt=["no-new-privileges"],
+                    mem_limit="2048M",
+                    memswap_limit="2048M",
+                    kernel_memory="1024M",
+                    mem_swappiness=0,
+                    cpu_period=100000,
+                    cpu_quota=100000,
+                    ulimits=[
+                        docker.types.Ulimit(name="nproc", soft=20, hard=20),
+                        docker.types.Ulimit(name="stack", soft=67108864, hard=67108864),
+                        docker.types.Ulimit(name="fsize", soft=16777216, hard=16777216),
+                        docker.types.Ulimit(name="data", soft=1073741824, hard=1073741824),
+                        docker.types.Ulimit(name="msgqueue", soft=0, hard=0),
+                        docker.types.Ulimit(name="core", soft=0, hard=0)
+                    ]
+                )
+                container.start()
+            common.containers.put((container, ""))
 
     @staticmethod
-    def exec_solution(sandbox, executable, inp_file, out_file, time_limit, memory_limit):
-        exec_time = 0.0
-        exec_memory = 0.0
-        exit_code = None
-
-        children_limit = 0
-        thread_limit = config.THREAD_LIMIT_CPP
-        time_offset = config.TIME_OFFSET_CPP
-        memory_offset = config.MEMORY_OFFSET_CPP
-
-        language = get_language_by_exec_name(executable)
-
-        if language == "Java":
-            thread_limit = config.THREAD_LIMIT_JAVA
-            time_offset = config.TIME_OFFSET_JAVA
-            memory_offset = config.MEMORY_OFFSET_JAVA
-        if language == "Python":
-            thread_limit = config.THREAD_LIMIT_PYTHON
-            time_offset = config.TIME_OFFSET_PYTHON
-            memory_offset = config.MEMORY_OFFSET_PYTHON
-
-        # TODO: Figure out if this is still needed
-        execution_time_limit = max(1.0, time_limit * 2)
-
-        # Calling the executable doesn't work on Windows 10 Ubuntu Bash if we don't provide the full path
-        executable = path.join(getcwd(), executable)
-
-        args = []
-        if language == "Java":
-            xms = "-Xms{}k".format(1024)
-            xmx = "-Xmx{}k".format(memory_limit // 1024)
-            args = ["java", "-XX:-UseSerialGC", xms, xmx, "-jar", executable]
-            executable = None
-        elif language == "Python":
-            args = ["python3", executable]
-            executable = None
-
+    def cmd_exec(command, timeout=config.MAX_EXECUTION_TIME):
         start_time = perf_counter()
-        if platform.startswith("win32"):
-            process = psutil.Popen(args=args, executable=executable, cwd=sandbox, stdin=inp_file, stdout=out_file)
-        else:
-            process = psutil.Popen(args=args, executable=executable, cwd=sandbox, stdin=inp_file, stdout=out_file,
-                                   preexec_fn=(lambda: Executor.set_restrictions(
-                                       time_limit, language == "Java")))
-
-        check_interval = config.EXECUTION_MIN_CHECK_INTERVAL
-
+        process = subprocess.Popen(
+            args=command,
+            shell=True,
+            stdin=None,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
         while True:
-            sleep(check_interval)
-            # Exponentially increase the check interval, until a certain max time gap
-            # This works fine for very short-lived programs as well as long-lived ones
-            check_interval = min(config.EXECUTION_MAX_CHECK_INTERVAL, check_interval * 2)
+            sleep(0.1)
 
             # Process already terminated
-            if process.poll() is not None:
-                break
-            if not process.is_running():
-                break
-
-            # Process has hung up
-            if perf_counter() - start_time > execution_time_limit:
-                exit_code = Executor.KILLED_RUNTIME_ERROR
-                process.kill()
+            exit_code = process.poll()
+            if exit_code is not None:
                 break
 
-            try:
-                # Update statistics
-                exec_time = max(0, max(exec_time, process.cpu_times().user) - time_offset)
-                # RSS should be available on both Windows and Unix
-                exec_memory = max(0, max(exec_memory, process.memory_info().rss) - memory_offset)
-
-                """
-                # Consider using USS instead of PSS if available (currently it returns zeroes only)
-                mem_info = process.memory_full_info()
-                # Need to check with "in" for named tuple
-                exec_memory = max(exec_memory, mem_info.pss if "pss" in mem_info else mem_info.rss)
-                """
-
-                # Spawning processes or threads
-                # print("Running for {} seconds ({} children and {} threads)...".format(
-                #    exec_time, len(process.children()), process.num_threads()))
-                if len(process.children()) > children_limit or process.num_threads() > thread_limit:
-                    exit_code = Executor.KILLED_RUNTIME_ERROR
-                    process.kill()
-                    break
-
-                # Time Limit, kill the process
-                if exec_time > time_limit:
-                    exit_code = Executor.KILLED_TIME_LIMIT
-                    process.kill()
-                    break
-
-                # Memory Limit, kill the process
-                if exec_memory > memory_limit:
-                    exit_code = Executor.KILLED_MEMORY_LIMIT
-                    process.kill()
-                    break
-
-            except psutil.NoSuchProcess:
+            # Execution is taking too much time
+            if perf_counter() - start_time > timeout:
+                # Kill the shell and the compilation process
+                os.kill(process.pid, SIGKILL)
                 break
 
-        if exit_code is None:
-            exit_code = process.wait(timeout=0.5)
-            if exit_code is None:
-                exit_code = Executor.KILLED_RUNTIME_ERROR
+        output = process.communicate()
+        stdout = output[0] if output[0] is not None else ""
+        stderr = output[1] if output[1] is not None else ""
+        return exit_code, stdout, stderr, perf_counter() - start_time
 
-        error_message = ""
+    @staticmethod
+    def docker_exec(container, command, user, workdir):
+        _, output = container.exec_run(cmd=command, user=user, workdir=workdir, demux=True)
+        stdout = output[0].decode() if output[0] is not None else ""
+        stderr = output[1].decode() if output[1] is not None else ""
+        return stdout, stderr
 
-        # Leave the parent function decide what the test status will be
-        return RunResult(TestStatus.TESTING, error_message, exit_code, exec_time, exec_memory, 0.0, "")
+    @staticmethod
+    def docker_exec_with_stdio(container, command, user, workdir, input_data):
+        _, socket = container.exec_run(cmd=command, user=user, workdir=workdir, stdin=True, socket=True)
+        socket._writing = True
+        socket._sock.sendall(input_data.encode())
+        # input_data = input_data.encode()
+        # while len(input_data) > 0:
+        #     written = socket.write(input_data)
+        #     input_data = input_data[written:]
+        socket.flush()
+
+        gen = frames_iter(socket, False)
+        gen = (demux_adaptor(*frame) for frame in gen)
+        output = consume_socket_output(gen, True)
+
+        stdout = output[0].decode() if output[0] is not None else ""
+        stderr = output[1].decode() if output[1] is not None else ""
+        print("STDOUT: {}".format(stdout))
+        print("STDERR: {}".format(stderr))
+
+        socket.close()
+        return stdout, stderr
+

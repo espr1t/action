@@ -2,33 +2,27 @@
 # Grader configuration
 #
 
-WORKER_COUNT = 3  # Threads
+WORKER_COUNT = 3  # Max number of running solutions/containers
 
 # Evaluation
 UPDATE_INTERVAL = 0.33  # Seconds
 FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 
 # Execution
-EXECUTION_MIN_CHECK_INTERVAL = 0.0001  # Seconds
-EXECUTION_MAX_CHECK_INTERVAL = 0.001  # Seconds
 MAX_GAME_LENGTH = 300.0  # Seconds = 5 minutes
 
 # Start time taken by non-user actions
 TIME_OFFSET_CPP = 0.0  # Seconds
-TIME_OFFSET_JAVA = 0.1  # Seconds
-TIME_OFFSET_PYTHON = 0.1  # Seconds
+TIME_OFFSET_JAVA = 0.05  # Seconds
+TIME_OFFSET_PYTHON = 0.0  # Seconds
 
 # Memory used by non-user code
-MEMORY_OFFSET_CPP = 1800000  # Bytes
-MEMORY_OFFSET_JAVA = 26000000  # Bytes
-MEMORY_OFFSET_PYTHON = 19000000  # Bytes
-
-# Maximum number of threads
-THREAD_LIMIT_CPP = 2  # Threads
-THREAD_LIMIT_JAVA = 99  # Threads
-THREAD_LIMIT_PYTHON = 2  # Threads
+MEMORY_OFFSET_CPP = 1300000  # 1.3MB
+MEMORY_OFFSET_JAVA = 36000000  # 36MB
+MEMORY_OFFSET_PYTHON = 8000000  # 8MB
 
 # Compilation
+MAX_EXECUTION_TIME = 30.0  # Seconds
 MAX_COMPILATION_TIME = 10.0  # Seconds
 
 # Checker
@@ -61,3 +55,8 @@ EXECUTABLE_EXTENSION_PYTHON = ".py"
 
 # Output Validation
 FLOAT_PRECISION = 1e-9
+
+# Languages
+LANGUAGE_CPP = "C++"
+LANGUAGE_JAVA = "Java"
+LANGUAGE_PYTHON = "Python"

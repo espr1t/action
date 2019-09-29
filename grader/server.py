@@ -8,70 +8,69 @@ The following API is exposed:
 """
 import os
 import json
-from flask import Flask, request, send_from_directory
+import flask
+from time import sleep
 
-from common import scheduler, requires_auth, create_response
+import config
+import common
+import network
 from evaluator import Evaluator
 from printer import Printer
-from config import PATH_LOG_FILE
+from executor import Executor
 
-app = Flask(__name__)
+
+app = flask.Flask("Grader")
+
+logger = common.get_logger(__name__)
+# NOTE: Do not remove, this is done to initialize the werkzeug's logger
+werkzeug_logger = common.get_logger("werkzeug")
 
 
 @app.route("/available", methods=["GET"])
-@requires_auth
+@network.requires_auth
 def available():
     """ Used for checking whether the Grader is available. """
-    return create_response(200, "Grader is healthy.")
+    return network.create_response(200, "Grader is healthy.")
 
 
 @app.route("/evaluate", methods=["POST"])
-@requires_auth
+@network.requires_auth
 def evaluate():
     """ Used for grading a submission. """
-    data = json.loads(request.form["data"])
+    data = json.loads(flask.request.form["data"])
     try:
+        # Sleep for a very short while so werkzeug can print its log BEFORE we start printing from here
+        sleep(0.01)
         evaluator = Evaluator(data)
-        scheduler.submit(evaluator.evaluate)
+        common.scheduler.submit(evaluator.evaluate)
     except RuntimeError as exception:
-        return create_response(500, exception)
+        return network.create_response(500, exception)
 
-    return create_response(200, "Submission received.")
+    return network.create_response(200, "Submission received.")
 
 
 @app.route("/print-pdf", methods=["POST"])
-@requires_auth
+@network.requires_auth
 def print_pdf():
     """ Used for printing a document to PDF """
-    logger = logging.getLogger("srvr")
-
-    data = json.loads(request.form["data"])
+    data = json.loads(flask.request.form["data"])
     logger.info("Printing PDF from URL: {}".format(data["url"]))
 
     try:
         pdf_path = Printer.get_pdf(data["url"])
         if pdf_path is None:
             logger.error("Could not create PDF for URL: {}".format(data["url"]))
-            return create_response(404, "File cannot be printed to pdf.")
-        return send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path))
+            return network.create_response(404, "File cannot be printed to pdf.")
+        return flask.send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path))
     except RuntimeError as exception:
         logger.error("Runtime Error while trying to create a PDF for URL: {}".format(data["url"]))
-        return create_response(500, exception)
+        return network.create_response(500, exception)
 
 
 if __name__ == "__main__":
     # Change current working directory to the one the script is in
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    if not os.path.exists(os.path.dirname(PATH_LOG_FILE)):
-        # Create the directory
-        os.mkdir(os.path.dirname(PATH_LOG_FILE))
+    Executor.setup_containers(config.WORKER_COUNT)
 
-        # Create and chmod the file
-        open(PATH_LOG_FILE, "w").close()
-        os.chmod(PATH_LOG_FILE, 0o0664)
-
-    import logging, logging.config, yaml
-    logging.config.dictConfig(yaml.load(open("logging.conf")))
-
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host="0.0.0.0", port="5000", debug=True)

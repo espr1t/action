@@ -4,6 +4,10 @@ Provides constants for several possible grading events / statuses
 
 from enum import Enum
 
+import common
+
+logger = common.get_logger(__name__)
+
 
 class TestStatus(Enum):
     """ Defines variable results (or progress) of running the tests. """
@@ -17,4 +21,5 @@ class TestStatus(Enum):
     MEMORY_LIMIT = 7
     INTERNAL_ERROR = 8
     ACCEPTED = 9
+
 
