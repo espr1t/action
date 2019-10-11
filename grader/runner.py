@@ -3,6 +3,7 @@ Runs the executable in a sandbox and returns the result for a single test case
 """
 
 import os
+import json
 from time import sleep, perf_counter
 import subprocess
 import config
@@ -24,12 +25,13 @@ from validator import Validator
 # --format argument '%U' prints "Elapsed CPU seconds in User mode"
 # --format argument '%e' prints "Elapsed real (clock) time in seconds" (backup only - volatile and also can be tricked)
 # --format argument '%M' prints "Maximum resident set size (kbytes)"
-RUN_TEST_COMMAND = "{time} /bin/bash -c \"{timeout} {command}; >&2 printf '\\n%d\\n' $?\"".format(
+RUN_TEST_COMMAND = "/bin/bash -c \"{time} /bin/bash -c \\\"{timeout} {command}\\\" ; >&2 printf '%d' $?\"".format(
     time="/usr/bin/time --quiet --format='%U %e %M'",
     # Send a SIGTERM signal after {timeout} seconds, but ensure the program is killed after 0.2 more seconds
     timeout="/usr/bin/timeout --preserve-status --kill-after=0.2s --signal=SIGTERM {timeout}s",
     command="{run_command} < input.txt > output.txt 2> /dev/null"
 )
+
 
 logger = common.get_logger(__name__)
 
@@ -276,6 +278,66 @@ class Runner:
         self.evaluator.updater.add_info("", results)
         return result
 
+    def run_interactive_problem(self, result_id, test):
+        # Update the frontend that we are running this test
+        results = [{
+            "id": result_id,
+            "position": test["position"],
+            "status": TestStatus.TESTING.name,
+            "score": 0
+        }]
+        self.evaluator.updater.add_info("", results)
+
+        if self.evaluator.tester is None:
+            logger.error("Interactive problem without a tester!")
+            return common.RunResult(status=TestStatus.INTERNAL_ERROR, error_message="Interactive problem without a tester!")
+
+        start_time = perf_counter()
+
+        # Prepare the run input and output data
+        inp_file_path = os.path.abspath(os.path.join(config.PATH_TESTS, test["inpHash"]))
+        solution_path = os.path.abspath(os.path.join(os.getcwd(), self.evaluator.path_executable))
+        tester_path = os.path.abspath(os.path.join(os.getcwd(), config.PATH_TESTERS, self.evaluator.tester + config.EXECUTABLE_EXTENSION_CPP))
+
+        # Execute the solution
+        try:
+            result = Runner.run_interactive_solution(
+                solution_path, tester_path, inp_file_path, self.evaluator.time_limit, self.evaluator.memory_limit
+            )
+        except Exception as ex:
+            result = common.RunResult(status=TestStatus.INTERNAL_ERROR, error_message=str(ex), exit_code=-1)
+
+        # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
+        result.status, result.error_message, result.score, result.info = Validator.determine_interactive_status(
+                submit_id=self.evaluator.id,
+                test=test,
+                result=result,
+                time_limit=self.evaluator.time_limit,
+                memory_limit=self.evaluator.memory_limit
+        )
+
+        total_time = perf_counter() - start_time
+        score = " ({})".format(result.score) if 0.0 < result.score < 1.0 else ""
+        logger.info("Submit {} | Test {} | Time: {:.2f}s. Memory: {:.2f}MB. Testing: {:.2f}s ({}{})".format(
+                self.evaluator.id, test["inpFile"], result.exec_time, result.exec_memory / 1048576.0, total_time, result.status.name, score))
+
+        # if result.status == TestStatus.WRONG_ANSWER:
+        #     logger.info("Submit {} | Test {} |   >> {}".format(self.evaluator.id, test["inpFile"], result.error_message))
+
+        # Update the frontend once again that the testing has been completed (along with TL, ML, and score this time)
+        results = [{
+            "id": result_id,
+            "position": test["position"],
+            "status": result.status.name,
+            "error_message": result.error_message,
+            "exec_time": result.exec_time,
+            "exec_memory": round(result.exec_memory / 1048576.0, 2),  # Convert back to megabytes
+            "score": result.score,
+            "info": result.info
+        }]
+        self.evaluator.updater.add_info("", results)
+        return result
+
     @staticmethod
     def get_run_command(language, executable, memory_limit):
         if language == config.LANGUAGE_CPP:
@@ -293,11 +355,11 @@ class Runner:
         stderr_lines = stderr.strip().splitlines()
 
         # Fix exit code (it is offset by 128 by timeout command)
-        exit_code = int(stderr_lines[-2])
+        exit_code = int(stderr_lines[-1])
         exit_code = 0 if exit_code == 0 else exit_code - 128
 
         # Calculate final time and memory (offset for language VM)
-        time_memory_info = stderr_lines[-1]
+        time_memory_info = stderr_lines[-2]
         exec_time = max(0.0, float(time_memory_info.split()[0]) - sandbox.time_offset)
         total_time = max(0.0, float(time_memory_info.split()[1]) - sandbox.time_offset)
         exec_memory = max(0.0, float(time_memory_info.split()[2]) * 1024 - sandbox.memory_offset)
@@ -308,55 +370,61 @@ class Runner:
         return exit_code, exec_time, exec_memory
 
     @staticmethod
-    def prepare_sandbox(executable_path, time_limit, memory_limit):
+    def prepare_sandbox(solution_path, tester_path, time_limit, memory_limit):
         sandbox = Sandbox()
-        sandbox.executable_path = executable_path
-        with open(sandbox.executable_path, "rb") as exe:
+        sandbox.solution_path = solution_path
+        sandbox.tester_path = tester_path
+
+        with open(sandbox.solution_path, "rb") as exe:
             sandbox.new_hash = md5(exe.read()).hexdigest()
 
         # Clean the sandbox directory if it needs cleaning
-        if sandbox.cur_hash != sandbox.new_hash:
+        if sandbox.cur_hash != sandbox.new_hash or sandbox.tester_path is not None:
             if not sandbox.clean():
                 raise Exception("Could not clean sandbox dir for container {}!".format(sandbox.container_id))
 
-        sandbox.executable = os.path.basename(sandbox.executable_path)
-        sandbox.language = common.get_language_by_exec_name(sandbox.executable)
+        sandbox.solution_name = os.path.basename(sandbox.solution_path)
+        sandbox.solution_language = common.get_language_by_exec_name(sandbox.solution_name)
+        if sandbox.tester_path is not None:
+            sandbox.tester_name = os.path.basename(sandbox.tester_path)
+            sandbox.tester_language = common.get_language_by_exec_name(sandbox.tester_path)
 
         # Determine actual time and memory limits
         # (this accounts for JVM startup time and memory overhead)
         sandbox.time_limit = time_limit
-        sandbox.time_offset = common.get_time_offset(sandbox.language)
+        sandbox.time_offset = common.get_time_offset(sandbox.solution_language)
         sandbox.memory_limit = memory_limit
-        sandbox.memory_offset = common.get_memory_offset(sandbox.language)
+        sandbox.memory_offset = common.get_memory_offset(sandbox.solution_language)
 
         # Terminate after TL + 0.2 or TL + 20% (whichever larger)
-        sandbox.timeout = sandbox.time_limit + sandbox.time_offset + max(0.2, sandbox.time_limit * 0.2)
+        sandbox.timeout = sandbox.time_limit + sandbox.time_offset + max(0.1, sandbox.time_limit * 0.1)
         return sandbox
 
     @staticmethod
-    def run_solution(executable_path, inp_file_path, time_limit, memory_limit):
-        sandbox = Runner.prepare_sandbox(executable_path, time_limit, memory_limit)
+    def run_solution(solution_path, inp_file_path, time_limit, memory_limit):
+        sandbox = Runner.prepare_sandbox(solution_path, None, time_limit, memory_limit)
 
         # Copy the executable and input file to the sandbox directory
         # Also create the output file (by copying an empty file there) such that the user can write into it
         empty_file = NamedTemporaryFile(mode="w+t", delete=True)
         empty_file_path = os.path.abspath(empty_file.name)
-        if not sandbox.put([
-            (executable_path, sandbox.executable),
+        if sandbox.put([
+            (solution_path, sandbox.solution_name),
             (inp_file_path, "input.txt"),
             (empty_file_path, "output.txt")
         ]):
-            raise Exception("Could not copy executable and input file to container {}.".format(sandbox.container_id))
-        else:
             # If the executable was copied correctly, update its hash in the container info
             sandbox.cur_hash = sandbox.new_hash
+        else:
+            raise Exception("Could not copy executable and input file to container {}.".format(sandbox.container_id))
 
         # Run the executable, while measuring CPU and Memory consumption
-        run_command = Runner.get_run_command(sandbox.language, sandbox.executable, sandbox.memory_limit)
+        run_command = Runner.get_run_command(sandbox.solution_language, sandbox.solution_name, sandbox.memory_limit)
         command = RUN_TEST_COMMAND.format(run_command=run_command, timeout=sandbox.timeout)
         stdout, stderr = Executor.docker_exec(
             sandbox.container, command, user=sandbox.container_id, workdir="/sandbox/"
         )
+
         exit_code, exec_time, exec_memory = Runner.parse_exec_status(sandbox, stderr)
 
         # Get the output and put it in the given output file if everything else seems okay
@@ -366,3 +434,84 @@ class Runner:
 
         # Leave the caller function decide what the test status will be
         return common.RunResult(status=TestStatus.TESTING, exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=output)
+
+    @staticmethod
+    def run_interactive_solution(solution_path, tester_path, inp_file_path, time_limit, memory_limit):
+        sandbox = Runner.prepare_sandbox(solution_path, tester_path, time_limit, memory_limit)
+
+        args = {
+            "time_limit": sandbox.time_limit,
+            "solution_run_command": Runner.get_run_command(sandbox.solution_language, sandbox.solution_name, sandbox.memory_limit),
+            "tester_run_command": Runner.get_run_command(sandbox.tester_language, sandbox.tester_name, sandbox.memory_limit)
+        }
+
+        # Copy all the needed files to the sandbox directory
+        # This includes:
+        #   1) the solution (binary)
+        #   2) the tester (binary)
+        #   3) interaction orchestrator (interactor.py)
+        #   4) interaction orchestrator arguments (json file)
+        #   5) tester input (text file)
+        #   6) solution output / game log (empty file)
+        #   7) game result (empty file)
+
+        empty_file = NamedTemporaryFile(mode="w+t", delete=True)
+        empty_file_path = os.path.abspath(empty_file.name)
+
+        args_file = NamedTemporaryFile(mode="w+t", delete=True)
+        args_file_path = os.path.abspath(args_file.name)
+        args_file.write(json.dumps(args, indent=4, sort_keys=True))
+        args_file.seek(0)
+
+        if sandbox.put([
+            (solution_path, sandbox.solution_name),
+            (tester_path, sandbox.tester_name),
+            ("interactor.py", "interactor.py"),
+            (args_file_path, "args.txt"),
+            (inp_file_path, "input.txt"),
+            (empty_file_path, "output.txt"),
+            (empty_file_path, "results.txt")
+        ]):
+            # If the executable was copied correctly, update its hash in the container info
+            sandbox.cur_hash = sandbox.new_hash
+        else:
+            raise Exception("Could not copy interactor files to container {}.".format(sandbox.container_id))
+
+        # Run the executable, while measuring CPU and Memory consumption
+        command = RUN_TEST_COMMAND.format(
+            run_command="python3 interactor.py",
+            timeout=sandbox.timeout * 2
+        )
+        command = command.replace(" < input.txt > output.txt", "")
+        stdout, stderr = Executor.docker_exec(
+            sandbox.container, command, user=sandbox.container_id, workdir="/sandbox/"
+        )
+        exit_code, exec_time, exec_memory = Runner.parse_exec_status(sandbox, stderr)
+
+        # Get the output and put it in the given output file if everything else seems okay
+        results, game_log = "", ""
+        if exit_code == 0 and exec_time <= sandbox.time_limit * 2 and exec_memory <= sandbox.memory_limit * 2:
+            results = sandbox.get("/sandbox/results.txt")
+            game_log = sandbox.get("/sandbox/output.txt")
+
+        logger.info("RESULTS:\n{}".format(results))
+
+        # Record the game log to the /replays folder if not empty
+        if game_log != "":
+            # Generate a hash of the solution, tester and input
+            combined_hash = ""
+            with open(solution_path, "rb") as file:
+                combined_hash += md5(file.read()).hexdigest()
+            with open(tester_path, "rb") as file:
+                combined_hash += md5(file.read()).hexdigest()
+            with open(inp_file_path, "rb") as file:
+                combined_hash += md5(file.read()).hexdigest()
+            combined_hash = md5(combined_hash.encode()).hexdigest()
+
+            # Record the log in the /replays folder using the hash as a name
+            game_log_path = os.path.abspath(os.path.join(config.PATH_REPLAYS, combined_hash + ".txt"))
+            with open(game_log_path, "wt") as out:
+                out.write(game_log)
+
+        # Leave the caller function decide what the test status will be
+        return common.RunResult(status=TestStatus.TESTING, exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=results)

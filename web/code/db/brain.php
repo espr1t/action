@@ -215,7 +215,7 @@ class Brain {
     function getAllProblems() {
         $response = $this->db->query("
             SELECT * FROM `Problems`
-            WHERE type != 'game' AND type != 'relative'
+            WHERE type != 'game' AND type != 'relative' AND type != 'interactive'
             ORDER BY id
         ");
         if (!$response) {
@@ -228,7 +228,7 @@ class Brain {
     function getAllGames() {
         $response = $this->db->query("
             SELECT * FROM `Problems`
-            WHERE type = 'game' OR type = 'relative'
+            WHERE type = 'game' OR type = 'relative' OR type = 'interactive'
             ORDER BY id
         ");
         if (!$response) {

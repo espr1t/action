@@ -121,6 +121,7 @@ class Submit {
         $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
         $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
         $checkerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_CHECKER'], $problem->folder);
+        $testerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTER'], $problem->folder);
 
         $brain = new Brain();
         $tests = $brain->getProblemTests($this->problemId);
@@ -139,12 +140,18 @@ class Submit {
 
         // Also add the md5 hash of the checker (if there is one)
         $checkerHash = '';
-        $checkerPath = '';
         if ($problem->checker != '') {
             $checkerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
                     $GLOBALS['PROBLEM_CHECKER_FOLDER'], $problem->checker);
             $checkerHash = md5(file_get_contents($checkerPath));
             $checkerEndpoint .= $problem->checker;
+        }
+        $testerHash = '';
+        if ($problem->tester != '') {
+            $testerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
+                    $GLOBALS['PROBLEM_TESTER_FOLDER'], $problem->tester);
+            $testerHash = md5(file_get_contents($testerPath));
+            $testerEndpoint .= $problem->tester;
         }
 
         // Compile all the data, required by the grader to evaluate the solution
@@ -152,13 +159,16 @@ class Submit {
             'id' => $this->id,
             'source' => $this->source,
             'language' => $this->language,
+            'tester' => $testerHash,
             'checker' => $checkerHash,
             'floats' => $problem->floats,
+            'problemType' => $problem->type,
             'timeLimit' => $problem->timeLimit,
             'memoryLimit' => $problem->memoryLimit,
             'tests' => $tests,
             'testsEndpoint' => $testsEndpoint,
             'updateEndpoint' => $updateEndpoint,
+            'testerEndpoint' => $testerEndpoint,
             'checkerEndpoint' => $checkerEndpoint
         );
 
@@ -281,6 +291,7 @@ class Submit {
             'matches' => $matches,
             'tester' => $testerHash,
             'floats' => false,
+            'problemType' => $problem->type,
             'timeLimit' => $problem->timeLimit,
             'memoryLimit' => $problem->memoryLimit,
             'tests' => $tests,

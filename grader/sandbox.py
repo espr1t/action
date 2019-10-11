@@ -10,9 +10,12 @@ logger = common.get_logger(__name__)
 
 class Sandbox:
     def __init__(self):
-        self.executable_path = None
-        self.executable = None
-        self.language = None
+        self.solution_path = None
+        self.solution_name = None
+        self.solution_language = None
+        self.tester_path = None
+        self.tester_name = None
+        self.tester_language = None
         self.time_limit = None
         self.memory_limit = None
         self.time_offset = None

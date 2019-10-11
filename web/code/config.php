@@ -105,7 +105,8 @@ $PROBLEM_TYPES = [
     'ioi' => 'IOI',
     'acm' => 'ACM',
     'game' => 'Game',
-    'relative' => 'Relative'
+    'relative' => 'Relative',
+    'interactive' => 'Interactive'
 ];
 
 $PROBLEM_DIFFICULTIES = [

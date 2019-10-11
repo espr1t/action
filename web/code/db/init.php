@@ -164,7 +164,7 @@ if ($db->tableExists('Problems')) {
             folder VARCHAR(64) NOT NULL,
             timeLimit FLOAT NOT NULL,
             memoryLimit FLOAT NOT NULL,
-            type ENUM('ioi', 'acm', 'relative', 'game') NOT NULL,
+            type ENUM('ioi', 'acm', 'relative', 'game', 'interactive') NOT NULL,
             difficulty ENUM('trivial', 'easy', 'medium', 'hard', 'brutal') NOT NULL,
             logo TEXT NOT NULL,
             description TEXT NOT NULL,

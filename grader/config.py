@@ -37,6 +37,7 @@ PATH_DATA = "data/"
 PATH_TESTS = "data/tests/"
 PATH_CHECKERS = "data/checkers/"
 PATH_TESTERS = "data/testers/"
+PATH_REPLAYS = "data/replays/"
 PATH_SANDBOX = "sandbox/"
 PATH_LOG_FILE = "logs/grader.log"
 

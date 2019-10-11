@@ -94,7 +94,7 @@ def get_executable_extension(language):
         return config.EXECUTABLE_EXTENSION_PYTHON
     else:
         logger.error("Requested executable extension for unknown language: '{}'!".format(language))
-        return ".unk"
+        return ".unknown"
 
 
 def get_time_offset(language):

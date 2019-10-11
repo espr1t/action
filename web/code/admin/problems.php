@@ -260,6 +260,7 @@ class AdminProblemsPage extends Page {
                                     <option value="acm"' . ($problem->type == 'acm' ? 'selected' : '') . '>ACM</option>
                                     <option value="relative"' . ($problem->type == 'relative' ? 'selected' : '') . '>Relative</option>
                                     <option value="game"' . ($problem->type == 'game' ? 'selected' : '') . '>Game</option>
+                                    <option value="interactive"' . ($problem->type == 'interactive' ? 'selected' : '') . '>Interactive</option>
                                 </select>
                             </td>
                             <td style="width: 30%;">

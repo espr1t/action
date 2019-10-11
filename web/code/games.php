@@ -132,20 +132,33 @@ class GamesPage extends Page {
         foreach ($submits as $submitDict) {
             $submit = Submit::instanceFromArray($submitDict, array('source' => ''));
             // Skip system submits
-            if ($submit->userId == 0)
+            if ($submit->userId == 0) {
                 continue;
+            }
             $userKey = 'User_' . $submit->userId;
             if (array_key_exists($userKey, $userSubmits)) {
                 continue;
             }
             $userSubmits[$userKey] = $submit;
 
-            for ($i = 0; $i < count($submit->results); $i += 1) {
+            for ($i = 0; $i < count($submit->results); $i++) {
                 if (count($bestScores) <= $i) {
-                    array_push($bestScores, 0.0);
+                    if ($problem->name == 'ImageScanner') {
+                        array_push($bestScores, 1e100);
+                    } else {
+                        array_push($bestScores, 0.0);
+                    }
                 }
-                if (is_numeric($submit->results[$i]) && $bestScores[$i] < floatval($submit->results[$i])) {
-                    $bestScores[$i] = floatval($submit->results[$i]);
+                if (is_numeric($submit->results[$i])) {
+                    if ($problem->name == 'ImageScanner') {
+                        if ($bestScores[$i] > floatval($submit->results[$i])) {
+                            $bestScores[$i] = floatval($submit->results[$i]);
+                        }
+                    } else {
+                        if ($bestScores[$i] < floatval($submit->results[$i])) {
+                            $bestScores[$i] = floatval($submit->results[$i]);
+                        }
+                    }
                 }
             }
         }
@@ -153,7 +166,7 @@ class GamesPage extends Page {
         // Hack to make Airports use the grader's score
         // This, in fact, makes the task just a standard problem, but, oh well, I need it to be a game.
         if ($problem->name == 'Airports') {
-            for ($i = 0; $i < count($bestScores); $i += 1)
+            for ($i = 0; $i < count($bestScores); $i++)
                 $bestScores[$i] = 1.0;
         }
     }
@@ -185,7 +198,11 @@ class GamesPage extends Page {
             for ($i = 1; $i < count($submit->results); $i += 1) {
                 if (is_numeric($submit->results[$i])) {
                     if (floatval($submit->results[$i]) > 0.0) {
-                        $score += pow($submit->results[$i] / $bestScores[$i], $scoringPower) * $testScore;
+                        if ($problem->name == 'ImageScanner') {
+                            $score += pow($bestScores[$i] / $submit->results[$i], $scoringPower) * $testScore;
+                        } else {
+                            $score += pow($submit->results[$i] / $bestScores[$i], $scoringPower) * $testScore;
+                        }
                     }
                 }
             }
@@ -463,7 +480,7 @@ class GamesPage extends Page {
             ';
         }
 
-        if ($problem->name == 'HyperWords' || $problem->name == 'Airports') {
+        if ($problem->name == 'HyperWords' || $problem->name == 'Airports' || $problem->name == "ImageScanner") {
             $visualizerButton = '';
         }
 
@@ -807,11 +824,16 @@ class GamesPage extends Page {
 
         $points = array();
         $testWeight = 100.0 / (count($bestScores) - 1);
-        for ($i = 0; $i < count($bestScores); $i += 1) {
+        // TODO: This logic is duplicated above. Take it out in a single place.
+        for ($i = 0; $i < count($bestScores); $i++) {
             if (!is_numeric($submit->results[$i]) || $submit->results[$i] == 0.0) {
                 array_push($points, 0.0);
             } else {
-                $score = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], $scoringPower);
+                if ($problem->name == 'ImageScanner') {
+                    $score = $submit->results[$i] <= $bestScores[$i] ? 1.0 : pow($bestScores[$i] / $submit->results[$i], $scoringPower);
+                } else {
+                    $score = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], $scoringPower);
+                }
                 array_push($points, $score * $testWeight);
             }
         }
@@ -948,7 +970,7 @@ class GamesPage extends Page {
                     showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
                 </script>
             ';
-        } else if ($problem->type == 'relative') {
+        } else if ($problem->type == 'relative' || $problem->type == 'interactive') {
             $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
             if ($problem->name != 'Airports') {
                 $updatesUrl = getGameUrl($problem->name) . '/submits/' . $submitId . '/updates';
@@ -1080,6 +1102,8 @@ class GamesPage extends Page {
                 return array('espr1t', 'ThinkCreative', 'IvayloS', 'stuno');
             case 'Airports':
                 return array('espr1t', 'kiv');
+            case 'ImageScanner':
+                return array('espr1t', 'kopche', 'emazing');
         }
         return array();
     }
@@ -1189,7 +1213,7 @@ class GamesPage extends Page {
 
             if ($problem->type == 'game') {
                 $content = $this->getGameStatement($problem);
-            } else if ($problem->type == 'relative') {
+            } else if ($problem->type == 'relative' || $problem->type == 'interactive') {
                 $content = $this->getRelativeStatement($problem);
             }
             if (isset($_GET['visualizer'])) {

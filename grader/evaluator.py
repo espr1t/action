@@ -29,6 +29,7 @@ class Evaluator:
         self.language = data["language"]
         self.time_limit = data["timeLimit"]
         self.memory_limit = data["memoryLimit"] * 1048576  # Given in MiB, convert to bytes
+        self.problem_type = data["problemType"]
 
         # Front-end endpoint
         self.update_url = data["updateEndpoint"]
@@ -209,7 +210,10 @@ class Evaluator:
 
         test_futures = []
         for result_id in range(len(self.tests)):
-            future = common.executor.submit(runner.run_problem, result_id, self.tests[result_id])
+            if self.problem_type != "interactive":
+                future = common.executor.submit(runner.run_problem, result_id, self.tests[result_id])
+            else:
+                future = common.executor.submit(runner.run_interactive_problem, result_id, self.tests[result_id])
             test_futures.append((self.tests[result_id], future))
 
         for test, future in test_futures:
@@ -284,17 +288,17 @@ class Evaluator:
         return errors
 
     def run_solution(self):
-        if self.tester is None:
+        if self.tester is not None and self.problem_type != 'interactive':
+            run_status = self.process_games()
+            if run_status != "":
+                logger.info("Submit {} | Error while processing the games: {}".format(self.id, run_status))
+                return False
+        else:
             run_status = self.process_tests()
             if run_status != "":
                 logger.info("Submit {} | Error while processing the tests: {}".format(self.id, run_status))
                 return False
         # If a game, set-up the runner and opponents' solutions, then simulate the game
-        else:
-            run_status = self.process_games()
-            if run_status != "":
-                logger.info("Submit {} | Error while processing the games: {}".format(self.id, run_status))
-                return False
         return True
 
     def cleanup(self):

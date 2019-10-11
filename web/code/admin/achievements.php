@@ -834,7 +834,7 @@ class AdminAchievementsPage extends Page {
             $problem = Problem::instanceFromArray($game);
             if ($problem->type == 'game') {
                 $this->standings[$game['id']] = GamesPage::getGameRanking($problem);
-            } else if ($problem->type == 'relative') {
+            } else if ($problem->type == 'relative' || $problem->type == 'interactive') {
                 $this->standings[$game['id']] = GamesPage::getRelativeRanking($problem);
             } else {
                 echo 'WARNING: Unknown type of game: ' . $problem->type . PHP_EOL;

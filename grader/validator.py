@@ -6,6 +6,7 @@ This can happen in several different ways:
     >> Using a checker
 """
 
+import json
 import subprocess
 from os import getcwd
 from math import fabs
@@ -61,6 +62,52 @@ class Validator:
             return TestStatus.WRONG_ANSWER, error_message, 0, info
         else:
             return TestStatus.ACCEPTED, "", score, info
+
+    @staticmethod
+    def determine_interactive_status(submit_id, test, result, time_limit, memory_limit):
+        """
+        Determines the proper execution status of an interactive problem
+        """
+
+        # IE (Internal Error)
+        # The actual interactor.py crashed or took too much time to complete
+        if result.exec_time > time_limit * 2:
+            return TestStatus.INTERNAL_ERROR, "Interactor took too much time to complete.", 0, ""
+        if result.exec_memory > memory_limit * 2:
+            return TestStatus.INTERNAL_ERROR, "Interactor used too much memory.", 0, ""
+        if result.exit_code != 0:
+            return TestStatus.INTERNAL_ERROR, "Interactor exited with non-zero exit code.", 0, ""
+
+        # Okay, let's assume the interactor was okay. Let's now check if the tester crashed.
+        results = json.loads(result.output)
+        if results["internal_error"] or results["tester_exit_code"] != 0:
+            logger.error("Submit {} | Got internal error while executing interactive problem (test {})".format(
+                submit_id, test["inpFile"]))
+            return TestStatus.INTERNAL_ERROR, "Tester crashed.", 0, ""
+
+        # TODO: Change this to take into account time and memory offsets per language
+        # TODO: Fix exit code to be the correct one (it is now offset by 128)
+        # This shouldn't be a problem for games, but may for interactive problems that aim at efficiency
+
+        # TL (Time Limit)
+        if results["solution_user_time"] > time_limit:
+            return TestStatus.TIME_LIMIT, "", 0, ""
+
+        # ML (Memory Limit)
+        if results["solution_memory"] > memory_limit:
+            return TestStatus.MEMORY_LIMIT, "", 0, ""
+
+        # RE (Runtime Error)
+        if result.exit_code != 0:
+            return TestStatus.RUNTIME_ERROR, "", 0, ""
+
+        # AC (Accepted) or WA (Wrong Answer)
+        score = results["tester_score"] if "tester_score" in results else 0.0
+        info_message = results["tester_info_message"] if "tester_info_message" in results else ""
+        if info_message != "OK":
+            return TestStatus.WRONG_ANSWER, info_message, 0, info_message
+        else:
+            return TestStatus.ACCEPTED, "", score, info_message
 
     @staticmethod
     def validate_output(submit_id, inp_file, out_file, sol_file, floats_comparison, checker):
