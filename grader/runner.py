@@ -440,7 +440,7 @@ class Runner:
         sandbox = Runner.prepare_sandbox(solution_path, tester_path, time_limit, memory_limit)
 
         args = {
-            "time_limit": sandbox.time_limit,
+            "timeout": sandbox.timeout,
             "solution_run_command": Runner.get_run_command(sandbox.solution_language, sandbox.solution_name, sandbox.memory_limit),
             "tester_run_command": Runner.get_run_command(sandbox.tester_language, sandbox.tester_name, sandbox.memory_limit)
         }

@@ -52,12 +52,13 @@ def parse_info(tester_stderr, solution_stderr):
     # TODO: Fix this in a better way
     if info["solution_exit_code"] == 143:
         if info["tester_exit_code"] == 143:
-            if info["tester_user_time"] < info["solution_user_time"] - 0.2:
-                info["tester_exit_code"] = 0
-                info["tester_clock_time"] = info["tester_user_time"]
             if info["solution_user_time"] < info["tester_user_time"] - 0.2:
                 info["solution_exit_code"] = 0
                 info["solution_clock_time"] = info["solution_user_time"]
+            else:
+                info["tester_exit_code"] = 0
+                info["tester_clock_time"] = info["tester_user_time"]
+                info["solution_user_time"] = info["solution_clock_time"]
 
     if info["solution_exit_code"] != 0 and info["solution_exit_code"] != 143:
         info["tester_exit_code"] = 0
@@ -115,19 +116,19 @@ def interact(solution_exec_cmd, tester_exec_cmd, tester_input):
     print(json.dumps(info, indent=4, sort_keys=True))
 
 
-def prepare_and_run(time_limit, tester_run_cmd, solution_run_cmd):
+def prepare_and_run(timeout, tester_run_cmd, solution_run_cmd):
     with open("input.txt", "rt") as inp:
         tester_input = inp.read()
     with open("input.txt", "wt") as out:
         out.write("Deleted.\n")
 
     tester_exec_cmd = RUN_TEST_COMMAND.format(
-        timeout=time_limit + 0.5, run_command=tester_run_cmd
+        timeout=timeout + 0.5, run_command=tester_run_cmd
     )
     tester_exec_cmd = tester_exec_cmd.replace(" 2> /dev/null", "")
 
     solution_exec_cmd = RUN_TEST_COMMAND.format(
-        timeout=time_limit, run_command=solution_run_cmd
+        timeout=timeout, run_command=solution_run_cmd
     )
     interact(solution_exec_cmd, tester_exec_cmd, tester_input)
 
@@ -137,13 +138,13 @@ def prod():
         args = json.loads(inp.read())
 
     # The first line contains the time limit
-    time_limit = float(args["time_limit"])
+    timeout = float(args["timeout"])
     # The second line contains the exec command for the tester
     tester_run_cmd = args["tester_run_command"]
     # The third line contains the exec command for the solution
     solution_run_cmd = args["solution_run_command"]
 
-    prepare_and_run(time_limit, tester_run_cmd, solution_run_cmd)
+    prepare_and_run(timeout, tester_run_cmd, solution_run_cmd)
 
 
 def local():
