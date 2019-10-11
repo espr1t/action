@@ -67,6 +67,20 @@ def print_pdf():
         return network.create_response(500, exception)
 
 
+@app.route("/replay", methods=["POST"])
+@network.requires_auth
+def replay():
+    """ Used for returning a replay log to the front-end """
+    data = json.loads(flask.request.form["data"])
+    logger.info("Getting replay: {}".format(data["id"]))
+
+    path = os.path.abspath(os.path.join(config.PATH_REPLAYS, data["id"]))
+    if not os.path.isfile(path):
+        logger.error("No replay with ID {}.".format(data["id"]))
+        return network.create_response(404, "No replay with ID {}.".format(data["id"]))
+    return flask.send_from_directory(os.path.dirname(path), os.path.basename(path))
+
+
 if __name__ == "__main__":
     # Change current working directory to the one the script is in
     os.chdir(os.path.dirname(os.path.abspath(__file__)))

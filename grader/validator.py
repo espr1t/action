@@ -113,7 +113,7 @@ class Validator:
         if info_message != "OK":
             return TestStatus.WRONG_ANSWER, info_message, 0, info_message
         else:
-            return TestStatus.ACCEPTED, "", score, info_message
+            return TestStatus.ACCEPTED, "", score, result.info
 
     @staticmethod
     def validate_output(submit_id, inp_file, out_file, sol_file, floats_comparison, checker):

@@ -497,9 +497,9 @@ class Runner:
         logger.info("RESULTS:\n{}".format(results))
 
         # Record the game log to the /replays folder if not empty
+        combined_hash = ""
         if game_log != "":
             # Generate a hash of the solution, tester and input
-            combined_hash = ""
             with open(solution_path, "rb") as file:
                 combined_hash += md5(file.read()).hexdigest()
             with open(tester_path, "rb") as file:
@@ -509,9 +509,9 @@ class Runner:
             combined_hash = md5(combined_hash.encode()).hexdigest()
 
             # Record the log in the /replays folder using the hash as a name
-            game_log_path = os.path.abspath(os.path.join(config.PATH_REPLAYS, combined_hash + ".txt"))
+            game_log_path = os.path.abspath(os.path.join(config.PATH_REPLAYS, combined_hash))
             with open(game_log_path, "wt") as out:
                 out.write(game_log)
 
         # Leave the caller function decide what the test status will be
-        return common.RunResult(status=TestStatus.TESTING, exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=results)
+        return common.RunResult(status=TestStatus.TESTING, exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=results, info=combined_hash)
