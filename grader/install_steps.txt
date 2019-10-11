@@ -38,9 +38,11 @@ Installation steps:
     sudo apt-get install docker-ce docker-ce-cli containerd.io
 6.7. Configure Docker to start at system boot:
     sudo systemctl enable docker
-6.8. Build the docker image for the sandbox (the grader will automatically spin up containers from this image):
+6.8. Add the user(s) to the docker group so they can access the docker engine
+    sudo usermod -a -G docker $USER
+6.9. Build the docker image for the sandbox (the grader will automatically spin up containers from this image):
     cd action/grader/docker && docker build --tag=action_sandbox --file action_sandbox.docker .
-6.9 Return back to the root directory:
+6.10 Return back to the root directory:
     cd ../../..
 7. Install PDF printing utility (https://wkhtmltopdf.org)
 7.1. Download the installation package:

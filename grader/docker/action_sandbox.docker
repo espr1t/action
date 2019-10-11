@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y python3
 
 # Add the /usr/bin/time program
 COPY time /usr/bin/time
+RUN chmod 755 /usr/bin/time
 
 # Add non-privileged user to run the executables with
 RUN useradd --shell /bin/bash sandbox01
