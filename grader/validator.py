@@ -98,7 +98,7 @@ class Validator:
             return TestStatus.MEMORY_LIMIT, "", 0, ""
 
         # RE (Runtime Error)
-        if result.exit_code != 0:
+        if results["solution_exit_code"] != 0:
             return TestStatus.RUNTIME_ERROR, "", 0, ""
 
         # AC (Accepted) or WA (Wrong Answer)
