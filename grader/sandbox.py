@@ -51,7 +51,7 @@ class Sandbox:
         for file_path_name in file_list:
             with open(file_path_name[0], "rb") as file_obj:
                 file_info = archive.gettarinfo(file_path_name[0], file_path_name[1])
-                file_info.uid = file_info.gid = 1000 + int(self.container.name[8:]) - 1
+                file_info.uid = file_info.gid = 1000 + int(self.container.name[7:]) - 1
                 file_info.uname = file_info.gname = self.container.name
                 archive.addfile(file_info, file_obj)
 
