@@ -89,16 +89,22 @@ class Validator:
         # TODO: Fix exit code to be the correct one (it is now offset by 128)
         # This shouldn't be a problem for games, but may for interactive problems that aim at efficiency
 
+        # Change time/memory/exit code in the result object
+        # so they are properly displayed to the user.
+        result.exec_time = float(results["solution_user_time"])
+        result.exec_memory = float(results["solution_memory"])
+        result.exit_code = int(results["solution_exit_code"])
+
         # TL (Time Limit)
-        if results["solution_user_time"] > time_limit:
+        if result.exec_time> time_limit:
             return TestStatus.TIME_LIMIT, "", 0, ""
 
         # ML (Memory Limit)
-        if results["solution_memory"] > memory_limit:
+        if result.exec_memory > memory_limit:
             return TestStatus.MEMORY_LIMIT, "", 0, ""
 
         # RE (Runtime Error)
-        if results["solution_exit_code"] != 0:
+        if result.exit_code != 0:
             return TestStatus.RUNTIME_ERROR, "", 0, ""
 
         # AC (Accepted) or WA (Wrong Answer)
