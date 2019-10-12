@@ -22,6 +22,7 @@ class GamesPage extends Page {
             '/scripts/games/hypersnakes.js',
             '/scripts/games/tetris.js',
             '/scripts/games/connect.js',
+            '/scripts/games/imagescanner.js',
             '/scripts/jquery-3.3.1.min.js',
             '/scripts/jquery-jvectormap-2.0.3.min.js',
             '/scripts/jquery-jvectormap-world-mill.js'
@@ -484,6 +485,13 @@ class GamesPage extends Page {
             $visualizerButton = '';
         }
 
+        // if ($problem->name == 'ImageScanner' && $this->user->id > 1) {
+        //     $submitButton = '
+        //         <input type="submit" value="Изпрати Решение" class="button button-large button-color-gray"
+        //                 title="Събмитването по задачата е временно спряно.">
+        //     ';
+        // }
+
         $controlButtons = '
                 <div class="center">
                     ' . $submitButton . '
@@ -743,7 +751,7 @@ class GamesPage extends Page {
         ';
     }
 
-    private function getRelativeDetailsTable($submit, $points) {
+    private function getRelativeDetailsTable($problem, $submit, $points) {
         // If compilation error, pretty-print it and return instead of the per-test circles
         if ($submit->status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
             return prettyPrintCompilationErrors($submit);
@@ -802,7 +810,13 @@ class GamesPage extends Page {
                 $background = 'dull-black';
                 $icon = '<i class="fas fa-exclamation"></i>';
             }
-            $detailsTable .= '<div class="test-result tooltip--top background-' . $background . '" data-tooltip="' . $tooltip . '">' . $icon . '</div>';
+
+            $testCircle = '<div class="test-result tooltip--top background-' . $background . '" data-tooltip="' . $tooltip . '">' . $icon . '</div>';
+            if ($problem->name == 'ImageScanner') {
+                $testCircle = str_replace('test-result', 'test-result test-result-link', $testCircle);
+                $testCircle = '<a href="' . getGameUrl($problem->name) . '/submits/' . $submit->id . '/replays/' . $i . '">' . $testCircle . '</a>';
+            }
+            $detailsTable .= $testCircle;
         }
         $detailsTable .= '</div>';
         $detailsTable = '<div class="test-result-wrapper">' . $detailsTable . '</div>';
@@ -839,7 +853,7 @@ class GamesPage extends Page {
         }
 
         $statusTable = $this->getRelativeStatusTable($submit, $points);
-        $detailsTable = $this->getRelativeDetailsTable($submit, $points);
+        $detailsTable = $this->getRelativeDetailsTable($problem, $submit, $points);
 
         $author = '';
         if ($this->user->id != $submit->userId) {
@@ -869,7 +883,7 @@ class GamesPage extends Page {
             $content = '';
             if ($problem->type == 'game') {
                 $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, '');
-            } else if ($problem->type == 'relative') {
+            } else if ($problem->type == 'relative' || $problem->type == 'interactive') {
                 $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, '');
             }
 
@@ -1048,10 +1062,11 @@ class GamesPage extends Page {
         if ($gameName == 'ultimate-ttt') return 'showUtttReplay';
         if ($gameName == 'hypersnakes') return 'showHypersnakesReplay';
         if ($gameName == 'connect') return 'showConnectReplay';
+        if ($gameName == 'imagescanner') return 'showImagescannerReplay';
         return 'undefinedFunction';
     }
 
-    private function getReplay($problem, $submitId, $matchId) {
+    private function getGameReplay($problem, $submitId, $matchId) {
         $returnUrl = getGameUrl($problem->name) . '/submits/' . $submitId;
 
         $match = Match::getById($matchId);
@@ -1086,6 +1101,67 @@ class GamesPage extends Page {
         return $content;
     }
 
+    private function getOtherReplay($problem, $submitId, $testId) {
+        $returnUrl = getGameUrl($problem->name) . '/submits/' . $submitId;
+
+        $submit = Submit::get($submitId);
+
+        // Check if this is a valid match ID
+        if ($submit == null) {
+            redirect($returnUrl, 'ERROR', 'Изисканият събмит не съществува!');
+        }
+        // Check if the replay is part of the same problem
+        if ($submit->problemId != $problem->id) {
+            redirect($returnUrl, 'ERROR', 'Изисканият събмит не е от тази задача!');
+        }
+        // Finally, check permissions
+        if ($this->user->access < $GLOBALS['ACCESS_SEE_REPLAYS']) {
+            if ($this->user->id != $submit->userId) {
+                redirect($returnUrl, 'ERROR', 'Нямате права да видите този събмит!');
+            }
+        }
+
+        $submitInfo = explode(',', $submit->info);
+
+        $logId = '';
+        if (count($submitInfo) == count($submit->results)) {
+            if ($testId >= 0 && $testId < count($submitInfo))
+                $logId = $submitInfo[$testId];
+        }
+        if ($logId == '') {
+            redirect($returnUrl, 'ERROR', 'Този събмит няма визуализация!');
+        }
+
+        $functionName = $this->getReplayFunction($_GET['game']);
+
+        $ranking = $this->getRelativeRanking($problem);
+        $position = 0;
+        for (; $position < count($ranking); $position += 1)
+            if ($ranking[$position]['user'] == $submit->userId)
+                break;
+        $rank = '';
+        if ($position == 0) $rank = '1-st';
+        if ($position == 1) $rank = '2-nd';
+        if ($position == 2) $rank = '3-rd';
+        if ($position >= 3) $rank = '' . ($position + 1) . '-th';
+        $userName = $submit->userName . ' (ranked ' . $rank . ' out of ' . count($ranking) . ')';
+
+        $content = '
+            <script>
+                ' . $functionName . '("' . $userName . '", "'. $logId . '");
+            </script>
+        ';
+        return $content;
+    }
+
+    private function getReplay($problem, $submitId, $matchId) {
+        if ($problem->type == 'game') {
+            return $this->getGameReplay($problem, $submitId, $matchId);
+        } else {
+            return $this->getOtherReplay($problem, $submitId, $matchId);
+        }
+    }
+
     private function getUnofficial($problem) {
         switch ($problem->name) {
             case 'Snakes':
@@ -1103,7 +1179,7 @@ class GamesPage extends Page {
             case 'Airports':
                 return array('espr1t', 'kiv');
             case 'ImageScanner':
-                return array('espr1t', 'kopche', 'emazing');
+                return array('espr1t', 'kopche', 'emazing', 'ThinkCreative');
         }
         return array();
     }
@@ -1171,25 +1247,47 @@ class GamesPage extends Page {
     }
 
     private function getDemo($problem) {
-        // Show the standings for 5 seconds, then play a random replay
+        // Show the standings for 10 seconds, then play 3 random replays
 
         $brain = new Brain();
+        $scoreboard = $this->getScoreboard($problem);
+        $functionName = $this->getReplayFunction($_GET['game']);
+
+        $allSubmits = $brain->getProblemSubmits($problem->id, $GLOBALS['STATUS_ACCEPTED']);
+        $users = array();
+        $submits = array();
+        for ($i = count($allSubmits) - 1; $i >= 0; $i--) {
+            if ($allSubmits[$i]['userName'] != 'system') {
+                if (!in_array($allSubmits[$i]['userName'], $users)) {
+                    array_push($users, $allSubmits[$i]['userName']);
+                    array_push($submits, $allSubmits[$i]['id']);
+                }
+            }
+        }
+
+        $submitId = $submits[rand(0, count($submits) - 1)];
+        $test = rand(0, 10);
+
+        $replay = $this->getReplay($problem, $submitId, $test);
+        $replay = str_replace('<script>', '', $replay);
+        $replay = str_replace('</script>', '', $replay);
+
+        /*
         $matches = $brain->getGameMatches($problem->id);
         $idx = rand() % count($matches);
         while ($matches[$idx]['userOne'] < 0 || $matches[$idx]['userTwo'] < 0 || $matches[$idx]['log'] == '')
             $idx = rand() % count($matches);
 
-        $scoreboard = $this->getScoreboard($problem);
-
         $playerOne = User::get($matches[$idx]['userOne']);
         $playerTwo = User::get($matches[$idx]['userTwo']);
-        $functionName = $this->getReplayFunction($_GET['game']);
         $replay = $functionName . '("'. $playerOne->username . '", "' . $playerTwo->username .'", "' . $matches[$idx]['log'] . '", true);';
+        */
 
         $demoActions = '
             <script>
-                setTimeout(function() {hideActionForm();}, 4500);
-                setTimeout(function() {' . $replay . '}, 5000);
+                setTimeout(function() {
+                    ' . $replay . '
+                }, 5000);
             </script>
         ';
         return $scoreboard . $demoActions;

@@ -347,3 +347,11 @@ table.connect-board td.player2 {
     border: 0;
     border-radius: 0.6rem;
 }
+
+/***********************
+       ImageScanner
+************************/
+div.imagescanner-content {
+    width: 100%;
+    text-align: center;
+}

@@ -1197,6 +1197,10 @@ div.test-result {
     cursor: help;
 }
 
+div.test-result-link {
+    cursor: pointer;
+}
+
 table.bordered {
     margin: 0.25rem 0.5rem;
     border: 1px solid #333333;

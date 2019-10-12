@@ -75,9 +75,9 @@ class HelpPage extends Page {
             <h2 id="compilation"><a href="#compilation">Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 7.3.0):</b> <pre>g++ -O2 -std=c++17 -w -s -static -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
-                <li><b>Java (OpenJDK 1.8):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
-                <li><b>Python (Python 3.6.7):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
+                <li><b>C++ (GCC 7.4.0):</b> <pre>g++ -O2 -std=c++17 -w -s -static -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>Java (OpenJDK 11.0.4):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
+                <li><b>Python (Python 3.6.8):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
             Максималното време за компилация е 10 секунди.<br>
             Максималният размер на стека е 64 мегабайта.
@@ -85,8 +85,8 @@ class HelpPage extends Page {
             <h2 id="grader"><a href="#grader">Тестова машина</a></h2>
             Тестовата машина има следната хардуерна конфигурация:
             <ul>
-                <li><b>Процесор:</b> Core2 Quad :: 3.0GHz</li>
-                <li><b>Рам:</b> DDR2 8GB :: 800MHz</li>
+                <li><b>Процесор:</b> Intel Xeon 16 Core :: 2.1GHz</li>
+                <li><b>Рам:</b> DDR3 32GB :: 1333MHz ECC</li>
                 <li><b>Харддиск:</b> Corsair Force SSD :: 520MB/s</li>
             </ul>
             Ползваната операционна система на тестовата машина е Ubuntu 18.04.
@@ -136,9 +136,11 @@ class HelpPage extends Page {
                 се е справило с всички тестове в групата.</li>
                 <li><b>ACM-стил:</b> За да се вземат точки за задачата, решението трябва да се е справило с
                 <em>всички</em> тестове.</li>
+                <li><b>Игра:</b> Всеки тест е "игра" между двама (или всички) участници, предали решение на задачата.</li>
+                <li><b>Интерактивна:</b> Програмата ви комуникира с авторска програма, която й дава частична информация
+                (примерно отговаря на въпроси).</li>
                 <li><b>Релативна:</b> За всеки тест се получават точки, пропорционално спрямо най-добрия резултат от
                 всички участници за съответния тест.</li>
-                <li><b>Игра:</b> Всеки тест е "игра" между двама (или всички) участници, предали решение на задачата.</li>
             </ul>
             Системата е направена да показва колко точки бихте получили в IOI-стил състезание, но класирането е все едно
             задачите са ACM-стил - една задача не се счита за решена, докато не минете всички тестове на нея!

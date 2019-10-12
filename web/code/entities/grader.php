@@ -122,8 +122,13 @@ class Grader {
             $submit->exec_memory[$result['position']] = floatval($result['exec_memory']);
         }
         // Update the info fields for tests other than the sample
-        if (array_key_exists('info', $result) && $result['info'] != '' && $result['position'] > 0) {
-            $submit->info = $result['info'];
+        if (array_key_exists('info', $result) && $result['info'] != '') {
+            $results_info = explode(',', $submit->info);
+            if (count($results_info) != count($submit->results)) {
+                $results_info = array_fill(0, count($submit->results), '');
+            }
+            $results_info[$result['position']] = $result['info'];
+            $submit->info = implode(',', $results_info);
         }
     }
 
@@ -193,6 +198,11 @@ class Grader {
             }
         }
         return $response['data'];
+    }
+
+    function get_replay($replayId) {
+        $response = $this->call($GLOBALS['GRADER_ENDPOINT_GET_REPLAY'], array("id" => $replayId), Grader::$METHOD_POST, false);
+        return $response['status'] == 200 ? $response['data'] : null;
     }
 }
 

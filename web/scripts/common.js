@@ -1,4 +1,14 @@
 /*
+ * Sleeps for ms milliseconds.
+ */
+
+function sleep(ms) {
+    // Use: await sleep(1337)
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+/*
  * Get last url token (can be problem id, submission id, news id, etc.)
  */
 function getLastUrlToken() {
@@ -177,6 +187,8 @@ function hideActionForm(redirectUrl) {
         document.onkeydown = keyDownEventStack.pop();
     }
     var form = document.getElementsByClassName('action-form')[0];
+    if (form == null)
+        return;
     form.className = 'action-form fade-out';
     setTimeout(function() {
         form.parentNode.removeChild(form);

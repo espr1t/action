@@ -373,6 +373,9 @@ class Submit {
             // TODO: Remove the 80-percent logic altogether (make all relative problems games)
             $brain = new Brain();
             $problem = $brain->getProblem($this->problemId);
+            // TODO: This may be a problem later on. Interactive problems have their scores not normalized,
+            // thus may pass this easily, however if their scores are in [0, 1] they will fall here.
+            // Fix this by introducing 'scoring' flag in the problems (absolute/relative).
             if ($problem['type'] != 'relative') {
                 if (array_sum($this->results) < count($this->results) * 8.0 / 10.0)
                     return $GLOBALS['STATUS_WRONG_ANSWER'];

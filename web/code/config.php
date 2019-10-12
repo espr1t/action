@@ -38,6 +38,7 @@ $ADMIN_EMAIL = 'admin.email@example.com';
 $GRADER_ENDPOINT_AVAILABLE = '/available';
 $GRADER_ENDPOINT_EVALUATE = '/evaluate';
 $GRADER_ENDPOINT_PRINT_PDF = '/print-pdf';
+$GRADER_ENDPOINT_GET_REPLAY = '/replay';
 
 // Grader-exposed system endpoints
 $PROTOCOL = PHP_OS == 'WINNT' ? 'http' : 'https';

@@ -58,6 +58,10 @@ switch ($_GET['action']) {
         require_once('update_tester.php');
         break;
 
+    case 'getReplay':
+        require_once('get_replay.php');
+        break;
+
     default:
         printAjaxResponse(array(
             'status' => 'WARNING',
