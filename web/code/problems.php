@@ -324,7 +324,7 @@ class ProblemsPage extends Page {
         $submitFormContent = '
             <h2><span class="blue">' . $problem->name . '</span> :: Предаване на Решение</h2>
             <div class="center">
-                <textarea name="source" class="submit-source" cols=80 rows=24 maxlength=20000 id="source"></textarea>
+                <textarea name="source" class="submit-source" cols=80 rows=24 maxlength=50000 id="source"></textarea>
             </div>
             <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
             <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ');" class="button button-color-red"></div>
