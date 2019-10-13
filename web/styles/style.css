@@ -766,7 +766,7 @@ button.button-color-red {
 }
 
 button.button-color-gray {
-    color: #FFFFFF;
+    background-color: #CCCCCC;
 }
 
 input.button {
@@ -800,7 +800,7 @@ input.button-color-red {
 }
 
 input.button-color-gray {
-    color: #FFFFFF;
+    background-color: #CCCCCC;
 }
 
 input.radio {
