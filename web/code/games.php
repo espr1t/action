@@ -320,7 +320,7 @@ class GamesPage extends Page {
             <div class="center">%s</div>
             <br>
             <div class="center">
-                <textarea name="source" class="submit-source" cols=80 rows=24 id="source"></textarea>
+                <textarea name="source" class="submit-source" cols=80 rows=24 maxlength=20000 id="source"></textarea>
             </div>
             <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
             <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ', %s);" class="button button-color-red"></div>
@@ -431,7 +431,7 @@ class GamesPage extends Page {
             <div class="center">Решението ще получи пропорционални точки спрямо авторското решение, или това на най-добрия друг участник.</div>
             <br>
             <div class="center">
-                <textarea name="source" class="submit-source" cols=80 rows=24 id="source"></textarea>
+                <textarea name="source" class="submit-source" cols=80 rows=24 maxlength=20000 id="source"></textarea>
             </div>
             <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
             <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ');" class="button button-color-red"></div>
