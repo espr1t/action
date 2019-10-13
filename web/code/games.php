@@ -198,13 +198,13 @@ class GamesPage extends Page {
             $score = 0.0;
             for ($i = 1; $i < count($submit->results); $i += 1) {
                 if (is_numeric($submit->results[$i])) {
-                    if (floatval($submit->results[$i]) > 0.0) {
-                        if ($problem->name == 'ImageScanner') {
-                            $score += pow($bestScores[$i] / $submit->results[$i], $scoringPower) * $testScore;
-                        } else {
-                            $score += pow($submit->results[$i] / $bestScores[$i], $scoringPower) * $testScore;
-                        }
+                    $fraction = 0.0;
+                    if ($problem->name == 'ImageScanner') {
+                        $fraction = $submit->results[$i] <= $bestScores[$i] ? 1.0 : pow($bestScores[$i] / $submit->results[$i], $scoringPower);
+                    } else {
+                        $fraction = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], $scoringPower);
                     }
+                    $score += $fraction * $testScore;
                 }
             }
             array_push($ranking, array(
@@ -840,7 +840,7 @@ class GamesPage extends Page {
         $testWeight = 100.0 / (count($bestScores) - 1);
         // TODO: This logic is duplicated above. Take it out in a single place.
         for ($i = 0; $i < count($bestScores); $i++) {
-            if (!is_numeric($submit->results[$i]) || $submit->results[$i] == 0.0) {
+            if (!is_numeric($submit->results[$i])) {
                 array_push($points, 0.0);
             } else {
                 if ($problem->name == 'ImageScanner') {
