@@ -103,17 +103,23 @@ class Validator:
         if result.exec_memory > memory_limit:
             return TestStatus.MEMORY_LIMIT, "", 0, ""
 
+        # WA (Wrong Answer)
+        score = results["tester_score"] if "tester_score" in results else 0.0
+        info_message = results["tester_info_message"] if "tester_info_message" in results else ""
+        if info_message != "OK" and info_message != "":
+            return TestStatus.WRONG_ANSWER, info_message, 0, info_message
+
         # RE (Runtime Error)
         if result.exit_code != 0:
             return TestStatus.RUNTIME_ERROR, "", 0, ""
 
-        # AC (Accepted) or WA (Wrong Answer)
-        score = results["tester_score"] if "tester_score" in results else 0.0
-        info_message = results["tester_info_message"] if "tester_info_message" in results else ""
         if info_message != "OK":
-            return TestStatus.WRONG_ANSWER, info_message, 0, info_message
-        else:
-            return TestStatus.ACCEPTED, "", score, result.info
+            logger.error("Submit {} | Got internal error while executing interactive problem (test {})".format(
+                submit_id, test["inpFile"]))
+            return TestStatus.INTERNAL_ERROR, "Tester didn't print a status!", 0, ""
+
+        # AC(Accepted)
+        return TestStatus.ACCEPTED, "", score, result.info
 
     @staticmethod
     def validate_output(submit_id, inp_file, out_file, sol_file, floats_comparison, checker):
