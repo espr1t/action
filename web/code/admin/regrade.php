@@ -187,7 +187,7 @@ class AdminRegradePage extends Page {
         }
     }
 
-    private function retestLatest($problemId) {
+    private function regradeLatest($problemId) {
         $submits = $this->brain->getProblemSubmits($problemId);
         $seen = array();
         for ($i = count($submits) - 1; $i >= 0; $i--) {
