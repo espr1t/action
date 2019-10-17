@@ -91,11 +91,12 @@ class Executor:
                         docker.types.Ulimit(name="fsize", soft=16777216, hard=16777216),
                         docker.types.Ulimit(name="data", soft=1073741824, hard=1073741824),
                         docker.types.Ulimit(name="msgqueue", soft=0, hard=0),
-                        docker.types.Ulimit(name="core", soft=0, hard=0)
+                        docker.types.Ulimit(name="core", soft=0, hard=0),
+                        docker.types.Ulimit(name="nice", soft=-20, hard=-20)
                     ]
                 )
                 container.start()
-            common.containers.put((container, ""))
+            common.containers.put(container)
 
     @staticmethod
     def cmd_exec(command, timeout=config.MAX_EXECUTION_TIME):

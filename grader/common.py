@@ -97,26 +97,6 @@ def get_executable_extension(language):
         return ".unknown"
 
 
-def get_time_offset(language):
-    if language == config.LANGUAGE_CPP:
-        return config.TIME_OFFSET_CPP
-    if language == config.LANGUAGE_JAVA:
-        return config.TIME_OFFSET_JAVA
-    if language == config.LANGUAGE_PYTHON:
-        return config.TIME_OFFSET_PYTHON
-    raise Exception("Unsupported language")
-
-
-def get_memory_offset(language):
-    if language == config.LANGUAGE_CPP:
-        return config.MEMORY_OFFSET_CPP
-    if language == config.LANGUAGE_JAVA:
-        return config.MEMORY_OFFSET_JAVA
-    if language == config.LANGUAGE_PYTHON:
-        return config.MEMORY_OFFSET_PYTHON
-    raise Exception("Unsupported language")
-
-
 def send_request(method, url, data=None):
     username = config.AUTH_USERNAME
     password = config.AUTH_PASSWORD

@@ -2,6 +2,12 @@
 # Grader configuration
 #
 
+import os
+
+# Change current working directory to the one the script is in
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
 WORKER_COUNT = 3  # Max number of running solutions/containers
 
 # Evaluation
@@ -33,13 +39,13 @@ CHECKER_TIMEOUT = 3.0  # Seconds
 AUTH_USERNAME = "username"
 AUTH_PASSWORD = "password"
 
-PATH_DATA = "data/"
-PATH_TESTS = "data/tests/"
-PATH_CHECKERS = "data/checkers/"
-PATH_TESTERS = "data/testers/"
-PATH_REPLAYS = "data/replays/"
-PATH_SANDBOX = "sandbox/"
-PATH_LOG_FILE = "logs/grader.log"
+PATH_DATA = os.path.abspath(os.path.join(os.getcwd(), "data/"))
+PATH_TESTS = os.path.abspath(os.path.join(os.getcwd(), "data/tests/"))
+PATH_CHECKERS = os.path.abspath(os.path.join(os.getcwd(), "data/checkers/"))
+PATH_TESTERS = os.path.abspath(os.path.join(os.getcwd(), "data/testers/"))
+PATH_REPLAYS = os.path.abspath(os.path.join(os.getcwd(), "data/replays/"))
+PATH_SANDBOX = os.path.abspath(os.path.join(os.getcwd(), "sandbox/"))
+PATH_LOG_FILE = os.path.abspath(os.path.join(os.getcwd(), "logs/grader.log"))
 
 SOURCE_NAME = "source"
 EXECUTABLE_NAME = "executable"

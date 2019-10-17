@@ -4,6 +4,7 @@
     "source": "#include <cstdio>\n\n// With кирилица\nint main(void) {\n    fprintf(stdout, \"Hello, World!\\n\");\n    return 0;\n}",
     "timeLimit": 0.1,
     "memoryLimit": 0.5,
+    "problemType": "acm",
     "tester": "",
     "checker": "",
     "tests": [

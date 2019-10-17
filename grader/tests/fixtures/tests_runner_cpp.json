@@ -4,6 +4,7 @@
     "language": "C++",
     "timeLimit": 0.3,
     "memoryLimit": 32,
+    "problemType": "acm",
     "floats": false,
     "tests": [
         {

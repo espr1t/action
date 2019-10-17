@@ -10,26 +10,15 @@ logger = common.get_logger(__name__)
 
 class Sandbox:
     def __init__(self):
-        self.solution_path = None
-        self.solution_name = None
-        self.solution_language = None
-        self.tester_path = None
-        self.tester_name = None
-        self.tester_language = None
-        self.time_limit = None
-        self.memory_limit = None
-        self.time_offset = None
-        self.memory_offset = None
-        self.timeout = None
-        self.cur_hash = None
-        self.new_hash = None
-
         # Get any available container
-        self.container, self.cur_hash = common.containers.get()
+        self.container = common.containers.get()
+        # Get the container name
         self.container_id = self.container.name
+        # Clean the sandbox directory
+        self.clean()
 
     def __del__(self):
-        common.containers.put((self.container, self.cur_hash))
+        common.containers.put(self.container)
 
     def get(self, file_path):
         stream, info = self.container.get_archive(file_path)
@@ -69,5 +58,4 @@ class Sandbox:
                 "Could not clean sandbox directory on container {container}! Message was: {message}".format(
                     container=self.container.name, message=stdout + stderr)
             )
-            return False
-        return True
+            raise Exception("Could not clean sandbox dir for container {}!".format(self.container_id))

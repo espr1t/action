@@ -4,6 +4,7 @@
     "language": "C++",
     "timeLimit": 0.2,
     "memoryLimit": 128,
+    "problemType": "game",
     "tester": "SnakesTesterHash",
     "tests": [
         {

@@ -8,7 +8,7 @@
 #
 
 import shutil
-from os import path, makedirs
+import os
 from time import perf_counter
 
 import config
@@ -39,27 +39,36 @@ class Evaluator:
         self.tests_url = data["testsEndpoint"]
 
         # If a task with checker, there should also be an endpoint where to download it from
-        self.checker = data["checker"] if ("checker" in data and data["checker"] != "") else None
+        self.path_checker_source = None
+        self.path_checker_executable = None
+        if "checker" in data and data["checker"] != "":
+            self.path_checker_source = os.path.join(config.PATH_CHECKERS, data["checker"] + config.SOURCE_EXTENSION_CPP)
+            self.path_checker_executable = os.path.join(config.PATH_CHECKERS, data["checker"] + config.EXECUTABLE_EXTENSION_CPP)
         self.checker_url = data["checkerEndpoint"] if "checkerEndpoint" in data else None
 
-        # If a game, there should also be a tester and a list of matches (opponents' names and solutions)
-        self.tester = data["tester"] if ("tester" in data and data["tester"] != "") else None
+        # If a task with tester, there should also be an endpoint where to download it from
+        self.path_tester_source = None
+        self.path_tester_executable = None
+        if "tester" in data and data["tester"] != "":
+            self.path_tester_source = os.path.join(config.PATH_TESTERS, data["tester"] + config.SOURCE_EXTENSION_CPP)
+            self.path_tester_executable = os.path.join(config.PATH_TESTERS, data["tester"] + config.EXECUTABLE_EXTENSION_CPP)
         self.tester_url = data["testerEndpoint"] if "testerEndpoint" in data else None
+
+        # If a game, there should also be a list of matches (opponents' names and solutions)
         self.matches = data["matches"] if "matches" in data else None
 
         # Whether to use relative or absolute floating point comparison
         self.floats = data["floats"]
 
         # Path to sandbox and files inside
-        self.path_sandbox = path.join(config.PATH_SANDBOX, "submit_{:06d}/".format(self.id))
-        self.path_source = path.join(self.path_sandbox, config.SOURCE_NAME + common.get_source_extension(self.language))
-        self.path_executable = path.join(self.path_sandbox, config.EXECUTABLE_NAME + common.get_executable_extension(self.language))
+        self.path_sandbox = os.path.join(config.PATH_SANDBOX, "submit_{:06d}/".format(self.id))
+        self.path_source = os.path.join(self.path_sandbox, config.SOURCE_NAME + common.get_source_extension(self.language))
+        self.path_executable = os.path.join(self.path_sandbox, config.EXECUTABLE_NAME + common.get_executable_extension(self.language))
 
         # Frontend server update logic
         self.updater = Updater(self.update_url, self.id, self.tests)
 
     def __del__(self):
-        # Clean up remaining files
         self.cleanup()
 
     def evaluate(self):
@@ -80,27 +89,29 @@ class Evaluator:
             return
 
         # Download and compile the checker (if not already available)
-        if self.checker is not None and not path.exists(config.PATH_CHECKERS + self.checker):
-            logger.info("Submit {} |   >> updating checker file...".format(self.id))
-            if not self.download_and_compile_utility_file(config.PATH_CHECKERS, self.checker, self.checker_url):
-                self.updater.add_info("Error while setting up checker!", None, TestStatus.INTERNAL_ERROR)
-                return
+        if self.path_checker_executable is not None:
+            if not os.path.exists(self.path_checker_executable):
+                logger.info("Submit {} |   >> downloading and compiling checker...".format(self.id))
+                if not self.setup_utility_file(self.path_checker_source, self.path_checker_executable, self.checker_url):
+                    self.updater.add_info("Error while setting up checker!", None, TestStatus.INTERNAL_ERROR)
+                    return
 
         # Download and compile the tester (if not already available)
-        if self.tester is not None and not path.exists(config.PATH_TESTERS + self.tester):
-            logger.info("Submit {} |   >> updating tester file...".format(self.id))
-            if not self.download_and_compile_utility_file(config.PATH_TESTERS, self.tester, self.tester_url):
-                self.updater.add_info("Error while setting up tester!", None, TestStatus.INTERNAL_ERROR)
-                return
+        if self.path_checker_executable is not None:
+            if not os.path.exists(self.path_checker_executable):
+                logger.info("Submit {} |   >> downloading and compiling tester...".format(self.id))
+                if not self.setup_utility_file(self.path_tester_source, self.path_tester_executable, self.tester_url):
+                    self.updater.add_info("Error while setting up tester!", None, TestStatus.INTERNAL_ERROR)
+                    return
+
+        # Send an update that the compilation has been started for this submission
+        self.updater.add_info("", None, TestStatus.COMPILING)
 
         # Save the source to a file so we can compile it later
         logger.info("Submit {} |   >> writing source code to file...".format(self.id))
         if not self.write_source(self.source, self.path_source):
             self.updater.add_info("Error while writing the source to a file!", None, TestStatus.INTERNAL_ERROR)
             return
-
-        # Send an update that the compilation has been started for this submission
-        self.updater.add_info("", None, TestStatus.COMPILING)
 
         # Compile
         logger.info("Submit {} |   >> compiling solution...".format(self.id))
@@ -124,30 +135,28 @@ class Evaluator:
     def create_sandbox_dir(self):
         try:
             # Delete if already present (maybe regrade?)
-            if path.exists(self.path_sandbox):
+            if os.path.exists(self.path_sandbox):
                 shutil.rmtree(self.path_sandbox)
             # Create the submit testing directory
-            if not path.exists(self.path_sandbox):
-                makedirs(self.path_sandbox)
+            if not os.path.exists(self.path_sandbox):
+                os.makedirs(self.path_sandbox)
         except OSError as ex:
             logger.error("Submit {} | Could not create sandbox directory. Error was: {}".format(self.id, str(ex)))
             return False
         return True
 
     def download_test(self, test_name, test_hash):
-        test_path = config.PATH_TESTS + test_hash
+        test_path = os.path.join(config.PATH_TESTS, test_hash)
         # Download only if the file doesn't already exist
-        if not path.exists(test_path):
+        if not os.path.exists(test_path):
             logger.info("Submit {} | Downloading file {} with hash {} from URL: {}".format(
                 self.id, test_name, test_hash, self.tests_url + test_name))
             common.download_file(self.tests_url + test_name, test_path)
 
     def download_tests(self):
         # In case the directory for the tests does not exist, create it
-        if not path.exists(config.PATH_DATA):
-            makedirs(config.PATH_DATA)
-        if not path.exists(config.PATH_TESTS):
-            makedirs(config.PATH_TESTS)
+        if not os.path.exists(config.PATH_TESTS):
+            os.makedirs(config.PATH_TESTS)
 
         try:
             for test in self.tests:
@@ -169,26 +178,24 @@ class Evaluator:
 
     def compile_utility_file(self, path_source, path_executable):
         # Only compile if not already compiled
-        if not path.exists(path_executable):
+        if not os.path.exists(path_executable):
             logger.info("Submit {} |   >> compiling utility file {}...".format(
-                self.id, path.basename(path_source)))
-            return self.compile("C++", path_source, path_executable) == ""
+                self.id, os.path.basename(path_source)))
+            return self.compile(config.LANGUAGE_CPP, path_source, path_executable) == ""
         return True
 
-    def download_utility_file(self, url, destination):
+    def download_utility_file(self, download_url, destination):
         # Only download if not downloaded already
-        if not path.exists(destination):
-            logger.info("Submit {} |   >> downloading utility file {}".format(self.id, url.split('/')[-1]))
+        if not os.path.exists(destination):
+            logger.info("Submit {} |   >> downloading utility file {}".format(self.id, download_url.split('/')[-1]))
             try:
-                common.download_file(url, destination)
+                common.download_file(download_url, destination)
             except RuntimeError:
                 return False
         return True
 
-    def download_and_compile_utility_file(self, directory, file_hash, url):
-        path_source = directory + file_hash + config.SOURCE_EXTENSION_CPP
-        path_executable = directory + file_hash + config.EXECUTABLE_EXTENSION_CPP
-        if not self.download_utility_file(url, path_source):
+    def setup_utility_file(self, path_source, path_executable, download_url):
+        if not self.download_utility_file(download_url, path_source):
             return False
         if not self.compile_utility_file(path_source, path_executable):
             return False
@@ -240,10 +247,10 @@ class Evaluator:
 
             # Get and compile the opponent's solution
             opponent_language = match["language"]
-            opponent_path_source = self.path_sandbox + config.OPPONENT_SOURCE_NAME +\
-                common.get_source_extension(opponent_language)
-            opponent_path_executable = self.path_sandbox + config.OPPONENT_EXECUTABLE_NAME +\
-                common.get_executable_extension(opponent_language)
+            opponent_path_source = os.path.join(self.path_sandbox, config.OPPONENT_SOURCE_NAME +
+                common.get_source_extension(opponent_language))
+            opponent_path_executable = os.path.join(self.path_sandbox, config.OPPONENT_EXECUTABLE_NAME +
+                common.get_executable_extension(opponent_language))
 
             logger.info("Submit {} |       ++ writing opponent's source...".format(self.id))
             if not self.write_source(match["source"], opponent_path_source):
@@ -258,14 +265,14 @@ class Evaluator:
             test_futures = []
             for test in self.tests:
                 # Play forward game
-                future = common.executor.submit(runner.run_game, result_id, test, self.tester,
+                future = common.executor.submit(runner.run_game, result_id, test,
                                                 match["player_one_id"], match["player_one_name"], self.path_executable,
                                                 match["player_two_id"], match["player_two_name"], opponent_path_executable)
                 test_futures.append([test, future])
                 result_id += 1
 
                 # Play also reversed game (first player as second) so it is fair
-                future = common.executor.submit(runner.run_game, result_id, test, self.tester,
+                future = common.executor.submit(runner.run_game, result_id, test,
                                                 match["player_two_id"], match["player_two_name"], opponent_path_executable,
                                                 match["player_one_id"], match["player_one_name"], self.path_executable)
                 test_futures.append([test, future])
@@ -288,7 +295,7 @@ class Evaluator:
         return errors
 
     def run_solution(self):
-        if self.tester is not None and self.problem_type != 'interactive':
+        if self.path_tester_executable is not None and self.problem_type != 'interactive':
             run_status = self.process_games()
             if run_status != "":
                 logger.info("Submit {} | Error while processing the games: {}".format(self.id, run_status))
@@ -302,5 +309,6 @@ class Evaluator:
         return True
 
     def cleanup(self):
-        if path.exists(self.path_sandbox):
+        # Clean up remaining files
+        if os.path.exists(self.path_sandbox):
             shutil.rmtree(self.path_sandbox)

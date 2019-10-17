@@ -27,9 +27,6 @@ def parse_output(prefix, stderr):
 
 
 def parse_info(tester_stderr, solution_stderr):
-    # print("Tester stderr:\n{}".format(tester_stderr))
-    # print("Solution stderr:\n{}".format(solution_stderr))
-
     info = {}
     info.update(parse_output("tester", tester_stderr))
     info.update(parse_output("solution", solution_stderr))
@@ -50,14 +47,13 @@ def parse_info(tester_stderr, solution_stderr):
 
     # Fix known cases that have issues
     # TODO: Fix this in a better way
-    if info["solution_exit_code"] == 143:
-        if info["tester_exit_code"] == 143:
-            if info["solution_user_time"] < info["tester_user_time"] - 0.2:
-                info["solution_exit_code"] = 0
-                info["solution_clock_time"] = info["solution_user_time"]
-            else:
-                info["tester_exit_code"] = 0
-                info["tester_clock_time"] = info["tester_user_time"]
+    if info["solution_exit_code"] == 143 and info["tester_exit_code"] == 143:
+        if info["solution_user_time"] < info["tester_user_time"] - 0.2:
+            info["solution_exit_code"] = 0
+            info["solution_clock_time"] = info["solution_user_time"]
+        else:
+            info["tester_exit_code"] = 0
+            info["tester_clock_time"] = info["tester_user_time"]
 
     if info["solution_exit_code"] != 0 and info["solution_exit_code"] != 143:
         info["tester_exit_code"] = 0

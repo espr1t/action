@@ -5,6 +5,7 @@ The following API is exposed:
     /available                      For checking whether the Grader is available
     /evaluate                       For evaluation of a submission
     /print-pdf                      For printing a page to a PDF file
+    /replay                         For getting a game replay log
 """
 import os
 import json
@@ -82,9 +83,6 @@ def replay():
 
 
 if __name__ == "__main__":
-    # Change current working directory to the one the script is in
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
     Executor.setup_containers(config.WORKER_COUNT)
 
     app.run(host="0.0.0.0", port="5000", debug=True)
