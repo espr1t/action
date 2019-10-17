@@ -95,8 +95,13 @@ class Validator:
         result.exec_memory = float(results["solution_memory"])
         result.exit_code = int(results["solution_exit_code"])
 
+        # Fix cases in which the solution just slept, in which case the user time would be much less
+        # than actual clock time - in cases it can be 0, but clock time be > 5s.
+        if results["solution_user_time"] <= time_limit < results["solution_clock_time"]:
+            result.exec_time = float(results["solution_clock_time"])
+
         # TL (Time Limit)
-        if result.exec_time> time_limit:
+        if result.exec_time > time_limit:
             return TestStatus.TIME_LIMIT, "", 0, ""
 
         # ML (Memory Limit)

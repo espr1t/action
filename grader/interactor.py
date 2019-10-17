@@ -58,7 +58,6 @@ def parse_info(tester_stderr, solution_stderr):
             else:
                 info["tester_exit_code"] = 0
                 info["tester_clock_time"] = info["tester_user_time"]
-                info["solution_user_time"] = info["solution_clock_time"]
 
     if info["solution_exit_code"] != 0 and info["solution_exit_code"] != 143:
         info["tester_exit_code"] = 0

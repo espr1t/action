@@ -396,8 +396,8 @@ class Runner:
         sandbox.memory_limit = memory_limit
         sandbox.memory_offset = common.get_memory_offset(sandbox.solution_language)
 
-        # Terminate after TL + 0.2 or TL + 20% (whichever larger)
-        sandbox.timeout = sandbox.time_limit + sandbox.time_offset + max(0.1, sandbox.time_limit * 0.1)
+        # Terminate after TL + 0.2 or TL + 10% (whichever larger)
+        sandbox.timeout = sandbox.time_limit + sandbox.time_offset + max(0.2, sandbox.time_limit * 0.1)
         return sandbox
 
     @staticmethod
@@ -490,7 +490,7 @@ class Runner:
 
         # Get the output and put it in the given output file if everything else seems okay
         results, game_log = "", ""
-        if exit_code == 0 and exec_time <= sandbox.time_limit * 2 and exec_memory <= sandbox.memory_limit * 2:
+        if exit_code == 0 and exec_time < sandbox.timeout * 2 and exec_memory < sandbox.memory_limit * 2:
             results = sandbox.get("/sandbox/results.txt")
             game_log = sandbox.get("/sandbox/output.txt")
 
