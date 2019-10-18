@@ -27,7 +27,7 @@ class Sandbox:
             temp.write(i)
         temp.seek(0)
         archive = tarfile.open(mode="r", fileobj=temp)
-        data = archive.extractfile(path.basename(file_path)).read().decode()
+        data = archive.extractfile(path.basename(file_path)).read()
         archive.close()
         return data
 

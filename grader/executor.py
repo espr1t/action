@@ -86,7 +86,7 @@ class Executor:
                     cpu_period=100000,
                     cpu_quota=100000,
                     ulimits=[
-                        docker.types.Ulimit(name="nproc", soft=20, hard=20),
+                        docker.types.Ulimit(name="nproc", soft=128, hard=128),
                         docker.types.Ulimit(name="stack", soft=67108864, hard=67108864),
                         docker.types.Ulimit(name="fsize", soft=16777216, hard=16777216),
                         docker.types.Ulimit(name="data", soft=1073741824, hard=1073741824),
@@ -152,8 +152,6 @@ class Executor:
 
         stdout = output[0].decode() if output[0] is not None else ""
         stderr = output[1].decode() if output[1] is not None else ""
-        print("STDOUT: {}".format(stdout))
-        print("STDERR: {}".format(stderr))
 
         socket.close()
         return stdout, stderr

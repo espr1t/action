@@ -247,7 +247,7 @@ class Runner:
         # Create a temporary file and write the output there
         out_file = NamedTemporaryFile(mode="w+t", delete=True)
         out_file_path = os.path.abspath(out_file.name)
-        with open(out_file_path, "wt") as out:
+        with open(out_file_path, "wb") as out:
             out.write(result.output)
         out_file.seek(0)
 
@@ -404,7 +404,7 @@ class Runner:
         exit_code, exec_time, exec_memory = Runner.parse_exec_status(run_info, stderr)
 
         # Get the output if everything else seems okay
-        output = ""
+        output = b""
         if exit_code == 0 and exec_time <= run_info.time_limit and exec_memory <= run_info.memory_limit:
             output = sandbox.get("/sandbox/output.txt")
 
@@ -469,7 +469,7 @@ class Runner:
             return common.RunResult(status=TestStatus.INTERNAL_ERROR, error_message="Interactor exited with non-zero exit code.")
 
         # Okay, let's assume the interactor was okay. Let's now check if the tester crashed.
-        results = sandbox.get("/sandbox/results.txt")
+        results = sandbox.get("/sandbox/results.txt").decode()
         logger.info("RESULTS:\n{}".format(results))
         results = json.loads(results)
         if results["internal_error"] or results["tester_exit_code"] != 0:
@@ -490,7 +490,7 @@ class Runner:
         # Get the game log in the replays folder if everything seems normal
         combined_hash = ""
         if exit_code == 0 and exec_time <= run_info.time_limit and exec_memory <= run_info.memory_limit:
-            game_log = sandbox.get("/sandbox/output.txt")
+            game_log = sandbox.get("/sandbox/output.txt").decode()
 
             # Record the game log to the /replays folder if not empty
             if game_log != "":
