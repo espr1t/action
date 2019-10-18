@@ -85,4 +85,4 @@ def replay():
 if __name__ == "__main__":
     Executor.setup_containers(config.WORKER_COUNT)
 
-    app.run(host="0.0.0.0", port="5000", debug=True)
+    app.run(host="0.0.0.0", port="5000", debug=False)
