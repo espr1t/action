@@ -377,7 +377,10 @@ class Runner:
 
         # If program was killed, use total (clock) time instead
         if exit_code == SIGKILL or exit_code == SIGTERM:
-            exec_time = total_time
+            # If simply being too slow (wasting lots of CPU cycles), show the user time.
+            # If blocked (no CPU cycles, but taking a lot of time), show the clock (kill) time.
+            if exec_time <= run_info.time_limit:
+                exec_time = total_time
         return exit_code, exec_time, exec_memory
 
     @staticmethod
