@@ -3,11 +3,20 @@
 FROM ubuntu:18.04
 MAINTAINER Alexander Georgiev <thinkcreative@outlook.com>
 
-# Install Java JRE
-RUN apt-get update && apt-get install -y openjdk-11-jre-headless
+# Update apt-get
+RUN apt-get update
 
-# Install Python 3
-RUN apt-get update && apt-get install -y python3
+# Install Java JRE
+RUN apt-get install -y openjdk-11-jre-headless
+
+# Install Python
+RUN apt-get install -y python3
+
+# Install PIP
+RUN apt-get install -y python3-pip
+
+# Install psutil (needed for interactive problems)
+RUN pip3 install psutil
 
 # Add the /usr/bin/time program
 COPY time /usr/bin/time

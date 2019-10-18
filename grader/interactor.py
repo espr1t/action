@@ -1,5 +1,6 @@
 import subprocess
 import json
+import psutil
 
 RUN_TEST_COMMAND = "{time} /bin/bash -c \"{timeout} {command}\" ; >&2 printf '%d' $?".format(
     time="/usr/bin/time --quiet --format='%U %e %M'",
@@ -11,6 +12,9 @@ RUN_TEST_COMMAND = "{time} /bin/bash -c \"{timeout} {command}\" ; >&2 printf '%d
 
 def parse_output(prefix, stderr):
     stderr_lines = stderr.strip().splitlines()
+    if len(stderr_lines) >= 1 and stderr_lines[0].strip() == "Killed":
+        stderr_lines = stderr_lines[1:]
+
     info = {}
     if len(stderr_lines) >= 1:
         info[prefix + "_exit_code"] = int(stderr_lines[-1])
@@ -26,10 +30,20 @@ def parse_output(prefix, stderr):
     return info
 
 
-def parse_info(tester_stderr, solution_stderr):
+def parse_info(tester_stderr, solution_stderr, solution_exited_unexpectedly):
     info = {}
     info.update(parse_output("tester", tester_stderr))
     info.update(parse_output("solution", solution_stderr))
+
+    # We were the ones who killed the tester, as the solution exited unexpectedly
+    if solution_exited_unexpectedly:
+        info["tester_exit_code"] = 0
+        if "tester_user_time" not in info:
+            info["tester_user_time"] = 0.0
+        if "tester_clock_time" not in info:
+            info["tester_clock_time"] = 0.0
+        info["tester_score"] = 0.0
+        info["tester_info_message"] = "Solution exited unexpectedly."
 
     # Sanity checking
     info["internal_error"] = False
@@ -65,13 +79,15 @@ def parse_info(tester_stderr, solution_stderr):
 def interact(solution_exec_cmd, tester_exec_cmd, tester_input):
     print("Starting tester process...")
     # Start the tester's process
-    tester_process = subprocess.Popen(
+
+    tester_process = psutil.Popen(
         args=tester_exec_cmd,
         shell=True,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        universal_newlines=True)
+        universal_newlines=True
+    )
 
     print("Writing input data...")
     # Write the input file to the tester
@@ -80,30 +96,31 @@ def interact(solution_exec_cmd, tester_exec_cmd, tester_input):
 
     print("Starting solution process...")
     # Start the solution's process (piping the tester's input and output directly)
-    solution_process = subprocess.Popen(
+    solution_process = psutil.Popen(
         args=solution_exec_cmd,
         shell=True,
         stdin=tester_process.stdout,
         stdout=tester_process.stdin,
         stderr=subprocess.PIPE,
-        universal_newlines=True)
+        universal_newlines=True
+    )
 
     solution_process.wait()
-    tester_process.wait()
-    """
+    solution_exited_unexpectedly = False
     try:
         tester_process.wait(timeout=0.5)
-    except subprocess.TimeoutExpired:
-        # Apparently the child process died
+    except psutil.TimeoutExpired:
+        # Apparently the solution process died unexpectedly,
+        # but the tester is still waiting for its output
+        for process in tester_process.children(recursive=True):
+            process.kill()
         tester_process.kill()
-        # os.killpg(tester_process.pid, SIGKILL)
-        pass
-    """
+        solution_exited_unexpectedly = True
 
     tester_stderr = tester_process.stderr.read()
     solution_stderr = solution_process.stderr.read()
 
-    info = parse_info(tester_stderr, solution_stderr)
+    info = parse_info(tester_stderr, solution_stderr, solution_exited_unexpectedly)
 
     print("Writing results.")
     with open("results.txt", "wt") as out:
