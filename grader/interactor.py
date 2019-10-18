@@ -108,7 +108,7 @@ def interact(solution_exec_cmd, tester_exec_cmd, tester_input):
     solution_process.wait()
     solution_exited_unexpectedly = False
     try:
-        tester_process.wait(timeout=0.5)
+        tester_process.wait(timeout=1.0)
     except psutil.TimeoutExpired:
         # Apparently the solution process died unexpectedly,
         # but the tester is still waiting for its output
@@ -134,13 +134,16 @@ def prepare_and_run(timeout, tester_run_cmd, solution_run_cmd):
     with open("input.txt", "wt") as out:
         out.write("Deleted.\n")
 
+    # Both the tester and the solution get 1 extra second
+    # (to account for time the tester actually processes input/output)
+    # The tester gets additionally 0.5s to make sure it is killed after the solution
     tester_exec_cmd = RUN_TEST_COMMAND.format(
-        timeout=timeout + 0.5, run_command=tester_run_cmd
+        timeout=timeout + 1.5, run_command=tester_run_cmd
     )
     tester_exec_cmd = tester_exec_cmd.replace(" 2> /dev/null", "")
 
     solution_exec_cmd = RUN_TEST_COMMAND.format(
-        timeout=timeout, run_command=solution_run_cmd
+        timeout=timeout + 1.0, run_command=solution_run_cmd
     )
     interact(solution_exec_cmd, tester_exec_cmd, tester_input)
 

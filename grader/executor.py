@@ -79,12 +79,13 @@ class Executor:
                     network_disabled=True,
                     restart_policy={"Name": "on-failure", "MaximumRetryCount": 3},
                     security_opt=["no-new-privileges"],
+                    cap_add="sys_nice",
                     mem_limit="2G",
                     memswap_limit="2G",
                     kernel_memory="1G",
                     mem_swappiness=0,
                     cpu_period=100000,
-                    cpu_quota=100000,
+                    cpu_quota=95000,
                     ulimits=[
                         docker.types.Ulimit(name="nproc", soft=128, hard=128),
                         docker.types.Ulimit(name="stack", soft=67108864, hard=67108864),
@@ -92,7 +93,7 @@ class Executor:
                         docker.types.Ulimit(name="data", soft=1073741824, hard=1073741824),
                         docker.types.Ulimit(name="msgqueue", soft=0, hard=0),
                         docker.types.Ulimit(name="core", soft=0, hard=0),
-                        docker.types.Ulimit(name="nice", soft=-20, hard=-20)
+                        docker.types.Ulimit(name="rtprio", soft=42, hard=42)
                     ]
                 )
                 container.start()
