@@ -27,7 +27,7 @@ from run_info import RunInfo
 # --format argument '%e' prints "Elapsed real (clock) time in seconds" (backup only - volatile and also can be tricked)
 # --format argument '%M' prints "Maximum resident set size (kbytes)"
 RUN_TEST_COMMAND = "/bin/bash -c \"{time} /bin/bash -c \\\"{timeout} {command}\\\" ; >&2 printf '%d' $?\"".format(
-    time="/usr/bin/time --quiet --format='%U %e %M'",
+    time="/usr/bin/time --quiet --format='%U %S %e %M'",
     # Send a SIGTERM signal after {timeout} seconds, but ensure the program is killed after 0.2 more seconds
     timeout="/usr/bin/timeout --preserve-status --kill-after=0.2s --signal=SIGTERM {timeout}s",
     command="{run_command} < input.txt > output.txt 2> /dev/null"
@@ -369,18 +369,27 @@ class Runner:
         exit_code = int(stderr_lines[-1])
         exit_code = 0 if exit_code == 0 else exit_code - 128
 
-        # Calculate final time and memory (offset for language VM)
+        # Get time and memory from /usr/bin/time output
         time_memory_info = stderr_lines[-2]
-        exec_time = max(0.0, float(time_memory_info.split()[0]) - run_info.time_offset)
-        total_time = max(0.0, float(time_memory_info.split()[1]) - run_info.time_offset)
-        exec_memory = max(0.0, float(time_memory_info.split()[2]) * 1024 - run_info.memory_offset)
+        logger.info(time_memory_info)
+        # Exec time is user time + sys time
+        exec_time = float(time_memory_info.split()[0]) +\
+                    float(time_memory_info.split()[1])
+        clock_time = float(time_memory_info.split()[2])
+        exec_memory = int(time_memory_info.split()[3]) * 1024
 
         # If program was killed, use total (clock) time instead
         if exit_code == SIGKILL or exit_code == SIGTERM:
             # If simply being too slow (wasting lots of CPU cycles), show the user time.
             # If blocked (no CPU cycles, but taking a lot of time), show the clock (kill) time.
             if exec_time <= run_info.time_limit:
-                exec_time = total_time
+                exec_time = clock_time
+
+        # Calculate final time and memory (offset for language VM)
+        exec_time = max(0, exec_time - run_info.time_offset)
+        exec_memory = max(0, exec_memory - run_info.memory_offset)
+
+        # Return the results
         return exit_code, exec_time, exec_memory
 
     @staticmethod
@@ -480,9 +489,9 @@ class Runner:
 
         # Everything with the system seems okay.
         # Replace the exit_code, exec_time, and exec_memory with the ones of the solution.
-        stderr = "{} {} {}\n{}".format(
-            results["solution_user_time"], results["solution_clock_time"], results["solution_memory"],
-            results["solution_exit_code"]
+        stderr = "{} {} {} {}\n{}".format(
+            results["solution_user_time"], results["solution_sys_time"], results["solution_clock_time"],
+            results["solution_memory"], results["solution_exit_code"]
         )
         exit_code, exec_time, exec_memory = Runner.parse_exec_status(run_info, stderr)
         output = "{score}\n{info_message}".format(

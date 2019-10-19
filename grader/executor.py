@@ -93,7 +93,7 @@ class Executor:
                         docker.types.Ulimit(name="data", soft=1073741824, hard=1073741824),
                         docker.types.Ulimit(name="msgqueue", soft=0, hard=0),
                         docker.types.Ulimit(name="core", soft=0, hard=0),
-                        docker.types.Ulimit(name="rtprio", soft=42, hard=42)
+                        docker.types.Ulimit(name="rtprio", soft=50, hard=50)
                     ]
                 )
                 container.start()

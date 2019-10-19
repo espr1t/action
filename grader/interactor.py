@@ -3,7 +3,7 @@ import json
 import psutil
 
 RUN_TEST_COMMAND = "{time} /bin/bash -c \"{timeout} {command}\" ; >&2 printf '%d' $?".format(
-    time="/usr/bin/time --quiet --format='%U %e %M'",
+    time="/usr/bin/time --quiet --format='%U %S %e %M'",
     # Send a SIGTERM signal after {timeout} seconds, but ensure the program is killed after 0.2 more seconds
     timeout="/usr/bin/timeout --preserve-status --kill-after=0.2s --signal=SIGTERM {timeout}s",
     command="{run_command} 2> /dev/null"
@@ -21,8 +21,9 @@ def parse_output(prefix, stderr):
     if len(stderr_lines) >= 2:
         tokens = stderr_lines[-2].split()
         info[prefix + "_user_time"] = float(tokens[0])
-        info[prefix + "_clock_time"] = float(tokens[1])
-        info[prefix + "_memory"] = int(tokens[2])
+        info[prefix + "_sys_time"] = float(tokens[1])
+        info[prefix + "_clock_time"] = float(tokens[2])
+        info[prefix + "_memory"] = int(tokens[3])
     if len(stderr_lines) >= 3 and info[prefix + "_exit_code"] == 0:
         info[prefix + "_info_message"] = stderr_lines[-3]
     if len(stderr_lines) >= 4 and info[prefix + "_exit_code"] == 0:
