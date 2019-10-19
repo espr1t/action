@@ -33,17 +33,17 @@ def get_logger(name):
     fmt = "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
     formatter = logging.Formatter(fmt=fmt)
 
-    log_file_path = os.path.abspath(config.PATH_LOG_FILE)
-    if not os.path.exists(os.path.dirname(log_file_path)):
+    if not os.path.exists(os.path.dirname(config.PATH_LOG_FILE)):
         # Create the directory
-        os.mkdir(os.path.dirname(log_file_path))
+        os.mkdir(os.path.dirname(config.PATH_LOG_FILE))
 
         # Create and chmod the file
-        open(log_file_path, "w").close()
-        os.chmod(log_file_path, 0o0664)
+        open(config.PATH_LOG_FILE, "w").close()
+        os.chmod(config.PATH_LOG_FILE, 0o0664)
 
-    file_output = logging.handlers.RotatingFileHandler(
-        filename=log_file_path, encoding="utf-8", maxBytes=1048576, backupCount=5)
+    # file_output = logging.handlers.RotatingFileHandler(
+    #     filename=log_file_path, encoding="utf-8", maxBytes=1048576, backupCount=5)
+    file_output = logging.FileHandler(filename=config.PATH_LOG_FILE)
     file_output.setLevel(logging.INFO)
     file_output.setFormatter(formatter)
 
