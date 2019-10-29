@@ -127,6 +127,7 @@ RewriteRule    ^admin/regrade/pending$                          /code/admin/admi
 RewriteRule    ^admin/regrade$                                  /code/admin/admin.php?page=regrade                                                  [NC,L,QSA]
 RewriteRule    ^admin/achievements$                             /code/admin/admin.php?page=achievements                                             [NC,L,QSA]
 RewriteRule    ^admin/achievements/recalc$                      /code/admin/admin.php?page=achievements&recalc=true                                 [NC,L,QSA]
+RewriteRule    ^admin/history/(\d+)$                            /code/admin/admin.php?page=history&submitId=$1                                      [NC,L,QSA]
 
 # DB tools
 RewriteRule    ^admin/init$                                     /code/db/init.php                                                                   [NC,L,QSA]

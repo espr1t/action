@@ -1162,6 +1162,51 @@ class Brain {
         }
         return true;
     }
+
+    // Submit run history
+    function getHistory($submitId) {
+        $response = $this->db->query("
+            SELECT * FROM `History`
+            WHERE submitId = '" . $submitId . "'
+            LIMIT 1
+        ");
+
+        if (!$response) {
+            error_log('Could not execute getHistory() query for submitId "' . $submitId . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function addHistory($submitId) {
+        $response = $this->db->query("
+            INSERT INTO `History` (submitId, time01, time02, time03, time04, time05)
+            VALUES ('" . $submitId . "', '', '', '', '', '')
+        ");
+        if (!$response) {
+            error_log('Could not insert new entry in addHistory() for submitId "' . $submitId . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function updateHistory($submitId, $info) {
+        $response = $this->db->query("
+            UPDATE `History` SET
+                time01 = '" . $info['time01'] . "',
+                time02 = '" . $info['time02'] . "',
+                time03 = '" . $info['time03'] . "',
+                time04 = '" . $info['time04'] . "',
+                time05 = '" . $info['time05'] . "'
+            WHERE submitId = '" . $submitId . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute updateHistory() query for submitId "' . $submitId . '"!');
+            return null;
+        }
+        return true;
+    }
+
 }
 
 ?>

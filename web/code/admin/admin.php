@@ -42,6 +42,11 @@ switch ($_GET['page']) {
         $page = new AdminAchievementsPage($user);
         break;
 
+    case 'history':
+        require_once('history.php');
+        $page = new AdminHistoryPage($user);
+        break;
+
     default:
         header('Location: /error');
         exit();

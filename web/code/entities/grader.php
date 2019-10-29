@@ -169,6 +169,22 @@ class Grader {
         // Save the updated submit info in the database
         $brain->updateSubmit($submit);
 
+        // Update the submit history
+        if ($submit->message != '') {
+            $history = $brain->getHistory($submit->id);
+            if ($history == null) {
+                // If we still haven't added history for this submit
+                $brain->addHistory($submit->id);
+                $history = $brain->getHistory($submit->id);
+            }
+            $history['time01'] = $history['time02'];
+            $history['time02'] = $history['time03'];
+            $history['time03'] = $history['time04'];
+            $history['time04'] = $history['time05'];
+            $history['time05'] = implode(',', $submit->exec_time);
+            $brain->updateHistory($submit->id, $history);
+        }
+
         // Update Pending and Latest lists if the submission is not hidden
         if (!$submit->hidden) {
             $brain->updatePending($submit);

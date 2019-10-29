@@ -651,4 +651,34 @@ if ($db->tableExists('Training')) {
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
 
+/*
+Table::History
+==============
+{
+    "submitId": 42,
+    "time01": "0.00,0.00,0.03,0.13,0.11,0.52,0.48,0.78,0.88,0.52,0.74",
+    ...
+    "time05": "0.01,0.00,0.02,0.11,0.19,0.49,0.49,0.72,0.90,0.53,0.77"
+}
+*/
+output('');
+output('Creating table History...');
+
+if ($db->tableExists('History')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `History`(
+            `submitId` INT NOT NULL,
+            `time01` TEXT NOT NULL,
+            `time02` TEXT NOT NULL,
+            `time03` TEXT NOT NULL,
+            `time04` TEXT NOT NULL,
+            `time05` TEXT NOT NULL,
+            PRIMARY KEY (`submitId`)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
 ?>

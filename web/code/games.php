@@ -1179,7 +1179,7 @@ class GamesPage extends Page {
             case 'Airports':
                 return array('espr1t', 'kiv');
             case 'ImageScanner':
-                return array('espr1t', 'kopche', 'emazing', 'ThinkCreative');
+                return array('espr1t', 'kopche', 'emazing', 'ThinkCreative', 'peterkazakov');
         }
         return array();
     }
