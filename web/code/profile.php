@@ -352,7 +352,7 @@ class ProfilePage extends Page {
             $hourCnt[$hour]++;
         }
         if ($totalTests == 0)
-            return '';
+            return '<br>';
 
         // Determine favorite language
         $languages = array('C++', 'Java', 'Python');
@@ -376,7 +376,11 @@ class ProfilePage extends Page {
         }
         $favoriteTime = sprintf("%02d:00-%02d:59", $favoriteTime, $favoriteTime);
 
-        $hardestProblem = $GLOBALS['PROBLEM_DIFFICULTIES'][$hardest];
+        if (!array_key_exists($hardest, $GLOBALS['PROBLEM_DIFFICULTIES'])) {
+            $hardestProblem = '';
+        } else {
+            $hardestProblem = $GLOBALS['PROBLEM_DIFFICULTIES'][$hardest];
+        }
 
         $mostSubmits = $maxSubmits;
         $numExecutedTests = $totalTests;
@@ -384,7 +388,9 @@ class ProfilePage extends Page {
 
         $content .= '<b>Любим програмен език:</b> ' . $favoriteLang . '<br>';
         $content .= '<b>Любим час за решаване:</b> ' . $favoriteTime . '<br>';
-        $content .= '<b>Най-голяма сложност:</b> ' . $hardestProblem . '<br>';
+        if ($hardestProblem != '') {
+            $content .= '<b>Най-голяма сложност:</b> ' . $hardestProblem . '<br>';
+        }
         $content .= '<b>Най-много събмити по задача:</b> ' . $mostSubmits . '<br>';
         $content .= '<b>Брой изпълнени тестове:</b> ' . $numExecutedTests . '<br>';
         $content .= '<b>Изразходвано процесорно време:</b> ' . $totalProcessorTime . 's<br>';
