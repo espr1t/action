@@ -1146,6 +1146,8 @@ input.edit-problem-text-field {
 
 textarea.edit-problem-statement {
     width: 100%;
+    resize: none;
+    max-height: 20rem;
 }
 
 textarea.edit-problem-sample {
