@@ -145,7 +145,7 @@ h1 {
     font-weight: bold;
     margin-bottom: 0.125rem;
     padding-bottom: 0.0625rem;
-    border-bottom: 0.0625rem dotted #999999;
+    border-bottom: 0.03125rem dotted #999999;
 }
 h2 {
     font-size: 1.5rem;
@@ -153,7 +153,7 @@ h2 {
     color: #333333;
     margin: 0.375rem 0;
     padding-bottom: 0.125rem;
-    border-bottom: 0.0625rem dotted #999999;
+    border-bottom: 0.03125rem dotted #999999;
 }
 h3 {
     font-size: 1.25rem;
@@ -360,11 +360,10 @@ div.logo {
 }
 
 div.userInfo {
-    width: 48.75rem;
-    padding: 0 0.625rem;
+    width: 100%;
     height: 1.25rem;
     margin: 0.625rem auto 0 auto;
-    line-height: 1.25rem;
+    line-height: 1.5rem;
     text-align: right;
     font-size: 0.8125rem;
 }
@@ -892,6 +891,95 @@ textarea.news-form-content {
     height: 21rem;
 }
 
+div.searchbox-wrapper {
+    opacity: 0;
+    width: 100%;
+    position: fixed;
+    top: 50%;
+    z-index: 101;
+}
+
+div.searchbox {
+    width: 60rem;
+    margin: auto;
+    border-radius: 0.25rem;
+    border: 0.0625rem solid #CCCCCC;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.24);
+    background-color: white;
+    padding: 1.5rem 2rem;
+}
+
+input.searchbox-input {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    border: none;
+    outline: none;
+}
+
+div.searchbox-divider {
+    width: 100%;
+    border-bottom: 0.0625rem dotted #CCCCCC;
+    margin: 1rem 0;
+    display: none;
+}
+
+div.searchbox-suggestions {
+    width: 100%;
+    text-align: center;
+    display: none;
+    font-weight: bold;
+}
+
+div.searchbox-suggestion {
+    height: 2rem;
+    line-height: 2rem;
+}
+
+div.searchbox-suggestion:hover {
+    height: 2rem;
+    line-height: 2rem;
+    background-color: #F8F8F8;
+    cursor: pointer;
+}
+
+div.searchbox-suggestion-selected {
+    height: 2rem;
+    line-height: 2rem;
+    background-color: #F8F8F8;
+}
+
+div.search-result {
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    display: block;
+    font-weight: bold;
+    background-color: #0099FF;
+    color: white;
+    margin: 0.125rem;
+    border-radius: 0.25rem;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    cursor: initial;
+}
+
+div.search-result-title {
+    display: inline-block;
+}
+
+div.search-result-remove {
+    padding-left: 0.375rem;
+    text-align: center;
+    display: inline-block;
+    border-left: 0.03125rem solid;
+    margin-left: 0.5rem;
+    cursor: pointer;
+}
+
 div.message {
     position: -webkit-sticky;
     position: sticky;
@@ -959,6 +1047,12 @@ div.fade-out-overlay {
     animation-name: fade-out-overlay;
     animation-duration: 0.3s;
     opacity: 0;
+}
+
+div.fade-in-searchbox {
+    animation-name: fade-in;
+    animation-duration: 1s;
+    opacity: 1;
 }
 
 @keyframes fade-in {

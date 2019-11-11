@@ -1,7 +1,6 @@
 /*
  * Sleeps for ms milliseconds.
  */
-
 function sleep(ms) {
     // Use: await sleep(1337)
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -41,6 +40,35 @@ function ajaxCall(url, data, callback) {
 }
 
 /*
+ * Label (search results)
+ */
+function createLabel(title, data) {
+    var label = document.createElement('div');
+    label.className ='search-result';
+
+    // Add the displayed text
+    var labelTitle = document.createElement('div');
+    labelTitle.className = 'search-result-title';
+    labelTitle.textContent = title;
+    label.appendChild(labelTitle);
+
+    // Add the remove button
+    var labelRemove = document.createElement('div');
+    labelRemove.className = 'search-result-remove';
+    labelRemove.innerHTML = '<i class="fa fa-times"></i>';
+    label.appendChild(labelRemove);
+
+    // Make clicking on the remove button delete the element
+    labelRemove.onclick = function() {
+        label.parentNode.removeChild(label);
+    }
+
+    // Attach the corresponding data
+    label.data = data;
+    return label;
+}
+
+/*
  * Redirect
  */
 function redirect(url) {
@@ -48,15 +76,46 @@ function redirect(url) {
 }
 
 /*
+ * Fade-out
+ */
+function fadeOutAndRemove(elementId) {
+    var element = document.getElementById(elementId);
+    if (element) {
+        if (element.className.includes('fade-in')) {
+            element.className = element.className.replace('fade-in', 'fade-out');
+        } else {
+            element.className += ' fade-out';
+        }
+        setTimeout(function() {
+            element.parentNode.removeChild(element);
+        }, 300);
+    }
+}
+
+/*
  * Key bindings
  */
-var keyDownEventStack = [];
-function identifyEscKeyPressedEvent(event, action) {
+function identifyEscPress(event, handler) {
     var keyCode = event.keyCode || event.which || 0;
     if (keyCode == 27) {
+        popEscHandler();
         event.preventDefault();
         event.stopPropagation();
-        action();
+        handler();
+    }
+}
+
+var keyDownEventStack = [];
+function addEscHandler(handler) {
+    keyDownEventStack.push(document.onkeydown);
+    document.onkeydown = function(event) {
+        identifyEscPress(event, handler);
+    }
+}
+
+function popEscHandler() {
+    if (!keyDownEventStack.empty) {
+        document.onkeydown = keyDownEventStack.pop();
     }
 }
 
@@ -78,21 +137,18 @@ function showMessage(type, message, timeout=3 /* seconds */) {
 
     messageEl.id = id;
     messageEl.className = className + ' fade-in';
-    messageEl.innerHTML = '' +
-        '<div class="message-content">' +
-        '    <div class="message-icon">' + icon + '</div>' +
-        '    <div class="message-text">' + message + '</div>' +
-        '    <div class="message-close" onclick="hideMessage(\'' + className + '\', \'' + id + '\');">' +
-        '        <i class="fa fa-times fa-fw" style="line-height: 2rem;"></i>'+
-        '    </div>' +
-        '</div>' +
-    '';
+    messageEl.innerHTML = `
+        <div class="message-content">
+            <div class="message-icon">${icon}</div>
+            <div class="message-text">${message}</div>
+            <div class="message-close" onclick="hideMessage('${id}');">
+                <i class="fa fa-times fa-fw" style="line-height: 2rem;"></i>
+            </div>
+        </div>
+    `;
 
     // Make it possible to hide the message with hitting escape
-    keyDownEventStack.push(document.onkeydown);
-    document.onkeydown = function(event) {
-        identifyEscKeyPressedEvent(event, function() {hideMessage(className, id);});
-    }
+    addEscAction(function() {hideMessage(id);});
 
     var wrapperEl = document.getElementById('wrapper');
     var headerEl = document.getElementById('head');
@@ -104,96 +160,69 @@ function showMessage(type, message, timeout=3 /* seconds */) {
 
     // Hide the message after several seconds
     setTimeout(function() {
-        hideMessage(className, id);
+        hideMessage(id);
     }, timeout * 1000);
 }
 
-function hideMessage(className, id) {
-    var messageEl = document.getElementById(id);
-    if (messageEl) {
-        if (!keyDownEventStack.empty) {
-            document.onkeydown = keyDownEventStack.pop();
-        }
-        messageEl.className = className + ' fade-out';
-        setTimeout(function() {
-            messageEl.parentNode.removeChild(messageEl);
-        }, 300);
-    }
+function hideMessage(id) {
+    fadeOutAndRemove(id);
 }
 
 /*
  * Overlay (for pop-up boxes)
  */
-function showOverlay() {
+function showOverlay(overlayId) {
     var overlay = document.createElement('div');
-    overlay.id = 'overlay';
-    overlay.className = 'overlay';
+    overlay.id = overlayId;
     document.body.appendChild(overlay);
     overlay.className = 'overlay fade-in-overlay';
-
     document.body.style.overflow = 'hidden';
 }
 
-function hideOverlay() {
-    var overlay = document.getElementById('overlay');
-    overlay.className = 'overlay fade-out-overlay';
-    setTimeout(function() {
-        overlay.parentNode.removeChild(overlay);
-    }, 300);
+function hideOverlay(overlayId) {
+    fadeOutAndRemove(overlayId);
     document.body.style.overflow = 'auto';
 }
 
 /*
  * Form actions (show/hide/submit)
  */
-function reposition() {
+function reposition(elementId) {
     // Position the box in the center of the screen (well, kind of)
-    var el = document.getElementsByClassName('action-form')[0];
+    var el = document.getElementById(elementId);
     var screenHeight = window.innerHeight || document.documentElement.clientHeight;
     var offset = Math.min(el.clientHeight / 2 + 20, screenHeight / 2 - 20);
     el.style.marginTop = -offset + 'px';
 }
 
-function showActionForm(content, redirect, classes = '') {
+function showActionForm(content, redirect, classes='') {
     // Create an overlay shadowing the rest of the page
-    showOverlay();
+    showOverlay('actionFormOverlay');
 
     // Create the form box and add it to the DOM using a fade-in animation
     var form = document.createElement('div');
-    form.innerHTML = '' +
-        '<div class="action-form-close" onclick="hideActionForm(\'' + redirect + '\');"><i class="fa fa-times fa-fw"></i></div>' +
-        '<div id="action-form-content">' + content + '</div>'
-    ;
+    form.id = 'actionForm';
+    form.innerHTML = `
+        <div class="action-form-close" onclick="hideActionForm('${redirect}');"><i class="fa fa-times fa-fw"></i></div>
+        <div id="action-form-content">${content}</div>
+    `;
     document.body.appendChild(form);
     form.className = 'action-form fade-in' + (classes != '' ? ' ' + classes : '');
 
     // Set the vertical position of the box
-    reposition();
+    reposition('actionForm');
 
     // Bind escape button for closing it
-    keyDownEventStack.push(document.onkeydown);
-    document.onkeydown = function(event) {
-        identifyEscKeyPressedEvent(event, function() {hideActionForm(redirect);});
-    }
+    addEscHandler(function() {hideActionForm(redirect);});
 }
 
 function hideActionForm(redirectUrl) {
+    fadeOutAndRemove('actionForm');
+    hideOverlay('actionFormOverlay');
     // Redirect to another page if requested
     if (redirectUrl && redirectUrl != 'undefined') {
         redirect(redirectUrl);
     }
-    // Otherwise just hide the form box using a fade-out animation
-    if (!keyDownEventStack.empty) {
-        document.onkeydown = keyDownEventStack.pop();
-    }
-    var form = document.getElementsByClassName('action-form')[0];
-    if (form == null)
-        return;
-    form.className = 'action-form fade-out';
-    setTimeout(function() {
-        form.parentNode.removeChild(form);
-    }, 300);
-    hideOverlay();
 }
 
 function submitActionForm(response, hideOnSuccess = true) {

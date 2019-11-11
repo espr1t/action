@@ -10,7 +10,7 @@ async function drawImage(replayLog) {
     canvas.height = numRows;
     canvas.width = numCols;
     var ctx = canvas.getContext('2d');
-    reposition();
+    reposition('actionForm');
 
     var usedQueries = data[idx++];
 
@@ -73,9 +73,6 @@ async function drawImage(replayLog) {
         canvas.style.opacity = i / 200.0;
         await sleep(10);
     }
-
-    await sleep(3000);
-    location.reload();
 }
 
 function getImagescannerContent(playerName) {
@@ -115,22 +112,18 @@ function getImagescannerContent(playerName) {
 
 function showImagescannerReplay(userName, replayId) {
     ajaxCall('/actions/getReplay', {'replayId': replayId}, function(response) {
-        hideActionForm();
-        setTimeout(function() {
-            var content = getImagescannerContent(userName);
-            // Make pressing escape return back to the game
-            var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
-            showActionForm(content.outerHTML, gameUrl);
+        var content = getImagescannerContent(userName);
+        // Make pressing escape return back to the game
+        var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
+        showActionForm(content.outerHTML, gameUrl);
 
-            if (response.length > 0 && response[0] >= '0' && response[0] <= '9') {
-                drawImage(response);
-            } else {
-                var imagePlaceholderEl = document.getElementById('imagePlaceholder');
-                imagePlaceholderEl.outerHTML = '<div>No data available for this test.</div>';
-                var queryInfoEl = document.getElementById('queryInfo');
-                queryInfoEl.outerHTML = '<div></div>';
-            }
-        }, 300);
+        if (response.length > 0 && response[0] >= '0' && response[0] <= '9') {
+            drawImage(response);
+        } else {
+            var imagePlaceholderEl = document.getElementById('imagePlaceholder');
+            imagePlaceholderEl.outerHTML = '<div>No data available for this test.</div>';
+            var queryInfoEl = document.getElementById('queryInfo');
+            queryInfoEl.outerHTML = '<div></div>';
+        }
     });
-
 }

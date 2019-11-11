@@ -67,7 +67,7 @@ function showAchievement(title, description, index, total, requested=false) {
     // Add event handlers (escape or clicking outside the achievement)
     keyDownEventStack.push(document.onkeydown);
     document.onkeydown = function(event) {
-        identifyEscKeyPressedEvent(event, function() {hideAchievement(requested);});
+        identifyEscPress(event, function() {hideAchievement(requested);});
     };
     document.onclick = document.ontouchstart = function(event) {
         var inAchievementBox = false;
