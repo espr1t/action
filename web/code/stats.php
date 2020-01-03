@@ -39,7 +39,7 @@ class StatsPage extends Page {
             <script>
                 var words = ' . json_encode($words) . ';
                 d3.wordcloud()
-                    .size([700, 350])
+                    .size([780, 350])
                     .font("Century Gothic")
                     .selector("#wordcloud")
                     .words(words)
@@ -186,7 +186,7 @@ class StatsPage extends Page {
             array_push($difficultyChartValues, $cnt);
         }
         $content .= $this->createChart('PieChart', 'difficultiesPieChart', 'Задачи по сложност',
-                $difficultyChartLabels, $difficultyChartValues, 340, 300, 90, 85, 'right');
+                $difficultyChartLabels, $difficultyChartValues, 380, 300, 90, 85, 'right');
 
         // Pie chart by tags
         $tagsChartLabels = array('Вид');
@@ -203,7 +203,7 @@ class StatsPage extends Page {
             array_push($tagsChartValues, $cnt);
         }
         $content .= $this->createChart('PieChart', 'tagsPieChart', 'Задачи по вид',
-                $tagsChartLabels, $tagsChartValues, 340, 300, 90, 85, 'right');
+                $tagsChartLabels, $tagsChartValues, 380, 300, 90, 85, 'right');
 
         return inBox($content);
     }
@@ -242,7 +242,7 @@ class StatsPage extends Page {
             array_push($langsChartValues, $languages[$name]);
         }
         $content .= $this->createChart('ColumnChart', 'langsColumnChart', 'Решения по програмен език',
-                $langsChartLabels, $langsChartValues, 340, 300, 80, 80, 'none');
+                $langsChartLabels, $langsChartValues, 380, 300, 80, 80, 'none');
 
         // Most common results statuses
         $statusesChartLabels = array('Статус');
@@ -254,7 +254,7 @@ class StatsPage extends Page {
             }
         }
         $content .= $this->createChart('ColumnChart', 'statusesColumnChart', 'Резултати от решенията',
-                $statusesChartLabels, $statusesChartValues, 340, 300, 80, 80, 'none');
+                $statusesChartLabels, $statusesChartValues, 380, 300, 80, 80, 'none');
 
         $content .= '<br>';
 
@@ -266,7 +266,7 @@ class StatsPage extends Page {
             array_push($hourlyActivityHistogramLabels, sprintf("%d:00", $i));
         }
         $content .= $this->createChart('ColumnChart', 'hourlyActivityHistogram', 'Предадени решения по час в денонощието',
-                $hourlyActivityHistogramLabels, $hourlyActivityHistogramValues, 700, 300, 90, 70, 'none');
+                $hourlyActivityHistogramLabels, $hourlyActivityHistogramValues, 780, 300, 90, 70, 'none');
 
         // Per-month activity histogram
         $months = array('Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември');
@@ -277,7 +277,7 @@ class StatsPage extends Page {
             array_push($monthlyActivityHistogramLabels, $months[$i]);
         }
         $content .= $this->createChart('ColumnChart', 'monthlyActivityHistogram', 'Предадени решения по месец в годината',
-                $monthlyActivityHistogramLabels, $monthlyActivityHistogramValues, 700, 300, 90, 70, 'none');
+                $monthlyActivityHistogramLabels, $monthlyActivityHistogramValues, 780, 300, 90, 70, 'none');
 
         // Activity over time line chart
         $NUM_TIME_POINTS = 15;
@@ -304,7 +304,7 @@ class StatsPage extends Page {
             $firstDate += $timeOffset;
         }
         $content .= $this->createChart('AreaChart', 'totalActivityAreaChart', 'Предадени решения през времето',
-                $totalActivityChartLabels, $totalActivityChartValues, 700, 300, 90, 70, 'none');
+                $totalActivityChartLabels, $totalActivityChartValues, 780, 300, 90, 70, 'none');
 
         return inBox($content);
     }
@@ -362,7 +362,7 @@ class StatsPage extends Page {
         $genderChartLabels = array('Пол', 'Мъж', 'Жена', 'Незададен');
         $genderChartValues = array('Процент', $genders['male'], $genders['female'],  $genders['unknown']);
         $content .= $this->createChart('PieChart', 'genderPieChart', 'Дял на потребителите по пол',
-                $genderChartLabels, $genderChartValues, 340, 300, 90, 85, 'right');
+                $genderChartLabels, $genderChartValues, 380, 300, 90, 85, 'right');
 
         // Pie chart by town
         $towns = array();
@@ -395,7 +395,7 @@ class StatsPage extends Page {
             array_push($townChartValues, $value);
         }
         $content .= $this->createChart('PieChart', 'townPieChart', 'Дял на потребителите по град',
-                $townChartLabels, $townChartValues, 340, 300, 90, 85, 'right');
+                $townChartLabels, $townChartValues, 380, 300, 90, 85, 'right');
 
         // Line chart for number of users in time
         $NUM_TIME_POINTS = 15;
@@ -421,7 +421,7 @@ class StatsPage extends Page {
             $firstDate += $timeOffset;
         }
         $content .= $this->createChart('AreaChart', 'usersAreaChart', 'Брой регистрирани потребители',
-                $usersChartLabels, $usersChartValues, 700, 300, 90, 70, 'none');
+                $usersChartLabels, $usersChartValues, 780, 300, 90, 70, 'none');
 
         // Histogram of user's age
         // Instead of simply taking the current time and subtracting the birthday, we'll do
@@ -454,7 +454,7 @@ class StatsPage extends Page {
             array_push($ageHistogramLabels, sprintf("%d", $i));
         }
         $content .= $this->createChart('ColumnChart', 'ageHistogram', 'Брой потребители по възраст',
-                $ageHistogramLabels, $ageHistogramValues, 700, 300, 90, 70, 'none');
+                $ageHistogramLabels, $ageHistogramValues, 780, 300, 90, 70, 'none');
 
         return inBox($content);
     }

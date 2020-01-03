@@ -226,7 +226,7 @@ class ProfilePage extends Page {
             $targetDate += $timeOffset;
         }
         $content .= StatsPage::createChart('LineChart', 'activityAreaChart', '',
-                $usersChartLabels, $usersChartValues, 700, 200, 90, 70, 'none');
+                $usersChartLabels, $usersChartValues, 780, 200, 90, 70, 'none');
         return $content . '<br>';
     }
 

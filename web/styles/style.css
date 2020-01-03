@@ -229,9 +229,9 @@ div.footer-right {
 }
 
 div.container {
-    width: 50rem;
-    min-width: 50rem;
-    max-width: 50rem;
+    width: 55rem;
+    min-width: 55rem;
+    max-width: 55rem;
     margin: 0 auto;
 }
 
@@ -309,13 +309,13 @@ div.authenticate {
 div.register {
     position: absolute;
     height: 40rem;
-    width: 50rem;
-    min-width: 50rem;
-    max-width: 50rem;
+    width: 55rem;
+    min-width: 55rem;
+    max-width: 55rem;
     top: 50%;
     margin-top: -20rem;
     left: 50%;
-    margin-left: -25rem;
+    margin-left: -27.5rem;
     z-index: 89;
 }
 
@@ -324,15 +324,15 @@ div.login {
 }
 
 div.menu {
-    width: 50rem;
+    width: 55rem;
     height: 5.625rem;
     left: 50%;
     position: absolute;
-    margin-left: -25rem;
+    margin-left: -27.5rem;
     overflow: hidden;
 }
 table.menu {
-    width: 50rem;
+    width: 55rem;
     border-spacing: 0;
 }
 table.menu .button {
@@ -544,7 +544,7 @@ div.news-date {
 div.game-info {
     display: inline-block;
     vertical-align: top;
-    width: 30rem;
+    width: 35rem;
     padding: 1rem 1rem 1rem 0;
 }
 
