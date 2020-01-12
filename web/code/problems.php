@@ -48,32 +48,32 @@ class ProblemsPage extends Page {
         }
 
         $iconInfo = 'Unknown';
-        $iconType = 'fa fa-question';
+        $iconType = 'fas fa-question';
         switch ($problemInfo['difficulty']) {
             case 'trivial':
                 $iconInfo = 'Много лесна';
-                $iconType = 'fa fa-leaf';
+                $iconType = 'fad fa-duck';
                 break;
             case 'easy':
                 $iconInfo = 'Лесна';
-                $iconType = 'fa fa-paper-plane';
+                $iconType = 'fas fa-feather-alt';
                 break;
             case 'medium':
                 $iconInfo = 'Средна';
-                $iconType = 'fa fa-balance-scale';
+                $iconType = 'fas fa-brain';
                 break;
             case 'hard':
                 $iconInfo = 'Трудна';
-                $iconType = 'fa fa-tint';
+                $iconType = 'fas fa-paw-claws';
                 break;
             case 'brutal':
                 $iconInfo = 'Много трудна';
-                $iconType = 'fa fa-paw';
+                $iconType = 'fas fa-biohazard';
                 break;
         }
         $difficulty = '
             <div class="tooltip--top" data-tooltip="' . $iconInfo . '">
-                <i class="fa ' . $iconType . '"></i>
+                <i class="' . $iconType . '"></i>
             </div>
         ';
 
