@@ -90,7 +90,7 @@ class ProblemsPage extends Page {
             </div>
         ';
 
-        $successTooltip = 'Решена от ' . $problemInfo['successRate'] . '% от пробвалите я потребители.';
+        $successTooltip = '' . $problemInfo['successRate'] . '% от събмитите по задачата са успешни.';
         $success = '
             <div class="tooltip--top" data-tooltip="' . $successTooltip . '">
                 <span style="font-weight: bold;">' . $problemInfo['successRate'] . ' <i class="fas fa-percentage fa-sm"></i></span>
@@ -118,9 +118,13 @@ class ProblemsPage extends Page {
         $problemsInfo = $brain->getAllProblems();
         $allProblemsSubmits = $brain->getAllSubmits();
 
+        $totalSubmits = array();
+        $successfulSubmits = array();
         $problemTriedBy = array();
         $problemSolvedBy = array();
         foreach ($problemsInfo as $problem) {
+            $totalSubmits[$problem['id']] = 0;
+            $successfulSubmits[$problem['id']] = 0;
             $problemTriedBy[$problem['id']] = array();
             $problemSolvedBy[$problem['id']] = array();
         }
@@ -128,27 +132,23 @@ class ProblemsPage extends Page {
             // Evaluate only submits on problems (otherwise it can be a game)
             if (array_key_exists($submit['problemId'], $problemSolvedBy)) {
                 $problemTriedBy[$submit['problemId']][$submit['userId']] = true;
+                if ($submit['userId'] > 1) {
+                    $totalSubmits[$submit['problemId']]++;
+                }
                 if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
                     $problemSolvedBy[$submit['problemId']][$submit['userId']] = true;
+                    if ($submit['userId'] > 1) {
+                        $successfulSubmits[$submit['problemId']]++;
+                    }
                 }
             }
         }
 
         // Calculate number of solutions and success rate
         for ($i = 0; $i < count($problemsInfo); $i++) {
-            $numTries = count($problemTriedBy[$problemsInfo[$i]['id']]);
-            $numSolutions = count($problemSolvedBy[$problemsInfo[$i]['id']]);
-
-            // Remove admin and system submits from stats
-            for ($userId = 0; $userId < 2; $userId++) {
-                if (array_key_exists($userId, $problemTriedBy[$problemsInfo[$i]['id']]))
-                    $numTries--;
-                if (array_key_exists($userId, $problemSolvedBy[$problemsInfo[$i]['id']]))
-                    $numSolutions--;
-            }
-
-            $problemsInfo[$i]['solutions'] = $numSolutions;
-            $problemsInfo[$i]['successRate'] = $numSolutions == 0 ? 0 : round(100 * $numSolutions / $numTries);
+            $problemsInfo[$i]['solutions'] = $successfulSubmits[$problemsInfo[$i]['id']];
+            $problemsInfo[$i]['successRate'] = $totalSubmits[$problemsInfo[$i]['id']] == 0 ? 0 :
+                round(100 * $successfulSubmits[$problemsInfo[$i]['id']] / $totalSubmits[$problemsInfo[$i]['id']]);
         }
 
         for ($i = 0; $i < count($problemsInfo); $i++) {
@@ -159,25 +159,25 @@ class ProblemsPage extends Page {
 
         // Order by solutions or difficulty, if requested
         if (isset($_GET['order'])) {
-            $numericDifficulty = array('trivial' => 0, 'easy' => 1, 'medium' => 2, 'hard' => 3, 'brutal' => 4);
+            $priority = ['solutions', 'difficulty', 'successRate'];
             if ($_GET['order'] == 'solutions') {
-                usort($problemsInfo, function($left, $right) use($numericDifficulty) {
-                    if ($left['solutions'] != $right['solutions'])
-                        return $right['solutions'] - $left['solutions'];
-                    if ($left['difficulty'] != $right['difficulty'])
-                        return $numericDifficulty[$left['difficulty']] - $numericDifficulty[$right['difficulty']];
-                    return $left['id'] - $right['id'];
-                });
+                $priority = ['solutions', 'difficulty', 'successRate'];
+            } else if ($_GET['order'] == 'difficulty') {
+                $priority = ['difficulty', 'solutions', 'successRate'];
+            } else if ($_GET['order'] == 'success') {
+                $priority = ['successRate', 'solutions', 'difficulty'];
             }
-            if ($_GET['order'] == 'difficulty') {
-                usort($problemsInfo, function($left, $right) use($numericDifficulty) {
-                    if ($left['difficulty'] != $right['difficulty'])
-                        return $numericDifficulty[$left['difficulty']] - $numericDifficulty[$right['difficulty']];
-                    if ($left['solutions'] != $right['solutions'])
-                        return $right['solutions'] - $left['solutions'];
-                    return $left['id'] - $right['id'];
-                });
-            }
+            $numericDifficulty = array('trivial' => 0, 'easy' => 1, 'medium' => 2, 'hard' => 3, 'brutal' => 4);
+            usort($problemsInfo, function($left, $right) use($numericDifficulty, $priority) {
+                for ($i = 0; $i < count($priority); $i++) {
+                    $lValue = $priority[$i] == 'difficulty' ? -$numericDifficulty[$left[$priority[$i]]] : $left[$priority[$i]];
+                    $rValue = $priority[$i] == 'difficulty' ? -$numericDifficulty[$right[$priority[$i]]] : $right[$priority[$i]];
+                    if ($lValue != $rValue)
+                        return $rValue - $lValue;
+                }
+                // If everything else is the same, order by ID
+                return $left['id'] - $right['id'];
+            });
         }
 
         $problems = '';
@@ -191,9 +191,14 @@ class ProblemsPage extends Page {
     }
 
     private function getOrderings() {
-        $order_by_difficulty = '<a href="?order=difficulty">сложност</a>';
-        $order_by_solutions = '<a href="?order=solutions">брой решения</a>';
-        return '<div class="right" style="font-size: smaller;">Подреди по: ' . $order_by_difficulty . ' | ' . $order_by_solutions . '</div>';
+        $orderByDifficulty = '<a href="?order=difficulty">сложност</a>';
+        $orderBySolutions = '<a href="?order=solutions">брой решения</a>';
+        $orderBySuccessRate = '<a href="?order=success">успеваемост</a>';
+        return '
+            <div class="right" style="font-size: smaller;">
+                Подреди по: ' . $orderByDifficulty . ' | ' . $orderBySolutions . ' | ' . $orderBySuccessRate . '
+            </div>
+        ';
     }
 
     private function getMainPage() {
