@@ -31,66 +31,78 @@ class ProblemsPage extends Page {
         return 'addPreTags()';
     }
 
-    public function getProblemBox(&$problemInfo, $problemSolutions) {
-        $statusIcon = '<i class="fa fa-circle-thin gray" title="Още не сте пробвали да решите тази задача."></i>';
-        $serviceUserSolutions = 0;
-        foreach ($problemSolutions as $problemSolution) {
-            if ($problemSolution['userId'] == $this->user->id) {
-                $statusIcon = '
-                    <div class="tooltip--top" data-tooltip="Вече сте решили успешно тази задача!">
-                        <i class="fa fa-check green"></i>
-                    </div>
-                ';
-            }
-            if ($problemSolution['userId'] <= 1) {
-                $serviceUserSolutions |= (1 << $problemSolution['userId']);
-            }
+    public function getProblemBox($problemInfo, $problemTriedBy, $problemSolvedBy) {
+        $statusTooltip = 'Още не сте пробвали да решите тази задача.';
+        $statusIconClass = 'fal fa-circle gray';
+        if (array_key_exists($this->user->id, $problemTriedBy)) {
+            $statusTooltip = 'Пробвали сте неуспешно тази задача.';
+            $statusIconClass = 'fas fa-times-circle red';
         }
-
-        $iconInfo = 'Unknown';
-        $iconType = 'fas fa-question';
-        switch ($problemInfo['difficulty']) {
-            case 'trivial':
-                $iconInfo = 'Много лесна';
-                $iconType = 'fad fa-duck';
-                break;
-            case 'easy':
-                $iconInfo = 'Лесна';
-                $iconType = 'fas fa-feather-alt';
-                break;
-            case 'medium':
-                $iconInfo = 'Средна';
-                $iconType = 'fas fa-brain';
-                break;
-            case 'hard':
-                $iconInfo = 'Трудна';
-                $iconType = 'fas fa-paw-claws';
-                break;
-            case 'brutal':
-                $iconInfo = 'Много трудна';
-                $iconType = 'fas fa-biohazard';
-                break;
+        if (array_key_exists($this->user->id, $problemSolvedBy)) {
+            $statusTooltip = 'Вече сте решили успешно тази задача.';
+            $statusIconClass = 'fas fa-check-circle green';
         }
-        $difficulty = '
-            <div class="tooltip--top" data-tooltip="' . $iconInfo . '">
-                <i class="' . $iconType . '"></i>
+        $status = '
+            <div class="tooltip--top" data-tooltip="' . $statusTooltip . '">
+                <i class="' . $statusIconClass . '"></i>
             </div>
         ';
 
-        $problemInfo['solutions'] = (count($problemSolutions) - popcount($serviceUserSolutions));
-        $solutionsInfo = 'Решена от ' . $problemInfo['solutions'] . ' човек' . ($problemInfo['solutions'] != 1 ? 'a' : '');
+        $difficultyTooltip = 'Unknown';
+        $difficultyIconClass = 'fas fa-question';
+        switch ($problemInfo['difficulty']) {
+            case 'trivial':
+                $difficultyTooltip = 'Много лесна';
+                $difficultyIconClass = 'fad fa-duck';
+                // $difficultyIconClass = 'far fa-grin-tongue-wink';
+                break;
+            case 'easy':
+                $difficultyTooltip = 'Лесна';
+                $difficultyIconClass = 'fas fa-feather-alt';
+                // $difficultyIconClass = 'far fa-grin-beam';
+                break;
+            case 'medium':
+                $difficultyTooltip = 'Средна';
+                $difficultyIconClass = 'fas fa-brain';
+                // $difficultyIconClass = 'far fa-flushed';
+                break;
+            case 'hard':
+                $difficultyTooltip = 'Трудна';
+                $difficultyIconClass = 'fas fa-paw-claws';
+                // $difficultyIconClass = 'far fa-frown';
+                break;
+            case 'brutal':
+                $difficultyTooltip = 'Много трудна';
+                $difficultyIconClass = 'fas fa-biohazard';
+                // $difficultyIconClass = 'far fa-angry';
+                break;
+        }
+        $difficulty = '
+            <div class="tooltip--top" data-tooltip="' . $difficultyTooltip . '">
+                <i class="' . $difficultyIconClass . '"></i>
+            </div>
+        ';
+
+        $solutionsTooltip = 'Решена от ' . $problemInfo['solutions'] . ' човек' . ($problemInfo['solutions'] != 1 ? 'a' : '');
         $solutions = '
-            <div class="tooltip--top" data-tooltip="' . $solutionsInfo . '">
-                <span style="font-weight: bold;">' . $problemInfo['solutions'] . '</span>
+            <div class="tooltip--top" data-tooltip="' . $solutionsTooltip . '">
+                <span style="font-weight: bold;">' . $problemInfo['solutions'] . ' <i class="fas fa-users fa-sm"></i></span>
+            </div>
+        ';
+
+        $successTooltip = 'Решена от ' . $problemInfo['successRate'] . '% от пробвалите я потребители.';
+        $success = '
+            <div class="tooltip--top" data-tooltip="' . $successTooltip . '">
+                <span style="font-weight: bold;">' . $problemInfo['successRate'] . ' <i class="fas fa-percentage fa-sm"></i></span>
             </div>
         ';
 
         $box = '
             <a href="/problems/' . $problemInfo['id'] . '" class="decorated">
                 <div class="box narrow boxlink">
-                        <div class="problem-status">' . $statusIcon . '</div>
+                        <div class="problem-status">' . $status . '</div>
                         <div class="problem-name">' . $problemInfo['name'] . '</div>
-                        <div class="problem-stats">' . $difficulty . ' | ' . $solutions . '</div>
+                        <div class="problem-stats">' . $difficulty . ' | ' . $solutions . ' | ' . $success . '</div>
                 </div>
             </a>
         ';
@@ -104,27 +116,45 @@ class ProblemsPage extends Page {
     private function getAllProblems() {
         $brain = new Brain();
         $problemsInfo = $brain->getAllProblems();
-        $allProblemsSubmits = $brain->getAllSubmits($GLOBALS['STATUS_ACCEPTED']);
+        $allProblemsSubmits = $brain->getAllSubmits();
+
+        $problemTriedBy = array();
         $problemSolvedBy = array();
-        foreach ($problemsInfo as $problem)
+        foreach ($problemsInfo as $problem) {
+            $problemTriedBy[$problem['id']] = array();
             $problemSolvedBy[$problem['id']] = array();
+        }
         foreach ($allProblemsSubmits as $submit) {
-            // Apparently a submit on a game
-            if (!array_key_exists($submit['problemId'], $problemSolvedBy)) {
-                continue;
+            // Evaluate only submits on problems (otherwise it can be a game)
+            if (array_key_exists($submit['problemId'], $problemSolvedBy)) {
+                $problemTriedBy[$submit['problemId']][$submit['userId']] = true;
+                if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
+                    $problemSolvedBy[$submit['problemId']][$submit['userId']] = true;
+                }
             }
-            // Check if already counting the solution by this user
-            $alreadyIn = false;
-            foreach ($problemSolvedBy[$submit['problemId']] as $author)
-                $alreadyIn = $alreadyIn || $author['userId'] == $submit['userId'];
-            if (!$alreadyIn)
-                array_push($problemSolvedBy[$submit['problemId']], $submit);
         }
 
-        for ($i = 0; $i < count($problemsInfo); $i += 1) {
-            $problemSolutions = $problemSolvedBy[$problemsInfo[$i]['id']];
-            // The number of user solutions is calculated in getProblemBox()
-            $problemsInfo[$i]['box'] = $this->getProblemBox($problemsInfo[$i], $problemSolutions);
+        // Calculate number of solutions and success rate
+        for ($i = 0; $i < count($problemsInfo); $i++) {
+            $numTries = count($problemTriedBy[$problemsInfo[$i]['id']]);
+            $numSolutions = count($problemSolvedBy[$problemsInfo[$i]['id']]);
+
+            // Remove admin and system submits from stats
+            for ($userId = 0; $userId < 2; $userId++) {
+                if (array_key_exists($userId, $problemTriedBy[$problemsInfo[$i]['id']]))
+                    $numTries--;
+                if (array_key_exists($userId, $problemSolvedBy[$problemsInfo[$i]['id']]))
+                    $numSolutions--;
+            }
+
+            $problemsInfo[$i]['solutions'] = $numSolutions;
+            $problemsInfo[$i]['successRate'] = $numSolutions == 0 ? 0 : round(100 * $numSolutions / $numTries);
+        }
+
+        for ($i = 0; $i < count($problemsInfo); $i++) {
+            $problemsInfo[$i]['box'] = $this->getProblemBox($problemsInfo[$i],
+                                                            $problemTriedBy[$problemsInfo[$i]['id']],
+                                                            $problemSolvedBy[$problemsInfo[$i]['id']]);
         }
 
         // Order by solutions or difficulty, if requested
