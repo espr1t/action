@@ -113,9 +113,16 @@ class ProblemsPage extends Page {
         return $box;
     }
 
-    private function getAllProblems() {
+    public function getProblems($problemList=null) {
         $brain = new Brain();
-        $problemsInfo = $brain->getAllProblems();
+        $allProblems = $brain->getAllProblems();
+        $problemsInfo = array();
+        foreach ($allProblems as $problem) {
+            if ($problemList == null || in_array($problem['id'], $problemList)) {
+                array_push($problemsInfo, $problem);
+            }
+        }
+
         $allProblemsSubmits = $brain->getAllSubmits();
 
         $totalSubmits = array();
@@ -129,7 +136,7 @@ class ProblemsPage extends Page {
             $problemSolvedBy[$problem['id']] = array();
         }
         foreach ($allProblemsSubmits as $submit) {
-            // Evaluate only submits on problems (otherwise it can be a game)
+            // Evaluate only submits on specified problems
             if (array_key_exists($submit['problemId'], $problemSolvedBy)) {
                 $problemTriedBy[$submit['problemId']][$submit['userId']] = true;
                 if ($submit['userId'] > 1) {
@@ -207,7 +214,7 @@ class ProblemsPage extends Page {
         ';
         $header = inBox($text);
         $orderings = $this->getOrderings();
-        $problems = $this->getAllProblems();
+        $problems = $this->getProblems();
         return $header . $orderings . $problems;
     }
 

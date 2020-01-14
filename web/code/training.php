@@ -918,21 +918,9 @@ class TrainingPage extends Page {
         $problemIds = explode(',', $topic['problems']);
 
         $sectionInfo = inBox('<h1>' . $topic['title'] . '</h1>' . $topic['expanded']);
-        $sectionProblems = '';
         $problemsPage = new ProblemsPage($this->user);
-        foreach ($problemIds as $problemId) {
-            $problemInfo = $brain->getProblem($problemId);
-            $problemAllACSubmits = $brain->getProblemSubmits($problemId, $GLOBALS['STATUS_ACCEPTED']);
-            $problemSubmits = array();
-            $problemAuthors = array();
-            foreach ($problemAllACSubmits as $submit) {
-                if (!in_array($submit['userId'], $problemAuthors)) {
-                    array_push($problemSubmits, $submit);
-                    array_push($problemAuthors, $submit['userId']);
-                }
-            }
-            $sectionProblems .= $problemsPage->getProblemBox($problemInfo, $problemSubmits);
-        }
+        $sectionProblems = $problemsPage->getProblems($problemIds);
+
         return $sectionInfo . $sectionProblems;
     }
 
