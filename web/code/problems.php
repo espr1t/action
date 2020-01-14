@@ -43,7 +43,7 @@ class ProblemsPage extends Page {
             $statusIconClass = 'fas fa-check-circle green';
         }
         $status = '
-            <div class="tooltip--top" data-tooltip="' . $statusTooltip . '">
+            <div class="tooltip--right" data-tooltip="' . $statusTooltip . '">
                 <i class="' . $statusIconClass . '"></i>
             </div>
         ';
@@ -90,7 +90,7 @@ class ProblemsPage extends Page {
             </div>
         ';
 
-        $successTooltip = '' . $problemInfo['successRate'] . '% от събмитите по задачата са успешни.';
+        $successTooltip = '' . $problemInfo['successRate'] . '% успеваемост';
         $success = '
             <div class="tooltip--top" data-tooltip="' . $successTooltip . '">
                 <span style="font-weight: bold;">' . $problemInfo['successRate'] . ' <i class="fas fa-percentage fa-sm"></i></span>

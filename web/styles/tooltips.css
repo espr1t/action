@@ -106,7 +106,7 @@
 .tooltip--right:before { margin-bottom: -0.375rem; }
 
 .tooltip--left:after,
-.tooltip--right:after { margin-bottom: -0.9375rem; }
+.tooltip--right:after { margin-bottom: -1.5rem; }
 
 .tooltip--right:before,
 .tooltip--right:after { left: calc(100% + 0.3125rem); }
