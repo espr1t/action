@@ -74,6 +74,7 @@ class QueuePage extends Page {
                     <td>' . $userEl . '</td>
                     <td>' . $problemEl . '</td>
                     <td title="' . $entry['time'] . '">' . explode(' ', $entry['time'])[1] . '</td>
+                    <td>' . $entry['language'] . '</td>
                     <td>' . intval($entry['progress'] * 100) . '%</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$entry['status']] . '</td>
                     ' . $regradeSubmission . '
@@ -90,10 +91,11 @@ class QueuePage extends Page {
         $table = '
             <table class="default">
                 <tr>
-                    <th style="width: 3rem;">#</th>
+                    <th style="width: 3.5rem;">#</th>
                     <th style="width: 10rem;">Потребител</th>
                     <th style="width: 10rem;">Задача</th>
                     <th style="width: 4.5rem;">Час</th>
+                    <th style="width: 4.0rem;">Език</th>
                     <th style="width: 4.5rem;">Прогрес</th>
                     <th>Статус</th>
                     ' . $adminExtras . '

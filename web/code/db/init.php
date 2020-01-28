@@ -388,6 +388,7 @@ Table::Pending
     "problemId": 1,
     "problemName": "Input/Output",
     "time": "2016-08-30 00:24:11",
+    "language": "C++",
     "progress": 0.66,
     "status": "W"
 }
@@ -407,6 +408,7 @@ if ($db->tableExists('Pending')) {
             problemId INT NOT NULL,
             problemName VARCHAR(32) NOT NULL,
             time DATETIME NOT NULL,
+            language VARCHAR(8) NOT NULL,
             progress FLOAT NOT NULL,
             status VARCHAR(2) NOT NULL,
             PRIMARY KEY (id)
@@ -426,6 +428,7 @@ Table::Latest
     "problemId": 1,
     "problemName": "Input/Output",
     "time": "2016-08-29 23:54:33",
+    "language": "C++",
     "progress": 1.0,
     "status": "AC"
 }
@@ -445,6 +448,7 @@ if ($db->tableExists('Latest')) {
             problemId INT NOT NULL,
             problemName VARCHAR(32) NOT NULL,
             time DATETIME NOT NULL,
+            language VARCHAR(8) NOT NULL,
             progress FLOAT NOT NULL,
             status VARCHAR(2) NOT NULL,
             PRIMARY KEY (id)

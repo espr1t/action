@@ -575,7 +575,7 @@ class Brain {
 
     function addPending($submit) {
         $response = $this->db->query("
-            INSERT INTO `Pending`(submitId, userId, userName, problemId, problemName, time, progress, status)
+            INSERT INTO `Pending`(submitId, userId, userName, problemId, problemName, time, language, progress, status)
             VALUES (
                 '" . $submit->id . "',
                 '" . $submit->userId . "',
@@ -583,6 +583,7 @@ class Brain {
                 '" . $submit->problemId . "',
                 '" . $submit->problemName . "',
                 '" . $submit->submitted . "',
+                '" . $submit->language . "',
                 '" . 0 . "',
                 '" . $submit->status . "'
             )
@@ -634,7 +635,7 @@ class Brain {
 
     function addLatest($submit) {
         $response = $this->db->query("
-            INSERT INTO `Latest`(submitId, userId, userName, problemId, problemName, time, progress, status)
+            INSERT INTO `Latest`(submitId, userId, userName, problemId, problemName, time, language, progress, status)
             VALUES (
                 '" . $submit->id . "',
                 '" . $submit->userId . "',
@@ -642,6 +643,7 @@ class Brain {
                 '" . $submit->problemId . "',
                 '" . $submit->problemName . "',
                 '" . $submit->submitted . "',
+                '" . $submit->language . "',
                 '" . 1 . "',
                 '" . $submit->status . "'
             )

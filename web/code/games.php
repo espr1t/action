@@ -481,16 +481,9 @@ class GamesPage extends Page {
             ';
         }
 
-        if ($problem->name == 'HyperWords' || $problem->name == 'Airports' || $problem->name == "ImageScanner") {
+        if ($problem->name == 'HyperWords' || $problem->name == 'Airports' || $problem->name == 'ImageScanner') {
             $visualizerButton = '';
         }
-
-        // if ($problem->name == 'ImageScanner' && $this->user->id > 1) {
-        //     $submitButton = '
-        //         <input type="submit" value="Изпрати Решение" class="button button-large button-color-gray"
-        //                 title="Събмитването по задачата е временно спряно.">
-        //     ';
-        // }
 
         $controlButtons = '
                 <div class="center">
@@ -1024,9 +1017,10 @@ class GamesPage extends Page {
             $submitList .= '
                 <tr>
                     <td>' . ($i + 1) . '</td>
+                    <td>' . $submitLink . '</td>
                     <td>' . explode(' ', $submit->submitted)[0] . '</td>
                     <td>' . explode(' ', $submit->submitted)[1] . '</td>
-                    <td>' . $submitLink . '</td>
+                    <td>' . $submit->language . '</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->calcStatus()] . '</td>
                     <td>' . ($finalFull == $submit->id ? '<i class="fa fa-check green"></i>' : '') . '</td>
                 </tr>
@@ -1038,9 +1032,10 @@ class GamesPage extends Page {
             <table class="default">
                 <tr>
                     <th>#</th>
+                    <th>ID</th>
                     <th>Дата</th>
                     <th>Час</th>
-                    <th>Идентификатор</th>
+                    <th>Език</th>
                     <th>Статус</th>
                     <th>Финално</th>
                 </tr>

@@ -18,6 +18,18 @@ if ($user == null || $user->access < $GLOBALS['ADMIN_USER_ACCESS']) {
 
 $brain = new Brain();
 
+
+/*
+output('Filling "language" info...');
+$data = $brain->getLatest();
+
+for ($i = 0; $i < count($data); $i = $i + 1) {
+    $entry = $data[$i];
+    $submit = $brain->getSubmit($entry['submitId']);
+    $brain->addLatestLanguage($submit['id'], $submit['language']);
+}
+*/
+
 /*
 output('Filling "last seen" info...');
 $numUpdated = 0;

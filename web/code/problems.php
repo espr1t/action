@@ -599,9 +599,10 @@ class ProblemsPage extends Page {
             $submitList .= '
                 <tr>
                     <td>' . ($i + 1) . '</td>
+                    <td>' . $submitLink . '</td>
                     <td>' . explode(' ', $submit->submitted)[0] . '</td>
                     <td>' . explode(' ', $submit->submitted)[1] . '</td>
-                    <td>' . $submitLink . '</td>
+                    <td>' . $submit->language . '</td>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->calcStatus()] . '</td>
                     <td>' . round($submit->calcScore(), 3) . '</td>
                 </tr>
@@ -613,9 +614,10 @@ class ProblemsPage extends Page {
             <table class="default">
                 <tr>
                     <th>#</th>
+                    <th>ID</th>
                     <th>Дата</th>
                     <th>Час</th>
-                    <th>Идентификатор</th>
+                    <th>Език</th>
                     <th>Статус</th>
                     <th>Точки</th>
                 </tr>
