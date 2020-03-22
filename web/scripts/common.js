@@ -40,35 +40,6 @@ function ajaxCall(url, data, callback) {
 }
 
 /*
- * Label (search results)
- */
-function createLabel(title, data) {
-    var label = document.createElement('div');
-    label.className ='search-result';
-
-    // Add the displayed text
-    var labelTitle = document.createElement('div');
-    labelTitle.className = 'search-result-title';
-    labelTitle.textContent = title;
-    label.appendChild(labelTitle);
-
-    // Add the remove button
-    var labelRemove = document.createElement('div');
-    labelRemove.className = 'search-result-remove';
-    labelRemove.innerHTML = '<i class="fa fa-times"></i>';
-    label.appendChild(labelRemove);
-
-    // Make clicking on the remove button delete the element
-    labelRemove.onclick = function() {
-        label.parentNode.removeChild(label);
-    }
-
-    // Attach the corresponding data
-    label.data = data;
-    return label;
-}
-
-/*
  * Redirect
  */
 function redirect(url) {

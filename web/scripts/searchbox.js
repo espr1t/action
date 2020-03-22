@@ -5,9 +5,38 @@ var searchboxData = {};
 var callbackFunction = null;
 
 /*
+ * Label (search results)
+ */
+function createLabel(title, data) {
+    var label = document.createElement('div');
+    label.className ='search-result';
+
+    // Add the displayed text
+    var labelTitle = document.createElement('div');
+    labelTitle.className = 'search-result-title';
+    labelTitle.textContent = title;
+    label.appendChild(labelTitle);
+
+    // Add the remove button
+    var labelRemove = document.createElement('div');
+    labelRemove.className = 'search-result-remove';
+    labelRemove.innerHTML = '<i class="fa fa-times"></i>';
+    label.appendChild(labelRemove);
+
+    // Make clicking on the remove button delete the element
+    labelRemove.onclick = function() {
+        label.parentNode.removeChild(label);
+    }
+
+    // Attach the corresponding data
+    label.data = data;
+    return label;
+}
+
+/*
  * Download search data
  */
-function getSearchboxData(dataType) {
+function getSearchboxData(dataType, wildcard) {
     // Valid types are: users, tags, pages, problems
     ajaxCall('/actions/data/' + dataType, {}, function(response) {
         try {
@@ -18,6 +47,14 @@ function getSearchboxData(dataType) {
         }
         if (response != null) {
             if (response['status'] == 'OK') {
+                if (wildcard && dataType == 'users') {
+                    response[dataType].push({
+                        id: "-1",
+                        username: "<all_users>",
+                        name: "*Everyone* (all users - всички потребители)"
+                    });
+                }
+
                 searchboxData[dataType] = response[dataType];
                 // Add information what each object is.
                 for (var i = 0; i < searchboxData[dataType].length; i++) {
@@ -109,15 +146,18 @@ function getSuggestion(suggestion) {
     var suggestionEl = document.createElement('div');
     suggestionEl.className = 'searchbox-suggestion';
 
-    var icon = '';
+    var icon = '', text = '';
     switch (suggestion['type']) {
         case 'user':
             icon = '<i class="fa fa-user"></i>';
+            text = suggestion['username'];
             break;
         default:
             console.error('Invalid suggestion type: ' + suggestion['type']);
     }
-    var text = suggestion['username'];
+
+    // Perform some escaping to handle the <all_users> wildcard
+    text = text.replace('<', '&lt;').replace('>', '&gt;');
 
     suggestionEl.innerHTML = `${icon} ${text}`;
     suggestionEl.data = suggestion;
@@ -239,7 +279,7 @@ function selectSuggestion() {
     }
 }
 
-function showSearchBox(dataTypes, callback) {
+function showSearchBox(dataTypes, callback, wildcard=false) {
     // dataTypes should be an array of some of the strings: "users", "tags", "pages", "problems"
     // callback is being called whenever the user selects a suggestion (valid result)
     callbackFunction = callback;
@@ -247,7 +287,7 @@ function showSearchBox(dataTypes, callback) {
     // Populate data if not already populated
     for (const dataType of dataTypes) {
         if (!(dataType in searchboxData)) {
-            getSearchboxData(dataType);
+            getSearchboxData(dataType, wildcard);
         }
     }
 
