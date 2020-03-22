@@ -223,7 +223,7 @@ function connectMakeMove(row, col) {
             message = 'Player ' + connectPlayerName + ' attempted to do an invalid move!';
         else
             message = 'Player ' + connectOpponentName + ' attempted to do an invalid move!';
-        showMessage('ERROR', message);
+        showNotification('ERROR', message);
         return;
     }
 
@@ -238,7 +238,7 @@ function connectMakeMove(row, col) {
         if (winner == -1) message = 'The game has ended in a draw.';
         else if (winner == CONNECT_PLAYER_ONE) message = 'Player ' + connectPlayerName + ' has won!';
         else if (winner == CONNECT_PLAYER_TWO) message = 'Player ' + connectOpponentName + ' has won!';
-        showMessage('INFO', message);
+        showNotification('INFO', message);
         connectUpdateBoard();
         return;
     } else {
@@ -376,7 +376,7 @@ function connectUpdateBoard() {
 function connectReplayCycle(idx, moves) {
     if (connectReplayRunning) {
         if (idx + 1 >= moves.length) {
-            showMessage('INFO', 'Reached end of game log.');
+            showNotification('INFO', 'Reached end of game log.');
             var winner = connectGetWinner();
             connectUpdateBoard();
             return;

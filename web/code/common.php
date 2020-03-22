@@ -69,15 +69,15 @@ function randomString($len, $alpha) {
     return $randomString;
 }
 
-function showMessage($type, $message) {
-    return '<script>showMessage("' . $type . '", "' . $message . '");</script>';
+function showNotification($notificationType, $notificationText) {
+    return '<script>showNotification("' . $notificationType . '", "' . $notificationText . '");</script>';
 }
 
-function redirect($url, $type = null, $message = null) {
+function redirect($url, $notificationType = null, $notificationText = null) {
     // Redirect with arguments (pass them using session data).
-    if ($type != null && $message != null) {
-        $_SESSION['messageType'] = $type;
-        $_SESSION['messageText'] = $message;
+    if ($notificationType != null && $notificationText != null) {
+        $_SESSION['notificationType'] = $notificationType;
+        $_SESSION['notificationText'] = $notificationText;
     }
     header('Location: ' . $url);
     exit();
@@ -213,7 +213,6 @@ function getUserLink($userName, $unofficial=array()) {
         $suffix = '*';
     return '<a href="/users/' . $userName . '"><div class="user">' . $userName . $suffix . '</div></a>';
 }
-
 
 function userInfo($user) {
     if ($user->username != 'anonymous') {

@@ -6,13 +6,21 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
 /*
  * Get last url token (can be problem id, submission id, news id, etc.)
  */
 function getLastUrlToken() {
     var urlTokens = window.location.href.split('/');
     return urlTokens[urlTokens.length - 1].split('#')[0];
+}
+
+/*
+ * Converts HTML string into a DOM element.
+ */
+function htmlToElement(html) {
+    var template = document.createElement('template');
+    template.innerHTML = html.trim();
+    return template.content.firstChild;
 }
 
 /*
@@ -42,8 +50,19 @@ function ajaxCall(url, data, callback) {
 /*
  * Redirect
  */
-function redirect(url) {
-    window.location = url;
+function redirect(url, notificationType=null, notificationText=null) {
+    if (notificationType && notificationText) {
+        var form = htmlToElement(`
+            <form action="${url}" method="POST" style="display: none;">
+                <input type="text" name="notificationType" value="${notificationType}" />
+                <input type="text" name="notificationText" value="${notificationText}" />
+            </form>
+        `);
+        document.body.appendChild(form);
+        form.submit();
+    } else {
+        window.location = url;
+    }
 }
 
 /*
@@ -93,49 +112,49 @@ function popEscHandler() {
 /*
  * Butter bars (pop-up messages)
  */
-function showMessage(type, message, timeout=3 /* seconds */) {
-    var messageEl = document.createElement('div');
+function showNotification(type, text, timeout=3 /* seconds */) {
+    var notificationEl = document.createElement('div');
 
     var id = "i" + Date.now();
     var className, icon;
     if (type == 'INFO') {
-        className = 'message message-info';
+        className = 'notification notification-info';
         icon = '<i class="fa fa-check fa-fw"></i>';
     } else {
-        className = 'message message-error';
+        className = 'notification notification-error';
         icon = '<i class="fa fa-exclamation-triangle fa-fw"></i>';
     }
 
-    messageEl.id = id;
-    messageEl.className = className + ' fade-in';
-    messageEl.innerHTML = `
-        <div class="message-content">
-            <div class="message-icon">${icon}</div>
-            <div class="message-text">${message}</div>
-            <div class="message-close" onclick="hideMessage('${id}');">
+    notificationEl.id = id;
+    notificationEl.className = className + ' fade-in';
+    notificationEl.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">${icon}</div>
+            <div class="notification-text">${text}</div>
+            <div class="notification-close" onclick="hideNotification('${id}');">
                 <i class="fa fa-times fa-fw" style="line-height: 2rem;"></i>
             </div>
         </div>
     `;
 
-    // Make it possible to hide the message with hitting escape
-    addEscAction(function() {hideMessage(id);});
+    // Make it possible to hide the notification with hitting escape
+    addEscHandler(function() {hideNotification(id);});
 
     var wrapperEl = document.getElementById('wrapper');
     var headerEl = document.getElementById('head');
-    wrapperEl.insertBefore(messageEl, headerEl.nextSibling);
+    wrapperEl.insertBefore(notificationEl, headerEl.nextSibling);
 
-    // Center the message horizontally
+    // Center the notification horizontally
     // Please note that this has to be done after it is appended to the DOM, since otherwise its width will be 0 (it is not visible)
-    messageEl.style.marginLeft = (wrapperEl.offsetWidth / 2 - messageEl.offsetWidth / 2) + 'px';
+    notificationEl.style.marginLeft = (wrapperEl.offsetWidth / 2 - notificationEl.offsetWidth / 2) + 'px';
 
-    // Hide the message after several seconds
+    // Hide the notification after several seconds
     setTimeout(function() {
-        hideMessage(id);
+        hideNotification(id);
     }, timeout * 1000);
 }
 
-function hideMessage(id) {
+function hideNotification(id) {
     fadeOutAndRemove(id);
 }
 
@@ -187,16 +206,16 @@ function showActionForm(content, redirect, classes='') {
     addEscHandler(function() {hideActionForm(redirect);});
 }
 
-function hideActionForm(redirectUrl) {
+function hideActionForm(redirectUrl=null) {
     fadeOutAndRemove('actionForm');
     hideOverlay('actionFormOverlay');
     // Redirect to another page if requested
-    if (redirectUrl && redirectUrl != 'undefined') {
+    if (redirectUrl) {
         redirect(redirectUrl);
     }
 }
 
-function submitActionForm(response, hideOnSuccess = true) {
+function parseActionResponse(response, hideOnSuccess=true) {
     try {
         response = JSON.parse(response);
     } catch(ex) {
@@ -208,17 +227,16 @@ function submitActionForm(response, hideOnSuccess = true) {
         type = response.status == 'NONE' ? 'NONE' :
                response.status == 'OK' ? 'INFO' : 'ERROR';
     }
-    var message = (response && response.message != '') ? response.message :
-            (type == 'INFO') ? 'Действието беше изпълнено успешно.' : 'Действието не може да бъде изпълнено.';
+    var message = (response && response.message) ? response.message :
+                  'Could not get action response or the response was invalid.';
     if (type == 'INFO' && hideOnSuccess) {
         hideActionForm();
     }
-    if (type != 'NONE') {
-        showMessage(type, message);
+    if (type == 'ERROR') {
+        console.error(message);
     }
     return response;
 }
-
 
 /*
  * Submit form handling
@@ -250,7 +268,7 @@ function submitSubmitForm(problemId, full=true) {
     };
 
     var callback = function(response) {
-        response = submitActionForm(response);
+        response = parseActionResponse(response);
         if ('id' in response) {
             redirect(window.location.href + '/submits/' + response.id);
         }
@@ -275,7 +293,7 @@ function submitReportForm() {
     };
 
     var callback = function(response) {
-        submitActionForm(response);
+        parseActionResponse(response);
     }
     ajaxCall('/actions/reportProblem', data, callback);
 }
@@ -313,7 +331,7 @@ function updateGraderStatus() {
  */
 function regradeSubmission(id) {
     var callback = function(response) {
-        showMessage('INFO', 'Събмит ' + id + ' беше пратен за ретестване.');
+        showNotification('INFO', 'Събмит ' + id + ' беше пратен за ретестване.');
     }
     ajaxCall('/admin/regrade/submit/' + id, {}, callback);
 }
@@ -458,7 +476,7 @@ function circularProgress(parentId, done, total) {
 function subscribeForUpdates(url, targetElement, level=0) {
     if (level >= 10) {
         console.log('Reached maximum update time. Use page refresh instead.');
-        showMessage('WARNING', 'Reached maximum auto-update time. Please refresh.', 1000000);
+        showNotification('WARNING', 'Reached maximum auto-update time. Please refresh.', 1000000);
         return;
     }
 
@@ -482,7 +500,7 @@ function subscribeForUpdates(url, targetElement, level=0) {
         }, false);
         eventSource.addEventListener('error', function() {
             console.log('Encountered an SSE error. Closing the connection...');
-            showMessage('WARNING', 'Auto-updating failed. Please refresh.', 1000000);
+            showNotification('WARNING', 'Auto-updating failed. Please refresh.', 1000000);
             eventSource.close();
         }, false);
         window.addEventListener('beforeunload', function() {

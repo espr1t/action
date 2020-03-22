@@ -23,7 +23,7 @@ class RegisterPage extends Page {
     public function getContent() {
         if (isset($_POST['username'])) {
             $error = $this->registerUser();
-            return $this->getRegisterForm() . showMessage('ERROR', $error);
+            return $this->getRegisterForm() . showNotification('ERROR', $error);
         }
         return $this->getRegisterForm();
     }

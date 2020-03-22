@@ -89,7 +89,7 @@ a:active, div.link:active {
 }
 
 a.decorated {
-    color: #111111;
+    color: #333333;
 }
 
 a.white, div.white {
@@ -980,7 +980,7 @@ div.search-result-remove {
     cursor: pointer;
 }
 
-div.message {
+div.notification {
     position: -webkit-sticky;
     position: sticky;
     float: left;
@@ -993,32 +993,32 @@ div.message {
     background-color: #0099FF;
 }
 
-div.message-info {
+div.notification-info {
     background-color: #45B891;
 }
 
-div.message-error {
+div.notification-error {
     background-color: #D84A38;
 }
 
-div.message-content {
+div.notification-content {
     line-height: 2rem;
     vertical-align: middle;
     padding: 0 0.75rem 0 1rem;
 }
 
-div.message-icon {
+div.notification-icon {
     color: #FFFFFF;
     display: inline-block;
 }
 
-div.message-text {
+div.notification-text {
     padding-left: 0.25rem;
     display: inline-block;
     color: #FFFFFF;
 }
 
-div.message-close {
+div.notification-close {
     float: right;
     color: #FFFFFF;
     margin-left: 0.5rem;

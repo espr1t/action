@@ -80,7 +80,7 @@ function hypersnakesAiLogic() {
                 headRow = row, headCol = col;
         }
     }
-    
+
     var bestDir = -1, bestDist = INF;
     for (var d = 0; d < 4; d++) {
         var row = headRow + dir[d][0]; if (row < 0 || row >= hypersnakesNumRows) continue;
@@ -122,7 +122,7 @@ function addHypersnakesApple() {
 function endHypersnakesGame(message) {
     clearTimeout(hypersnakesGameLoop);
     document.removeEventListener('keydown', identifyHypersnakesArrowEvent, false);
-    showMessage('INFO', message);
+    showNotification('INFO', message);
     if (hypersnakesDemo) {
         window.setTimeout(function() {location.reload();}, 4000);
     }

@@ -19,7 +19,7 @@ function utttIdentifyReplayEvent(event) {
 }
 
 function utttEndGame(message) {
-    showMessage('INFO', message);
+    showNotification('INFO', message);
     if (utttDemo) {
         window.setTimeout(function() {location.reload();}, 4000);
     }
@@ -60,7 +60,7 @@ function utttUpdateGame(largeRow, largeCol, smallRow, smallCol) {
     utttNextRow = smallRow, utttNextCol = smallCol;
     if (utttBoardWinner(utttNextRow, utttNextCol) != '.')
         utttNextRow = utttNextCol = -1;
-    
+
     // Game is won by one of the players
     for (var i = 0; i < 8; i++) {
         var cntX = 0, cntO = 0;
@@ -186,14 +186,14 @@ function utttGetMove(targetRow, targetCol) {
     }
     if (targetCell.length > 0)
         return targetCell;
-    
+
     for (var row = 0; row < 3; row++) {
         for (var col = 0; col < 3; col++) {
             if (utttBoard[targetRow * 3 + row][targetCol * 3 + col] == '.') {
                 utttBoard[targetRow * 3 + row][targetCol * 3 + col] = utttNextPlayer;
                 var res = utttPlayTTT(targetRow, targetCol, utttNextPlayer == 'x' ? 'o' : 'x');
                 utttBoard[targetRow * 3 + row][targetCol * 3 + col] = '.';
-                
+
                 if (res == utttNextPlayer) {
                     return [row, col];
                 } else if (res == '#') {
@@ -221,11 +221,11 @@ function utttAiLogic() {
     // Win the entire game
     if (targetBoard.length == 0)
         targetBoard = utttGetWinningMove(utttNextPlayer == 'x' ? 'x' : 'o');
-    
+
     // Prevents a loss of the entire game
     if (targetBoard.length == 0)
         targetBoard = utttGetWinningMove(utttNextPlayer == 'x' ? 'o' : 'x');
-    
+
     // Find a board with highest score
     if (targetBoard.length == 0) {
         var best = -1;
@@ -239,7 +239,7 @@ function utttAiLogic() {
             }
         }
     }
-    
+
     // By this point we should know on which of the small boards we should play
     if (targetBoard.length == 0) {
         alert("Error in UTTT AI!");
@@ -255,7 +255,7 @@ function utttReplayCycle(idx, log) {
             endSnakesGame('Reached end of game log.');
             return;
         }
-        
+
         var largeRow = log[idx++] - '0';
         var largeCol = log[idx++] - '0';
         var smallRow = log[idx++] - '0';

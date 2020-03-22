@@ -126,7 +126,7 @@ function addSnakesApple() {
 function endSnakesGame(message) {
     clearTimeout(snakesGameLoop);
     document.removeEventListener('keydown', identifySnakeArrowEvent, false);
-    showMessage('INFO', message);
+    showNotification('INFO', message);
     if (snakesDemo) {
         window.setTimeout(function() {location.reload();}, 4000);
     }

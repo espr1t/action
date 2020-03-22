@@ -447,7 +447,7 @@ class AdminProblemsPage extends Page {
                 $problem = Problem::get($_GET['problemId']);
             }
             if ($problem == null) {
-                $content .= showMessage('ERROR', 'Не съществува задача с този идентификатор!');
+                $content .= showNotification('ERROR', 'Не съществува задача с този идентификатор!');
             }
 
             $redirect = '/admin/problems';

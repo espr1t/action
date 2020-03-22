@@ -263,7 +263,7 @@ function tetrisIdentifyReplayEvent(event) {
 
 function tetrisEndGame(message) {
     document.removeEventListener('keydown', tetrisIdentifyActionEvent, false);
-    showMessage('ERROR', message);
+    showNotification('ERROR', message);
 }
 
 function tetrisUserMove() {

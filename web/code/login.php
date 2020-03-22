@@ -70,7 +70,7 @@ class LoginPage extends Page {
         }
 
         // Not authorised user, show login form (and possibly error message)
-        return $this->getLoginForm() . ($error == '' ? '' : showMessage('ERROR', $error));
+        return $this->getLoginForm() . ($error == '' ? '' : showNotification('ERROR', $error));
     }
 
     private function getLoginForm() {

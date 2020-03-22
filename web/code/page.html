@@ -20,7 +20,7 @@
             function reportProblem() {
                 <?php
                     if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
-                        echo "showMessage('ERROR', 'Трябва да влезете в системата за да съобщите за проблем.');";
+                        echo "showNotification('ERROR', 'Трябва да влезете в системата за да съобщите за проблем.');";
                     } else {
                         echo "showReportForm(`" . $reportFormContent . "`);";
                     }
@@ -165,7 +165,6 @@
         <!-- Achievements -->
         <!-- These should be outside the wrapper element, because they self-attach to it (thus it needs to already be created). -->
         <?php echo $achievementsContent; ?>
-
-        <?php if (isset($showMessage)) echo $showMessage; ?>
+        <?php echo $showNotification; ?>
     </body>
 </html>

@@ -72,14 +72,13 @@ class AdminNewsPage extends Page {
 
         // Specific news entry is open
         if (isset($_GET['newsId'])) {
-            $brain = new Brain();
             if ($_GET['newsId'] == 'new') {
                 $news = new News();
             } else {
                 $news = News::get($_GET['newsId']);
             }
             if ($news == null) {
-                $content .= showMessage('ERROR', 'Не съществува новина с този идентификатор!');
+                $content .= showNotification('ERROR', 'Не съществува новина с този идентификатор!');
             }
 
             $redirect = '/admin/news';

@@ -207,13 +207,13 @@ class ResetPage extends Page {
         if (isset($_POST['username']) && !isset($_POST['password1'])) {
             $error = $this->sendResetEmail();
             if ($error == 'NO_EMAIL') { // The user has not provided a valid e-mail address
-                return $this->noEmailPage() . showMessage('ERROR', 'Потребителят няма въведен e-mail адрес!');
+                return $this->noEmailPage() . showNotification('ERROR', 'Потребителят няма въведен e-mail адрес!');
             }
             if ($error != '') { // Some other error happened
-                return $this->getSendEmailForm() . showMessage('ERROR', $error);
+                return $this->getSendEmailForm() . showNotification('ERROR', $error);
             }
             // Everything ran smoothly - show a page that the e-mail was sent to the user's e-mail address
-            return $this->emailSentPage() . showMessage('INFO', 'Действието беше извършено успешно!');
+            return $this->emailSentPage() . showNotification('INFO', 'Действието беше извършено успешно!');
         }
 
         // Clicked on the link in the e-mail, make him or her enter the new passwords
@@ -221,11 +221,11 @@ class ResetPage extends Page {
             $brain = new Brain();
             $creds = $brain->getCredsByResetKey($_GET['key']);
             if (!$creds) {
-                return $this->getSendEmailForm() . showMessage('ERROR', 'Използваният ключ е невалиден.');
+                return $this->getSendEmailForm() . showNotification('ERROR', 'Използваният ключ е невалиден.');
             }
             $timeDiff = strtotime(date('Y-m-d H:i:s')) - strtotime($creds['resetTime']);
             if ($timeDiff > $GLOBALS['RESET_PASSWORD_TIMEOUT']) {
-                return $this->getSendEmailForm() . showMEssage('ERROR', 'Изпратеният ключ е изтекъл.');
+                return $this->getSendEmailForm() . showNotification('ERROR', 'Изпратеният ключ е изтекъл.');
             }
             return $this->getResetForm($creds['username']);
         }
@@ -237,12 +237,12 @@ class ResetPage extends Page {
                 redirect('/login', 'INFO', 'Променихте паролата си успешно!');
             } else {
                 // Show the same form and an error message
-                return $this->getSendEmailForm() . showMessage('ERROR', 'Възникна проблем при промяната на паролата.');
+                return $this->getSendEmailForm() . showNotification('ERROR', 'Възникна проблем при промяната на паролата.');
             }
         }
 
         error_log('ERROR: Shouldn\'t reach this code (problem is in password reset logic).');
-        return $this->getSendEmailForm() . showMessage('ERROR', 'Това не трябва да се случва. Моля, свържете се с администратор.');
+        return $this->getSendEmailForm() . showNotification('ERROR', 'Това не трябва да се случва. Моля, свържете се с администратор.');
     }
 
     private function getSendEmailForm() {

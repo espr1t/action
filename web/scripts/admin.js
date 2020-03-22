@@ -23,9 +23,19 @@ function submitEditNewsForm() {
     };
 
     var callback = function(response) {
-        response = submitActionForm(response, false);
-        if (id == 'new' && 'id' in response) {
-            redirect('/admin/news?action=success');
+        response = parseActionResponse(response, false);
+        if (response && response.status && response.status == 'OK') {
+            if (id == 'new') {
+                redirect('/admin/news', 'INFO', 'Новината беше публикувана успешно.');
+            } else {
+                showNotification('INFO', 'Новината беше редактирана успешно.');
+            }
+        } else {
+            if (response && response.message) {
+                showNotification('ERROR', response.message);
+            } else {
+                showNotification('ERROR', 'Възникна проблем при публикуването на новината!');
+            }
         }
     }
     ajaxCall('/actions/publishNews', data, callback);
@@ -180,10 +190,10 @@ function deleteTest(position) {
                 if (response['status'] == 'OK') {
                     tests.splice(index, 1);
                     updateTestTable();
-                    showMessage('INFO', 'Тестът беше изтрит успешно.');
+                    showNotification('INFO', 'Тестът беше изтрит успешно.');
                 }
             } catch(ex) {
-                showMessage('ERROR', 'Тестът не беше изтрит успешно.');
+                showNotification('ERROR', 'Тестът не беше изтрит успешно.');
             }
         }
         ajaxCall('/actions/deleteTest', data, callback);
@@ -210,13 +220,13 @@ function deleteAllTests() {
                         successfullyDeleted.push(testId);
                     }
                 } catch(ex) {
-                    showMessage('ERROR', 'Тест ' + testId + ' не беше изтрит успешно.');
+                    showNotification('ERROR', 'Тест ' + testId + ' не беше изтрит успешно.');
                 }
                 if (remainingResponses == 0) {
                     if (successfullyDeleted.length == tests.length) {
-                        showMessage('INFO', 'Всички тестове бяха успешно изтрити.');
+                        showNotification('INFO', 'Всички тестове бяха успешно изтрити.');
                     } else {
-                        showMessage('ERROR', 'Някои от тестовете не бяха изтрити.');
+                        showNotification('ERROR', 'Някои от тестовете не бяха изтрити.');
                     }
                     successfullyDeleted = successfullyDeleted.sort(function(a, b) {return b - a;});
                     for (var c = 0; c < successfullyDeleted.length; c++) {
@@ -251,7 +261,7 @@ function uploadTest(problemId, position, testFile) {
                 exception = true;
             }
             if (exception || response['status'] !== 'OK') {
-                showMessage('ERROR', 'Възникна проблем при качването на тест "' + testFile.name + '"!');
+                showNotification('ERROR', 'Възникна проблем при качването на тест "' + testFile.name + '"!');
                 updateFileHash(testFile.name, 'error');
             } else {
                 updateFileHash(testFile.name, response['hash'], response['path']);
@@ -270,7 +280,7 @@ function addTests() {
         // New test, add it to tests[] first
         if (findTest(name) == -1) {
             if (!name.match(/^[A-Za-z0-9_]+(\.\d{2,3})?\.(in|inp|out|sol)$/)) {
-                showMessage('ERROR', 'Невалидно име на тест "' + name + '"!');
+                showNotification('ERROR', 'Невалидно име на тест "' + name + '"!');
                 continue;
             }
             var tokens = name.split('.');
@@ -369,7 +379,7 @@ function uploadSolution(problemId, solution) {
                 exception = true;
             }
             if (exception || response['status'] == 'ERROR') {
-                showMessage('ERROR', 'Възникна проблем при качването на решение "' + solution.name + '"!');
+                showNotification('ERROR', 'Възникна проблем при качването на решение "' + solution.name + '"!');
                 updateSolutionId(solution.name, 'error', '');
             } else {
                 updateSolutionId(solution.name, response['id'], response['path']);
@@ -397,10 +407,10 @@ function deleteSolution(name) {
                     }
                 }
                 updateSolutionsTable();
-                showMessage('INFO', 'Решението беше изтрито успешно.');
+                showNotification('INFO', 'Решението беше изтрито успешно.');
             }
         } catch(ex) {
-            showMessage('ERROR', 'Решението не беше изтрито успешно.');
+            showNotification('ERROR', 'Решението не беше изтрито успешно.');
         }
     }
     ajaxCall('/actions/deleteSolution', data, callback);
@@ -416,7 +426,7 @@ function addSolutions() {
     for (var i = 0; i < solutionSelector.files.length; i++) {
         var name = solutionSelector.files[i].name;
         if (!name.match(/^[A-Za-z0-9_.]+\.(cpp|java|py)$/)) {
-            showMessage('ERROR', 'Невалидно име на решение "' + name + '"!');
+            showNotification('ERROR', 'Невалидно име на решение "' + name + '"!');
             continue;
         }
 
@@ -450,7 +460,7 @@ function toggleStatementHTML() {
         textArea.value = statementHTML.trim();
         statementParent.appendChild(textArea);
     } else {
-        var editableDiv = document.createElement('DIV');
+        var editableDiv = document.createElement('div');
         editableDiv.id = 'editStatement';
         editableDiv.contentEditable = true;
         editableDiv.innerHTML = statementHTML;
@@ -515,7 +525,7 @@ function submitEditProblemForm() {
     }
 
     var callback = function(response) {
-        response = submitActionForm(response, false);
+        response = parseActionResponse(response, false);
         if (id == 'new' && 'id' in response) {
             redirect('/admin/problems?action=success');
         }
@@ -541,13 +551,13 @@ function updateChecker(action, checkerName, checkerContent) {
             exception = true;
         }
         if (exception || response['status'] !== 'OK') {
-            showMessage('ERROR', 'Възникна проблем при промяната на чекера "' + checkerName + '"!');
+            showNotification('ERROR', 'Възникна проблем при промяната на чекера "' + checkerName + '"!');
         } else {
             if (action == 'delete') {
-                showMessage('INFO', 'Чекерът беше изтрит успешно.');
+                showNotification('INFO', 'Чекерът беше изтрит успешно.');
                 document.getElementById('checkerName').innerText = 'N/A';
             } else {
-                showMessage('INFO', 'Чекерът беше качен успешно.');
+                showNotification('INFO', 'Чекерът беше качен успешно.');
                 document.getElementById('checkerName').innerText = checkerName;
             }
         }
@@ -586,13 +596,13 @@ function updateTester(action, testerName, testerContent) {
             exception = true;
         }
         if (exception || response['status'] !== 'OK') {
-            showMessage('ERROR', 'Възникна проблем при промяната на тестера "' + testerName + '"!');
+            showNotification('ERROR', 'Възникна проблем при промяната на тестера "' + testerName + '"!');
         } else {
             if (action == 'delete') {
-                showMessage('INFO', 'Тестерът беше изтрит успешно.');
+                showNotification('INFO', 'Тестерът беше изтрит успешно.');
                 document.getElementById('testerName').innerText = 'N/A';
             } else {
-                showMessage('INFO', 'Тестерът беше качен успешно.');
+                showNotification('INFO', 'Тестерът беше качен успешно.');
                 document.getElementById('testerName').innerText = testerName;
             }
         }

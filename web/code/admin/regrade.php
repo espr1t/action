@@ -55,7 +55,7 @@ class AdminRegradePage extends Page {
 
         $regradeCount = count($regradeList);
         if ($regradeCount == 0) {
-            return $content . showMessage('ERROR', 'Няма regrade с този идентификатор!');
+            return $content . showNotification('ERROR', 'Няма regrade с този идентификатор!');
         }
 
         for ($i = 0; $i < $regradeCount; $i++) {
