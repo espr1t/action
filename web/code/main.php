@@ -30,6 +30,7 @@ if (isset($_POST['notificationType']) && isset($_POST['notificationText'])) {
     $showNotification .= '<script>setTimeout(function() {window.location=window.location;}, 3000);</script>';
 }
 
+
 // Decide which Page should generate the content
 switch ($_GET['page']) {
     case 'home':
@@ -55,6 +56,10 @@ switch ($_GET['page']) {
     case 'ranking':
         require_once('ranking.php');
         $page = new RankingPage($user);
+        break;
+    case 'messages':
+        require_once('messages.php');
+        $page = new MessagesPage($user);
         break;
     case 'profile':
         require_once('profile.php');

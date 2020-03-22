@@ -23,6 +23,7 @@ if (isset($_POST['notificationType']) && isset($_POST['notificationText'])) {
     $showNotification .= '<script>setTimeout(function() {window.location=window.location;}, 3000);</script>';
 }
 
+
 switch ($_GET['page']) {
 
     case 'news':
@@ -48,6 +49,11 @@ switch ($_GET['page']) {
     case 'history':
         require_once('history.php');
         $page = new AdminHistoryPage($user);
+        break;
+
+    case 'messages':
+        require_once('messages.php');
+        $page = new AdminMessagesPage($user);
         break;
 
     default:

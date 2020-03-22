@@ -100,9 +100,9 @@ class ProblemsPage extends Page {
         $box = '
             <a href="/problems/' . $problemInfo['id'] . '" class="decorated">
                 <div class="box narrow boxlink">
-                        <div class="problem-status">' . $status . '</div>
-                        <div class="problem-name">' . $problemInfo['name'] . '</div>
-                        <div class="problem-stats">' . $difficulty . ' | ' . $solutions . ' | ' . $success . '</div>
+                    <div class="problem-status">' . $status . '</div>
+                    <div class="problem-name">' . $problemInfo['name'] . '</div>
+                    <div class="problem-stats">' . $difficulty . ' | ' . $solutions . ' | ' . $success . '</div>
                 </div>
             </a>
         ';

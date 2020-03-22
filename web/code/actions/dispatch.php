@@ -26,6 +26,10 @@ switch ($_GET['action']) {
         require_once('publish_news.php');
         break;
 
+    case 'sendMessage':
+        require_once('send_message.php');
+        break;
+
     case 'sendSubmission':
         require_once('send_submission.php');
         break;
@@ -63,8 +67,9 @@ switch ($_GET['action']) {
         break;
 
     default:
+        error_log("ERROR: Invalid action type: '" . $_GET['action'] . "'!");
         printAjaxResponse(array(
-            'status' => 'WARNING',
+            'status' => 'ERROR',
             'reason' => 'Невалидно действие!'
         ));
 }

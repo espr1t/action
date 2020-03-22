@@ -129,6 +129,9 @@ class User {
         // Add credentials entry
         $brain->addCredentials($user->id, $username, $password, '');
 
+        // Add notifications entry
+        $brain->addNotifications($user->id, $username, '', '');
+
         // Grant admin rights to the first user
         if ($user->id == 1) {
             $user->access = $GLOBALS['ADMIN_USER_ACCESS'];
@@ -141,6 +144,31 @@ class User {
 
         return $user;
    }
+
+    public function getMessages() {
+        $brain = new Brain();
+        $notifications = $brain->getNotifications($this->id);
+        $toEveryone = $brain->getMessagesToEveryone();
+        $messages = parseIntArray($notifications['messages']);
+        foreach ($toEveryone as $message) {
+            // Only show messages sent after the user registered (except the welcome message)
+            if ($message['id'] == 1 || $message['sent'] >= $this->registered->format('Y-m-d')) {
+                if (!in_array($message['id'], $messages)) {
+                    array_push($messages, $message['id']);
+                }
+            }
+        }
+        sort($messages);
+        return $messages;
+    }
+
+    public function numUnreadMessages() {
+        $brain = new Brain();
+        $notifications = $brain->getNotifications($this->id);
+        $seen = parseIntArray($notifications['seen']);
+        $messages = $this->getMessages();
+        return count($messages) - count($seen);
+    }
 }
 
 ?>

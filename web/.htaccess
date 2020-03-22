@@ -105,6 +105,10 @@ RewriteRule    ^games/([\w-]+)/pdf$                             /code/main.php?p
 # User profile page
 RewriteRule    ^users/(\w[\w.]{1,15})$                          /code/main.php?page=profile&user=$1                                                 [NC,L,QSA]
 
+# Messages
+RewriteRule    ^messages$                                       /code/main.php?page=messages                                                        [NC,L,QSA]
+RewriteRule    ^messages/(\w+)$                                 /code/main.php?page=messages&messageKey=$1                                          [NC,L,QSA]
+
 # Actions
 RewriteRule    ^actions/update$                                 /code/actions/grader_update.php                                                     [NC,L,QSA]
 RewriteRule    ^actions/data/(\w+)$                             /code/actions/data.php?type=$1                                                      [NC,L,QSA]
@@ -129,6 +133,8 @@ RewriteRule    ^admin/regrade/pending$                          /code/admin/admi
 RewriteRule    ^admin/achievements$                             /code/admin/admin.php?page=achievements                                             [NC,L,QSA]
 RewriteRule    ^admin/achievements/recalc$                      /code/admin/admin.php?page=achievements&recalc=true                                 [NC,L,QSA]
 RewriteRule    ^admin/history/(\d+)$                            /code/admin/admin.php?page=history&submitId=$1                                      [NC,L,QSA]
+RewriteRule    ^admin/messages$                                 /code/admin/admin.php?page=messages                                                 [NC,L,QSA]
+RewriteRule    ^admin/messages/(\w+)$                           /code/admin/admin.php?page=messages&messageKey=$1                                   [NC,L,QSA]
 
 # DB tools
 RewriteRule    ^admin/init$                                     /code/db/init.php                                                                   [NC,L,QSA]

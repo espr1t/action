@@ -2,6 +2,20 @@
 require_once('config.php');
 require_once('db/brain.php');
 
+function getCurrentUrl() {
+    return !isset($_SERVER['HTTPS']) ? "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"
+                                     : "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+}
+
+function getUtcTime() {
+    $utcTime = new DateTime(null, new DateTimeZone('UTC'));
+    if ($utcTime) {
+        return $utcTime->format("Y-m-d H:i:s");
+    } else {
+        return NULL;
+    }
+}
+
 function getLocalTime() {
     $localTime = DateTime::createFromFormat('U.u', microtime(true));
     if ($localTime) {
@@ -159,6 +173,14 @@ function getValue($array, $key) {
     return $array[$key];
 }
 
+function parseStringArray($str) {
+    return $str == '' ? array() : explode(',', $str);
+}
+
+function parseIntArray($str) {
+    return array_map('intval', parseStringArray($str));
+}
+
 function passSpamProtection($user, $type, $limit) {
     $brain = new Brain();
     $brain->refreshSpamCounters(time() - $GLOBALS['SPAM_INTERVAL']);
@@ -216,7 +238,23 @@ function getUserLink($userName, $unofficial=array()) {
 
 function userInfo($user) {
     if ($user->username != 'anonymous') {
-        return '<div class="userInfo"><i class="fa fa-user-circle"></i> &nbsp;' . getUserLink($user->username) . '</div>';
+        $numUnreadMessages = $user->numUnreadMessages();
+        $notificationIcon = '<i class="fas fa-bell"></i>';
+        $notificationText = 'Нямате непрочетени съобщения.';
+        if ($numUnreadMessages > 0) {
+            $notificationIcon = '<i class="fas fa-bell" style="color: #D84A38;"></i>';
+            $notificationText = $numUnreadMessages == 1 ? 'Имате 1 непрочетено съобщение.' :
+                                                          'Имате ' . $numUnreadMessages . ' непрочетени съобщения.';
+        }
+        return '
+            <div class="userInfo">
+                <i class="fa fa-user-circle"></i>
+                <span style="position: relative; top: -0.0625rem;">' . getUserLink($user->username) . ' | </span>
+                <div class="tooltip--top" style="cursor: pointer;" data-tooltip="' . $notificationText . '">
+                    <a class="decorated" href="/messages">' . $notificationIcon . '</a>
+                </div>
+                &nbsp;
+            </div>';
     }
     return '';
 }
@@ -240,6 +278,7 @@ function createHead($page) {
         <link rel="shortcut icon" type="image/png" href="/images/favicon_blue_512.png">
         <link rel="stylesheet" type="text/css" href="/styles/style.css">
         <link rel="stylesheet" type="text/css" href="/styles/achievements.css">
+        <link rel="stylesheet" type="text/css" href="/styles/tooltips.css">
         <link rel="stylesheet" type="text/css" href="/styles/icons/css/fontawesome-all.min.css">
         <script src="/scripts/common.js"></script>
         <script src="/scripts/achievements.js"></script>

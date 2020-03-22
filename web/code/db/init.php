@@ -685,4 +685,78 @@ if ($db->tableExists('History')) {
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
 
+/*
+Table::Notifications
+==============
+{
+    "userId": 42,
+    "username": "espr1t",
+    "messages": "13,17,42",
+    "seen": "1,13,42"
+}
+Note that messages sent to all users are not listed in messages (thus can be in seen[] but not messages[])
+*/
+output('');
+output('Creating table Notifications...');
+
+if ($db->tableExists('Notifications')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Notifications`(
+            userId INT NOT NULL,
+            username VARCHAR(32) NOT NULL,
+            messages TEXT NOT NULL,
+            seen TEXT NOT NULL,
+            PRIMARY KEY (`userId`)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+}
+
+/*
+Table::Messages
+==============
+{
+    "id": 13,
+    "key": "f4kek3y",
+    "sent": "2020-03-21T18:11:13",
+    "authorId": "42",
+    "authorName": "espr1t",
+    "title": "You received a message!",
+    "content": "The message is stupid.",
+    "userIds": "13,17,42,666",
+    "userNames": "ThinkCreative,goshko,pesho,kopche"
+}
+*/
+output('');
+output('Creating table Messages...');
+
+if ($db->tableExists('Messages')) {
+    output('  >> already exists.');
+} else {
+    $result = $db->query("
+        CREATE TABLE `Messages`(
+            `id` INT NOT NULL AUTO_INCREMENT,
+            `key` VARCHAR(8) NOT NULL,
+            `sent` DATETIME NOT NULL,
+            `authorId` INT NOT NULL,
+            `authorName` TEXT NOT NULL,
+            `title` TEXT NOT NULL,
+            `content` TEXT NOT NULL,
+            `userIds` TEXT NOT NULL,
+            `userNames` TEXT NOT NULL,
+            PRIMARY KEY (`id`)
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ");
+    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    if ($result !== false) {
+        $result = $db->query("
+            INSERT INTO `Messages` (`key`, `sent`, `authorId`, `authorName`, `title`, `content`, `userIds`, `userNames`)
+            VALUES ('welcome', NOW(), 0, 'system', 'Здравейте!', 'Добре дошли на системата!', '-1', '<all_users>')
+        ");
+        output('  >> ' . ($result !== false ? 'inserted welcome message' : 'failed to insert welcome message') . '!');
+    }
+}
+
 ?>

@@ -1165,6 +1165,133 @@ class Brain {
         return true;
     }
 
+    // Notifications
+    function addNotifications($userId, $userName, $messages, $seen) {
+        $response = $this->db->query("
+            INSERT INTO `Notifications`(userId, username, messages, seen)
+            VALUES (
+                '" . $userId . "',
+                '" . $userName . "',
+                '" . $messages . "',
+                '" . $seen . "'
+            )
+        ");
+        if (!$response) {
+            error_log('Could not insert notifications entry for username "' . $userName . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function updateNotifications($notifications) {
+        $response = $this->db->query("
+            UPDATE `Notifications` SET
+                messages = '" . $notifications['messages'] . "',
+                seen = '" . $notifications['seen'] . "'
+            WHERE userId = " . $notifications['userId'] . "
+        ");
+        if (!$response) {
+            error_log('Could not update notifications for user "' . $notifications['username'] . '"!');
+            return null;
+        }
+        return true;
+    }
+
+    function getNotifications($userId) {
+        $response = $this->db->query("
+            SELECT * FROM `Notifications`
+            WHERE userId = '" . $userId . "'
+            LIMIT 1
+        ");
+
+        if (!$response) {
+            error_log('Could not execute getNotifications() query for userId "' . $userId . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getMessage($id) {
+        $response = $this->db->query("
+            SELECT * FROM `Messages`
+            WHERE id = '" . $id . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getMessage() query with id = "' . $id . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getMessageByKey($key) {
+        $response = $this->db->query("
+            SELECT * FROM `Messages`
+            WHERE `key` = '" . $key . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getMessageByKey() query with key = "' . $key . '"!');
+            return null;
+        }
+        return $this->getResult($response);
+    }
+
+    function getAllMessages() {
+        $response = $this->db->query("
+            SELECT * FROM `Messages`
+        ");
+        if (!$response) {
+            error_log('Could not execute getAllMessages() query!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function getMessagesToEveryone() {
+        $response = $this->db->query("
+            SELECT * FROM `Messages`
+            WHERE userIds = '-1'
+        ");
+        if (!$response) {
+            error_log('Could not execute getMessagesToEveryone() query!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function addMessage() {
+        $response = $this->db->query("
+            INSERT INTO `Messages` (`key`, `sent`, `authorId`, `authorName`, `title`, `content`, `userIds`, `userNames`)
+            VALUES ('', '', -1, '', '', '', '', '')
+        ");
+
+        if (!$response) {
+            error_log('Could not execute addMessage() query properly!');
+            return null;
+        }
+        return $this->db->lastId();
+    }
+
+    function updateMessage($message) {
+        $response = $this->db->query("
+            UPDATE `Messages` SET
+                `key` = '" . $message->key . "',
+                `sent` = '" . $message->sent . "',
+                `authorId` = '" . $message->authorId . "',
+                `authorName` = '" . $message->authorName . "',
+                `title` = '" . $this->db->escape($message->title) . "',
+                `content` = '" . $this->db->escape($message->content) . "',
+                `userIds` = '" . implode(',', $message->userIds) . "',
+                `userNames` = '" . implode(',', $message->userNames) . "'
+            WHERE `id` = " . $message->id . "
+        ");
+        if (!$response) {
+            error_log('Could not update message with id "' . $message->id . '"!');
+            return null;
+        }
+        return true;
+    }
+
+
     // Submit run history
     function getHistory($submitId) {
         $response = $this->db->query("

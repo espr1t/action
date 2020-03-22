@@ -1,4 +1,73 @@
 /*
+ * Publish/Edit Messages
+ */
+function addMessageRecipient(user) {
+    var recipientsEl = document.getElementById('messageRecipients');
+
+    // Check if already added
+    for (var child of recipientsEl.children) {
+        if (child.textContent == user['username']) {
+            console.log('User ' + user['username'] + ' already added.');
+            return;
+        }
+    }
+
+    // Create the user search result element and add it
+    recipientsEl.appendChild(createLabel(user['username'], user));
+}
+
+function showEditMessageForm(content, redirect) {
+    showActionForm(content, redirect);
+}
+
+function submitEditMessageForm() {
+    var id = parseInt(document.getElementById('messageId').innerText);
+    var key = document.getElementById('messageKey').innerText;
+    var authorId = parseInt(document.getElementById('messageAuthorId').innerText);
+    var authorName = document.getElementById('messageAuthorName').innerText;
+    var sent = document.getElementById('messageSent').value;
+    var title = document.getElementById('messageTitle').value;
+    var content = document.getElementById('messageContent').value;
+    var userIds = [];
+    var userNames = [];
+    for (recipient of document.getElementById('messageRecipients').children) {
+        userIds.push(recipient.data['id']);
+        userNames.push(recipient.data['username']);
+    }
+
+    var data = {
+        'id': id,
+        'key': key,
+        'sent': sent,
+        'authorId': authorId,
+        'authorName': authorName,
+        'title': title,
+        'content': content,
+        'userIds': userIds,
+        'userNames': userNames
+    };
+
+    var callback = function(response) {
+        response = parseActionResponse(response, false);
+        if (response && response.status && response.status == 'OK') {
+            if (id == -1) {
+                redirect('/admin/messages', 'INFO', 'Съобщението беше изпратено успешно.');
+            } else {
+                showNotification('INFO', 'Съобщението беше редактирано успешно.');
+            }
+        } else {
+            if (response && response.message) {
+                showNotification('ERROR', response.message);
+            } else {
+                showNotification('ERROR', 'Възникна проблем при изпращането на съобщението!');
+            }
+        }
+    }
+    ajaxCall('/actions/sendMessage', data, callback);
+}
+
+
+/*
  * Publish/Edit News
  */
 function showEditNewsForm(content, redirect) {

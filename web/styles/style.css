@@ -980,6 +980,105 @@ div.search-result-remove {
     cursor: pointer;
 }
 
+div.message-form-section {
+    display: flex;
+    margin-top: 0.5rem;
+}
+
+div.message-form-tag {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+div.message-form-author {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+div.message-form-recipients {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    min-height: 2.25rem;
+    line-height: 2.25rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-width: 0.0125rem;
+    border-style: dashed;
+    border-color: #999999;
+}
+
+div.message-form-recipients-add {
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background-color: green;
+    border-radius: 0 0.25rem 0.25rem 0;
+
+}
+
+input.message-form-title {
+    margin-top: 0.5rem;
+    width: 100%;
+    height: 1.5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+}
+
+input.message-form-sent {
+    width: 100%;
+    text-align: right;
+    height: 1rem;
+    font-size: 0.75rem;
+    text-align: right;
+    font-style: italic;
+    border: none;
+}
+
+textarea.message-form-content {
+    width: 100%;
+    height: 21rem;
+}
+
+div.message-seen {
+    position: relative;
+    float: right;
+    right: -2.5rem;
+    margin-top: -0.75rem;
+}
+
+div.message-title {
+    font-weight: bold;
+    font-size: 1.25rem;
+    padding-bottom: 0.125rem;
+    border-bottom: 0.03125rem dotted #999999;
+}
+
+div.message-content {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+div.message-footer {
+    text-align: right;
+    font-style: italic;
+    font-size: 0.75rem;
+    padding-top: 0.125rem;
+    border-top: 0.03125rem dotted #999999;
+}
+
 div.notification {
     position: -webkit-sticky;
     position: sticky;
