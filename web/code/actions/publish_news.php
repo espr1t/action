@@ -1,7 +1,6 @@
 <?php
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
-require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/news.php');
 
 // User doesn't have access level needed for publishing news
@@ -49,7 +48,6 @@ else {
 
 // Everything seems alright, return success and the news ID
 printAjaxResponse(array(
-    'id' => $news->id,
     'status' => 'OK',
     'message' => 'Новината е записана успешно.'
 ));
