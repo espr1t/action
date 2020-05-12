@@ -16,7 +16,7 @@ In case there is a problem with the checker itself or the stystem (e.g., some of
 In case everything goes well (that is, the checker ran smoothly) exit the checker with exit code 0 and print on the stdout stream one or two lines:
 1. The score for the test (a number between 0.0 and 1.0). Don't worry that the score is in
 [0, 1] - this is later scaled.
-2. Optional message what was the problem with the answer.
+2. Optional message what was the problem with the answer. If you want to print an info message even though the run is considered okay (ACCEPTED), start the line with "OK"; for example: "OK - solution required 42 queries.". 
 
 ## Example checker
 An example stub of a checker is provided in this directory.
