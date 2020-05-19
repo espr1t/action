@@ -7,13 +7,13 @@ from unittest import mock
 import config
 from time import sleep
 from updater import Updater
-from status import TestStatus
+from common import TestStatus, TestInfo
 
 PATH_FIXTURES = "tests/fixtures/"
 TESTS = [
-    {"name": "Test.01.in", "position": 1},
-    {"name": "Test.02.in", "position": 2},
-    {"name": "Test.03.in", "position": 3},
+    TestInfo(inpFile="Test.01.in", inpHash="Test01.hash", solFile="", solHash="", position=1),
+    TestInfo(inpFile="Test.02.in", inpHash="Test02.hash", solFile="", solHash="", position=2),
+    TestInfo(inpFile="Test.03.in", inpHash="Test03.hash", solFile="", solHash="", position=3),
 ]
 
 
@@ -26,7 +26,7 @@ class TestUpdater(unittest.TestCase):
             self.assertEqual(results[i]["score"], 0)
             self.assertEqual(results[i]["status"], TestStatus.RUNTIME_ERROR.name)
 
-    @mock.patch("common.send_request")
+    @mock.patch("network.send_request")
     def test_send_update(self, send_request_mock):
         updater = Updater("localhost", 1337, TESTS)
         updater.add_info(status=TestStatus.COMPILING)
@@ -34,7 +34,7 @@ class TestUpdater(unittest.TestCase):
         sleep(0.1)
         self.assertTrue(send_request_mock.call_count == 1, "An update to the frontend is not being sent.")
 
-    @mock.patch("common.send_request")
+    @mock.patch("network.send_request")
     def test_update_interval(self, send_request_mock):
         updater = Updater("localhost", 1337, TESTS)
         updater.add_info(status=TestStatus.COMPILING)

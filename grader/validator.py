@@ -2,185 +2,143 @@
 Validates whether a given output is valid or not.
 This can happen in several different ways:
     >> Direct text comparison between the expected output and the user's output
-    >> Comparison between floats (if we detect they are floats and the flag is set in the problem)
-    >> Using a checker
+    >> Comparison between floats (if the appropriate flag is set in the problem)
+    >> Using a checker or a tester
 """
 
-import subprocess
-from os import getcwd
+from re import finditer
 from math import fabs
-import config
-import common
-from status import TestStatus
+from dataclasses import dataclass
 
-logger = common.get_logger(__name__)
+import config
+from runner import RunConfig, RunResult
+from common import TestStatus, TestInfo, get_logger
+
+logger = get_logger(__file__)
+
+
+@dataclass
+class ValidatorResult:
+    status: TestStatus
+    score: float
+    info: str = ""
+    error: str = ""
 
 
 class Validator:
 
     @staticmethod
-    def determine_status(submit_id, test, result, run_info, inp_file, out_file, sol_file):
+    def determine_status(submit_id, test: TestInfo, run_config: RunConfig, run_result: RunResult) -> ValidatorResult:
         """
-        Determines the proper execution status (OK, WA, TL, ML, RE) and score of the solution
+        Determines the final execution status (OK, WA, TL, ML, RE, or IE) and score of the solution
         """
         # TODO: We can be more specific what the RE actually is:
-        # Killed (TL): Command terminated by signal 9
-        # Killed (TL): Killed (Command exited with non-zero status 137)
-        # Killed (RE, division by zero): Command terminated by signal 8
-        # Killed (RE, division by zero): Floating point exception (Command exited with non-zero status 136)
-        # Killed (RE, out of bounds): Command terminated by signal 11
-        # Killed (RE, out of bounds): Segmentation fault (Command exited with non-zero status 139)
-        # Killed (RE, allocated too much memory): Command terminated by signal 11
-        # Killed (RE, allocated too much memory): Segmentation fault (Command exited with non-zero status 139)
-        # Killed (RE, max output size exceeded): Command terminated by signal 25
-        # Killed (RE, max output size exceeded): File size limit exceeded (Command exited with non-zero status 153)
+        # Killed (TL): Killed (exit_code = 9)
+        # Killed (TL): Terminated (exit_code = 15)
+        # Killed (RE, division by zero): Floating point exception (exit_code = 8)
+        # Killed (RE, out of bounds): Segmentation fault (exit_code = 11)
+        # Killed (RE, allocated too much memory): Segmentation fault (exit_code = 11)
+        # Killed (RE, max output size exceeded): File size limit exceeded (exit_code = 25)
 
-        # IE (Internal Error)
-        if result.error_message != "":
-            logger.error("Submit {} | Got error while executing test {}: \"{}\"".format(
-                submit_id, test["inpFile"], result.error_message))
-            return TestStatus.INTERNAL_ERROR, result.error_message, 0, ""
-
-        # TL (Time Limit)
-        if result.exec_time > run_info.time_limit:
-            return TestStatus.TIME_LIMIT, "", 0, ""
+        # IE (Internal Error) - error message set previously
+        if run_result.error != "":
+            logger.error("Submit {id} | Got error while executing test {test_name}: \"{error}\"".format(
+                id=submit_id, test_name=test.inpFile, error=run_result.error))
+            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=run_result.error)
 
         # ML (Memory Limit)
-        if result.exec_memory > run_info.memory_limit:
-            return TestStatus.MEMORY_LIMIT, "", 0, ""
+        if run_result.exec_memory > run_config.memory_limit:
+            return ValidatorResult(status=TestStatus.MEMORY_LIMIT, score=0.0)
+
+        # TL (Time Limit)
+        if run_result.exec_time > run_config.time_limit:
+            return ValidatorResult(status=TestStatus.TIME_LIMIT, score=0.0)
 
         # RE (Runtime Error)
-        if result.exit_code != 0:
-            return TestStatus.RUNTIME_ERROR, "", 0, ""
+        if run_result.exit_code != 0:
+            return ValidatorResult(status=TestStatus.RUNTIME_ERROR, score=0.0)
 
-        # AC (Accepted) or WA (Wrong Answer)
-        error_message, score, info = Validator.validate_output(
-            submit_id, inp_file, out_file, sol_file, run_info, result)
-        if error_message != "":
-            return TestStatus.WRONG_ANSWER, error_message, 0, info
-        else:
-            return TestStatus.ACCEPTED, "", score, info
+        # AC (Accepted), WA (Wrong Answer), or IE (Internal Error)
+        if run_config.checker_path is not None or run_config.tester_path is not None:
+            return Validator.validate_output_from_checker_or_tester(submit_id, run_result.output)
+        return Validator.validate_output_directly(test, run_result.output, run_config.compare_floats)
 
     @staticmethod
-    def validate_output(submit_id, inp_file, out_file, sol_file, run_info, result):
-        if run_info.tester_path is not None:
-            return Validator.validate_output_with_tester(submit_id, result)
-        elif run_info.checker_path is not None:
-            return Validator.validate_output_with_checker(submit_id, inp_file, out_file, sol_file, run_info)
-        else:
-            return Validator.validate_output_directly(submit_id, out_file, sol_file, run_info)
+    def line_iterator(text):
+        return (x.group(0) for x in finditer(r"[^\r\n]+", text))
 
     @staticmethod
-    def validate_output_directly(submit_id, out_file, sol_file, run_info):
-        with open(out_file, "rt", encoding="cp866") as out:
-            with open(sol_file, "rt", encoding="cp866") as sol:
-                while True:
-                    out_line = out.readline()
-                    sol_line = sol.readline()
-                    if not out_line and not sol_line:
-                        return "", 1.0, ""
+    def token_iterator(text):
+        return (x.group(0) for x in finditer(r"\S+", text))
 
-                    out_line = out_line.strip() if out_line else ""
-                    sol_line = sol_line.strip() if sol_line else ""
+    @staticmethod
+    def floats_equal(num1, num2):
+        # Absolute difference
+        if fabs(num1 - num2) <= config.FLOAT_PRECISION:
+            return True
+        # Relative difference
+        lower_bound = min((1.0 - config.FLOAT_PRECISION) * num2, (1.0 + config.FLOAT_PRECISION) * num2)
+        upper_bound = max((1.0 - config.FLOAT_PRECISION) * num2, (1.0 + config.FLOAT_PRECISION) * num2)
+        return lower_bound <= num1 <= upper_bound
 
-                    if out_line == sol_line:
+    @staticmethod
+    def validate_output_directly(test: TestInfo, output, compare_floats) -> ValidatorResult:
+        expected_output_bytes = open(test.solPath, mode="rb").read()
+        out_line_iterator = Validator.line_iterator(output.decode(encoding=config.OUTPUT_ENCODING))
+        sol_line_iterator = Validator.line_iterator(expected_output_bytes.decode(encoding=config.OUTPUT_ENCODING))
+
+        for sol_line in sol_line_iterator:
+            out_line = next(out_line_iterator, "")
+            if sol_line.strip() == out_line.strip():
+                continue
+
+            # Line is not exactly the same, but maybe the difference is acceptable
+            # (e.g., if float comparison is enabled, numbers can have different precision or representation)
+            out_token_iterator = Validator.token_iterator(out_line)
+            sol_token_iterator = Validator.token_iterator(sol_line)
+
+            for sol_token in sol_token_iterator:
+                out_token = next(out_token_iterator, "")
+                if out_token == sol_token:
+                    continue
+                try:
+                    # If the tokens are floating-point numbers, try comparing with absolute or relative error
+                    if compare_floats and Validator.floats_equal(float(sol_token), float(out_token)):
                         continue
+                except ValueError:  # Apparently not floats...
+                    pass
 
-                    # If a float (or a list of floats), try comparing with absolute or relative error
-                    out_tokens = out_line.split()
-                    sol_tokens = sol_line.split()
+                # If none of the checks proved the answer to be correct, return Wrong Answer
+                message = "Expected \"{}\" but got \"{}\".".format(
+                    sol_line if len(sol_line) <= 20 else sol_line[:17] + "...",
+                    out_line if len(out_line) <= 20 else out_line[:17] + "..."
+                )
+                return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)
 
-                    line_okay = True
-                    if len(out_tokens) != len(sol_tokens):
-                        line_okay = False
-                    else:
-                        for i in range(len(out_tokens)):
-                            if out_tokens[i] == sol_tokens[i]:
-                                continue
-                            if not run_info.compare_floats:
-                                line_okay = False
-                                break
-                            else:
-                                try:
-                                    out_num = float(out_tokens[i])
-                                    sol_num = float(sol_tokens[i])
-                                    if fabs(out_num - sol_num) > config.FLOAT_PRECISION:
-                                        abs_out_num, abs_sol_num = fabs(out_num), fabs(sol_num)
-                                        if abs_out_num < (1.0 - config.FLOAT_PRECISION) * abs_sol_num or \
-                                                abs_out_num > (1.0 + config.FLOAT_PRECISION) * abs_sol_num:
-                                            line_okay = False
-                                            break
-                                except ValueError:
-                                    logger.info("[Submission {}] Double parsing failed!".format(submit_id))
-                                    line_okay = False
-                                    break
+        # Although everything so far seems correct, maybe the contested printed extra output?
+        for out_line in out_line_iterator:
+            if not out_line.strip().isspace():
+                message = "Output contained extra symbols."
+                return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)
 
-                    if line_okay:
-                        continue
-
-                    # If none of the checks proved the answer to be correct, return a Wrong Answer
-                    if len(out_line) > 20:
-                        out_line = out_line[:17] + "..."
-                    if len(sol_line) > 20:
-                        sol_line = sol_line[:17] + "..."
-                    return "Expected \"{}\" but received \"{}\".".format(sol_line, out_line), 0.0, ""
+        return ValidatorResult(status=TestStatus.ACCEPTED, score=1.0)
 
     @staticmethod
-    def validate_output_with_checker(submit_id, inp_file, out_file, sol_file, run_info):
-        process = subprocess.Popen(
-            args=[run_info.checker_path, inp_file, out_file, sol_file],
-            executable=run_info.checker_path,
-            cwd=getcwd(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+    def validate_output_from_checker_or_tester(submit_id, output: bytes) -> ValidatorResult:
+        output_lines = output.decode(config.OUTPUT_ENCODING).splitlines()
+        if len(output_lines) < 1:
+            message = "Checker or tester's output didn't contain a score!"
+            logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
+            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
+
         try:
-            exit_code = process.wait(timeout=config.CHECKER_TIMEOUT)
-        except subprocess.TimeoutExpired:
-            logger.error("[Submission {}] Internal Error: Checker took more than the allowed {}s.".format(
-                submit_id, config.CHECKER_TIMEOUT))
-            process.terminate()
-            return "Checker Timeout", 0.0, ""
+            score = float(output_lines[0].strip())
+        except ValueError:
+            message = "Checker or tester's score line didn't contain a number (value = '{}')!".format(output_lines[0])
+            logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
+            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
 
-        output = process.communicate()
-        stdout = output[0].decode("utf-8") if output[0] is not None else "0.0"
-        stderr = output[1].decode("utf-8") if output[1] is not None else ""
-
-        if exit_code != 0:
-            message = "Checker returned non-zero exit code. Error was: \"{error_message}\"" \
-                .format(exit_code=exit_code, error_message=stderr)
-            return message, 0.0, ""
-
-        result_lines = stdout.splitlines()
-
-        if len(result_lines) < 1:
-            logger.error("[Submission {}] Internal Error: tester's output didn't contain score!".format(submit_id))
-
-        score = 0.0
-        info_message = ""
-        if len(result_lines) > 0:
-            score = float(result_lines[0].strip())
-        if len(result_lines) > 1:
-            info_message = result_lines[1].strip()
-
-        if info_message != "OK" and info_message != "":
-            return info_message, score, info_message
-        return "", score, info_message
-
-    @staticmethod
-    def validate_output_with_tester(submit_id, result):
-        result_lines = result.output.splitlines()
-
-        if len(result_lines) < 1:
-            logger.error("[Submission {}] Internal Error: tester's output didn't contain score!".format(submit_id))
-
-        score = 0.0
-        info_message = ""
-        if len(result_lines) > 0:
-            score = float(result_lines[0].strip())
-        if len(result_lines) > 1:
-            info_message = result_lines[1].strip()
-
-        if info_message != "OK" and info_message != "":
-            return info_message, score, info_message
-        return "", score, result.info
+        message = "" if len(output_lines) < 2 else "\n".join([line.strip() for line in output_lines[1:]])
+        if message != "" and not message.startswith("OK"):
+            return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)
+        return ValidatorResult(status=TestStatus.ACCEPTED, score=score, info=message)

@@ -1,13 +1,15 @@
 import json
 from threading import Timer, Lock
 from time import time
+from typing import List
 
 import config
 import common
+import network
 
 
 class Updater:
-    def __init__(self, endpoint, submit_id, tests):
+    def __init__(self, endpoint, submit_id, tests: List[common.TestInfo]):
         self.endpoint = endpoint
         self.submit_id = submit_id
         self.tests = tests
@@ -22,19 +24,18 @@ class Updater:
         if message != "":
             self.message = message
             self.updated = True
-        if results is not None:
-            for result in results:
-                found = False
-                for i in range(len(self.results)):
-                    # We could have used test["position"] for this, if it wasn't for the games. There we
-                    # have two matches with the same test["position"] (one as first and one as second player)
-                    if self.results[i]["id"] == result["id"]:
-                        self.results[i] = result
-                        found = True
-                        break
-                if not found:
-                    self.results.append(result)
-                self.updated = True
+        for result in results:
+            found = False
+            for i in range(len(self.results)):
+                # We could have used test.position for this, if it wasn't for the games. There we
+                # have two matches with the same test.position (one as first and one as second player)
+                if self.results[i]["id"] == result["id"]:
+                    self.results[i] = result
+                    found = True
+                    break
+            if not found:
+                self.results.append(result)
+            self.updated = True
 
     def update_frontend(self):
         # Make sure only one update is happening at a time
@@ -49,7 +50,7 @@ class Updater:
             self.last_update = time()
 
             # Actually send the update
-            common.send_request("POST", self.endpoint, {
+            network.send_request("POST", self.endpoint, {
                 "id": self.submit_id,
                 "message": self.message,
                 "results": json.dumps(self.results),
@@ -66,18 +67,21 @@ class Updater:
         for result_id in range(len(self.tests)):
             results.append({
                 "id": result_id,
-                "position": self.tests[result_id]["position"],
+                "position": self.tests[result_id].position,
                 "status": status.name,
                 "score": 0
             })
         return results
 
-    def add_info(self, message="", results=None, status=None):
+    def add_info(self, message="", result=None, status=None):
         self.lock.acquire()
 
-        # Build list of results for each test in case of mass status (P, T, C, IE, CE)
         if status is not None:
+            # Build list of results for each test in case of mass status (P, T, C, IE, CE)
             results = self.set_results(status)
+        else:
+            # apply_update() expects a list of results, so wrap the result in one
+            results = [result] if result is not None else []
 
         # Put the update info in the update queue
         self.apply_update(message, results)

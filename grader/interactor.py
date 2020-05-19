@@ -1,48 +1,67 @@
+import sys
 import subprocess
 import json
 import psutil
+from signal import SIGKILL, SIGTERM
 
-RUN_TEST_COMMAND = "{time} /bin/bash -c \"{timeout} {command}\" ; >&2 printf '%d' $?".format(
-    time="/usr/bin/time --quiet --format='%U %S %e %M'",
-    # Send a SIGTERM signal after {timeout} seconds, but ensure the program is killed after 0.2 more seconds
-    timeout="/usr/bin/timeout --preserve-status --kill-after=0.2s --signal=SIGTERM {timeout}s",
-    command="{run_command} 2> /dev/null"
+# Redirect the run_command's stderr to /dev/null, but keep the output from /usr/bin/time (which is also stderr)
+# http://man7.org/linux/man-pages/man1/time.1.html
+# --format argument '%U' prints "Elapsed CPU seconds in User mode"
+# --format argument '%S' prints "Total number of CPU-seconds that the process spent in kernel mode."
+# --format argument '%e' prints "Elapsed real (clock) time in seconds"
+# --format argument '%M' prints "Maximum resident set size (kbytes)"
+# --format argument '%x' prints "Exit status of the command."
+# Send a SIGTERM signal after {timeout} seconds, but ensure the program is killed after 0.2 more seconds
+RUN_TEST_COMMAND = "{time_cmd} /bin/bash -c \"{timeout_cmd} /bin/bash -c \\\"{{command}}\\\" 2> /dev/null\"".format(
+    time_cmd="/usr/bin/time --quiet --format='%U %S %e %M %x'",
+    timeout_cmd="/usr/bin/timeout --preserve-status --kill-after=0.2s --signal=SIGTERM {timeout}s"
 )
 
 
-def parse_output(prefix, stderr):
+def parse_time_memory_info(info_line, timeout):
+    # Get time, memory and exit_code info from /usr/bin/time output
+    tokens = info_line.split()
+
+    # Fix exit code (it is offset by 128 by /usr/bin/timeout command)
+    exit_code = 0 if int(tokens[4]) == 0 else int(tokens[4]) - 128
+
+    # Exec time is user time + sys time
+    exec_time = float(tokens[0]) + float(tokens[1])
+    clock_time = float(tokens[2])
+    exec_memory = int(tokens[3]) * 1024
+
+    # If program was killed, use total (clock) time instead
+    if exit_code == SIGKILL or exit_code == SIGTERM:
+        if exec_time < timeout:
+            exec_time = clock_time
+    return exit_code, exec_time, exec_memory
+
+
+def parse_output(prefix, stderr, timeout):
     stderr_lines = stderr.strip().splitlines()
     if len(stderr_lines) >= 1 and stderr_lines[0].strip() == "Killed":
         stderr_lines = stderr_lines[1:]
 
     info = {}
     if len(stderr_lines) >= 1:
-        info[prefix + "_exit_code"] = int(stderr_lines[-1])
-    if len(stderr_lines) >= 2:
-        tokens = stderr_lines[-2].split()
-        info[prefix + "_user_time"] = float(tokens[0])
-        info[prefix + "_sys_time"] = float(tokens[1])
-        info[prefix + "_clock_time"] = float(tokens[2])
-        info[prefix + "_memory"] = int(tokens[3])
-    if len(stderr_lines) >= 3 and info[prefix + "_exit_code"] == 0:
-        info[prefix + "_info_message"] = stderr_lines[-3]
-    if len(stderr_lines) >= 4 and info[prefix + "_exit_code"] == 0:
-        info[prefix + "_score"] = float(stderr_lines[-4])
+        exit_code, exec_time, exec_memory = parse_time_memory_info(stderr_lines[-1], timeout)
+        info[prefix + "_exit_code"] = exit_code
+        info[prefix + "_exec_time"] = exec_time
+        info[prefix + "_exec_memory"] = exec_memory
+        info[prefix + "_message"] = "\n".join(stderr_lines[:-1])
     return info
 
 
-def parse_info(tester_stderr, solution_stderr, solution_exited_unexpectedly):
+def parse_info(tester_stderr, solution_stderr, timeout, solution_exited_unexpectedly):
     info = {}
-    info.update(parse_output("tester", tester_stderr))
-    info.update(parse_output("solution", solution_stderr))
+    info.update(parse_output("tester", tester_stderr, timeout))
+    info.update(parse_output("solution", solution_stderr, timeout))
 
     # We were the ones who killed the tester, as the solution exited unexpectedly
     if solution_exited_unexpectedly:
         info["tester_exit_code"] = 0
-        if "tester_user_time" not in info:
-            info["tester_user_time"] = 0.0
-        if "tester_clock_time" not in info:
-            info["tester_clock_time"] = 0.0
+        if "tester_exec_time" not in info:
+            info["tester_exec_time"] = 0.0
         info["tester_score"] = 0.0
         info["tester_info_message"] = "Solution exited unexpectedly."
 
@@ -50,11 +69,11 @@ def parse_info(tester_stderr, solution_stderr, solution_exited_unexpectedly):
     info["internal_error"] = False
     if not info["internal_error"] and "tester_exit_code" not in info:
         info["internal_error"] = True
+    if not info["internal_error"] and "tester_exec_time" not in info:
+        info["internal_error"] = True
     if not info["internal_error"] and "solution_exit_code" not in info:
         info["internal_error"] = True
-    if not info["internal_error"] and "tester_user_time" not in info:
-        info["internal_error"] = True
-    if not info["internal_error"] and "solution_user_time" not in info:
+    if not info["internal_error"] and "solution_exec_time" not in info:
         info["internal_error"] = True
 
     if info["internal_error"]:
@@ -63,22 +82,19 @@ def parse_info(tester_stderr, solution_stderr, solution_exited_unexpectedly):
     # Fix known cases that have issues
     # TODO: Fix this in a better way
     if info["solution_exit_code"] == 143 and info["tester_exit_code"] == 143:
-        if info["solution_user_time"] < info["tester_user_time"] - 0.2:
+        if info["solution_exec_time"] < info["tester_exec_time"] - 0.2:
             info["solution_exit_code"] = 0
-            info["solution_clock_time"] = info["solution_user_time"]
         else:
             info["tester_exit_code"] = 0
-            info["tester_clock_time"] = info["tester_user_time"]
 
     if info["solution_exit_code"] != 0 and info["solution_exit_code"] != 143:
         info["tester_exit_code"] = 0
-        info["tester_clock_time"] = info["tester_user_time"]
 
     return info
 
 
-def interact(solution_exec_cmd, tester_exec_cmd, tester_input):
-    print("Starting tester process...")
+def interact(solution_exec_cmd, tester_exec_cmd, tester_input, timeout):
+    sys.stderr.write("Starting tester process...\n")
     # Start the tester's process
 
     tester_process = psutil.Popen(
@@ -90,12 +106,12 @@ def interact(solution_exec_cmd, tester_exec_cmd, tester_input):
         universal_newlines=True
     )
 
-    print("Writing input data...")
+    sys.stderr.write("Writing input data...\n")
     # Write the input file to the tester
     tester_process.stdin.write(tester_input)
     tester_process.stdin.flush()
 
-    print("Starting solution process...")
+    sys.stderr.write("Starting solution process...\n")
     # Start the solution's process (piping the tester's input and output directly)
     solution_process = psutil.Popen(
         args=solution_exec_cmd,
@@ -118,22 +134,17 @@ def interact(solution_exec_cmd, tester_exec_cmd, tester_input):
         tester_process.kill()
         solution_exited_unexpectedly = True
 
-    tester_stderr = tester_process.stderr.read()
-    solution_stderr = solution_process.stderr.read()
+    tester_stderr = tester_process.stderr.read_file()
+    solution_stderr = solution_process.stderr.read_file()
 
-    info = parse_info(tester_stderr, solution_stderr, solution_exited_unexpectedly)
+    info = parse_info(tester_stderr, solution_stderr, timeout, solution_exited_unexpectedly)
 
-    print("Writing results.")
-    with open("results.txt", "wt") as out:
-        out.write(json.dumps(info, indent=4, sort_keys=True) + "\n")
-    print(json.dumps(info, indent=4, sort_keys=True))
+    sys.stderr.write("Writing results.\n")
+    sys.stdout.write(json.dumps(info, indent=4, sort_keys=True) + "\n")
 
 
 def prepare_and_run(timeout, tester_run_cmd, solution_run_cmd):
-    with open("input.txt", "rt") as inp:
-        tester_input = inp.read()
-    with open("input.txt", "wt") as out:
-        out.write("Deleted.\n")
+    tester_input = sys.stdin.read_file()
 
     # Both the tester and the solution get 1 extra second
     # (to account for time the tester actually processes input/output)
@@ -146,11 +157,11 @@ def prepare_and_run(timeout, tester_run_cmd, solution_run_cmd):
     solution_exec_cmd = RUN_TEST_COMMAND.format(
         timeout=timeout + 1.0, run_command=solution_run_cmd
     )
-    interact(solution_exec_cmd, tester_exec_cmd, tester_input)
+    interact(solution_exec_cmd, tester_exec_cmd, tester_input, timeout)
 
 
 def prod():
-    with open("args.txt", "rt") as inp:
+    with open("args.json", "rt") as inp:
         args = json.loads(inp.read())
 
     # The first line contains the time limit

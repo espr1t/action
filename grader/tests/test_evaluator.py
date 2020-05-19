@@ -1,78 +1,76 @@
 """
 Tests whether the evaluator is behaving as expected.
 """
-import json
-import unittest
-from unittest import mock
 import os
 import shutil
 import vcr
-from evaluator import Evaluator
-
-PATH_SANDBOX = "tests/test_sandbox/"
-PATH_DATA = "tests/test_data/"
-PATH_TESTS = "tests/test_data/tests/"
-PATH_FIXTURES = "tests/fixtures/"
-PATH_CASSETTES = "tests/fixtures/cassettes"
+import logging
+import config
+from unittest import TestCase, mock
+from tests.helper import get_evaluator
 
 
-class TestEvaluator(unittest.TestCase):
+class TestEvaluator(TestCase):
+    PATH_FIXTURES = os.path.abspath("tests/fixtures/evaluator")
+
+    # Do it this way instead of using a class decorator since otherwise the patching
+    # is not active in the setUp() / tearDown() methods -- and we need it there as well
+    patch_tests = mock.patch("config.PATH_TESTS", os.path.abspath("tests/test_data/"))
+    patch_sandbox = mock.patch("config.PATH_SANDBOX", os.path.abspath("tests/test_sandbox/"))
+
     def setUp(self):
-        if not os.path.exists(PATH_SANDBOX):
-            os.makedirs(PATH_SANDBOX)
-        if not os.path.exists(PATH_DATA):
-            os.makedirs(PATH_DATA)
-        if not os.path.exists(PATH_TESTS):
-            os.makedirs(PATH_TESTS)
+        logging.getLogger("vcr").setLevel(logging.FATAL)
+
+        self.patch_tests.start()
+        self.patch_sandbox.start()
+
+        if not os.path.exists(config.PATH_SANDBOX):
+            os.makedirs(config.PATH_SANDBOX)
+        if not os.path.exists(config.PATH_TESTS):
+            os.makedirs(config.PATH_TESTS)
 
     def tearDown(self):
-        shutil.rmtree(PATH_SANDBOX)
-        shutil.rmtree(PATH_DATA)
+        shutil.rmtree(config.PATH_SANDBOX)
+        shutil.rmtree(config.PATH_TESTS)
 
-    @mock.patch("config.PATH_SANDBOX", PATH_SANDBOX)
-    def get_evaluator(self, data_file):
-        with open(data_file) as file:
-            data = json.loads(file.read())
-            return Evaluator(data)
+        self.patch_tests.stop()
+        self.patch_sandbox.stop()
 
     def test_create_sandbox_dir(self):
-        evaluator = self.get_evaluator(os.path.join(PATH_FIXTURES, "problem_submit_ok.json"))
+        evaluator = get_evaluator(os.path.join(self.PATH_FIXTURES, "problem_submit_ok.json"))
         self.assertFalse(os.path.exists(evaluator.path_sandbox))
         evaluator.create_sandbox_dir()
         self.assertTrue(os.path.exists(evaluator.path_sandbox))
 
-    @mock.patch("config.PATH_DATA", PATH_DATA)
-    @mock.patch("config.PATH_TESTS", PATH_TESTS)
-    @vcr.use_cassette(os.path.join(PATH_CASSETTES, "download_tests.yaml"))
+    @vcr.use_cassette("tests/fixtures/cassettes/download_tests.yaml")
     def test_download_tests(self):
-        evaluator = self.get_evaluator(os.path.join(PATH_FIXTURES, "problem_submit_ok.json"))
-        print("PATH TO SANDBOX: {}".format(evaluator.path_sandbox))
+        evaluator = get_evaluator(os.path.join(self.PATH_FIXTURES, "problem_submit_ok.json"))
 
         # Assert none of the files is already present
         for test in evaluator.tests:
-            self.assertFalse(os.path.exists(os.path.join(PATH_TESTS, test["inpHash"])))
-            self.assertFalse(os.path.exists(os.path.join(PATH_TESTS, test["solHash"])))
+            self.assertFalse(os.path.exists(test.inpPath))
+            self.assertFalse(os.path.exists(test.solPath))
 
         # Do the actual download
         evaluator.download_tests()
 
         # Assert all of the files are now present
         for test in evaluator.tests:
-            self.assertTrue(os.path.exists(os.path.join(PATH_TESTS, test["inpHash"])))
-            self.assertTrue(os.path.exists(os.path.join(PATH_TESTS, test["solHash"])))
+            self.assertTrue(os.path.exists(test.inpPath))
+            self.assertTrue(os.path.exists(test.solPath))
 
     def test_write_source(self):
-        evaluator = self.get_evaluator(os.path.join(PATH_FIXTURES, "problem_submit_ok.json"))
+        evaluator = get_evaluator(os.path.join(self.PATH_FIXTURES, "problem_submit_ok.json"))
         self.assertFalse(os.path.isfile(evaluator.path_source))
         evaluator.create_sandbox_dir()
         evaluator.write_source(evaluator.source, evaluator.path_source)
         self.assertTrue(os.path.isfile(evaluator.path_source))
-        with open(evaluator.path_source, "r") as file:
+        with open(evaluator.path_source, "rt") as file:
             self.assertEqual(evaluator.source, file.read())
 
     def test_cleanup(self):
         # Create a new instance and write the source
-        evaluator = self.get_evaluator(os.path.join(PATH_FIXTURES, "problem_submit_ok.json"))
+        evaluator = get_evaluator(os.path.join(self.PATH_FIXTURES, "problem_submit_ok.json"))
         evaluator.create_sandbox_dir()
         evaluator.write_source(evaluator.source, evaluator.path_source)
 

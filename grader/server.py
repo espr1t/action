@@ -12,17 +12,16 @@ import json
 import flask
 from time import sleep
 
-import config
 import common
+import config
 import network
+import initializer
 from evaluator import Evaluator
 from printer import Printer
-from executor import Executor
-
 
 app = flask.Flask("Grader")
 
-logger = common.get_logger(__name__)
+logger = common.get_logger(__file__)
 # NOTE: Do not remove, this is done to initialize the werkzeug's logger
 werkzeug_logger = common.get_logger("werkzeug")
 
@@ -43,7 +42,7 @@ def evaluate():
         # Sleep for a very short while so werkzeug can print its log BEFORE we start printing from here
         sleep(0.01)
         evaluator = Evaluator(data)
-        common.scheduler.submit(evaluator.evaluate)
+        common.request_pool.submit(evaluator.evaluate)
     except RuntimeError as exception:
         return network.create_response(500, exception)
 
@@ -83,6 +82,5 @@ def replay():
 
 
 if __name__ == "__main__":
-    Executor.setup_containers(config.WORKER_COUNT)
-
-    app.run(host="0.0.0.0", port="5000", debug=False)
+    initializer.init()
+    app.run(host="0.0.0.0", port="5000", debug=True)

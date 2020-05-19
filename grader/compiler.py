@@ -3,135 +3,144 @@ Compiles or parses source files and returns information if an error arises.
 """
 
 import os
-from shutil import copyfile
+import random
+import string
 
 import config
-from executor import Executor
+from runner import Runner
+from sandbox import Sandbox
 
 
 class Compiler:
-    COMPILE_LINE_CPP = "g++ -O2 -std=c++17 -w -s -o {path_executable} {path_source}"
-    COMPILE_LINE_JAVA = "javac -nowarn -d {path_executable_dir} {path_source}"
-    COMPILE_LINE_PYTHON = "python3 -m pyflakes {path_source}"
+    COMPILE_COMMAND_CPP = "g++ -O2 -std=c++17 -w -s -o {executable} {source}"
+    COMPILE_COMMAND_PYTHON = "python3 -m pyflakes {source}"
+    COMPILE_COMMAND_JAVA = "javac -nowarn {source}"
+    COMPILE_COMMAND_JAVA_JAR = "jar --create --file=result.jar --main-class={class_name} *.class"
 
     @staticmethod
     def compile(language, path_source, path_executable):
-        """ Compiles (or parses) a source file and returns the name of the produced binary
-        as well as a string, containing the error message if the operation was unsuccessful.
-        """
-        if language == "C++":
+        # Check if the source contains only whitespace
+        # This assumes that the source is saved as UTF-8 (which should be the case)
+        with open(path_source, "rt") as source_file:
+            source = source_file.read()
+            if source == "" or source.isspace():
+                return "Source is empty."
+
+        # Compiles or parses a source file and returns a string containing the error message on failure.
+        if language == config.LANGUAGE_CPP:
             return Compiler.compile_cpp(path_source, path_executable)
-        elif language == "Java":
+        elif language == config.LANGUAGE_JAVA:
             return Compiler.compile_java(path_source, path_executable)
-        elif language == "Python":
+        elif language == config.LANGUAGE_PYTHON:
             return Compiler.compile_python(path_source, path_executable)
         else:
             raise ValueError("Unknown Language {}!".format(language))
 
     @staticmethod
     def compile_cpp(path_source, path_executable):
-        exit_code, stdout, stderr, compilation_time = Executor.cmd_exec(
-            command=Compiler.COMPILE_LINE_CPP.format(path_executable=path_executable, path_source=path_source),
-            timeout=config.MAX_COMPILATION_TIME
+        sandbox = Sandbox()
+        sandbox.put_file(path_source)
+        name_source = os.path.basename(path_source)
+        name_executable = os.path.basename(path_executable)
+
+        command = Compiler.COMPILE_COMMAND_CPP.format(executable=name_executable, source=name_source)
+        run_result = Runner.run_command(
+            sandbox=sandbox, command=command, timeout=config.MAX_COMPILATION_TIME, print_stderr=True, privileged=True
         )
 
-        if stderr != "":
-            return "Compilation error: " + stderr
-
-        if compilation_time > config.MAX_COMPILATION_TIME:
+        if run_result.output.decode() != "":
+            return "Compilation error: {}".format(run_result.output.decode())
+        if run_result.exec_time > config.MAX_COMPILATION_TIME - 0.1:
             return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
+        if run_result.exit_code != 0:
+            return "Compilation exited with a non-zero exit code: {}".format(run_result.exit_code)
 
-        if exit_code != 0:
-            return "Compilation exited with a non-zero exit code: {}".format(exit_code)
-
+        sandbox.get_file(name_executable, path_executable)
         return ""
-
-    @ staticmethod
-    def cleanup_java_source(path_source):
-        # Ignore package directives
-        with open(path_source, "rt") as inp:
-            lines_left = [line for line in inp.readlines() if not line.strip().startswith("package")]
-        # # Make all classes public
-        # for i in range(len(lines_left)):
-        #     if lines_left[i].strip().startswith("class"):
-        #         lines_left[i] = "public " + lines_left[i]
-        with open(path_source, "wt") as out:
-            out.writelines(lines_left)
 
     @staticmethod
     def compile_java(path_source, path_executable):
         # Remove "package" directives (we don't need them here)
-        Compiler.cleanup_java_source(path_source)
+        with open(path_source, "rt") as inp:
+            lines_left = [line for line in inp.readlines() if not line.strip().startswith("package")]
+        with open(path_source, "wt") as out:
+            out.writelines(lines_left)
 
-        # Javac expects directory, not complete path
-        name_executable = os.path.basename(path_executable)
-        path_executable_dir = os.path.dirname(path_executable)
-        class_name = os.path.basename(path_source).replace(".java", "")
+        sandbox = Sandbox()
 
-        command = Compiler.COMPILE_LINE_JAVA.format(path_executable_dir=path_executable_dir, path_source=path_source)
-        exit_code, stdout, stderr, compilation_time = Executor.cmd_exec(
-            command=command,
-            timeout=config.MAX_COMPILATION_TIME
+        # Try compiling the Java file using a random class name
+        # The compilation will almost certainly fail, but we'll figure out the name of the main class.
+        class_name = ''.join(random.choices(string.ascii_lowercase, k=8))
+        sandbox.put_file(path_source, class_name + ".java")
+
+        command = Compiler.COMPILE_COMMAND_JAVA.format(source=class_name + ".java")
+        run_result = Runner.run_command(
+            sandbox=sandbox, command=command, timeout=config.MAX_COMPILATION_TIME, print_stderr=True, privileged=True
         )
+        print("Output: {}".format(run_result.output.decode()))
+        print("Exec time: {:.3f}".format(run_result.exec_time))
 
-        if compilation_time > config.MAX_COMPILATION_TIME:
+        # If the compilation *does not* fail then there is no public class in the file
+        if run_result.exit_code == 0 and run_result.output.decode() == "":
+            return "No public class provided."
+
+        # If the compilation fails as we expect (the public class being named differently
+        # than the file it is in), try again using the name the compiler gives us.
+        if "is public, should be declared in a file named" in run_result.output.decode():
+            class_name = run_result.output.decode().split(" is public")[0].split()[-1]
+            sandbox.put_file(path_source, class_name + ".java")
+            command = Compiler.COMPILE_COMMAND_JAVA.format(source=class_name + ".java")
+            run_result = Runner.run_command(
+                sandbox=sandbox, command=command, timeout=config.MAX_COMPILATION_TIME, print_stderr=True, privileged=True)
+
+        # Check for standard errors (time limit, internal error or compilation error)
+        if run_result.exec_time > config.MAX_COMPILATION_TIME:
             return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
+        if run_result.output.decode() != "":
+            return "Compilation error: " + run_result.output.decode()
+        if run_result.exit_code != 0:
+            return "Compilation exited with a non-zero exit code: {}".format(run_result.exit_code)
 
-        # The main class is not named properly.
-        # Do a dirty fix copying the source to a temporary file with a proper name to handle that.
-        if "is public, should be declared in a file named" in stderr:
-            class_name = stderr.split(" is public")[0].split()[-1]
-            path_source_new = os.path.join(os.path.dirname(path_source), class_name + ".java")
-            copyfile(path_source, path_source_new)
+        # Do a sanity check that we have at least one class file with the public class
+        if not sandbox.has_file(class_name + ".class"):
+            return "An unexpected problem with the compilation arose, please report to the admin."
 
-            # Let's try this again...
-            command = Compiler.COMPILE_LINE_JAVA.format(path_executable_dir=path_executable_dir, path_source=path_source_new)
-            exit_code, stdout, stderr, compilation_time = Executor.cmd_exec(
-                command=command,
-                timeout=config.MAX_COMPILATION_TIME
-            )
+        # At this point everything seems to be fine and the code should be compiled into class files
+        # Create a jar with them so we can execute it later on.
+        command = Compiler.COMPILE_COMMAND_JAVA_JAR.format(class_name=class_name)
+        run_result = Runner.run_command(
+            sandbox=sandbox, command=command, timeout=config.MAX_COMPILATION_TIME, print_stderr=True, privileged=True)
 
-        if stderr != "":
-            return "Compilation error: " + stderr
-
-        if compilation_time > config.MAX_COMPILATION_TIME:
+        if run_result.exec_time > config.MAX_COMPILATION_TIME:
             return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
+        if run_result.output.decode() != "":
+            return "Compilation error: " + run_result.output.decode()
+        if run_result.exit_code != 0:
+            return "Compilation exited with a non-zero exit code: {}".format(run_result.exit_code)
 
-        if exit_code != 0:
-            return "Compilation exited with a non-zero exit code: {}".format(exit_code)
-
-        # Create a jar with the compiled class file(s)
-        # If there is no class file, there was some problem with the compilation (e.g. empty source)
-        if os.path.exists(os.path.join(path_executable_dir, class_name + ".class")):
-            manifest_file = os.path.join(path_executable_dir, "manifest.mf")
-            jar_file = os.path.join(path_executable_dir, name_executable)
-
-            with open(manifest_file, "wt") as manifest:
-                manifest.write("Manifest-version: 1.0\n")
-                manifest.write("Main-Class: {}\n".format(class_name))
-
-            command = "jar cfm {} {} -C {}/ .".format(jar_file, manifest_file, path_executable_dir)
-            exit_code, stdout, stderr, compilation_time = Executor.cmd_exec(command, config.MAX_COMPILATION_TIME)
-        else:
-            stderr = "Empty or buggy file provided."
-
-        return stderr
+        sandbox.get_file("result.jar", path_executable)
+        return ""
 
     @staticmethod
     def compile_python(path_source, path_executable):
-        exit_code, stdout, stderr, compilation_time = Executor.cmd_exec(
-            command=Compiler.COMPILE_LINE_PYTHON.format(path_source=path_source),
-            timeout=config.MAX_COMPILATION_TIME
-        )
+        name_source = os.path.basename(path_source)
 
-        # Pyflakes prints its output to stdout instead of stderr
-        if stdout != "":
-            return "Compilation error: " + stdout
+        sandbox = Sandbox()
+        sandbox.put_file(path_source, name_source)
 
-        if compilation_time > config.MAX_COMPILATION_TIME:
+        command = Compiler.COMPILE_COMMAND_PYTHON.format(source=name_source)
+        run_result = Runner.run_command(
+            sandbox=sandbox, command=command, timeout=config.MAX_COMPILATION_TIME, print_stderr=True, privileged=True)
+
+        if run_result.output.decode() != "":
+            return "Compilation error: " + run_result.output.decode()
+
+        if run_result.exec_time > config.MAX_COMPILATION_TIME:
             return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
 
-        # The file seems to be parsed correctly, so place it as an executable
-        copyfile(path_source, path_executable)
-        return ""
+        if run_result.exit_code != 0:
+            return "Compilation exited with a non-zero exit code: {}".format(run_result.exit_code)
 
+        # The file seems to be parsed correctly, so place it as an executable
+        sandbox.get_file(name_source, path_executable)
+        return ""
