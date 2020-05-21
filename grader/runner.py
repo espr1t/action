@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass, field
-from signal import SIGKILL, SIGTERM
+from signal import SIGKILL
 
 import config
 import common
@@ -79,39 +79,47 @@ class Runner:
     # --format argument '%S' prints "Total number of CPU-seconds that the process spent in kernel mode."
     # --format argument '%e' prints "Elapsed real (clock) time in seconds"
     # --format argument '%M' prints "Maximum resident set size (kbytes)"
-    # Send a SIGTERM signal after {timeout} seconds, but ensure the program is killed after 0.2 more seconds
+    # Send a SIGKILL signal after {timeout} seconds to get the program killed
     COMMAND_WRAPPER = \
-        "{time_cmd} /bin/bash -c \"{timeout_cmd} /bin/bash -c \\\"{{command}}\\\" 2>/dev/null\" ; >&2 echo $?".format(
-            time_cmd="/usr/bin/time --quiet --format='%x %U %S %e %M'",
-            timeout_cmd="/usr/bin/timeout --preserve-status --kill-after=0.2s --signal=SIGTERM {timeout}s"
+        "{time_cmd} /bin/bash -c \"{timeout_cmd} /bin/bash -c \\\"({{command}}) 2>/dev/null\\\"\" ; >&2 echo $?".format(
+            time_cmd="/usr/bin/time --quiet --format='%U %S %e %M'",
+            timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout}s"
         )
 
     @staticmethod
-    def parse_exec_info(info_lines: [str], timeout: float):
+    def parse_exec_info(info: str, timeout: float):
         """
         Parses the output of the above command for exit_code, used time and memory
-        :param info_lines: Two strings: the output by the /usr/bin/time in the first, and the exit code in the second
+        :param info: A string containing the stderr output from running the above command
         :param timeout: A float, the timeout used in the above command
-        :return: A tuple (exit_code, exec_time, exec_memory)
+        :return: A tuple (exit_code, exec_time, exec_memory) or None
         """
-        print("/usr/bin/time output: {}".format(info_lines))
+        # print("Parsing output: {}".format(info))
 
-        if len(info_lines) != 2:
-            logger.error("Expected info_lines to contain two strings; got {}".format(len(info_lines)))
-            return -1, -1, -1
+        info_lines = info.strip().splitlines()
+        if len(info_lines) < 2:
+            logger.error("Expected at least two lines of output, got {}".format(len(info_lines)))
+            return None
 
-        # Fix exit code (it is offset by 128 by /usr/bin/timeout command)
-        exit_code = int(info_lines[1]) % 128
+        try:
+            # Fix exit code (it is offset by 128 by /usr/bin/timeout command)
+            exit_code = int(info_lines[-1].strip()) % 128
 
-        # Exec time is user time + sys time
-        tokens = info_lines[0].strip().split()
-        exec_time = float(tokens[1]) + float(tokens[2])
-        clock_time = float(tokens[3])
-        exec_memory = int(tokens[4]) * 1024
+            # Exec time is user time + sys time
+            tokens = info_lines[-2].strip().split()
+            if len(tokens) != 4:
+                logger.error("Expected 4 numbers, got {}".format(info_lines[-2].strip()))
+                return None
+            exec_time = float(tokens[0]) + float(tokens[1])
+            clock_time = float(tokens[2])
+            exec_memory = int(tokens[3]) * 1024
+        except ValueError:
+            logger.error("Could not parse exec info from string: {}".format("|".join(info_lines[-2:])))
+            return None
 
         # If the program was killed, but the user+sys time is small, use clock time instead
         # This can happen if the program sleeps, for example, or blocks on a resource it never gets
-        if exit_code == SIGKILL or exit_code == SIGTERM:
+        if exit_code == SIGKILL:
             if exec_time < timeout:
                 exec_time = clock_time
 
@@ -153,8 +161,8 @@ class Runner:
         if language == config.LANGUAGE_CPP:
             return "./{executable}".format(executable=executable)
         if language == config.LANGUAGE_JAVA:
-            return "java -XX:+UseSerialGC -Xmx{memory_limit_in_mb}m -Xss64m {executable}".format(
-                memory_limit_in_mb=memory_limit // 1048576, executable=executable
+            return "java -XX:+UseSerialGC -Xmx{max_memory_mb}m -Xss64m -jar {executable}".format(
+                max_memory_mb=(memory_limit + config.MEMORY_OFFSET_JAVA) // 2**20, executable=executable
             )
         if language == config.LANGUAGE_PYTHON:
             return "python3 {executable}".format(executable=executable)
@@ -182,8 +190,8 @@ class Runner:
         )
 
         # Store the execution's stdout and stderr
-        stdout.seek(0); stdout_bytes = stdout.read()
-        stderr.seek(0); stderr_bytes = stderr.read()
+        stdout.flush(); stdout.seek(0); stdout_bytes = stdout.read()
+        stderr.flush(); stderr.seek(0); stderr_bytes = stderr.read()
 
         # If running java or javac or jar the JVM prints an annoying message:
         # "Picked up JAVA_TOOL_OPTIONS: <actual options set by sandbox environment>
@@ -212,9 +220,8 @@ class Runner:
         stdout_bytes, stderr_bytes = Runner.run(
             sandbox=sandbox, command=command, input_bytes=input_bytes, privileged=privileged
         )
-
-        info_lines = stderr_bytes.decode(encoding=config.OUTPUT_ENCODING).strip().splitlines()[-2:]
-        exit_code, exec_time, exec_memory = Runner.parse_exec_info(info_lines=info_lines, timeout=timeout)
+        info = stderr_bytes.decode(encoding=config.OUTPUT_ENCODING).strip()
+        exit_code, exec_time, exec_memory = Runner.parse_exec_info(info=info, timeout=timeout)
         return RunResult(exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=stdout_bytes)
 
     @staticmethod

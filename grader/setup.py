@@ -22,5 +22,6 @@ setup(
         "pyflakes~=2.2.0",
         "psutil~=5.6.3",
         "pytest~=5.4.0",
+        "numpy~=1.18",
     ],
 )

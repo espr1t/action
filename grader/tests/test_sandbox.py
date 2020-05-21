@@ -119,6 +119,12 @@ class TestSandbox(TestCase):
         self.assertNotEqual("", stderr)
         self.assertEqual("", stdout)
 
+    def test_cannot_chroot_second_time(self):
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="chroot ..")
+        self.assertIn("Operation not permitted", stderr)
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="sudo chroot ..")
+        self.assertIn("you do not exist in the passwd database", stderr)
+
     # ================================= #
     #         File System Access        #
     # ================================= #
@@ -150,9 +156,24 @@ class TestSandbox(TestCase):
     def test_cannot_rm_rf(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="rm -rf /")
         self.assertNotEqual("", stderr)
-
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="sudo rm -rf /")
         self.assertNotEqual("", stderr)
+
+    def test_cp(self):
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="cp /bin/bash .")
+        self.assertIn("Permission denied", stderr)
+
+    def test_mv(self):
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="mv /bin/bash .")
+        self.assertIn("Permission denied", stderr)
+
+    def test_create_symlink(self):
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="ln -s /bin/bash bash")
+        self.assertIn("Permission denied", stderr)
+
+    def test_mount(self):
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="mount /bin /usr")
+        self.assertIn("only root can do that", stderr)
 
     # ================================= #
     #           Network Access          #

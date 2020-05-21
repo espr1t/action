@@ -77,8 +77,6 @@ class Compiler:
         run_result = Runner.run_command(
             sandbox=sandbox, command=command, timeout=config.MAX_COMPILATION_TIME, print_stderr=True, privileged=True
         )
-        print("Output: {}".format(run_result.output.decode()))
-        print("Exec time: {:.3f}".format(run_result.exec_time))
 
         # If the compilation *does not* fail then there is no public class in the file
         if run_result.exit_code == 0 and run_result.output.decode() == "":

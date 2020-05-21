@@ -217,7 +217,7 @@ class Sandbox:
             logger.warn("Trying to run a second process while previous still running")
             return False
         # Run the command in a new process, limiting its resource usage
-        print("Executing command: {}".format(command))
+        # print("Executing command: {}".format(command))
         self._process = subprocess.Popen(
             args=command,
             shell=True,

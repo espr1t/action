@@ -54,9 +54,9 @@ TIME_OFFSET_JAVA = 0.05  # Seconds
 TIME_OFFSET_PYTHON = 0.0  # Seconds
 
 # Memory used by non-user code
-MEMORY_OFFSET_CPP = 1300000  # Bytes = 1.3MB
-MEMORY_OFFSET_JAVA = 36000000  # Bytes = 36MB
-MEMORY_OFFSET_PYTHON = 8000000  # Bytes = 8MB
+MEMORY_OFFSET_CPP = 2 * 2**20  # Bytes = 2MB
+MEMORY_OFFSET_JAVA = 40 * 2**20  # Bytes = 40MB
+MEMORY_OFFSET_PYTHON = 9 * 2**20  # Bytes = 9MB
 
 # Output Validation
 FLOAT_PRECISION = 1e-9
