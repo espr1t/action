@@ -75,7 +75,7 @@ class Executors:
     @staticmethod
     def _create_user(username):
         if os.system("useradd --shell /bin/bash -M {}".format(username)):
-            logger.error("Cannot create user '{}'!".format(username))
+            logger.fatal("Cannot create user '{}'!".format(username))
             exit(-1)
         return Executors._get_user_id(username)
 
@@ -117,7 +117,7 @@ class Executors:
             if os.path.ismount(child_path):
                 # logger.info("    -- unmounting directory {}".format(child_path))
                 if os.system("sudo umount {}".format(child_path)) != 0:
-                    logger.error("Could not umount directory {}!".format(child_path))
+                    logger.fatal("Could not umount directory {}!".format(child_path))
                     exit(-1)
 
             # Now it should be a simple file or directory. Delete it recursively.
@@ -177,7 +177,7 @@ class Executors:
             if not os.path.exists(mount_destination):
                 os.makedirs(mount_destination, 0o755)
             if os.system("sudo mount --bind {} {}".format(mount_source, mount_destination)) != 0:
-                logger.error("Could not mount '{}'!".format(mount_source))
+                logger.fatal("Could not mount '{}'!".format(mount_source))
                 exit(-1)
 
         # Create  a /home directory in which all user files are copied to
@@ -193,7 +193,7 @@ class Executors:
             source_file=os.path.abspath("time/time.c")
         ))
         if not os.path.exists(os.path.abspath("time/time.c")):
-            logger.error("Could not compile system timer (time/time.c)!")
+            logger.fatal("Could not compile system timer (time/time.c)!")
             exit(-1)
 
     @staticmethod
@@ -205,7 +205,7 @@ class Executors:
 
             # Check if MAX_PARALLEL_EXECUTORS is set properly
             if config.MAX_PARALLEL_EXECUTORS > psutil.cpu_count(logical=True):
-                logger.error("MAX_PARALLEL_EXECUTORS set to {} when number of CPU cores is {}.".format(
+                logger.fatal("MAX_PARALLEL_EXECUTORS set to {} when number of CPU cores is {}.".format(
                     config.MAX_PARALLEL_EXECUTORS, psutil.cpu_count(logical=True)))
                 exit(0)
             if config.MAX_PARALLEL_EXECUTORS > psutil.cpu_count(logical=False):

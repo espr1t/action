@@ -84,13 +84,13 @@ class Sandbox:
     def _check(self):
         # Test if the home directory exits
         if not os.path.exists(self._path):
-            logger.error("Sandbox {} check failed: directory '{}' does not exist!".format(
+            logger.fatal("Sandbox {} check failed: directory '{}' does not exist!".format(
                 self._executor.name, self._path)
             )
             exit(0)
         # Test that /bin exists and is mounted properly (other mount points should be there as well)
         if not os.path.ismount(os.path.join(self._path, os.pardir, "bin")):
-            logger.error("Sandbox {} check failed: directory '/bin' is not mounted!".format(self._executor.name))
+            logger.fatal("Sandbox {} check failed: directory '/bin' is not mounted!".format(self._executor.name))
             exit(0)
 
     def _clean(self):

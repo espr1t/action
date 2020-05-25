@@ -101,7 +101,7 @@ class Runner:
         :return: A tuple (exit_code, exec_time, exec_memory) or None
         """
 
-        print("Parsing output:\n{}".format(info))
+        # print("Parsing output:\n{}".format(info))
 
         info_lines = info.splitlines()
         # First sanity check: there are enough output lines

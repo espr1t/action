@@ -4,7 +4,7 @@ Installation steps:
 1. Clone the repository (git clone https://github.com/espr1t/action.git).
 2. Install python3, pip3, g++, java:
 2.1. Install Python3 and PIP3 (currently version 3.8):
-    sudo apt install python3 && sudo apt install python3-pip
+    sudo apt install python3.8 && sudo apt install python3.8-pip && sudo apt-get install python3.8-dev
 2.2. Install G++ (currently version 5.4):
     sudo apt install gcc
 2.3. Install Java JDK (currently version 13):

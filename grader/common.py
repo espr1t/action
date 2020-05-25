@@ -46,7 +46,6 @@ class TestStatus(Enum):
     UNKNOWN = 10
 
 
-
 def get_logger(name):
     name = name.split('/')[-1].split('.')[0]
 
