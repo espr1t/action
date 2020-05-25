@@ -36,11 +36,10 @@ Tests whether the runner is behaving as expected.
     >> Time and Memory offsets for "Hello, World!" program with many includes in each language
     >> Time and Memory offsets for a more complex program in each language
     >> Time and Memory offsets for a more complex program with many includes in each language
-
 """
 
-import shutil
 import os
+import shutil
 from unittest import TestCase, mock
 from signal import SIGKILL
 
@@ -136,21 +135,73 @@ class TestRunner(TestCase):
     # ================================= #
     #           Timed Commands          #
     # ================================= #
+    @staticmethod
+    def exec_info_helper(user_time, sys_time, clock_time, memory_kb, exit_code,
+                         before=None, after=None, missing=None, wrong=None):
+        lines = [
+            "{exit_code} -- exit code".format(exit_code=exit_code),
+            "{user_time:.3f} -- user time (seconds)".format(user_time=user_time),
+            "{sys_time:.3f} -- sys time (seconds)".format(sys_time=sys_time),
+            "{clock_time:.3f} -- clock time (seconds)".format(clock_time=clock_time),
+            "{memory} -- max resident set size (bytes)".format(memory=memory_kb * 1024),
+            "0 -- shared resident set size (bytes)",
+            "0 -- unshared data size (bytes)",
+            "0 -- unshared stack size (bytes)",
+            "0 -- number of swaps",
+            "521 -- voluntary context switches",
+            "0 -- involuntary context switches"
+        ]
+        if before is not None:
+            lines = [before] + lines
+        if after is not None:
+            lines = lines + [after]
+        if missing is not None:
+            del lines[missing]
+        if wrong is not None:
+            lines[wrong] = "foo bar baz"
+
+        return "\n".join(lines)
+
     def test_exec_info_parsing(self):
         # Valid - time is sum of user + sys times
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\n0\n", 0.42), (0, 0.55, 431449088))
+        self.assertEqual((0, 0.55, 431449088), Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, 421337, 0), 0.42)
+        )
         # Valid (killed by SIGKILL, use clock time instead)
-        self.assertEqual(Runner.parse_exec_info("0.01 0.00 0.57 421337\n{}\n".format(SIGKILL), 0.5), (SIGKILL, 0.57, 431449088))
+        self.assertEqual((SIGKILL, 0.57, 431449088), Runner.parse_exec_info(
+            self.exec_info_helper(0.01, 0.00, 0.57, 421337, SIGKILL), 0.5)
+        )
         # Valid (non-zero exit code)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\n11\n", 0.42), (11, 0.55, 431449088))
+        self.assertEqual((11, 0.55, 431449088), Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, 421337, 11), 0.42)
+        )
+        # Valid (extra stderr lines before output from time/time)
+        self.assertEqual((0, 0.55, 431449088), Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, 421337, 0, before="foo"), 0.42)
+        )
 
-        # Invalid
-        self.assertEqual(Runner.parse_exec_info("", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 421337\n0", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 foo 421337\n0", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\nbar", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\n0\nbaz", 0.42), None)
+        # Invalid (empty string)
+        self.assertEqual(None, Runner.parse_exec_info("", 0.42))
+        # Invalid (value is not the correct type)
+        self.assertEqual(None, Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, "foo", 0), 0.42)
+        )
+        # Invalid (extra stderr lines after output from time/time)
+        self.assertEqual(None, Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, 421337, 0, after="bar"), 0.42)
+        )
+        # Invalid (not enough lines)
+        self.assertEqual(None, Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, 421337, 0, missing=5), 0.42)
+        )
+        # Invalid (right number of lines, but not correct ones -- first one)
+        self.assertEqual(None, Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, 421337, 0, missing=0, after="foo"), 0.42)
+        )
+        # Invalid (right number of lines, but not correct ones -- important one)
+        self.assertEqual(None, Runner.parse_exec_info(
+            self.exec_info_helper(0.42, 0.13, 0.57, 421337, 0, wrong=3), 0.42)
+        )
 
     def test_timing_command_wrapper(self):
         sandbox = Sandbox()
@@ -283,6 +334,17 @@ class TestRunner(TestCase):
         self.assertEqual(run_result.exit_code, 0)
         self.assertEqual(run_result.output.decode().strip(), "t1rpse")
 
+    def test_run_program_output_limit(self):
+        path_source = os.path.join(self.PATH_FIXTURES, "outputlimit.cpp")
+        path_executable = os.path.join(config.PATH_SANDBOX, "outputlimit.o")
+        status = Compiler.compile(config.LANGUAGE_CPP, path_source, path_executable)
+        self.assertEqual(status, "")
+
+        run_result = Runner.run_program(sandbox=Sandbox(), executable_path=path_executable,
+                                        memory_limit=64000000, timeout=1.0, input_bytes=None)
+        self.assertEqual(run_result.exit_code, 0)
+        self.assertEqual(len(run_result.output.decode()), config.MAX_EXECUTION_OUTPUT)
+
     def test_run_program_exit_code(self):
         programs = [
             ("hello", 0),           # Exiting without errors
@@ -291,7 +353,6 @@ class TestRunner(TestCase):
             ("outofbounds", 6),     # Exiting after accessing invalid memory
             ("toomuchmemory", 6),   # Exiting after trying to allocate too much memory
             ("timelimit", 9),       # Being killed after exceeding the time limit
-            ("outputlimit", 25),    # Being killed after exceeding the output limit
             ("tryingtowrite", 11),  # Being killed after trying to write
         ]
         for program_name, expected_code in programs:

@@ -13,11 +13,16 @@ import common
 import config
 import shutil
 import subprocess
+from time import sleep, perf_counter
 from sys import platform
 from executors import Executors
+from threading import Lock
 
+last_time = perf_counter()
+init_time = perf_counter()
 logger = common.get_logger(__file__)
 
+# Only available on UNIX, so trick Windows into thinking these are valid.
 if not platform.startswith("win32"):
     from resource import *
 else:
@@ -39,8 +44,8 @@ else:
     RLIMIT_RTTIME = "rttime"
     RLIMIT_SIGPENDING = "sigpending"
 
-    def setrlimit(str, val):
-        logger.info("Trying to set resource {} to {}".format(str, val))
+    def setrlimit(resource, value):
+        logger.info("Trying to set resource {} to {}".format(resource, value))
 
 
 class Sandbox:
@@ -53,6 +58,7 @@ class Sandbox:
         self._path = os.path.join(self._executor.path, "home")
 
         # Process handle and saved execution result
+        self._lock = Lock()
         self._process = None
 
         # Check if directory exists and everything is mounted
@@ -104,7 +110,6 @@ class Sandbox:
         setrlimit(RLIMIT_AS, (config.MAX_EXECUTION_MEMORY, config.MAX_EXECUTION_MEMORY))
         setrlimit(RLIMIT_DATA, (config.MAX_EXECUTION_MEMORY, config.MAX_EXECUTION_MEMORY))
         setrlimit(RLIMIT_RSS, (config.MAX_EXECUTION_MEMORY, config.MAX_EXECUTION_MEMORY))
-        # setrlimit(RLIMIT_VMEM, (config.MAX_EXECUTION_MEMORY, config.MAX_EXECUTION_MEMORY))
 
         # Set the stack to be 64MB
         setrlimit(RLIMIT_STACK, (config.MAX_EXECUTION_STACK, config.MAX_EXECUTION_STACK))
@@ -136,31 +141,27 @@ class Sandbox:
         setrlimit(RLIMIT_CPU, (config.MAX_EXECUTION_TIME, config.MAX_EXECUTION_TIME))
 
         # Increase the priority of the process (in case realtime scheduler is not available)
-        os.nice(config.PROCESS_PRIORITY)
+        os.nice(config.PROCESS_PRIORITY_NICE)
 
         # Leave at standard scheduler for the moment
         # (managing time and memory is more complex with realtime priority processes)
-        """
         # Limit realtime priority to 50 (out of 99)
-        setrlimit(RLIMIT_RTPRIO, (50, 50))
+        setrlimit(RLIMIT_RTPRIO, (config.PROCESS_PRIORITY_REAL, config.PROCESS_PRIORITY_REAL))
 
-        # Schedule one interrupt every half a second in which the timeout can happen
         # As a fail-safe mechanism, if the timeout didn't work for some reason, kill
         # the solution using the hard limit (MAX_EXECUTION_TIME seconds) instead
-        setrlimit(RLIMIT_RTTIME, (500000, config.MAX_EXECUTION_TIME * 1000000))
+        setrlimit(RLIMIT_RTTIME, (config.MAX_EXECUTION_TIME * 1000000, config.MAX_EXECUTION_TIME * 1000000))
 
         # Set the scheduler to the realtime one (avoid interrupts as much as possible)
         if not platform.startswith("win32"):
-            os.sched_setscheduler(0, os.SCHED_RR, os.sched_param(50))
-            # Should be the same as the command below
-            # os.system("chrt --rr --all-tasks --verbose --pid 50 {}".format(os.getpid()))
-        """
+            # os.system("chrt --rr --all-tasks --verbose --pid {} {}".format(config.PROCESS_PRIORITY_REAL, os.getpid()))
+            os.sched_setscheduler(0, os.SCHED_RR, os.sched_param(config.PROCESS_PRIORITY_REAL))
 
         # Limit the process and its children to use a concrete CPU core
         os.system("taskset -p -c {} {} > /dev/null".format(self._executor.cpu, os.getpid()))
 
         if not privileged:
-            # Set the user to a more unprivileged one (workerXX)
+            # Set the user to a more unprivileged one (executorXX)
             os.setgroups([])
             os.setgid(self._executor.user)
             os.setuid(self._executor.user)
@@ -204,20 +205,37 @@ class Sandbox:
         return self._process is not None and self._process.poll() is None
 
     def wait(self, timeout=None):
+        start_time = perf_counter()
         if self.is_running():
             try:
                 self._process.wait(timeout)
             except subprocess.TimeoutExpired:
                 pass
-        os.system("killall -KILL -u {}".format(self._executor.name))
-        self._process = None
+        # Force kill all left-over processes (children, grandchildren, etc.)
+        with self._lock:
+            if self.is_running():
+                self._process.kill()
+            del self._process
+            self._process = None
+            # As a fail-safe also invoke killall
+            os.system("killall -signal SIGKILL --user {}".format(self._executor.name))
+            # Wait until all children are actually killed
+            while len(os.popen("ps -U {}".format(self._executor.name)).read().strip().splitlines()) > 1:
+                sleep(0.01)
+        print("wait() took {:.3f}s".format(perf_counter() - start_time))
 
     def execute(self, command, stdin_fd, stdout_fd, stderr_fd, blocking=True, privileged=False):
-        if self.is_running():
-            logger.warn("Trying to run a second process while previous still running")
+        if self._process is not None:
+            logger.error("Trying to run a second process while previous still running")
             return False
+
         # Run the command in a new process, limiting its resource usage
         # print("Executing command: {}".format(command))
+        if self._executor.cpu == 0:
+            global init_time, last_time
+            curr_time = perf_counter()
+            print("Starting process at time {:.3f} (difference from last {:.3f}s)".format(curr_time - init_time, curr_time - last_time))
+            last_time = curr_time
         self._process = subprocess.Popen(
             args=command,
             shell=True,

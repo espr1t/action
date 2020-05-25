@@ -1,10 +1,11 @@
 #include <cstdio>
 #include <cstdlib>
 
-char a[20000002];
+const int SIZE = 50000000;
 
 int main(void) {
-    for (int i = 0; i < 20000000; i++)
+    static char a[SIZE + 1];
+    for (int i = 0; i < SIZE; i++)
         a[i] = 'A' + rand() % 26;
     printf("%s\n", a);
     return 0;

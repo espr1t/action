@@ -20,7 +20,7 @@ setup(
         "requests~=2.22.0",
         "vcrpy~=4.0.2",
         "pyflakes~=2.2.0",
-        "psutil~=5.6.3",
+        "psutil~=5.7.0",
         "pytest~=5.4.0",
         "numpy~=1.18",
     ],

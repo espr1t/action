@@ -40,11 +40,23 @@ class Executors:
         Executors._clean_executors()
 
     @staticmethod
+    def lock():
+        Executors._lock.acquire()
+
+    @staticmethod
+    def unlock():
+        Executors._lock.release()
+
+    @staticmethod
     def get() -> Executor:
         # Initialize executors if not done already
         Executors.init()
+
         # Return one of the executors (or block until one is available)
-        return Executors._available.get()
+        # Use a lock in order to be able to limit the number of simultaneously running
+        # executors even further (e.g., to one) - useful for example for I/O heavy programs
+        with Executors._lock:
+            return Executors._available.get()
 
     @staticmethod
     def release(executor: Executor):
@@ -173,6 +185,17 @@ class Executors:
         logger.info("  >> creating home directory...")
         os.mkdir(os.path.join(executor_path, "home"), 0o755)
 
+        # Put custom time binary into a /time directory
+        logger.info("  >> creating time directory...")
+        os.mkdir(os.path.join(executor_path, "time"), 0o755)
+        os.system("gcc -O2 -o {target_file} {source_file}".format(
+            target_file=os.path.join(executor_path, "time/time"),
+            source_file=os.path.abspath("time/time.c")
+        ))
+        if not os.path.exists(os.path.abspath("time/time.c")):
+            logger.error("Could not compile system timer (time/time.c)!")
+            exit(-1)
+
     @staticmethod
     def _setup_executors():
         with Executors._lock:
@@ -181,11 +204,11 @@ class Executors:
                 return
 
             # Check if MAX_PARALLEL_EXECUTORS is set properly
-            if config.MAX_PARALLEL_EXECUTORS >= psutil.cpu_count(logical=True):
+            if config.MAX_PARALLEL_EXECUTORS > psutil.cpu_count(logical=True):
                 logger.error("MAX_PARALLEL_EXECUTORS set to {} when number of CPU cores is {}.".format(
                     config.MAX_PARALLEL_EXECUTORS, psutil.cpu_count(logical=True)))
                 exit(0)
-            if config.MAX_PARALLEL_EXECUTORS >= psutil.cpu_count(logical=False):
+            if config.MAX_PARALLEL_EXECUTORS > psutil.cpu_count(logical=False):
                 logger.warning("MAX_PARALLEL_EXECUTORS set to {} when physical CPU cores are {}.".format(
                     config.MAX_PARALLEL_EXECUTORS, psutil.cpu_count(logical=False)))
 
@@ -232,7 +255,9 @@ class Executors:
             Executors._available = Queue(maxsize=config.MAX_PARALLEL_EXECUTORS)
             for i in range(config.MAX_PARALLEL_EXECUTORS):
                 name = "executor{:02d}".format(i + 1)
-                Executors._available.put(Executor(cpu=affinity[i], user=Executors._get_user_id(name), name=name))
+                Executors._available.put(
+                    Executor(cpu=affinity[i % len(affinity)], user=Executors._get_user_id(name), name=name)
+                )
 
             logger.info("Executors queued successfully.")
             Executors._have_been_queued = True
