@@ -81,6 +81,10 @@ def get_logger(name):
 logger = get_logger(__file__)
 
 
+def is_mount(path):
+    return os.system("sudo mountpoint {} 1>/dev/null".format(path)) == 0
+
+
 def get_source_extension(language):
     if language == config.LANGUAGE_CPP:
         return config.SOURCE_EXTENSION_CPP

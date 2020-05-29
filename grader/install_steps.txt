@@ -1,42 +1,58 @@
 Installation steps:
 
-0. Update apt: sudo apt-get update
-1. Clone the repository (git clone https://github.com/espr1t/action.git).
-2. Install python3, pip3, g++, java:
-2.1. Install Python3 and PIP3 (currently version 3.8):
-    sudo apt install python3.8 && sudo apt install python3.8-pip && sudo apt-get install python3.8-dev
-2.2. Install G++ (currently version 5.4):
-    sudo apt install gcc
-2.3. Install Java JDK (currently version 13):
-    sudo apt install openjdk-13-jdk-headless
-2.4. (Optional) You may need to set Java 11 as the default
-2.4.1. Check the current Java
-    java -version
-2.4.2. If not 13.*, run the following command and select the appropriate choice:
-    sudo update-alternatives --config java
-    sudo update-alternatives --config javac
-    sudo update-alternatives --config jar
-3. Install the project's requirements (from the project's base directory, e.g. /home/grader/action)
-    make install
-4. (Optional) Set the port on which the web server will run
+0. Update apt and system
+    >> sudo apt update
+    >> sudo apt upgrade
+    >> sudo apt full-upgrade
+1. Install Python
+1.1. Install lateste version of Python and make it the default
+    >> sudo add-apt-repository ppa:deadsnakes/ppa
+    >> sudo apt update
+    >> apt list | grep python3.8
+    >> sudo apt install python3.8
+    >> sudo apt install python3.8-dev
+1.2. Change default python3 version to be the newest one
+    >> sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+    >> sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
+    >> sudo update-alternatives --config python3
+1.2.1. Check if the previous step didn't break apt:
+    >> apt list | grep python3.8
+1.2.2. If above command fails, do the following, then try again:
+    >> sudo apt-get install python-apt
+1.3. Install PIP
+    >> sudo apt install python3-pip
+    >> pip3 install --upgrade pip
+2. Install latest version of GCC/G++
+    >> sudo apt install g++
+3. Install latest version of Java
+3.1. Check which version of Java is currently installed (if any)
+    >> java --version
+3.2. If not installed (or too old), install a newer one
+    >> sudo apt install openjdk-11-jdk-headless
+3.3. In case you had an older one, you may need to make the new one default
+    >> sudo update-alternatives --config java
+    >> sudo update-alternatives --config javac
+    >> sudo update-alternatives --config jar
+4. Clone the project
+    >> cd <path_to_where_you_want_it>
+    >> git clone https://github.com/espr1t/action.git
+5. Install the project's requirements (from the project's base directory, e.g. /home/grader/action)
+    >> make install
+6. (Optional) Set the port on which the web server will run (default is 5000)
     open action/grader/server.py and change port='5000' to port='<whatever_you_want>'.
-5. Allow the port on which the server will run
-5.1. Install ufw (may be unnecessary):
-    sudo apt-get install ufw
-5.2. Use ufw to allow the port (change if not using the default port 5000):
-    sudo ufw allow 5000
-6. Install PDF printing utility (https://wkhtmltopdf.org)
-6.1. Download the installation package:
-    wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.xenial_amd64.deb
-6.2. Install it:
-    sudo apt install -y ./wkhtmltox_0.12.5-1.xenial_amd64.deb
-6.3. And remove the now obsolete installation package:
-    rm ./wkhtmltox_0.12.5-1.xenial_amd64.deb
-6.4. (optional) Install fonts:
-    sudo cp action/grader/fonts/* /usr/local/share/fonts
-7. Finally, run the service as root (from the project's base directory, e.g. /home/grader/action):
+7. Allow the port on which the server will run
+7.1. Install ufw (may be unnecessary):
+    >> sudo apt install ufw
+7.2. Use ufw to allow the port (change if not using the default port 5000):
+    >> sudo ufw allow 5000
+8. Install PDF printing utility (https://wkhtmltopdf.org)
+    >> sudo apt install xvfb libfontconfig wkhtmltopdf
+8.1. (Optional) Install fonts (needs to be in <root_dir>/grader/ folder):
+    sudo cp fonts/* /usr/local/share/fonts
+9. Finally, run the service as root (from the project's base directory, e.g. /home/grader/action):
     make run
-8. (Optional) Run it automatically on OS load:
-8.1. Run "sudo crontab -e" to edit the list of cronjobs
-8.2. Add "@reboot python3 /home/grader/action/grader/server.py" (with correct path to server.py)
-#8.3. Run "update-rc.d cron defaults" (may not be needed)
+10. (Optional) Run it automatically on OS load:
+10.1. Add it to the list of cronjobs on system start:
+    >> sudo crontab -e
+    Add "@reboot python3 /home/grader/action/grader/server.py" (with correct path to server.py)
+#10.2. Run "update-rc.d cron defaults" (may not be needed)

@@ -22,7 +22,7 @@ class Printer:
             return None
         pdf_path = "/tmp/{}.pdf".format("".join(random.choice(string.digits) for _ in range(10)))
         try:
-            subprocess.run(["wkhtmltopdf", url, pdf_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
+            subprocess.run(["xvfb-run", "wkhtmltopdf", url, pdf_path], timeout=10)
         except subprocess.TimeoutExpired:
             return None
         return pdf_path

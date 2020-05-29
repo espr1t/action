@@ -89,7 +89,7 @@ class Sandbox:
             )
             exit(0)
         # Test that /bin exists and is mounted properly (other mount points should be there as well)
-        if not os.path.ismount(os.path.join(self._path, os.pardir, "bin")):
+        if not common.is_mount(os.path.join(self._path, os.pardir, "bin")):
             logger.fatal("Sandbox {} check failed: directory '/bin' is not mounted!".format(self._executor.name))
             exit(0)
 

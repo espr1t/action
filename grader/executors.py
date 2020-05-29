@@ -114,7 +114,7 @@ class Executors:
             child_path = os.path.join(path, child)
 
             # Un-mount it if it is one of the mounted directories
-            if os.path.ismount(child_path):
+            if common.is_mount(child_path):
                 # logger.info("    -- unmounting directory {}".format(child_path))
                 if os.system("sudo umount {}".format(child_path)) != 0:
                     logger.fatal("Could not umount directory {}!".format(child_path))
