@@ -69,7 +69,6 @@ class TestConcurrency(TestCase):
         # Actual file size should be +/- 1% of the target
         self.assertAlmostEqual(os.path.getsize(input_file.name) / target_size, 1.0, 2)
 
-        # Run three times and get the best time (what we do it in execute_problem.py)
         times = [1e100] * num_runs
         # Run the same thing several times as quickly as possible to see if there is any significant increase
         pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
@@ -86,7 +85,7 @@ class TestConcurrency(TestCase):
         print("TIME: {:.3f}s vs {:.3f}s".format(min(times), max(times)))
         self.assertLessEqual(max(times), max(min(times) + 0.1, min(times) * 1.1))
 
-        # Then do the same without running it several times to verify it performs badly
+        # Then do the same without limiting the executions to verify it performs badly otherwise
         with mock.patch("config.CONCURRENT_IO_LIMIT", 2**30):
             # Run three times and get the best time (what we do it in execute_problem.py)
             times = [1e100] * num_runs
