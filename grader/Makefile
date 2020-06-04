@@ -18,5 +18,6 @@ start run:
 	sudo python3 server.py
 
 test:
-	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/test_concurrency.py
+	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/test_evaluator.py
+#	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/test_concurrency.py
 #	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/

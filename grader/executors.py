@@ -82,7 +82,7 @@ class Executors:
     @staticmethod
     def _disable_network_access(username):
         if os.system("iptables -A OUTPUT -p all -m owner --uid-owner {} -j DROP".format(username)):
-            logger.warn("Cannot disable network access for user '{}'!".format(username))
+            logger.warning("Cannot disable network access for user '{}'!".format(username))
 
 #     @staticmethod
 #     def _setup_cgroups(user_name):

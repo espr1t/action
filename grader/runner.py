@@ -75,10 +75,27 @@ class RunConfig:
 class Runner:
     # Redirect the run_command's stderr to /dev/null, but keep the output from /time/time (which is also stderr)
     # Send a SIGKILL signal after {timeout} seconds to get the program killed
+    # http://man7.org/linux/man-pages/man1/time.1.html
+    # --format argument '%x' prints "Exit status of the command."
+    # --format argument '%U' prints "Elapsed CPU seconds in User mode"
+    # --format argument '%S' prints "Total number of CPU-seconds that the process spent in kernel mode."
+    # --format argument '%e' prints "Elapsed real (clock) time in seconds"
+    # --format argument '%M' prints "Maximum resident set size (kbytes)"
+    # COMMAND_WRAPPER = \
+    #     "{time_cmd} /bin/bash -c \"{perf_cmd} {timeout_cmd} /bin/bash -c \\\"{{command}}\\\" 2>/dev/null\" ; >&2 echo $?".format(
+    #         time_cmd="/usr/bin/time --quiet --format='%U %S %e %M'",
+    #         perf_cmd="perf stat -e cycles,instructions,cache-references,cache-misses",
+    #         timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout:.3f}s"
+    #     )
     COMMAND_WRAPPER = \
-        "/time/time \"{timeout_cmd} /bin/bash -c \\\"({{command}}) 2>/dev/null\\\"\"".format(
-            timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout}s"
+        "{time_cmd} /bin/bash -c \"{timeout_cmd} /bin/bash -c \\\"{{command}}\\\" 2>/dev/null\" ; >&2 echo $?".format(
+            time_cmd="/usr/bin/time --quiet --format='%U %S %e %M'",
+            timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout:.3f}s"
         )
+    # COMMAND_WRAPPER = \
+    #     "/time/time \"{timeout_cmd} /bin/bash -c \\\"({{command}}) 2>/dev/null\\\"\"".format(
+    #         timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout}s"
+    #     )
 
     @staticmethod
     def parse_exec_info(info: str, timeout: float):
@@ -94,6 +111,13 @@ class Runner:
             > 0 -- unshared data size (bytes)
             > 0 -- unshared stack size (bytes)
             > 0 -- number of swaps
+            > 327 -- soft page faults
+            > 0 -- hard page faults
+            > 0 -- number of input blocks
+            > 0 -- number of output blocks
+            > 0 -- number of messages sent
+            > 0 -- number of messages received
+            > 0 -- number of signals
             > 521 -- voluntary context switches
             > 0 -- involuntary context switches
         :param info: A string containing the stderr output from running the above command
@@ -101,36 +125,54 @@ class Runner:
         :return: A tuple (exit_code, exec_time, exec_memory) or None
         """
 
-        # print("Parsing output:\n{}".format(info))
+        print("{sep}\n                 Parsing output\n{sep}\n{info}".format(sep="="*50, info=info))
 
         info_lines = info.splitlines()
-        # First sanity check: there are enough output lines
-        if len(info_lines) < 18:
-            logger.error("Expected at least 18 lines of output, got {}".format(len(info_lines)))
-            return None
-        # Second sanity check: the first of these 18 lines looks the way we expect
-        if "-- exit code" not in info_lines[-18]:
-            logger.error("Output didn't pass sanity check:\n{}".format("\n".join(info_lines[-18:])))
-            return None
-        info_values = [line.split()[0] for line in info_lines[-18:]]
 
+        if len(info_lines) < 2:
+            logger.error("Expected info_lines to contain at least two lines; got {}".format(len(info_lines)))
+            return None
+
+        # Fix exit code (it is offset by 128 by /usr/bin/timeout command)
         try:
-            exit_code = int(info_values[0])
+            exit_code = int(info_lines[-1]) % 128
+
             # Exec time is user time + sys time
-            exec_time = round(float(info_values[1]) + float(info_values[2]), 3)
-            clock_time = round(float(info_values[3]), 3)
-            exec_memory = int(info_values[4])
-        except ValueError:
+            tokens = info_lines[-2].strip().split()
+            exec_time = float(tokens[0]) + float(tokens[1])
+            clock_time = float(tokens[2])
+            exec_memory = int(tokens[3]) * 1024
+        except (ValueError, IndexError):
             logger.error("Could not parse exec info from string: {}".format("|".join(info_lines[-2:])))
             return None
+
+        # # First sanity check: there are enough output lines
+        # if len(info_lines) < 18:
+        #     logger.error("Expected at least 18 lines of output, got {}".format(len(info_lines)))
+        #     return None
+        # # Second sanity check: the first of these 18 lines looks the way we expect
+        # if "-- exit code" not in info_lines[-18]:
+        #     logger.error("Output didn't pass sanity check:\n{}".format("\n".join(info_lines[-18:])))
+        #     return None
+        # info_values = [line.split()[0] for line in info_lines[-18:]]
+        #
+        # try:
+        #     exit_code = int(info_values[0])
+        #     # Exec time is user time + sys time
+        #     exec_time = round(float(info_values[1]) + float(info_values[2]), 3)
+        #     clock_time = round(float(info_values[3]), 3)
+        #     exec_memory = int(info_values[4])
+        # except ValueError:
+        #     logger.error("Could not parse exec info from string: {}".format("|".join(info_lines[-2:])))
+        #     return None
 
         # If the program was killed, but the user+sys time is small, use clock time instead
         # This can happen if the program sleeps, for example, or blocks on a resource it never gets
         if exit_code == SIGKILL and exec_time < timeout:
             exec_time = clock_time
 
-        if abs(exec_time - clock_time) > 0.1 * clock_time:
-            logger.warning("Returned execution time differs from clock time by more than 10% ({:.3f}s vs. {:.3f}s)"
+        if clock_time > 0.5 and abs(exec_time - clock_time) > 0.2 * clock_time:
+            logger.warning("Returned execution time differs from clock time by more than 20% ({:.3f}s vs. {:.3f}s)"
                            .format(exec_time, clock_time))
 
         # Return the exit code, execution time and execution memory as a tuple

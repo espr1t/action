@@ -1,0 +1,94 @@
+{
+    "id": 21553,
+    "source": "Fake source",
+    "language": "Unknown",
+    "tester": "",
+    "checker": "RulerChecker",
+    "floats": false,
+    "problemType": "ioi",
+    "timeLimit": 0.3,
+    "memoryLimit": 64,
+    "tests": [
+        {
+            "position": 0,
+            "inpFile": "Ruler.00.in",
+            "inpHash": "8bf1569c67ae09bffec145f2ab96e637",
+            "solFile": "Ruler.00.sol",
+            "solHash": "6d7792fe947de1962f798c5a9e294f4d"
+        },
+        {
+            "position": 1,
+            "inpFile": "Ruler.01.in",
+            "inpHash": "66b86ab0232f8377c518f27ef9ae4be8",
+            "solFile": "Ruler.01.sol",
+            "solHash": "b87a92b265bc51d120d99855f4b1ace5"
+        },
+        {
+            "position": 2,
+            "inpFile": "Ruler.02.in",
+            "inpHash": "a0b6c3e24f6f2433b030951bc488f759",
+            "solFile": "Ruler.02.sol",
+            "solHash": "650176d20cbd77097b554cbccb974834"
+        },
+        {
+            "position": 3,
+            "inpFile": "Ruler.03.in",
+            "inpHash": "a2c767c4610cdaebcb167470ce70dd6f",
+            "solFile": "Ruler.03.sol",
+            "solHash": "56ee4710b58558709e6830975a01ea42"
+        },
+        {
+            "position": 4,
+            "inpFile": "Ruler.04.in",
+            "inpHash": "714dfe7f469037958b8c2cbac6cdb940",
+            "solFile": "Ruler.04.sol",
+            "solHash": "8a7d129f3182527740d5cc2844b01764"
+        },
+        {
+            "position": 5,
+            "inpFile": "Ruler.05.in",
+            "inpHash": "ce13adf30412a015b8910065683bc826",
+            "solFile": "Ruler.05.sol",
+            "solHash": "94a379eab652abc478a6780f5a296d52"
+        },
+        {
+            "position": 6,
+            "inpFile": "Ruler.06.in",
+            "inpHash": "22920780aa0dc077f82aa8f865f39910",
+            "solFile": "Ruler.06.sol",
+            "solHash": "24f77e94f4472b2f78b6758533667c0e"
+        },
+        {
+            "position": 7,
+            "inpFile": "Ruler.07.in",
+            "inpHash": "22920780aa0dc077f82aa8f865f39910",
+            "solFile": "Ruler.07.sol",
+            "solHash": "24f77e94f4472b2f78b6758533667c0e"
+        },
+        {
+            "position": 8,
+            "inpFile": "Ruler.08.in",
+            "inpHash": "f55e1abe701c1bcd7f4dbdea0ad2f31b",
+            "solFile": "Ruler.08.sol",
+            "solHash": "be788881303646a594f1768603f5969d"
+        },
+        {
+            "position": 9,
+            "inpFile": "Ruler.09.in",
+            "inpHash": "f55e1abe701c1bcd7f4dbdea0ad2f31b",
+            "solFile": "Ruler.09.sol",
+            "solHash": "be788881303646a594f1768603f5969d"
+        },
+        {
+            "position": 10,
+            "inpFile": "Ruler.10.in",
+            "inpHash": "f55e1abe701c1bcd7f4dbdea0ad2f31b",
+            "solFile": "Ruler.10.sol",
+            "solHash": "be788881303646a594f1768603f5969d"
+        }
+    ],
+    "testsEndpoint": "http://192.168.1.123/data/problems/Shumen.2018.A.Ruler/Tests/",
+    "updateEndpoint": "http://192.168.1.123/actions/update",
+    "testerEndpoint": "http://192.168.1.123/data/problems/Shumen.2018.A.Ruler/Tests/Tester/",
+    "checkerEndpoint": "http://192.168.1.123/data/problems/Shumen.2018.A.Ruler/Tests/Checker/RulerChecker.cpp"
+}

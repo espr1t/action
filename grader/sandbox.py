@@ -13,13 +13,11 @@ import common
 import config
 import shutil
 import subprocess
-from time import sleep, perf_counter
+from time import sleep
 from sys import platform
 from executors import Executors
 from threading import Lock
 
-last_time = perf_counter()
-init_time = perf_counter()
 logger = common.get_logger(__file__)
 
 # Only available on UNIX, so trick Windows into thinking these are valid.
@@ -97,15 +95,10 @@ class Sandbox:
         # Delete and re-create the worker's /home directory
         # The users should not have write access to any other directory,
         # thus those directories should not be modified by previous runs.
-        logger.info("Cleaning sandbox '{}'...".format(self._path))
         shutil.rmtree(self._path)
         os.mkdir(self._path, 0o755)
 
     def _set_restrictions(self, privileged):
-        # Move the process in the user's working directory and chroot its parent
-        os.chdir(self._path)
-        os.chroot(os.path.join(self._path, os.path.pardir))
-
         # Limit the solution to 2GB of memory
         setrlimit(RLIMIT_AS, (config.MAX_EXECUTION_MEMORY, config.MAX_EXECUTION_MEMORY))
         setrlimit(RLIMIT_DATA, (config.MAX_EXECUTION_MEMORY, config.MAX_EXECUTION_MEMORY))
@@ -157,8 +150,21 @@ class Sandbox:
             # os.system("chrt --rr --all-tasks --verbose --pid {} {}".format(config.PROCESS_PRIORITY_REAL, os.getpid()))
             os.sched_setscheduler(0, os.SCHED_RR, os.sched_param(config.PROCESS_PRIORITY_REAL))
 
+        # Set the quantum interval of the process
+        # (every how many milliseconds the process is being preempted)
+        os.system("sysctl -q kernel.sched_rr_timeslice_ms={}".format(int(config.PROCESS_QUANTUM_INTERVAL * 1000)))
+        # Set the amount of CPU a real-time process can use in a second
+        # (default is 95%, change this to 99%)
+        os.system("sysctl -q kernel.sched_rt_runtime_us=990000")
+
+        print("QUANTUM: {}".format(os.sched_rr_get_interval(0)))
+
         # Limit the process and its children to use a concrete CPU core
         os.system("taskset -p -c {} {} > /dev/null".format(self._executor.cpu, os.getpid()))
+
+        # Move the process in the user's working directory and chroot its parent
+        os.chdir(self._path)
+        os.chroot(os.path.join(self._path, os.path.pardir))
 
         if not privileged:
             # Set the user to a more unprivileged one (executorXX)
@@ -202,11 +208,12 @@ class Sandbox:
             return byte_stream.read()
 
     def is_running(self):
-        return self._process is not None and self._process.poll() is None
+        # Check that at least one processes started by the executor user is running
+        # (Please note that the first line of output is table column names, thus check for > 1)
+        return len(os.popen("ps -U {}".format(self._executor.name)).read().strip().splitlines()) > 1
 
     def wait(self, timeout=None):
-        start_time = perf_counter()
-        if self.is_running():
+        if self._process is not None and self._process.poll() is None:
             try:
                 self._process.wait(timeout)
             except subprocess.TimeoutExpired:
@@ -220,9 +227,8 @@ class Sandbox:
             # As a fail-safe also invoke killall
             os.system("killall -signal SIGKILL --user {}".format(self._executor.name))
             # Wait until all children are actually killed
-            while len(os.popen("ps -U {}".format(self._executor.name)).read().strip().splitlines()) > 1:
+            while self.is_running():
                 sleep(0.01)
-        print("wait() took {:.3f}s".format(perf_counter() - start_time))
 
     def execute(self, command, stdin_fd, stdout_fd, stderr_fd, blocking=True, privileged=False):
         if self._process is not None:
@@ -231,11 +237,6 @@ class Sandbox:
 
         # Run the command in a new process, limiting its resource usage
         # print("Executing command: {}".format(command))
-        if self._executor.cpu == 0:
-            global init_time, last_time
-            curr_time = perf_counter()
-            print("Starting process at time {:.3f} (difference from last {:.3f}s)".format(curr_time - init_time, curr_time - last_time))
-            last_time = curr_time
         self._process = subprocess.Popen(
             args=command,
             shell=True,

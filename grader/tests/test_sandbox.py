@@ -64,12 +64,12 @@ class TestSandbox(TestCase):
         pass
 
     @staticmethod
-    def sandbox_helper(sandbox, command, privileged=False):
+    def sandbox_helper(sandbox: Sandbox, command, privileged=False):
         stdout, stderr = TemporaryFile("wb+"), TemporaryFile("wb+")
         sandbox.execute(command=command, stdin_fd=None, stdout_fd=stdout, stderr_fd=stderr, privileged=privileged)
 
-        stdout.seek(0); stdout_text = stdout.read().decode().strip()
-        stderr.seek(0); stderr_text = stderr.read().decode().strip()
+        stdout.flush(); stdout.seek(0); stdout_text = stdout.read().decode().strip(); stdout.close()
+        stderr.flush(); stderr.seek(0); stderr_text = stderr.read().decode().strip(); stderr.close()
 
         # If running java or javac or jar the JVM prints an annoying message:
         # "Picked up JAVA_TOOL_OPTIONS: <actual options set by sandbox environment>
@@ -210,6 +210,10 @@ class TestSandbox(TestCase):
     # ================================= #
     #        User and process info      #
     # ================================= #
+    def test_priority_in_boundaries(self):
+        self.assertGreaterEqual(config.PROCESS_PRIORITY_REAL, os.sched_get_priority_min(os.SCHED_RR))
+        self.assertLessEqual(config.PROCESS_PRIORITY_REAL, os.sched_get_priority_max(os.SCHED_RR))
+
     def test_cannot_run_commands_with_sudo(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="sudo ls -la")
         self.assertNotEqual("", stderr)

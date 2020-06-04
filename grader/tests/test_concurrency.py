@@ -6,17 +6,17 @@ requirement on CPU / Hard Disk / Memory
 
 import shutil
 import os
+from time import perf_counter
 from unittest import TestCase, mock
 from concurrent.futures import ThreadPoolExecutor
 from resource import *
+from tempfile import NamedTemporaryFile
 
 import config
 import initializer
-from time import perf_counter
 from runner import Runner
 from sandbox import Sandbox
 from compiler import Compiler
-from tempfile import NamedTemporaryFile
 
 
 class TestConcurrency(TestCase):

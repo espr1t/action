@@ -34,14 +34,15 @@ FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 MAX_COMPILATION_TIME = 10.0  # Seconds
 
 # Checker
-CHECKER_TIMEOUT = 10.0  # Seconds
+CHECKER_TIMEOUT = 5.0  # Seconds
 
 # Priority
-PROCESS_PRIORITY_NICE = -20  # Limits [-20, 19], -20 is highest
-PROCESS_PRIORITY_REAL = +50  # Limits [0, 99], 99 is highest
+PROCESS_PRIORITY_NICE = -20  # In [-20, 19], -20 is highest
+PROCESS_PRIORITY_REAL = +50  # In [  1, 99], +99 is highest
+PROCESS_QUANTUM_INTERVAL = 0.05  # Seconds
 
 # Execution limits
-NUM_REPEATED_RUNS = 3
+NUM_REPEATED_RUNS = 1
 MAX_OPEN_FILES = 32
 MAX_PROCESSES = 256
 MAX_EXECUTION_TIME = 300  # Seconds = 5 minutes
@@ -59,9 +60,9 @@ TIME_OFFSET_JAVA = 0.05  # Seconds
 TIME_OFFSET_PYTHON = 0.0  # Seconds
 
 # Memory used by non-user code
-MEMORY_OFFSET_CPP = 2 * 2**20  # Bytes = 2MB
-MEMORY_OFFSET_JAVA = 40 * 2**20  # Bytes = 40MB
-MEMORY_OFFSET_PYTHON = 9 * 2**20  # Bytes = 9MB
+MEMORY_OFFSET_CPP = 2 * (1 << 20)  # Bytes = 2MB
+MEMORY_OFFSET_JAVA = 40 * (1 << 20)  # Bytes = 40MB
+MEMORY_OFFSET_PYTHON = 9 * (1 << 20)  # Bytes = 9MB
 
 # Output Validation
 FLOAT_PRECISION = 1e-9

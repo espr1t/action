@@ -305,8 +305,7 @@ class Evaluator:
                 test_futures.append([test, future])
                 result_id += 1
 
-            for test_future in test_futures:
-                test, future = test_future
+            for test, future in test_futures:
                 try:
                     future.result()  # Wait for the test to be executed
                 except Exception as ex:
@@ -325,14 +324,9 @@ class Evaluator:
                 return False
 
         if self.path_tester_executable is not None and self.problem_type != "interactive":
-            errors = self.process_game()
+            return self.process_game()
         else:
-            errors = self.process_problem()
-
-        if errors != "":
-            logger.error("Submit {id} | Error(s) while processing: {errors}".format(id=self.id, errors=errors))
-            return False
-        return True
+            return self.process_problem()
 
     def cleanup(self):
         # Clean up remaining files

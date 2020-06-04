@@ -4,77 +4,93 @@ NOTE: Some of the tests in this file are heavily dependent on execution time
       and may give false positives or negatives if ran on different hardware.
 """
 
-"""
 import shutil
 import os
-import warnings
 from unittest import TestCase, mock
+from concurrent.futures import ThreadPoolExecutor
+from time import perf_counter
+from tempfile import NamedTemporaryFile
 
 import config
 from common import TestStatus
 from compiler import Compiler
 from execute_problem import execute_problem
-import runner
-from sandbox import Sandbox
+from runner import RunConfig
 import initializer
-from tests.helper import get_evaluator
 
 
 class TestExecuteProblem(TestCase):
-    PATH_FIXTURES = os.path.abspath("tests/fixtures/runner/")
+    PATH_FIXTURES = os.path.abspath("tests/fixtures/execute_problem/")
 
     # Do it this way instead of using a class decorator since otherwise the patching
     # is not active in the setUp() / tearDown() methods -- and we need it there as well
-    patch_tests = mock.patch("config.PATH_TESTS", os.path.abspath("tests/test_data/"))
     patch_sandbox = mock.patch("config.PATH_SANDBOX", os.path.abspath("tests/test_sandbox/"))
-    patch_add_info = mock.patch("updater.Updater.add_info")
 
     @classmethod
     def setUpClass(cls):
         initializer.init()
 
-        cls.patch_tests.start()
         cls.patch_sandbox.start()
-        cls.patch_add_info.start()
-
-        # TODO: Do we need this?
-        # warnings.simplefilter("ignore", ResourceWarning)
-
         if not os.path.exists(config.PATH_SANDBOX):
             os.makedirs(config.PATH_SANDBOX)
-        if not os.path.exists(config.PATH_TESTS):
-            os.makedirs(config.PATH_TESTS)
-
-        # First, we need to create an Evaluator object
-        cls.evaluator_cpp = get_evaluator(os.path.join(cls.PATH_FIXTURES, "tests_runner_cpp.json"))
-        cls.evaluator_java = get_evaluator(os.path.join(cls.PATH_FIXTURES, "tests_runner_java.json"))
-        cls.evaluator_python = get_evaluator(os.path.join(cls.PATH_FIXTURES, "tests_runner_python.json"))
-
-        # Then create the submit file storage dir (same for all evaluators)
-        cls.evaluator_cpp.create_sandbox_dir()
-
-        # Then we need to compile the sources
-        Compiler.compile(config.LANGUAGE_CPP, os.path.join(cls.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.cpp"),
-                         cls.evaluator_cpp.path_executable)
-        Compiler.compile(config.LANGUAGE_JAVA, os.path.join(cls.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.java"),
-                         cls.evaluator_java.path_executable)
-        Compiler.compile(config.LANGUAGE_PYTHON, os.path.join(cls.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.py"),
-                         cls.evaluator_python.path_executable)
-
-        # Then we need to copy the tests to the test_data folder
-        for test in cls.evaluator_cpp.tests:
-            shutil.copy(os.path.join(cls.PATH_FIXTURES, "ThreeSum/Tests", test.inpFile), test.inpPath)
-            shutil.copy(os.path.join(cls.PATH_FIXTURES, "ThreeSum/Tests", test.solFile), test.solPath)
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(config.PATH_SANDBOX)
-        shutil.rmtree(config.PATH_TESTS)
-
-        cls.patch_tests.stop()
         cls.patch_sandbox.stop()
-        cls.patch_add_info.stop()
 
+    @classmethod
+    def get_run_config(cls, evaluator):
+        return RunConfig(
+            time_limit=evaluator.time_limit,
+            memory_limit=evaluator.memory_limit,
+            executable_path=evaluator.path_executable,
+            checker_path=evaluator.path_checker_executable,
+            tester_path=evaluator.path_tester_executable,
+            compare_floats=evaluator.floats
+        )
+
+    """
+    def test_successful_execution_cpp(self, add_info):
+        input_file = NamedTemporaryFile(mode="w+b", delete=False)
+        input_file.write(b"133742")
+        input_file.flush()
+        expected_output = 42
+
+        start_time = perf_counter()
+
+        call_args = []
+        add_info.side_effect = lambda result: call_args.append(result)
+
+        evaluator = self.evaluator_cpp
+        run_config = self.get_run_config(evaluator)
+
+        test_futures = []
+        result_id = 0
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
+        for test in evaluator.tests:
+            future = pool.submit(execute_problem, evaluator.updater, evaluator.id, result_id, test, run_config)
+            test_futures.append((test, future))
+            result_id += 1
+
+        for test, future in test_futures:
+            try:
+                future.result()  # Wait for the test to be executed
+            except Exception as ex:
+                self.fail("Got an exception: '{}'.".format(ex))
+        total_time = perf_counter() - start_time
+        print("Total time: {:.3f}s".format(total_time))
+        print(call_args)
+        self.assertTrue(total_time < evaluator.time_limit * len(evaluator.tests) / config.MAX_PARALLEL_EXECUTORS)
+        self.assertEqual(add_info.call_count, len(evaluator.tests) * 2)
+    """
+
+
+    """
+    def test_full_run_errors(self, add_info):
+    """
+
+    """
     # We'll use a dummy task for testing various run statuses. The task is the following:
     # Given a number N, return the sum of products of all distinct triplets of numbers in [1, N] modulo 1000000007.
 
@@ -168,4 +184,4 @@ class TestExecuteProblem(TestCase):
         result = Runner(self.evaluator_java).run_problem(-1, self.evaluator_java.tests[15])
         self.assertIs(result.status, TestStatus.ACCEPTED)
         self.assertEqual(result.error_message, "")
-"""
+    """

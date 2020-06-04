@@ -40,13 +40,21 @@ def execute_problem(updater, submit_id, result_id, test: TestInfo, run_config: R
 
     # Run the solution and record its exit code, execution time and memory, and output
     try:
+        if run_config.tester_path is None:
+            run_result = execute_standard(submit_id, test, run_config)
+        else:
+            run_result = execute_interactive(submit_id, test, run_config)
+
+        """
         test_function = execute_standard if run_config.tester_path is None else execute_interactive
         run_result = test_function(submit_id, test, run_config)
+
         # Perform several additional runs to get the best execution time
         for _ in range(config.NUM_REPEATED_RUNS - 1):
             cur_result = test_function(submit_id, test, run_config)
             if run_result.exit_code != 0 or (cur_result.exit_code == 0 and cur_result.exec_time < run_result.exec_time):
                 run_result = cur_result
+        """
 
         # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
         validator_result = Validator.determine_status(submit_id, test, run_config, run_result)
@@ -67,7 +75,7 @@ def execute_problem(updater, submit_id, result_id, test: TestInfo, run_config: R
         "id": result_id,
         "position": test.position,
         "status": run_result.status.name,
-        "exec_time": run_result.exec_time,
+        "exec_time": round(run_result.exec_time, 2),  # Round to 0.01 seconds
         "exec_memory": round(run_result.exec_memory / 1048576.0, 2),  # Convert back to megabytes
         "score": run_result.score,
         "info": run_result.info,
