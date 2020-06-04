@@ -220,9 +220,10 @@ class Sandbox:
                 pass
         # Force kill all left-over processes (children, grandchildren, etc.)
         with self._lock:
-            if self.is_running():
-                self._process.kill()
-            del self._process
+            if self._process is not None:
+                if self.is_running():
+                    self._process.kill()
+                del self._process
             self._process = None
             # As a fail-safe also invoke killall
             os.system("killall -signal SIGKILL --user {}".format(self._executor.name))
