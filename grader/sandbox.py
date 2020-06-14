@@ -157,8 +157,6 @@ class Sandbox:
         # (default is 95%, change this to 99%)
         os.system("sysctl -q kernel.sched_rt_runtime_us=990000")
 
-        print("QUANTUM: {}".format(os.sched_rr_get_interval(0)))
-
         # Limit the process and its children to use a concrete CPU core
         os.system("taskset -p -c {} {} > /dev/null".format(self._executor.cpu, os.getpid()))
 

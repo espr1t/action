@@ -59,7 +59,7 @@ class TestConcurrency(TestCase):
 
         # Write many integers into a (big) file
         input_file = NamedTemporaryFile(mode="w+b", delete=False)
-        num_runs = 100
+        num_runs = 50
         target_size = 50000000  # 50MB
         number_list = [999999999 - i for i in range(target_size // 10)]
         expected_output = sum(number_list)
@@ -113,7 +113,7 @@ class TestConcurrency(TestCase):
         status = Compiler.compile(config.LANGUAGE_CPP, path_source, path_executable)
         self.assertEqual(status, "")
 
-        num_runs = 100
+        num_runs = 50
         input_file = NamedTemporaryFile(mode="w+b", delete=False)
         input_file.write(b"100000000")
         input_file.flush()
@@ -179,7 +179,7 @@ class TestConcurrency(TestCase):
 
         num_runs = 20
         input_file = NamedTemporaryFile(mode="w+b", delete=False)
-        input_file.write(b"3")
+        input_file.write(b"2")
         input_file.flush()
 
         # Run the same thing over and over again as quickly as possible to see if there is any inconsistency
@@ -189,8 +189,8 @@ class TestConcurrency(TestCase):
         for i in range(len(futures)):
             run_result = futures[i].result()
             self.assertEqual(run_result.exit_code, 0)
-            self.assertEqual(int(run_result.output.decode().strip()), 1888986968)
-            times[i] = min(times[i], run_result.exec_time)
+            self.assertEqual(int(run_result.output.decode().strip()), 772983032)
+            times[i] = round(min(times[i], run_result.exec_time), 2)
         print(times)
 
         input_file.close()

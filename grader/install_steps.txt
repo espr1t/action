@@ -5,24 +5,26 @@ Installation steps:
     >> sudo apt upgrade
     >> sudo apt full-upgrade
 1. Install Python
-1.1. Install lateste version of Python and make it the default
+1.1. Install latest version of Python and make it the default
     >> sudo add-apt-repository ppa:deadsnakes/ppa
     >> sudo apt update
     >> apt list | grep python3.8
-    >> sudo apt install python3.8
-    >> sudo apt install python3.8-dev
+    >> sudo apt install python3.8 python3.8-dev
 1.2. Change default python3 version to be the newest one
     >> sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
     >> sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
     >> sudo update-alternatives --config python3
-1.2.1. Check if the previous step didn't break apt:
-    >> apt list | grep python3.8
-1.2.2. If above command fails, do the following, then try again:
-    >> sudo apt-get install python-apt
-1.3. Install PIP
+1.3. Install Python's package manager PIP
+1.3.1. Run:
     >> sudo apt install python3-pip
     >> pip3 install --upgrade pip
+1.3.2. If above command fails, then we have broken apt tool by changing the python. Do the following and rerun:
+    >> cd /usr/lib/python3/dist-packages
+    >> sudo ln -s apt_pkg.cpython-{36m,38m}-x86_64-linux-gnu.so apt_pkg.so
 2. Install latest version of GCC/G++
+2.1. Check which version of G++ is currently installed (if any)
+    >> g++ --version
+3.2. If not installed (or too old), install a newer one
     >> sudo apt install g++
 3. Install latest version of Java
 3.1. Check which version of Java is currently installed (if any)
@@ -34,9 +36,10 @@ Installation steps:
     >> sudo update-alternatives --config javac
     >> sudo update-alternatives --config jar
 4. Clone the project
+    >> sudo apt install git
     >> cd <path_to_where_you_want_it>
     >> git clone https://github.com/espr1t/action.git
-5. Install the project's requirements (from the project's base directory, e.g. /home/grader/action)
+5. Install the project's requirements (from the project's base directory, e.g. ~/action/grader)
     >> make install
 6. (Optional) Set the port on which the web server will run (default is 5000)
     open action/grader/server.py and change port='5000' to port='<whatever_you_want>'.

@@ -1,5 +1,6 @@
 import os
 import psutil
+import shutil
 from queue import Queue
 from threading import Lock
 from dataclasses import dataclass, field
@@ -109,43 +110,47 @@ class Executors:
 #                 out.write("{} memory {}\n".format(user_name, cg_name))
 
     @staticmethod
-    def _umount_and_delete_recursive(path):
+    def _umount_and_delete_recursive(path, base_dir=False):
         for child in os.listdir(path):
+            if base_dir and (child == "home" or child == "time"):
+                continue
             child_path = os.path.join(path, child)
 
             # Un-mount it if it is one of the mounted directories
             if common.is_mount(child_path):
                 # logger.info("    -- unmounting directory {}".format(child_path))
-                if os.system("sudo umount {}".format(child_path)) != 0:
+                if os.system("sudo umount --recursive {}".format(child_path)) != 0:
                     logger.fatal("Could not umount directory {}!".format(child_path))
                     exit(-1)
 
             # Now it should be a simple file or directory. Delete it recursively.
-            if os.path.isfile(child_path):
-                # logger.info("    -- deleting file {}".format(child_path))
-                os.remove(child_path)
-            elif os.path.isdir(child_path):
-                Executors._umount_and_delete_recursive(child_path)
-                if len(os.listdir(child_path)) == 0:
-                    # logger.info("    -- deleting directory {}".format(child_path))
+            if os.path.isdir(child_path):
+                Executors._umount_and_delete_recursive(child_path, False)
+                try:
                     os.rmdir(child_path)
-                else:
+                except OSError:
                     logger.warning("    -- skipping '{}' (directory not empty)".format(child_path))
             else:
                 logger.warning("    -- skipping '{}' (neither a file nor a directory)".format(child_path))
 
     @staticmethod
     def _clean_executor_dir(executor_path):
-        # Delete the sandbox/executorXX/ directory recursively unmounting paths where needed
-        # logger.info("    -- cleaning directory structure...")
-        Executors._umount_and_delete_recursive(executor_path)
+        """
+        Delete the sandbox/executorXX/ directory recursively unmounting paths where needed
+        """
+        # Unmount and remove mounted directories
+        Executors._umount_and_delete_recursive(path=executor_path, base_dir=True)
+
+        # Delete recursively custom directories
+        shutil.rmtree(os.path.join(executor_path, "home"))
+        shutil.rmtree(os.path.join(executor_path, "time"))
 
         # Finally remove the entire executor directory (should be empty now)
         # This can be done in the recursion above, but we want an extra check that the cleanup succeeded.
-        if len(os.listdir(executor_path)) == 0:
+        try:
             # logger.info("    -- deleting base directory...")
             os.rmdir(executor_path)
-        else:
+        except OSError:
             logger.error("Executor directory '{}' not empty after cleanup!".format(executor_path))
 
     @staticmethod
@@ -176,8 +181,11 @@ class Executors:
             mount_destination = os.path.join(executor_path, mount_dir)
             if not os.path.exists(mount_destination):
                 os.makedirs(mount_destination, 0o755)
-            if os.system("sudo mount --bind {} {}".format(mount_source, mount_destination)) != 0:
+            if os.system("sudo mount --rbind {} {}".format(mount_source, mount_destination)) != 0:
                 logger.fatal("Could not mount '{}'!".format(mount_source))
+                exit(-1)
+            if os.system("sudo mount --make-rslave {}".format(mount_destination)) != 0:
+                logger.fatal("Could not mount as rslave '{}'!".format(mount_source))
                 exit(-1)
 
         # Create  a /home directory in which all user files are copied to

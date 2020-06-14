@@ -24,8 +24,8 @@ int main(void) {
     fillArray();
     fprintf(stderr, "Filled array in %.3lfs.\n", (double)(clock() - sTime) / CLOCKS_PER_SEC);
 
-    int numIters = 3;
-    // fscanf(stdin, "%d", &numIters);
+    int numIters;
+    fscanf(stdin, "%d", &numIters);
     for (int iter = 0; iter < numIters; iter++) {
         // Allocate new 100MB of memory with values from the matrix which can benefit
         // from cache locality

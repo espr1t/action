@@ -125,7 +125,7 @@ class Runner:
         :return: A tuple (exit_code, exec_time, exec_memory) or None
         """
 
-        print("{sep}\n                 Parsing output\n{sep}\n{info}".format(sep="="*50, info=info))
+        # print("{sep}\n                 Parsing output\n{sep}\n{info}".format(sep="="*50, info=info))
 
         info_lines = info.splitlines()
 

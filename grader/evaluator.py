@@ -179,7 +179,11 @@ class Evaluator:
 
     def compile(self, language, path_source, path_executable):
         try:
-            return Compiler.compile(language, path_source, path_executable)
+            compile_status = Compiler.compile(language, path_source, path_executable)
+            if compile_status != "":
+                logger.error("Submit {id} | Could not compile file {file_path}! Compilation status: {status}".format(
+                        id=self.id, file_path=path_source, status=compile_status))
+            return compile_status
         except Exception as ex:
             # If a non-compiler error occurred, log the message in addition to sending it to the user
             logger.error("Submit {id} | Could not compile file {file_path}! Exception was: {ex}".format(
