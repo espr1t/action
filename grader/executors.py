@@ -185,17 +185,6 @@ class Executors:
         logger.info("  >> creating home directory...")
         os.mkdir(os.path.join(executor_path, "home"), 0o755)
 
-        # Put custom time binary into a /time directory
-        logger.info("  >> creating time directory...")
-        os.mkdir(os.path.join(executor_path, "time"), 0o755)
-        os.system("gcc -O2 -o {target_file} {source_file}".format(
-            target_file=os.path.join(executor_path, "time/time"),
-            source_file=os.path.abspath("time/time.c")
-        ))
-        if not os.path.exists(os.path.abspath("time/time.c")):
-            logger.fatal("Could not compile system timer (time/time.c)!")
-            exit(-1)
-
     @staticmethod
     def _setup_executors():
         with Executors._lock:

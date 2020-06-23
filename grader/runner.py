@@ -7,7 +7,6 @@ import config
 import common
 from common import TestStatus
 from sandbox import Sandbox
-from executors import Executors
 
 
 logger = common.get_logger(__file__)
@@ -92,10 +91,6 @@ class Runner:
             time_cmd="/usr/bin/time --quiet --format='%U %S %e %M'",
             timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout:.3f}s"
         )
-    # COMMAND_WRAPPER = \
-    #     "/time/time \"{timeout_cmd} /bin/bash -c \\\"({{command}}) 2>/dev/null\\\"\"".format(
-    #         timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout}s"
-    #     )
 
     @staticmethod
     def parse_exec_info(info: str, timeout: float):
