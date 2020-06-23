@@ -41,14 +41,6 @@ class Executors:
         Executors._clean_executors()
 
     @staticmethod
-    def lock():
-        Executors._lock.acquire()
-
-    @staticmethod
-    def unlock():
-        Executors._lock.release()
-
-    @staticmethod
     def get() -> Executor:
         # Initialize executors if not done already
         Executors.init()

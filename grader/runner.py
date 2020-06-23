@@ -234,13 +234,6 @@ class Runner:
 
     @staticmethod
     def run(sandbox: Sandbox, command, input_bytes=None, privileged=False) -> (bytes, bytes):
-        # For tasks with large inputs concurrent read/write seems to be a problem.
-        # To solve this, prevent other executors to be created (using a lock) until we
-        # are done with the test (effectively blocking parallel executions temporarily)
-        should_lock = input_bytes is not None and len(input_bytes) > config.CONCURRENT_IO_LIMIT
-        if should_lock:
-            Executors.lock()
-
         # Make the input and output go through pipes as they don't require hard drive I/O
         stdin = Runner.get_pipe(max_size=0 if input_bytes is None else len(input_bytes))
         stdout = Runner.get_pipe(max_size=config.MAX_EXECUTION_OUTPUT)
@@ -271,9 +264,6 @@ class Runner:
         os.close(stderr[1])
         with open(stderr[0], "rb") as err:
             stderr_bytes = err.read()
-
-        if should_lock:
-            Executors.unlock()
 
         # If running java or javac or jar the JVM prints an annoying message:
         # "Picked up JAVA_TOOL_OPTIONS: <actual options set by sandbox environment>
