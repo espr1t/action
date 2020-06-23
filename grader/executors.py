@@ -104,7 +104,7 @@ class Executors:
     @staticmethod
     def _umount_and_delete_recursive(path, base_dir=False):
         for child in os.listdir(path):
-            if base_dir and (child == "home" or child == "time"):
+            if base_dir and child == "home":
                 continue
             child_path = os.path.join(path, child)
 
@@ -123,7 +123,7 @@ class Executors:
                 except OSError:
                     logger.warning("    -- skipping '{}' (directory not empty)".format(child_path))
             else:
-                logger.warning("    -- skipping '{}' (neither a file nor a directory)".format(child_path))
+                logger.warning("    -- skipping '{}' (not a directory)".format(child_path))
 
     @staticmethod
     def _clean_executor_dir(executor_path):
@@ -134,8 +134,8 @@ class Executors:
         Executors._umount_and_delete_recursive(path=executor_path, base_dir=True)
 
         # Delete recursively custom directories
-        shutil.rmtree(os.path.join(executor_path, "home"))
-        shutil.rmtree(os.path.join(executor_path, "time"))
+        if os.path.exists(os.path.join(executor_path, "home")):
+            shutil.rmtree(os.path.join(executor_path, "home"))
 
         # Finally remove the entire executor directory (should be empty now)
         # This can be done in the recursion above, but we want an extra check that the cleanup succeeded.
