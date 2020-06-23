@@ -16,7 +16,7 @@ def set_rdt(path, cpu, mem, llc):
     os.system("echo 'L3:0={llc}' | sudo tee {path}/schemata".format(llc=format(llc, 'x'), path=path))
 
 
-def set_limits():
+def set_rdt_limits():
     # Mount the Intel RDT Linux control filesystem
     if not os.path.ismount("/sys/fs/resctrl"):
         print("Mounting resctrl filesystem...")
@@ -25,16 +25,16 @@ def set_limits():
         print("Filesystem resctrl already mounted.")
 
     # Calculate and set the default values (for COS0)
-    cache_bits = NUM_CACHE_WAYS // NUM_CPUS
-    cache_mask = (1 << cache_bits) - 1
-    print("Using {}/{} LLC ways...".format(cache_bits, NUM_CACHE_WAYS))
+    cache_ways = NUM_CACHE_WAYS // NUM_CPUS
+    cache_mask = (1 << cache_ways) - 1
+    print("Using {}/{} LLC ways...".format(cache_ways, NUM_CACHE_WAYS))
 
     print("Starting configuration...")
     for i in range(NUM_CPUS):
         set_rdt("/sys/fs/resctrl/COS{}".format(i + 1), i, 10, cache_mask)
-        cache_mask <<= cache_bits
+        cache_mask <<= cache_ways
     print("Done!")
 
 
 if __name__ == "__main__":
-    set_limits()
+    set_rdt_limits()
