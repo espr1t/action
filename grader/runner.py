@@ -75,7 +75,6 @@ class Runner:
     # Redirect the run_command's stderr to /dev/null, but keep the output from /time/time (which is also stderr)
     # Send a SIGKILL signal after {timeout} seconds to get the program killed
     # http://man7.org/linux/man-pages/man1/time.1.html
-    # --format argument '%x' prints "Exit status of the command."
     # --format argument '%U' prints "Elapsed CPU seconds in User mode"
     # --format argument '%S' prints "Total number of CPU-seconds that the process spent in kernel mode."
     # --format argument '%e' prints "Elapsed real (clock) time in seconds"
@@ -95,31 +94,11 @@ class Runner:
     @staticmethod
     def parse_exec_info(info: str, timeout: float):
         """
-        Parses the output of custom time command (/time/time) for exit_code, used time and memory
-        Command output has the following format:
-            > 0 -- exit code
-            > 0.021 -- user time (seconds)
-            > 0.016 -- sys time (seconds)
-            > 0.091 -- clock time (seconds)
-            > 26640384 -- max resident set size (bytes)
-            > 0 -- shared resident set size (bytes)
-            > 0 -- unshared data size (bytes)
-            > 0 -- unshared stack size (bytes)
-            > 0 -- number of swaps
-            > 327 -- soft page faults
-            > 0 -- hard page faults
-            > 0 -- number of input blocks
-            > 0 -- number of output blocks
-            > 0 -- number of messages sent
-            > 0 -- number of messages received
-            > 0 -- number of signals
-            > 521 -- voluntary context switches
-            > 0 -- involuntary context switches
+        Parses the output of /usr/bin/time and the exit code.
         :param info: A string containing the stderr output from running the above command
         :param timeout: A float, the timeout used in the above command
         :return: A tuple (exit_code, exec_time, exec_memory) or None
         """
-
         # print("{sep}\n                 Parsing output\n{sep}\n{info}".format(sep="="*50, info=info))
 
         info_lines = info.splitlines()
@@ -140,26 +119,6 @@ class Runner:
         except (ValueError, IndexError):
             logger.error("Could not parse exec info from string: {}".format("|".join(info_lines[-2:])))
             return None
-
-        # # First sanity check: there are enough output lines
-        # if len(info_lines) < 18:
-        #     logger.error("Expected at least 18 lines of output, got {}".format(len(info_lines)))
-        #     return None
-        # # Second sanity check: the first of these 18 lines looks the way we expect
-        # if "-- exit code" not in info_lines[-18]:
-        #     logger.error("Output didn't pass sanity check:\n{}".format("\n".join(info_lines[-18:])))
-        #     return None
-        # info_values = [line.split()[0] for line in info_lines[-18:]]
-        #
-        # try:
-        #     exit_code = int(info_values[0])
-        #     # Exec time is user time + sys time
-        #     exec_time = round(float(info_values[1]) + float(info_values[2]), 3)
-        #     clock_time = round(float(info_values[3]), 3)
-        #     exec_memory = int(info_values[4])
-        # except ValueError:
-        #     logger.error("Could not parse exec info from string: {}".format("|".join(info_lines[-2:])))
-        #     return None
 
         # If the program was killed, but the user+sys time is small, use clock time instead
         # This can happen if the program sleeps, for example, or blocks on a resource it never gets
