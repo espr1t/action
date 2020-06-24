@@ -42,7 +42,6 @@ PROCESS_PRIORITY_REAL = +50  # In [  1, 99], +99 is highest
 PROCESS_QUANTUM_INTERVAL = 0.05  # Seconds
 
 # Execution limits
-NUM_REPEATED_RUNS = 1
 MAX_OPEN_FILES = 32
 MAX_PROCESSES = 256
 MAX_EXECUTION_TIME = 300  # Seconds = 5 minutes

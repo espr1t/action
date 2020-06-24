@@ -45,17 +45,6 @@ def execute_problem(updater, submit_id, result_id, test: TestInfo, run_config: R
         else:
             run_result = execute_interactive(submit_id, test, run_config)
 
-        """
-        test_function = execute_standard if run_config.tester_path is None else execute_interactive
-        run_result = test_function(submit_id, test, run_config)
-
-        # Perform several additional runs to get the best execution time
-        for _ in range(config.NUM_REPEATED_RUNS - 1):
-            cur_result = test_function(submit_id, test, run_config)
-            if run_result.exit_code != 0 or (cur_result.exit_code == 0 and cur_result.exec_time < run_result.exec_time):
-                run_result = cur_result
-        """
-
         # Determine the proper execution status (OK, WA, TL, ML, RE) and score for this test
         validator_result = Validator.determine_status(submit_id, test, run_config, run_result)
         run_result.status, run_result.score, run_result.info, run_result.error =\
