@@ -148,7 +148,7 @@ class TestEvaluator(TestCase):
                 max_time = max(max_time, res["exec_time"])
                 max_memory = max(max_memory, res["exec_memory"])
 
-        time_upper_bound = evaluator.time_limit + max(0.2, evaluator.time_limit * 0.2) + config.PROCESS_QUANTUM_INTERVAL
+        time_upper_bound = evaluator.time_limit + max(0.2, evaluator.time_limit * 0.2)
         self.assertGreaterEqual(max_time, time_lb)
         self.assertLessEqual(max_time, time_upper_bound)
         self.assertGreater(max_memory, memory_lb)  # Returned memory is converted back to megabytes

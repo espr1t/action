@@ -22,7 +22,8 @@ AUTH_PASSWORD = "password"
 # process requests and do other miscellaneous work in the meantime.
 
 # Parallelism
-MAX_PARALLEL_EXECUTORS = 3
+NUM_PHYSICAL_CPUS = 2
+MAX_PARALLEL_EXECUTORS = 8
 MAX_PARALLEL_SUBMITS = MAX_PARALLEL_EXECUTORS
 MAX_PARALLEL_JOBS = MAX_PARALLEL_EXECUTORS * 2
 
@@ -39,7 +40,6 @@ CHECKER_TIMEOUT = 5.0  # Seconds
 # Priority
 PROCESS_PRIORITY_NICE = -20  # In [-20, 19], -20 is highest
 PROCESS_PRIORITY_REAL = +50  # In [  1, 99], +99 is highest
-PROCESS_QUANTUM_INTERVAL = 0.05  # Seconds
 
 # Execution limits
 MAX_OPEN_FILES = 32

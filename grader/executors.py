@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 
 import config
 import common
+import limiter
 
 logger = common.get_logger(__file__)
 
@@ -77,30 +78,6 @@ class Executors:
         if os.system("iptables -A OUTPUT -p all -m owner --uid-owner {} -j DROP".format(username)):
             logger.warning("Cannot disable network access for user '{}'!".format(username))
 
-#     @staticmethod
-#     def _setup_cgroups(user_name):
-#         # Set up the cgroups rule itself
-#         cg_name = "actionexecutor"
-#         cg_rule = """
-# group {cg_name} {{
-#     cpu {{
-#         cpu.cfs_quota_us = 100000;
-#     }}
-#     memory {{
-#         memory.limit_in_bytes = 2147483648;
-#     }}
-# }}  """.format(cg_name=cg_name, max_memory=config.MAX_EXECUTION_MEMORY).strip()
-#         cgconfig = "/etc/cgconfig.conf"
-#         if not os.path.exists(cgconfig) or cg_name not in open(cgconfig, "r").read():
-#             with open(cgconfig, "at") as out:
-#                 out.write(cg_rule)
-#
-#         # Set the cgrule to be applied for the user
-#         cgrules = "/etc/cgrules.conf"
-#         if not os.path.exists(cgrules) or user_name not in open(cgrules, "r").read():
-#             with open(cgrules, "at") as out:
-#                 out.write("{} memory {}\n".format(user_name, cg_name))
-
     @staticmethod
     def _umount_and_delete_recursive(path, base_dir=False):
         for child in os.listdir(path):
@@ -168,7 +145,7 @@ class Executors:
         # Prepare the directory for chroot-ing by mounting vital system directories
         logger.info("  >> mounting system paths...")
 
-        for mount_dir in ["bin", "lib", "lib64", "usr", "dev", "sys", "proc", "etc/alternatives"]:
+        for mount_dir in ["bin", "lib", "lib64", "usr", "dev", "sys", "proc", "etc"]:
             mount_source = "/{}".format(mount_dir)
             mount_destination = os.path.join(executor_path, mount_dir)
             if not os.path.exists(mount_destination):
@@ -194,12 +171,16 @@ class Executors:
 
             # Check if MAX_PARALLEL_EXECUTORS is set properly
             if config.MAX_PARALLEL_EXECUTORS > psutil.cpu_count(logical=True):
-                logger.fatal("MAX_PARALLEL_EXECUTORS set to {} when number of CPU cores is {}.".format(
+                logger.fatal("MAX_PARALLEL_EXECUTORS set to {}, but max CPU threads are {}.".format(
                     config.MAX_PARALLEL_EXECUTORS, psutil.cpu_count(logical=True)))
                 exit(0)
             if config.MAX_PARALLEL_EXECUTORS > psutil.cpu_count(logical=False):
-                logger.warning("MAX_PARALLEL_EXECUTORS set to {} when physical CPU cores are {}.".format(
+                logger.warning("MAX_PARALLEL_EXECUTORS set to {}, but physical CPU cores are {}.".format(
                     config.MAX_PARALLEL_EXECUTORS, psutil.cpu_count(logical=False)))
+
+            # Limit the single core memory bandwidth and L3 cache access (new Intel Xeon processors only)
+            # If this prints any errors, see the info on top of limiter.py or comment the line below
+            limiter.set_rdt_limits()
 
             # Create the user and sandbox (chroot) directory for each executor
             for i in range(config.MAX_PARALLEL_EXECUTORS):
@@ -236,9 +217,11 @@ class Executors:
             if Executors._have_been_queued:
                 return
 
-            # In order to avoid executors set on the same physical CPU (due to hyper-threading),
-            # first assign CPU affinity to even ids, then odd ones
-            affinity = list(range(0, psutil.cpu_count(), 2)) + list(range(1, psutil.cpu_count(), 2))
+            # In order to avoid executors set on the same physical core (due to hyper-threading)
+            # and to distribute them better on different physical CPUs (in systems with more than one),
+            # set the affinity of each executor appropriately
+            # NOTE: This is currently determined manually based on `lscpu` output (NUMA nodeX CPU(s))
+            affinity = list(range(0, psutil.cpu_count()))
 
             # Create a queue which allows at most MAX_PARALLEL_EXECUTORS executors
             Executors._available = Queue(maxsize=config.MAX_PARALLEL_EXECUTORS)

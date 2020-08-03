@@ -210,6 +210,7 @@ class Evaluator:
             network.download_file(download_url, destination)
         except RuntimeError:
             return False
+        return True
 
     def setup_utility_file(self, path_source, path_executable, download_url):
         if not self.download_utility_file(download_url, path_source):

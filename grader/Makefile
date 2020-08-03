@@ -8,10 +8,8 @@ clean:
 	sudo rm -rf __pycache__
 	sudo rm -rf tests/__pycache__
 
-install-requirements:
-	pip3 install .
-
-install: clean install-requirements
+install:
+	pip3 install --target=/usr/local/lib/python3.8/dist-packages .
 
 init:
 	sudo python3 initializer.py init
@@ -20,5 +18,6 @@ start run:
 	sudo python3 server.py
 
 test:
-	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/test_compiler.py
+	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/test_concurrency.py
+#	sudo env RUNNING_TESTS=true python3 -m pytest -rA --full-trace tests/test_evaluator.py
 #	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/

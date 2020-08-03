@@ -138,6 +138,7 @@ class Sandbox:
 
         # Leave at standard scheduler for the moment
         # (managing time and memory is more complex with realtime priority processes)
+        """
         # Limit realtime priority to 50 (out of 99)
         setrlimit(RLIMIT_RTPRIO, (config.PROCESS_PRIORITY_REAL, config.PROCESS_PRIORITY_REAL))
 
@@ -150,12 +151,10 @@ class Sandbox:
             # os.system("chrt --rr --all-tasks --verbose --pid {} {}".format(config.PROCESS_PRIORITY_REAL, os.getpid()))
             os.sched_setscheduler(0, os.SCHED_RR, os.sched_param(config.PROCESS_PRIORITY_REAL))
 
-        # Set the quantum interval of the process
-        # (every how many milliseconds the process is being preempted)
-        os.system("sysctl -q kernel.sched_rr_timeslice_ms={}".format(int(config.PROCESS_QUANTUM_INTERVAL * 1000)))
         # Set the amount of CPU a real-time process can use in a second
         # (default is 95%, change this to 99%)
         os.system("sysctl -q kernel.sched_rt_runtime_us=990000")
+        """
 
         # Limit the process and its children to use a concrete CPU core
         os.system("taskset -p -c {} {} > /dev/null".format(self._executor.cpu, os.getpid()))

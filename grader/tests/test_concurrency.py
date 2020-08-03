@@ -8,7 +8,6 @@ import shutil
 import os
 from unittest import TestCase, mock
 from concurrent.futures import ThreadPoolExecutor
-from resource import *
 from tempfile import NamedTemporaryFile
 
 import config
@@ -68,7 +67,7 @@ class TestConcurrency(TestCase):
             run_result = futures[i].result()
             self.assertEqual(run_result.exit_code, 0)
             self.assertEqual(int(run_result.output.decode().strip()), 50001661776328125)
-            times[i] = min(times[i], run_result.exec_time)
+            times[i] = round(run_result.exec_time, 2)
         input_file.close()
 
         print(times)
@@ -97,7 +96,7 @@ class TestConcurrency(TestCase):
             run_result = futures[i].result()
             self.assertEqual(run_result.exit_code, 0)
             self.assertEqual(int(run_result.output.decode().strip()), 250010718184821892)
-            times[i] = min(times[i], run_result.exec_time)
+            times[i] = round(run_result.exec_time, 2)
         input_file.close()
 
         print(times)
@@ -120,7 +119,7 @@ class TestConcurrency(TestCase):
         # Write many integers into a (big) file
         input_file = NamedTemporaryFile(mode="w+b", delete=False)
         num_runs = self.get_num_runs(20)
-        target_size = 50000000  # 50MB
+        target_size = 100000000  # 100MB
         number_list = [999999999 - i for i in range(target_size // 10)]
         expected_output = sum(number_list)
 
@@ -137,7 +136,7 @@ class TestConcurrency(TestCase):
             run_result = futures[i].result()
             self.assertEqual(run_result.exit_code, 0)
             self.assertEqual(int(run_result.output.decode().strip()), expected_output)
-            times[i] = min(times[i], run_result.exec_time)
+            times[i] = round(run_result.exec_time, 2)
         input_file.close()
 
         print(times)
@@ -166,7 +165,7 @@ class TestConcurrency(TestCase):
             run_result = futures[i].result()
             self.assertEqual(run_result.exit_code, 0)
             self.assertEqual(int(run_result.output.decode().strip()), 772983032)
-            times[i] = round(min(times[i], run_result.exec_time), 2)
+            times[i] = round(run_result.exec_time, 2)
         input_file.close()
 
         print(times)
