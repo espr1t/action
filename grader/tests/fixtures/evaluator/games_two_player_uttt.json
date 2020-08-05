@@ -1,0 +1,32 @@
+{
+    "id": 666,
+    "source": "Source replaced in tests.",
+    "language": "C++",
+    "matches": [
+        {
+            "player_one_id": 1,
+            "player_one_name": "espr1t",
+            "player_two_id": 42,
+            "player_two_name": "0pp0n3n7",
+            "language": "Unknown",
+            "source": "Source of opponent."
+        }
+    ],
+    "tester": "87cfbaad7102df95cb77bfc41cfe6da2",
+    "floats": false,
+    "problemType": "game",
+    "timeLimit": 0.5,
+    "memoryLimit": 128,
+    "tests": [
+        {
+            "position": "0",
+            "inpFile": "UltimateTTT.00.in",
+            "inpHash": "76b0b413e3e75e023bcbae242817d499",
+            "solFile": "UltimateTTT.00.sol",
+            "solHash": "76aa08d7a87129ec3f4e12124e94b148"
+        }
+    ],
+    "testsEndpoint": "",
+    "testerEndpoint": "",
+    "updateEndpoint": "http://192.168.1.123/actions/update"
+}

@@ -1,15 +1,14 @@
 import os
 from dataclasses import dataclass, field
-from signal import SIGKILL
 import fcntl
 
 import config
-import common
-from common import TestStatus
+from common import get_logger, TestStatus
 from sandbox import Sandbox
+from wrapper import COMMAND_WRAPPER, parse_exec_info
 
 
-logger = common.get_logger(__file__)
+logger = get_logger(__file__)
 
 
 @dataclass
@@ -39,99 +38,7 @@ class RunConfig:
         self.timeout = self.time_limit + max(0.2, self.time_limit * 0.2)
 
 
-"""
-class RunConfig:
-    def __init__(self, time_limit, memory_limit, executable_path,
-                 tester_path=None, checker_path=None, compare_floats=False):
-        self.time_limit = time_limit
-        self.memory_limit = memory_limit
-        self.executable_path = executable_path
-        self.tester_path = tester_path
-        self.checker_path = checker_path
-        self.compare_floats = compare_floats
-
-        # self.executable_name = os.path.basename(self.executable_path)
-        # self.executable_language = Runner.get_language_by_exec_name(self.executable_name)
-        #
-        # if self.tester_path is not None:
-        #     self.tester_name = os.path.basename(self.tester_path)
-        #     self.tester_language = Runner.get_language_by_exec_name(self.tester_path)
-        #
-        # if self.checker_path is not None:
-        #     self.checker_name = os.path.basename(self.checker_path)
-        #     self.checker_language = Runner.get_language_by_exec_name(self.checker_path)
-        #
-        # # Determine actual time and memory limits
-        # # (this accounts for JVM startup time and memory overhead)
-        # self.time_offset = Runner.get_time_offset(self.executable_language)
-        # self.memory_offset = Runner.get_memory_offset(self.executable_language)
-
-        # Terminate after TL + 0.2s or TL + 20% (whichever larger)
-        self.timeout = self.time_limit + max(0.2, self.time_limit * 0.2)
-"""
-
-
 class Runner:
-    # Redirect the run_command's stderr to /dev/null, but keep the output from /time/time (which is also stderr)
-    # Send a SIGKILL signal after {timeout} seconds to get the program killed
-    # http://man7.org/linux/man-pages/man1/time.1.html
-    # --format argument '%U' prints "Elapsed CPU seconds in User mode"
-    # --format argument '%S' prints "Total number of CPU-seconds that the process spent in kernel mode."
-    # --format argument '%e' prints "Elapsed real (clock) time in seconds"
-    # --format argument '%M' prints "Maximum resident set size (kbytes)"
-    # COMMAND_WRAPPER = \
-    #     "{time_cmd} /bin/bash -c \"{perf_cmd} {timeout_cmd} /bin/bash -c \\\"{{command}}\\\" 2>/dev/null\" ; >&2 echo $?".format(
-    #         time_cmd="/usr/bin/time --quiet --format='%U %S %e %M'",
-    #         perf_cmd="perf stat -e cycles,instructions,cache-references,cache-misses",
-    #         timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout:.3f}s"
-    #     )
-    COMMAND_WRAPPER = \
-        "{time_cmd} /bin/bash -c \"{timeout_cmd} /bin/bash -c \\\"{{command}}\\\" 2>/dev/null\" ; >&2 echo $?".format(
-            time_cmd="/usr/bin/time --quiet --format='%U %S %e %M'",
-            timeout_cmd="/usr/bin/timeout --preserve-status --signal=SIGKILL {timeout:.3f}s"
-        )
-
-    @staticmethod
-    def parse_exec_info(info: str, timeout: float):
-        """
-        Parses the output of /usr/bin/time and the exit code.
-        :param info: A string containing the stderr output from running the above command
-        :param timeout: A float, the timeout used in the above command
-        :return: A tuple (exit_code, exec_time, exec_memory) or None
-        """
-        # print("{sep}\n                 Parsing output\n{sep}\n{info}".format(sep="="*50, info=info))
-
-        info_lines = info.splitlines()
-
-        if len(info_lines) < 2:
-            logger.error("Expected info_lines to contain at least two lines; got {}".format(len(info_lines)))
-            return None
-
-        # Fix exit code (it is offset by 128 by /usr/bin/timeout command)
-        try:
-            exit_code = int(info_lines[-1]) % 128
-
-            # Exec time is user time + sys time
-            tokens = info_lines[-2].strip().split()
-            exec_time = float(tokens[0]) + float(tokens[1])
-            clock_time = float(tokens[2])
-            exec_memory = int(tokens[3]) * 1024
-        except (ValueError, IndexError):
-            logger.error("Could not parse exec info from string: {}".format("|".join(info_lines[-2:])))
-            return None
-
-        # If the program was killed, but the user+sys time is small, use clock time instead
-        # This can happen if the program sleeps, for example, or blocks on a resource it never gets
-        if exit_code == SIGKILL and exec_time < timeout:
-            exec_time = clock_time
-
-        if clock_time > 0.5 and abs(exec_time - clock_time) > 0.2 * clock_time:
-            logger.warning("Returned execution time differs from clock time by more than 20% ({:.3f}s vs. {:.3f}s)"
-                           .format(exec_time, clock_time))
-
-        # Return the exit code, execution time and execution memory as a tuple
-        return exit_code, exec_time, exec_memory
-
     @staticmethod
     def get_language_by_exec_name(executable_name):
         if executable_name.endswith(config.EXECUTABLE_EXTENSION_CPP):
@@ -236,7 +143,7 @@ class Runner:
     def run_command(sandbox: Sandbox, command, timeout,
                     input_bytes=None, print_stderr=False, privileged=False) -> RunResult:
         # Wrap the command in a timing and time limiting functions
-        command = Runner.COMMAND_WRAPPER.format(command=command, timeout=timeout)
+        command = COMMAND_WRAPPER.format(command=command, timeout=timeout)
 
         # Instead of ignoring it, merge the stderr to stdout if requested
         if print_stderr:
@@ -247,7 +154,7 @@ class Runner:
             sandbox=sandbox, command=command, input_bytes=input_bytes, privileged=privileged
         )
         info = stderr_bytes.decode(encoding=config.OUTPUT_ENCODING).strip()
-        exit_code, exec_time, exec_memory = Runner.parse_exec_info(info=info, timeout=timeout)
+        exit_code, exec_time, exec_memory = parse_exec_info(info=info, timeout=timeout, logger=logger)
         return RunResult(exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=stdout_bytes)
 
     @staticmethod

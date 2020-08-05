@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < N; i++) {
         int num;
         if (fscanf(out, "%d", &num) != 1) {
+            fprintf(stdout, "WA\n");
             fprintf(stdout, "0\n");
             fprintf(stdout, "Could not read N integers from contestant's output!\n");
             return 0;
@@ -63,12 +64,14 @@ int main(int argc, char** argv) {
     sort(contestant.begin(), contestant.end());
     
     if (contestant.front() != 0) {
+            fprintf(stdout, "WA\n");
             fprintf(stdout, "0\n");
             fprintf(stdout, "Contestant's output does not begin with a zero!\n");
             return 0;
     }
 
     if (contestant.back() != author.back()) {
+            fprintf(stdout, "WA\n");
             fprintf(stdout, "0\n");
             fprintf(stdout, "Contestant's ruler length is different than expected!\n");
             return 0;
@@ -76,6 +79,7 @@ int main(int argc, char** argv) {
     
     for (int i = 1; i < (int)contestant.size(); i++) {
         if (contestant[i] == contestant[i - 1]) {
+            fprintf(stdout, "WA\n");
             fprintf(stdout, "0\n");
             fprintf(stdout, "Contestant's output contains duplicate elements!\n");
             return 0;
@@ -86,6 +90,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < (int)contestant.size(); i++) {
         for (int c = i + 1; c < (int)contestant.size(); c++) {
             if (seen.find(contestant[c] - contestant[i]) != seen.end()) {
+                fprintf(stdout, "WA\n");
                 fprintf(stdout, "0\n");
                 fprintf(stdout, "Contestant's output contains duplicate distance between elements!\n");
                 return 0;
@@ -94,7 +99,7 @@ int main(int argc, char** argv) {
         }
     }
     
-    fprintf(stdout, "1.0\n");
     fprintf(stdout, "OK\n");
+    fprintf(stdout, "1.0\n");
     return 0;
 }

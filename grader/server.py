@@ -38,7 +38,6 @@ def available():
 def evaluate():
     """ Used for grading a submission. """
     data = json.loads(flask.request.form["data"])
-    print(json.dumps(data, indent=4))
     try:
         # Sleep for a very short while so werkzeug can print its log BEFORE we start printing from here
         sleep(0.01)

@@ -7,7 +7,6 @@ import vcr
 import logging
 import json
 from unittest import TestCase, mock
-from time import perf_counter
 
 import config
 from common import TestStatus
@@ -21,25 +20,35 @@ class TestEvaluator(TestCase):
 
     # Do it this way instead of using a class decorator since otherwise the patching
     # is not active in the setUp() / tearDown() methods -- and we need it there as well
-    patch_tests = mock.patch("config.PATH_TESTS", os.path.abspath("tests/test_data/"))
-    patch_sandbox = mock.patch("config.PATH_SANDBOX", os.path.abspath("tests/test_sandbox/"))
+    patch_sandbox = mock.patch("config.PATH_SANDBOX", os.path.abspath("tests/fake_sandbox/"))
+    patch_tests = mock.patch("config.PATH_TESTS", os.path.abspath("tests/fake_tests/"))
+    patch_testers = mock.patch("config.PATH_TESTERS", os.path.abspath("tests/fake_testers/"))
+    patch_checkers = mock.patch("config.PATH_CHECKERS", os.path.abspath("tests/fake_checkers/"))
+    patch_replays = mock.patch("config.PATH_REPLAYS", os.path.abspath("tests/fake_replays/"))
 
     @classmethod
     def setUpClass(cls):
         initializer.init()
         logging.getLogger("vcr").setLevel(logging.FATAL)
 
+        # Start mocks and create fake directories
         cls.patch_sandbox.start()
-        if not os.path.exists(config.PATH_SANDBOX):
-            os.makedirs(config.PATH_SANDBOX)
+        os.makedirs(config.PATH_SANDBOX, exist_ok=True)
         cls.patch_tests.start()
-        if not os.path.exists(config.PATH_TESTS):
-            os.makedirs(config.PATH_TESTS)
+        os.makedirs(config.PATH_TESTS, exist_ok=True)
+        cls.patch_testers.start()
+        os.makedirs(config.PATH_TESTERS, exist_ok=True)
+        cls.patch_checkers.start()
+        os.makedirs(config.PATH_CHECKERS, exist_ok=True)
+        cls.patch_replays.start()
+        os.makedirs(config.PATH_REPLAYS, exist_ok=True)
 
         tasks = [
-            ("tests_runner_three.json", "ThreeSum"),
-            ("tests_runner_sheep.json", "Sheep"),
-            ("tests_runner_ruler.json", "Ruler"),
+            ("problems_standard_three.json", "ThreeSum"),
+            ("problems_standard_sheep.json", "Sheep"),
+            ("problems_checker_ruler.json", "Ruler"),
+            ("games_two_player_uttt.json", "UTTT"),
+            ("games_interactive_ng.json", "NG")
         ]
 
         # Create an Evaluator objects for each task and copy its tests in the test_data folder
@@ -55,6 +64,12 @@ class TestEvaluator(TestCase):
         cls.patch_sandbox.stop()
         shutil.rmtree(config.PATH_TESTS)
         cls.patch_tests.stop()
+        shutil.rmtree(config.PATH_TESTERS)
+        cls.patch_testers.stop()
+        shutil.rmtree(config.PATH_CHECKERS)
+        cls.patch_checkers.stop()
+        shutil.rmtree(config.PATH_REPLAYS)
+        cls.patch_replays.stop()
 
     @classmethod
     def get_evaluator(cls, data_file, language) -> Evaluator:
@@ -63,6 +78,7 @@ class TestEvaluator(TestCase):
             data["language"] = language
             return Evaluator(data)
 
+    """
     def test_create_sandbox_dir(self):
         evaluator = self.get_evaluator("problem_submit_ok.json", config.LANGUAGE_CPP)
         self.assertFalse(os.path.exists(evaluator.path_sandbox))
@@ -112,8 +128,9 @@ class TestEvaluator(TestCase):
         self.assertFalse(os.path.isfile(evaluator.path_source))
         self.assertFalse(os.path.exists(evaluator.path_sandbox))
 
+    """
     @mock.patch("updater.Updater.add_info")
-    def full_run_helper(self, add_info, evaluator, language, source, time_lb, memory_lb, expected_counts={}):
+    def standard_problem_helper(self, add_info, evaluator, language, source, time_lb, memory_lb, expected_counts={}):
         evaluator.create_sandbox_dir()
 
         compilation_status = Compiler.compile(
@@ -148,10 +165,10 @@ class TestEvaluator(TestCase):
                 max_time = max(max_time, res["exec_time"])
                 max_memory = max(max_memory, res["exec_memory"])
 
-        time_upper_bound = evaluator.time_limit + max(0.2, evaluator.time_limit * 0.2)
+        time_upper_bound = evaluator.time_limit * 3 + max(0.2, evaluator.time_limit * 0.2)
         self.assertGreaterEqual(max_time, time_lb)
         self.assertLessEqual(max_time, time_upper_bound)
-        self.assertGreater(max_memory, memory_lb)  # Returned memory is converted back to megabytes
+        self.assertGreaterEqual(max_memory, memory_lb)
         self.assertLessEqual(max_memory, evaluator.memory_limit)
 
         for key in actual_non_ok.keys():
@@ -163,13 +180,14 @@ class TestEvaluator(TestCase):
             if key not in actual_non_ok:
                 self.fail("Expected status {} but didn't receive it.".format(key))
 
+    """
     ########################################################
     #                      Three Sum                       #
     #                   (sample problem)                   #
     ########################################################
-    def test_full_run_three_sum_cpp(self):
-        evaluator = self.get_evaluator("tests_runner_three.json", config.LANGUAGE_CPP)
-        self.full_run_helper(
+    def test_standard_problem_three_sum_cpp(self):
+        evaluator = self.get_evaluator("problems_standard_three.json", config.LANGUAGE_CPP)
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.cpp"),
@@ -177,9 +195,9 @@ class TestEvaluator(TestCase):
             memory_lb=1.0
         )
 
-    def test_full_run_three_sum_java(self):
-        evaluator = self.get_evaluator("tests_runner_three.json", config.LANGUAGE_JAVA)
-        self.full_run_helper(
+    def test_standard_problem_three_sum_java(self):
+        evaluator = self.get_evaluator("problems_standard_three.json", config.LANGUAGE_JAVA)
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_JAVA,
             source=os.path.join(self.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.java"),
@@ -187,9 +205,9 @@ class TestEvaluator(TestCase):
             memory_lb=0.0
         )
 
-    def test_full_run_three_sum_python(self):
-        evaluator = self.get_evaluator("tests_runner_three.json", config.LANGUAGE_PYTHON)
-        self.full_run_helper(
+    def test_standard_problem_three_sum_python(self):
+        evaluator = self.get_evaluator("problems_standard_three.json", config.LANGUAGE_PYTHON)
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_PYTHON,
             source=os.path.join(self.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.py"),
@@ -197,13 +215,14 @@ class TestEvaluator(TestCase):
             memory_lb=1.0
         )
 
+
     ########################################################
     #                        Sheep                         #
     #             (real problem, many tests)               #
     ########################################################
-    def test_full_run_sheep_cpp(self):
-        evaluator = self.get_evaluator("tests_runner_sheep.json", config.LANGUAGE_CPP)
-        self.full_run_helper(
+    def test_standard_problem_sheep_cpp(self):
+        evaluator = self.get_evaluator("problems_standard_sheep.json", config.LANGUAGE_CPP)
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "Sheep/Solutions/Sheep.cpp"),
@@ -211,9 +230,9 @@ class TestEvaluator(TestCase):
             memory_lb=1.0
         )
 
-    def test_full_run_sheep_java(self):
-        evaluator = self.get_evaluator("tests_runner_sheep.json", config.LANGUAGE_JAVA)
-        self.full_run_helper(
+    def test_standard_problem_sheep_java(self):
+        evaluator = self.get_evaluator("problems_standard_sheep.json", config.LANGUAGE_JAVA)
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_JAVA,
             source=os.path.join(self.PATH_FIXTURES, "Sheep/Solutions/Sheep.java"),
@@ -225,12 +244,12 @@ class TestEvaluator(TestCase):
     #                        Ruler                         #
     #                    (has checker)                     #
     ########################################################
-    def test_full_run_ruler_cpp(self):
-        evaluator = self.get_evaluator("tests_runner_ruler.json", config.LANGUAGE_CPP)
+    def test_task_with_checker(self):
+        evaluator = self.get_evaluator("problems_checker_ruler.json", config.LANGUAGE_CPP)
 
-        # Configure fake paths to source and executable of the checker and compile it
+        # Configure fake paths to the checker and its executable and compile it
         evaluator.path_checker_source = os.path.join(self.PATH_FIXTURES, "Ruler/Checker/RulerChecker.cpp")
-        evaluator.path_checker_executable = os.path.join(config.PATH_TESTS, "RulerChecker.o")
+        evaluator.path_checker_executable = os.path.join(config.PATH_CHECKERS, "RulerChecker.o")
         compilation_status = Compiler.compile(
             language=config.LANGUAGE_CPP,
             path_source=evaluator.path_checker_source,
@@ -239,7 +258,7 @@ class TestEvaluator(TestCase):
         self.assertEqual(compilation_status, "")
 
         # AC
-        self.full_run_helper(
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "Ruler/Solutions/Ruler.cpp"),
@@ -248,7 +267,7 @@ class TestEvaluator(TestCase):
         )
 
         # TL
-        self.full_run_helper(
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "Ruler/Solutions/RulerTL.cpp"),
@@ -258,7 +277,7 @@ class TestEvaluator(TestCase):
         )
 
         # WA
-        self.full_run_helper(
+        self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "Ruler/Solutions/RulerWA.cpp"),
@@ -266,3 +285,86 @@ class TestEvaluator(TestCase):
             memory_lb=0.0,
             expected_counts={"WRONG_ANSWER": 4}
         )
+    """
+
+    ########################################################
+    #                   Number Guessing                    #
+    #                  (interactive game)                  #
+    ########################################################
+    def test_interactive_game(self):
+        evaluator = self.get_evaluator("games_interactive_ng.json", config.LANGUAGE_CPP)
+
+        # Configure fake paths to the tester and its executable and compile it
+        evaluator.path_tester_source = os.path.join(self.PATH_FIXTURES, "NG/Tests/Tester/NumberGuessingTester.cpp")
+        evaluator.path_tester_executable = os.path.join(config.PATH_TESTERS, "NumberGuessingTester.o")
+
+        # Compile the tester
+        compilation_status = Compiler.compile(
+            language=config.LANGUAGE_CPP,
+            path_source=evaluator.path_tester_source,
+            path_executable=evaluator.path_tester_executable
+        )
+        self.assertEqual(compilation_status, "")
+
+        # OK
+        self.standard_problem_helper(
+            evaluator=evaluator,
+            language=config.LANGUAGE_CPP,
+            source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessing.cpp"),
+            time_lb=0.0,
+            memory_lb=0.0
+        )
+
+        # TL
+        self.standard_problem_helper(
+            evaluator=evaluator,
+            language=config.LANGUAGE_CPP,
+            source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessingTL.cpp"),
+            time_lb=0.0,
+            memory_lb=0.0,
+            expected_counts={"TIME_LIMIT": 4}
+        )
+
+        # WA
+        self.standard_problem_helper(
+            evaluator=evaluator,
+            language=config.LANGUAGE_CPP,
+            source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessingWA.cpp"),
+            time_lb=0.0,
+            memory_lb=0.0,
+            expected_counts={"WRONG_ANSWER": 6}
+        )
+
+    """
+    ########################################################
+    #                 Ultimate Tic-Tac-Toe                 #
+    #                   (two-player game)                  #
+    ########################################################
+    def test_two_player_game(self):
+        evaluator = self.get_evaluator("games_two_player_uttt.json", config.LANGUAGE_CPP)
+
+        # Configure fake paths to source and executable of the checker and compile it
+        evaluator.path_tester_source = os.path.join(self.PATH_FIXTURES, "UTTT/Tester/UltimateTTTTester.cpp")
+        evaluator.path_tester_executable = os.path.join(config.PATH_TESTS, "UltimateTTTTester.o")
+        compilation_status = Compiler.compile(
+            language=config.LANGUAGE_CPP,
+            path_source=evaluator.path_tester_source,
+            path_executable=evaluator.path_tester_executable
+        )
+        self.assertEqual(compilation_status, "")
+
+        with open(os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTT.java"), "rt") as inp:
+            opponent_source = inp.read()
+            for match in evaluator.matches:
+                match["source"] = opponent_source
+                match["language"] = config.LANGUAGE_JAVA
+
+        self.standard_problem_helper(
+            evaluator=evaluator,
+            language=config.LANGUAGE_CPP,
+            source=os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTT.cpp"),
+            time_lb=0.0,
+            memory_lb=0.0,
+            expected_counts={}
+        )
+    """

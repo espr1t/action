@@ -2,7 +2,7 @@
     "id": 42,
     "source": "In actual requests source would be here. We use external files for different langauges in tests",
     "language": "Unspecified",
-    "timeLimit": 0.3,
+    "timeLimit": 1.0,
     "memoryLimit": 32,
     "problemType": "acm",
     "floats": false,

@@ -128,75 +128,72 @@ def execute_standard(submit_id, test: TestInfo, run_config: RunConfig) -> RunRes
 
 
 def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> RunResult:
-    # Prepare input data (provided to the tester through stdin, it provides bits of it to the solution)
-    with open(test.inpPath, "rb") as inp:
-        input_bytes = inp.read()
-
+    log_file = "interaction.log"
+    tester_executable = "tester." + run_config.tester_path.split(".")[-1]
+    solution_executable = "solution." + run_config.executable_path.split(".")[-1]
     args = {
-        "timeout": run_config.timeout,
+        "time_limit": run_config.time_limit,
         "tester_run_command": Runner.get_run_command(
-            language=Runner.get_language_by_exec_name(run_config.tester_path),
-            executable=os.path.basename(run_config.tester_path),
-            memory_limit=config.MAX_EXECUTION_MEMORY / 2
+            language=Runner.get_language_by_exec_name(tester_executable),
+            executable=tester_executable,
+            memory_limit=config.MAX_TESTER_MEMORY
         ),
         "solution_run_command": Runner.get_run_command(
-            language=Runner.get_language_by_exec_name(run_config.executable_path),
-            executable=os.path.basename(run_config.executable_path),
+            language=Runner.get_language_by_exec_name(solution_executable),
+            executable=solution_executable,
             memory_limit=run_config.memory_limit
-        )
+        ),
+        "log_file": log_file
     }
 
-    args_file = NamedTemporaryFile(mode="w+t", delete=True)
-    args_file_path = os.path.abspath(args_file.name)
-    args_file.write(json.dumps(args, indent=4, sort_keys=True))
-    args_file.seek(0)
-
-    empty_file = NamedTemporaryFile(mode="w+t", delete=True)
+    empty_file = NamedTemporaryFile(mode="w+t", delete=False)
     empty_file_path = os.path.abspath(empty_file.name)
 
-    # Copy all the needed files to the sandbox directory
-    # This includes:
-    #   1) interaction orchestrator (interactor.py)
-    #   2) interaction orchestrator arguments (json file)
-    #   3) the solution (binary)
-    #   4) the tester (binary)
+    # Copy all the needed files to the sandbox directory:
+    #   1) wrapper.py
+    #   2) the tester executable
+    #   3) the solution executable
+    #   4) the input file (read by the tester)
     #   5) game log (empty file with write permissions)
 
     sandbox = Sandbox()
-    sandbox.put_file(args_file_path, target_name="args.json")
-    sandbox.put_file(run_config.executable_path)
-    sandbox.put_file(run_config.tester_path)
-    sandbox.put_file(empty_file_path, target_name="interaction.log", mode=0o777)
+    sandbox.put_file(os.path.join(config.ROOT_DIR, "wrapper.py"))
+    sandbox.put_file(run_config.tester_path, target_name=tester_executable)
+    sandbox.put_file(run_config.executable_path, target_name=solution_executable)
+    sandbox.put_file(test.inpPath, target_name="input.txt", mode=0o777)
+    sandbox.put_file(empty_file_path, target_name=log_file, mode=0o777)
 
     # Run the executable, while measuring CPU and Memory consumption
     run_result = Runner.run_program(
         sandbox=sandbox,
-        executable_path=os.path.join(config.ROOT_DIR, "interactor.py"),
+        executable_path=os.path.join(config.ROOT_DIR, "interactor_1P.py"),
         memory_limit=config.MAX_EXECUTION_MEMORY,
-        timeout=run_config.timeout * 3,
-        input_bytes=input_bytes
+        timeout=config.MAX_GAME_LENGTH,
+        input_bytes=json.dumps(args, indent=4, sort_keys=True).encode()
     )
-
-    interaction_log = sandbox.read_file("interaction.log")
+    interaction_log = sandbox.read_file(log_file)
     del sandbox
 
-    # The actual interactor.py crashed or got killed
+    # The interactor crashed or got killed
     # Don't check memory limit, as it can be caused by child processes (including solution)
-    if run_result.exec_time > run_config.timeout * 3:
-        message = "Interactor took too much time to complete."
+    if run_result.exec_time >= config.MAX_GAME_LENGTH:
+        message = "Interactor took too much time to complete ({:.3f}s).".format(run_result.exec_time)
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
         return RunResult(status=TestStatus.INTERNAL_ERROR, error=message)
     if run_result.exit_code != 0:
-        message = "Interactor exited with non-zero exit code."
+        message = "Interactor exited with non-zero exit code ({}).".format(run_result.exit_code)
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
         return RunResult(status=TestStatus.INTERNAL_ERROR, error=message)
 
     # Okay, let's assume the interactor was okay. Let's now check if the tester crashed.
     results = json.loads(run_result.output.decode(config.OUTPUT_ENCODING))
-    logger.info("RESULTS:\n{}".format(json.dumps(results, indent=4, sort_keys=True)))
+    # logger.info("RESULTS:\n{}".format(json.dumps(results, indent=4, sort_keys=True)))
+    # print("RESULTS:\n{}".format(json.dumps(results, indent=4, sort_keys=True)))
     if results["internal_error"] or results["tester_exit_code"] != 0:
         message = "Tester crashed or some other internal error happened."
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
+        logger.error("INTERNAL ERROR = {}".format(results["internal_error"]))
+        logger.error("EXIT CODE = {}".format(results["tester_exit_code"]))
         return RunResult(status=TestStatus.INTERNAL_ERROR, error=message)
 
     # Everything with the system seems okay.
@@ -207,7 +204,7 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
     exec_time = max(0, float(results["solution_exec_time"]) - Runner.get_time_offset(solution_language))
     exec_memory = max(0, float(results["solution_exec_memory"]) - Runner.get_memory_offset(solution_language))
     # Get tester's output
-    output = ("" if "tester_message" not in results else results["tester_message"])
+    output = ("" if "tester_message" not in results else results["tester_message"]).encode()
 
     # Put the replay log in the replays folder if everything seems normal
     replay_id = ""

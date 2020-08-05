@@ -1,0 +1,93 @@
+{
+    "id": 1337,
+    "source": "Source replaced in tests.",
+    "language": "Unknown",
+    "tester": "NumberGuessingTester",
+    "checker": "",
+    "floats": false,
+    "problemType": "interactive",
+    "timeLimit": 0.2,
+    "memoryLimit": 64,
+    "tests": [
+        {
+            "position": 0,
+            "inpFile": "NumberGuessing.00.in",
+            "inpHash": "NumberGuessing.00.in.hash",
+            "solFile": "NumberGuessing.00.sol",
+            "solHash": "NumberGuessing.00.sol.hash"
+        },
+        {
+            "position": 1,
+            "inpFile": "NumberGuessing.01.in",
+            "inpHash": "NumberGuessing.01.in.hash",
+            "solFile": "NumberGuessing.01.sol",
+            "solHash": "NumberGuessing.01.sol.hash"
+        },
+        {
+            "position": 2,
+            "inpFile": "NumberGuessing.02.in",
+            "inpHash": "NumberGuessing.02.in.hash",
+            "solFile": "NumberGuessing.02.sol",
+            "solHash": "NumberGuessing.02.sol.hash"
+        },
+        {
+            "position": 3,
+            "inpFile": "NumberGuessing.03.in",
+            "inpHash": "NumberGuessing.03.in.hash",
+            "solFile": "NumberGuessing.03.sol",
+            "solHash": "NumberGuessing.03.sol.hash"
+        },
+        {
+            "position": 4,
+            "inpFile": "NumberGuessing.04.in",
+            "inpHash": "NumberGuessing.04.in.hash",
+            "solFile": "NumberGuessing.04.sol",
+            "solHash": "NumberGuessing.04.sol.hash"
+        },
+        {
+            "position": 5,
+            "inpFile": "NumberGuessing.05.in",
+            "inpHash": "NumberGuessing.05.in.hash",
+            "solFile": "NumberGuessing.05.sol",
+            "solHash": "NumberGuessing.05.sol.hash"
+        },
+        {
+            "position": 6,
+            "inpFile": "NumberGuessing.06.in",
+            "inpHash": "NumberGuessing.06.in.hash",
+            "solFile": "NumberGuessing.06.sol",
+            "solHash": "NumberGuessing.06.sol.hash"
+        },
+        {
+            "position": 7,
+            "inpFile": "NumberGuessing.07.in",
+            "inpHash": "NumberGuessing.07.in.hash",
+            "solFile": "NumberGuessing.07.sol",
+            "solHash": "NumberGuessing.07.sol.hash"
+        },
+        {
+            "position": 8,
+            "inpFile": "NumberGuessing.08.in",
+            "inpHash": "NumberGuessing.08.in.hash",
+            "solFile": "NumberGuessing.08.sol",
+            "solHash": "NumberGuessing.08.sol.hash"
+        },
+        {
+            "position": 9,
+            "inpFile": "NumberGuessing.09.in",
+            "inpHash": "NumberGuessing.09.in.hash",
+            "solFile": "NumberGuessing.09.sol",
+            "solHash": "NumberGuessing.09.sol.hash"
+        },
+        {
+            "position": 10,
+            "inpFile": "NumberGuessing.10.in",
+            "inpHash": "NumberGuessing.10.in.hash",
+            "solFile": "NumberGuessing.10.sol",
+            "solHash": "NumberGuessing.10.sol.hash"
+        }
+    ],
+    "testsEndpoint": "",
+    "testerEndpoint": "",
+    "updateEndpoint": "http://192.168.1.123/actions/update"
+}

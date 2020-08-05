@@ -22,8 +22,8 @@ AUTH_PASSWORD = "password"
 # process requests and do other miscellaneous work in the meantime.
 
 # Parallelism
-NUM_PHYSICAL_CPUS = 2
-MAX_PARALLEL_EXECUTORS = 8
+NUM_PHYSICAL_CPUS = 1
+MAX_PARALLEL_EXECUTORS = 3
 MAX_PARALLEL_SUBMITS = MAX_PARALLEL_EXECUTORS
 MAX_PARALLEL_JOBS = MAX_PARALLEL_EXECUTORS * 2
 
@@ -34,8 +34,10 @@ FILE_DOWNLOAD_CHUNK_SIZE = 1048576  # 1 MB of data
 # Compilation
 MAX_COMPILATION_TIME = 10.0  # Seconds
 
-# Checker
+# Checker and tester
 CHECKER_TIMEOUT = 5.0  # Seconds
+MAX_TESTER_MEMORY = 268435456  # Bytes = 256MB
+MAX_CHECKER_MEMORY = 268435456  # Bytes = 256MB
 
 # Priority
 PROCESS_PRIORITY_NICE = -20  # In [-20, 19], -20 is highest

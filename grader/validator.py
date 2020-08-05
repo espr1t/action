@@ -82,7 +82,7 @@ class Validator:
         return lower_bound <= num1 <= upper_bound
 
     @staticmethod
-    def validate_output_directly(test: TestInfo, output, compare_floats) -> ValidatorResult:
+    def validate_output_directly(test: TestInfo, output: bytes, compare_floats: bool) -> ValidatorResult:
         expected_output_bytes = open(test.solPath, mode="rb").read()
         out_line_iterator = Validator.line_iterator(output.decode(encoding=config.OUTPUT_ENCODING))
         sol_line_iterator = Validator.line_iterator(expected_output_bytes.decode(encoding=config.OUTPUT_ENCODING))
@@ -124,21 +124,40 @@ class Validator:
         return ValidatorResult(status=TestStatus.ACCEPTED, score=1.0)
 
     @staticmethod
-    def validate_output_from_checker_or_tester(submit_id, output: bytes) -> ValidatorResult:
+    def validate_output_from_checker_or_tester(submit_id: int, output: bytes) -> ValidatorResult:
+        # Output should contain 2 or 3 lines:
+        # Line 1: Verdict (e.g., "OK", "WA", "PE", "IE"...)
+        # Line 2: Score (a number in [0.0, 1.0] or a result - any number - for relatively scored problems)
+        # Line 3: Message (which is optional and is provided to the users in the front-end)
+
         output_lines = output.decode(config.OUTPUT_ENCODING).splitlines()
-        if len(output_lines) < 1:
-            message = "Checker or tester's output didn't contain a score!"
+        if len(output_lines) < 2:
+            message = "Checker or tester's output didn't contain verdict or score!"
+            logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
+            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
+
+        verdict = ""
+        verdict = "OK" if output_lines[0].strip().upper().startswith("OK") else verdict
+        verdict = "IE" if output_lines[0].strip().upper().startswith("IE") else verdict
+        verdict = "WA" if output_lines[0].strip().upper().startswith("WA") else verdict
+
+        if verdict == "":
+            message = "Checker or tester's verdict line seems invalid (value = '{}')!".format(output_lines[0].strip())
             logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
 
         try:
-            score = float(output_lines[0].strip())
+            score = float(output_lines[1].strip())
         except ValueError:
-            message = "Checker or tester's score line didn't contain a number (value = '{}')!".format(output_lines[0])
+            message = "Checker or tester's score line didn't contain a number (value = '{}')!".format(output_lines[1])
             logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
 
-        message = "" if len(output_lines) < 2 else "\n".join([line.strip() for line in output_lines[1:]])
-        if message != "" and not message.startswith("OK"):
-            return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)
-        return ValidatorResult(status=TestStatus.ACCEPTED, score=score, info=message)
+        message = "" if len(output_lines) < 3 else "\n".join([line.strip() for line in output_lines[2:]])
+
+        if verdict == "OK":
+            return ValidatorResult(status=TestStatus.ACCEPTED, score=score, info=message)
+        if verdict == "IE":
+            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, info=message)
+        # Anything other is currently treated as wrong answer
+        return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)

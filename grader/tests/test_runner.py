@@ -49,6 +49,7 @@ from time import perf_counter
 from runner import Runner
 from sandbox import Sandbox
 from compiler import Compiler
+from wrapper import COMMAND_WRAPPER, parse_exec_info
 
 
 class TestRunner(TestCase):
@@ -137,19 +138,19 @@ class TestRunner(TestCase):
     # ================================= #
     def test_exec_info_parsing(self):
         # Valid - time is sum of user + sys times
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\n0\n", 0.42), (0, 0.55, 431449088))
+        self.assertEqual(parse_exec_info("0.42 0.13 0.57 421337\n0\n", 0.42), (0, 0.55, 431449088))
         # Valid (killed by SIGKILL, use clock time instead)
-        self.assertEqual(Runner.parse_exec_info("0.01 0.00 0.57 421337\n9\n", 0.5), (9, 0.57, 431449088))
+        self.assertEqual(parse_exec_info("0.01 0.00 0.57 421337\n9\n", 0.5), (9, 0.57, 431449088))
         # Valid (non-zero exit code)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\n11\n", 0.42), (11, 0.55, 431449088))
+        self.assertEqual(parse_exec_info("0.42 0.13 0.57 421337\n11\n", 0.42), (11, 0.55, 431449088))
 
         # Invalid
-        self.assertEqual(Runner.parse_exec_info("", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 421337\n0", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 foo 421337\n0", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\nbar", 0.42), None)
-        self.assertEqual(Runner.parse_exec_info("0.42 0.13 0.57 421337\n0\nbaz", 0.42), None)
+        self.assertEqual(parse_exec_info("", 0.42), None)
+        self.assertEqual(parse_exec_info("0.42 0.13 421337\n0", 0.42), None)
+        self.assertEqual(parse_exec_info("0.42 0.13 0.57 421337", 0.42), None)
+        self.assertEqual(parse_exec_info("0.42 0.13 foo 421337\n0", 0.42), None)
+        self.assertEqual(parse_exec_info("0.42 0.13 0.57 421337\nbar", 0.42), None)
+        self.assertEqual(parse_exec_info("0.42 0.13 0.57 421337\n0\nbaz", 0.42), None)
 
     def test_timing_command_wrapper(self):
         sandbox = Sandbox()
@@ -158,10 +159,10 @@ class TestRunner(TestCase):
         # With enough time the program completes successfully
         command = "python3 handle_sigterm.py"
         stdout_bytes, stderr_bytes = Runner.run(
-            sandbox=sandbox, command=Runner.COMMAND_WRAPPER.format(command=command, timeout=0.4)
+            sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.4)
         )
         self.assertNotEqual(stdout_bytes.decode(), "")
-        exit_code, exec_time, exec_memory = Runner.parse_exec_info(stderr_bytes.decode(), 0.4)
+        exit_code, exec_time, exec_memory = parse_exec_info(stderr_bytes.decode(), 0.4)
         self.assertEqual(exit_code, 0)
         self.assertTrue(0.0 <= exec_time <= 0.1)  # This is CPU time
         self.assertTrue(2**20 <= exec_memory <= 2**25)  # Takes between 1MB and 32MB
@@ -169,10 +170,10 @@ class TestRunner(TestCase):
         # If it runs longer than the timeout, it gets killed before printing anything
         command = "python3 handle_sigterm.py"
         stdout_bytes, stderr_bytes = Runner.run(
-            sandbox=sandbox, command=Runner.COMMAND_WRAPPER.format(command=command, timeout=0.2)
+            sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.2)
         )
         self.assertEqual(stdout_bytes.decode(), "")
-        exit_code, exec_time, exec_memory = Runner.parse_exec_info(stderr_bytes.decode(), 0.2)
+        exit_code, exec_time, exec_memory = parse_exec_info(stderr_bytes.decode(), 0.2)
         self.assertEqual(exit_code, SIGKILL)
         self.assertTrue(0.2 <= exec_time <= 0.22)  # This is clock time
         self.assertTrue(2**20 <= exec_memory <= 2**25)  # Takes between 1MB and 32MB
@@ -180,10 +181,10 @@ class TestRunner(TestCase):
         # Catching SIGTERM signal doesn't help
         command = "python3 handle_sigterm.py --handle"
         stdout_bytes, stderr_bytes = Runner.run(
-            sandbox=sandbox, command=Runner.COMMAND_WRAPPER.format(command=command, timeout=0.2)
+            sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.2)
         )
         self.assertEqual(stdout_bytes.decode(), "")
-        exit_code, exec_time, exec_memory = Runner.parse_exec_info(stderr_bytes.decode(), 0.2)
+        exit_code, exec_time, exec_memory = parse_exec_info(stderr_bytes.decode(), 0.2)
         self.assertEqual(exit_code, SIGKILL)
         self.assertTrue(0.2 <= exec_time <= 0.22)  # This is clock time
         self.assertTrue(2**20 <= exec_memory <= 2**25)  # Takes between 1MB and 32MB
