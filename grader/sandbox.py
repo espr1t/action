@@ -69,16 +69,6 @@ class Sandbox:
         self.wait(timeout=0.2)
         Executors.release(self._executor)
 
-    @staticmethod
-    def init():
-        Executors.init()
-        logger.info("Sandbox initialized successfully.")
-
-    @staticmethod
-    def clean():
-        Executors.clean()
-        logger.info("Sandbox cleaned successfully.")
-
     def _check(self):
         # Test if the home directory exits
         if not os.path.exists(self._path):

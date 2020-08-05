@@ -9,7 +9,7 @@ import os
 import sys
 
 import common
-from sandbox import Sandbox
+from executors import Executors
 
 logger = common.get_logger(__file__)
 
@@ -39,7 +39,7 @@ def init():
 
     # Create the sandbox directories for each of the executors and prepare them
     # to be chrooted (mounting /bin, /dev, /lib and similar directories inside)
-    Sandbox.init()
+    Executors.init()
 
     logger.info("Initialization completed successfully!")
 
@@ -52,7 +52,7 @@ def clean():
     escalate_permissions()
 
     # Clean and delete the sandbox directories for each of the executors
-    Sandbox.clean()
+    Executors.clean()
 
 
 if __name__ == "__main__":
