@@ -268,8 +268,8 @@ class ResetPage extends Page {
                                 <td class="left"><b>Потребител:</b></td>
                                 <td class="right">
                                     <input type="text" name="username" placeholder="Username" class="text" minlength=2 maxlength=16 required
-                                        title="Username must be between 2 and 16 characters long and can contain only Lattin letters, digits, dots, and underscores. It cannot start with a dot."
-                                        onkeyup="validateUsername(\'reset\')">
+                                        title="Must be a valid username of a registered user."
+                                        onkeyup="checkUsername(\'reset\'); updateEmailSuggestion(\'reset\');">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconUsername"></i>
                                 </td>
                             </tr>
@@ -279,7 +279,7 @@ class ResetPage extends Page {
                                 <td class="right">
                                     <input type="email" name="email" placeholder="example@mail.com" class="text" minlength=1 maxlength=32
                                         title="E-mail must look like a valid e-mail address."
-                                        onkeyup="validateEmail(\'reset\', false)">
+                                        onkeyup="validateEmail(\'reset\', false)" id="emailInputField">
                                     <i class="fa fa-minus-square" style="color: #D84A38;" id="validationIconEmail"></i>
                                 </td>
                             </tr>

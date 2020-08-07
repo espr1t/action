@@ -39,11 +39,62 @@ function setState(validationIcon, valid) {
 }
 
 function validateUsername(formName) {
-    // TODO: Check against already registered users.
     var username = document.forms[formName]['username'].value;
     var validationIcon = document.getElementById('validationIconUsername');
     return setState(validationIcon, usernameRe.test(username));
  }
+
+var users = null;
+function userExists(username) {
+    // Check if the username passes the validation criteria
+    if (!usernameRe.test(username)) {
+        return false;
+    }
+
+    // Check if the username actually exists among the registered users
+    if (users != null) {
+        for (user of users) {
+            if (user['username'].toLowerCase() == username.toLowerCase())
+                return true;
+        }
+    } else {
+        console.warn('Array users is not loaded.');
+    }
+    return false;
+}
+
+function checkUsername(formName) {
+    var username = document.forms[formName]['username'].value;
+    var validationIcon = document.getElementById('validationIconUsername');
+
+    var callback = function(response) {
+        response = parseActionResponse(response);
+        users = response['users'];
+        setState(validationIcon, userExists(username));
+        updateEmailSuggestion(formName);
+    }
+    if (users == null) {
+        ajaxCall('/actions/data/users', {}, callback);
+    } else {
+        setState(validationIcon, userExists(username));
+    }
+    return true;
+ }
+
+function updateEmailSuggestion(formName) {
+    var username = document.forms[formName]['username'].value;
+    var emailInputEl = document.getElementById('emailInputField');
+    emailInputEl.placeholder = 'example@mail.com';
+    if (users != null) {
+        for (user of users) {
+            if (user['username'].toLowerCase() == username.toLowerCase()) {
+                if (user['email'] != '') {
+                    emailInputEl.placeholder = user['email'];
+                }
+            }
+        }
+    }
+}
 
 function validateName(formName) {
     var name = document.forms[formName]['name'].value;

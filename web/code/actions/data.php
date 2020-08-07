@@ -6,12 +6,24 @@ require_once(__DIR__ . '/../entities/user.php');
 
 session_start();
 
-$user = isset($_SESSION['userId']) ? User::get($_SESSION['userId']) : null;
-if ($user == null) {
-    printAjaxResponse(array(
-        'status' => 'ERROR',
-        'reason' => 'Не сте влезли в системата.'
-    ));
+// We need to allow this for not logged-in users in order
+// to be available for password recovery
+
+// $user = isset($_SESSION['userId']) ? User::get($_SESSION['userId']) : null;
+// if ($user == null) {
+//     printAjaxResponse(array(
+//         'status' => 'ERROR',
+//         'reason' => 'Не сте влезли в системата.'
+//     ));
+// }
+
+function obscureEmail($email) {
+    if (strpos($email, '@') == false)
+        return '';
+    $obscured = explode('@', $email)[0];
+    for ($i = 1; $i < strlen($obscured) - 1; $i++)
+        $obscured[$i] = '*';
+    return $obscured . '@' . explode('@', $email)[1];
 }
 
 function getUsersBasicInfo() {
@@ -23,7 +35,8 @@ function getUsersBasicInfo() {
             array_push($usersBasicInfo, array(
                 'id' => $user['id'],
                 'username' => $user['username'],
-                'name' => $user['name']
+                'name' => $user['name'],
+                'email' => obscureEmail($user['email'])
             ));
         }
     }
