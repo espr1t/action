@@ -19,6 +19,7 @@ if ($user == null || $user->access < $GLOBALS['ADMIN_USER_ACCESS']) {
 $brain = new Brain();
 
 
+/*
 output('Migrating user notifications...');
 $users = $brain->getAllUsers();
 foreach ($users as $user) {
@@ -28,6 +29,7 @@ foreach ($users as $user) {
         output('ERROR: cannot add notifications for user "' . $user['username'] . '"');
     }
 }
+*/
 
 
 /*
