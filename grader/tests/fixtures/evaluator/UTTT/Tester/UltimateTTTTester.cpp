@@ -9,7 +9,7 @@ KEYWORDS: Tester
 #include <string>
 
 using namespace std;
-FILE* in = stdin; FILE* out = stdout; FILE* err = stderr;
+FILE* in = stdin; FILE* out = stdout; FILE* log = stderr;
 
 const int MAX_BUFF_SIZE = 20000000;
 char dir[MAX_BUFF_SIZE], buff[MAX_BUFF_SIZE];
@@ -135,75 +135,73 @@ string updateBoard(int largeRow, int largeCol, int smallRow, int smallCol) {
     return "draw";
 }
 
+void finalVerdict(const char* verdict, double score1, double score2, const char* message) {
+    fprintf(stderr, "%s\n", verdict);
+    fprintf(stderr, "%.2lf\n", score1);
+    fprintf(stderr, "%.2lf\n", score2);
+    fprintf(stderr, "%s\n", message);
+    exit(0);
+}
+
 void gameCycle() {
     buff[0] = 0;
     fgets(buff, MAX_BUFF_SIZE, in);
     // Invalid output
     int largeRow, largeCol, smallRow, smallCol;
     if (sscanf(buff, "%d %d %d %d", &largeRow, &largeCol, &smallRow, &smallCol) != 4) {
-        fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%.2lf\n", curPlayer == 1 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%s player printed invalid move!\n", !curPlayer ? "First" : "Second");
-        exit(0);
+        char message[1024];
+        sprintf(message, "%s player printed invalid move!", !curPlayer ? "First" : "Second");
+        finalVerdict("OK", !curPlayer ? SCORE_LOSS : SCORE_WIN, curPlayer ? SCORE_LOSS : SCORE_WIN, message);
     }
     
     // Not in required board
     if (nextRow != -1 && (nextRow != largeRow || nextCol != largeCol)) {
-        fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%.2lf\n", curPlayer == 1 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%s player didn't play in the required small board!\n",
-            !curPlayer ? "First" : "Second");
-        exit(0);
+        char message[1024];
+        sprintf(message, "%s player didn't play in the required small board!", !curPlayer ? "First" : "Second");
+        finalVerdict("OK", !curPlayer ? SCORE_LOSS : SCORE_WIN, curPlayer ? SCORE_LOSS : SCORE_WIN, message);
     }
 
     // Invalid numbers for row/col of large board
     if (largeRow < 0 || largeRow > 2 || largeCol < 0 || largeCol > 2) {
-        fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%.2lf\n", curPlayer == 1 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%s player wanted to play in invalid cell of the large board: (%d, %d)!\n",
+        char message[1024];
+        sprintf(message, "%s player wanted to play in invalid cell of the large board: (%d, %d)!",
             !curPlayer ? "First" : "Second", largeRow, largeCol);
-        exit(0);
+        finalVerdict("OK", !curPlayer ? SCORE_LOSS : SCORE_WIN, curPlayer ? SCORE_LOSS : SCORE_WIN, message);
     }
 
     // Invalid numbers for row/col of small board
     if (smallRow < 0 || smallRow > 2 || smallCol < 0 || smallCol > 2) {
-        fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%.2lf\n", curPlayer == 1 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%s player wanted to play in invalid cell of the small board: (%d, %d)!\n",
+        char message[1024];
+        sprintf(message, "%s player wanted to play in invalid cell of the small board: (%d, %d)!",
             !curPlayer ? "First" : "Second", smallRow, smallCol);
-        exit(0);
+        finalVerdict("OK", !curPlayer ? SCORE_LOSS : SCORE_WIN, curPlayer ? SCORE_LOSS : SCORE_WIN, message);
     }
 
     // Already occupied    
     if (board[largeRow * 4 + smallRow][largeCol * 4 + smallCol] != '.') {
-        fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%.2lf\n", curPlayer == 1 ? SCORE_LOSS : SCORE_WIN);
-        fprintf(out, "%s player wanted to play in a non-empty cell!\n",
+        char message[1024];
+        sprintf(message, "%s player wanted to play in a non-empty cell!",
             !curPlayer ? "First" : "Second", smallRow, smallCol);
-        exit(0);
+        finalVerdict("OK", !curPlayer ? SCORE_LOSS : SCORE_WIN, curPlayer ? SCORE_LOSS : SCORE_WIN, message);
     }
     
     // Print log
-    fprintf(stderr, "%d%d%d%d", largeRow, largeCol, smallRow, smallCol);
-    fflush(stderr);
+    fprintf(log, "%d%d%d%d\n", largeRow, largeCol, smallRow, smallCol);
+    fflush(log);
 
     // Update board with player's move
     string status = updateBoard(largeRow, largeCol, smallRow, smallCol);
 
     // Drawn?
     if (status == "draw") {
-        fprintf(out, "%.2lf\n", SCORE_DRAW);
-        fprintf(out, "%.2lf\n", SCORE_DRAW);
-        fprintf(out, "The mach ended in a draw.\n");
-        exit(0);
+        finalVerdict("OK", SCORE_DRAW, SCORE_DRAW, "The match ended in a draw.");
     }
     
     // Winning?
     if (status == "win") {
-        fprintf(out, "%.2lf\n", curPlayer == 0 ? SCORE_WIN : SCORE_LOSS);
-        fprintf(out, "%.2lf\n", curPlayer == 1 ? SCORE_WIN : SCORE_LOSS);
-        fprintf(out, "%s player won.\n", !curPlayer ? "First" : "Second");
-        exit(0);
+        char message[1024];
+        sprintf(message, "%s player won.\n", !curPlayer ? "First" : "Second");
+        finalVerdict("OK", curPlayer ? SCORE_LOSS : SCORE_WIN, !curPlayer ? SCORE_LOSS : SCORE_WIN, message);
     }
 
     // Swap the signs of the players (so current player is always with 'X')    
@@ -217,7 +215,9 @@ void gameCycle() {
     printInput();
 }
 
-int main(void) {
+int main(int argc, char** argv) {
+    log = fopen(argv[1], "wt");
+
     // Read dummy message in tests
     fgets(buff, MAX_BUFF_SIZE, in);
 

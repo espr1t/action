@@ -136,28 +136,46 @@ class Validator:
             logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
 
-        verdict = ""
-        verdict = "OK" if output_lines[0].strip().upper().startswith("OK") else verdict
-        verdict = "IE" if output_lines[0].strip().upper().startswith("IE") else verdict
-        verdict = "WA" if output_lines[0].strip().upper().startswith("WA") else verdict
+        # Strip all lines (simplifies further processing)
+        for i in range(len(output_lines)):
+            output_lines[i] = output_lines[i].strip()
 
+        verdict = ""
+        verdict = "OK" if output_lines[0].upper().startswith("OK") else verdict
+        verdict = "IE" if output_lines[0].upper().startswith("IE") else verdict
+        verdict = "WA" if output_lines[0].upper().startswith("WA") else verdict
+
+        # Maybe in wrong order (score -> line1, verdict -> line2)?
+        # A small hack to support old checkers, live is too short to fix them all
         if verdict == "":
-            message = "Checker or tester's verdict line seems invalid (value = '{}')!".format(output_lines[0].strip())
-            logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
-            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
+            # Swap them and try again
+            output_lines[0], output_lines[1] = output_lines[1], output_lines[0]
+            verdict = "OK" if output_lines[0].upper().startswith("OK") else verdict
+            verdict = "IE" if output_lines[0].upper().startswith("IE") else verdict
+            verdict = "WA" if output_lines[0].upper().startswith("WA") else verdict
+
+            # Nah, still wrong. Return the supposedly verdict line (now output_lines[1]) as erroneous.
+            if verdict == "":
+                message = "Checker or tester's verdict line seems invalid (value = '{}')!".format(output_lines[1])
+                logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
+                return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
 
         try:
-            score = float(output_lines[1].strip())
+            score = float(output_lines[1])
         except ValueError:
             message = "Checker or tester's score line didn't contain a number (value = '{}')!".format(output_lines[1])
             logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=message)
 
-        message = "" if len(output_lines) < 3 else "\n".join([line.strip() for line in output_lines[2:]])
+        message = "" if len(output_lines) < 3 else "\n".join([line for line in output_lines[2:]])
 
         if verdict == "OK":
             return ValidatorResult(status=TestStatus.ACCEPTED, score=score, info=message)
         if verdict == "IE":
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, info=message)
-        # Anything other is currently treated as wrong answer
-        return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)
+        if verdict == "WA":
+            return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)
+
+        # This code should be unreachable.
+        logger.error("[Submission {id}] Internal Error: Shouldn't be here.".format(id=submit_id))
+        return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, info=message)

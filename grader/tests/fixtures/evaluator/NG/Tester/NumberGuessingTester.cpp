@@ -10,7 +10,7 @@ KEYWORDS: Tester
 
 FILE* log;
 
-void finalVerdict(double score, const char* verdict, const char* message) {
+void finalVerdict(const char* verdict, double score, const char* message) {
     fprintf(stderr, "%s\n", verdict);
     fprintf(stderr, "%lf\n", score);
     fprintf(stderr, "%s\n", message);
@@ -24,15 +24,15 @@ int readQuery() {
     fgets(buff, 1000, stdin);
     if (strlen(buff) > 6) {
         fprintf(log, "WA: printed query was longer than expected.\n");
-        finalVerdict(0.0, "WA", "Printed query was longer than expected.");
+        finalVerdict("WA", 0.0, "Printed query was longer than expected.");
     }
     if (sscanf(buff, "%d", &guess) != 1) {
         fprintf(log, "WA: printed query was not an integer.\n");
-        finalVerdict(0.0, "WA", "Printed query was not an integer.");
+        finalVerdict("WA", 0.0, "Printed query was not an integer.");
     }
     if (guess < 1 || guess > 1000) {
         fprintf(log, "WA: printed query was not in range [1, 1000].\n");
-        finalVerdict(0.0, "WA", "Printed query was not in range [1, 1000].");
+        finalVerdict("WA", 0.0, "Printed query was not in range [1, 1000].");
     }
     return guess;
 }
@@ -75,10 +75,10 @@ int main(int argc, char** argv) {
         char message[1024];
         fprintf(log, "Guessed correctly with %d queries.", guesses);
         sprintf(message, "Guessed correctly with %d queries.", guesses);
-        finalVerdict(1.0, "OK", message);
+        finalVerdict("OK", 1.0, message);
     } else {
         fprintf(log, "Couldn't guess after 10 queries.");
-        finalVerdict(0.0, "WA", "Couldn't guess after 10 queries.");
+        finalVerdict("WA", 0.0, "Couldn't guess after 10 queries.");
     }
 
     return 0;

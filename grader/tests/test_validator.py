@@ -278,44 +278,93 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.INTERNAL_ERROR, validator_result.status)
 
-        # Non-number output on the first line is not okay
-        validator_result = Validator.validate_output_from_checker_or_tester(42, b"foo")
+        # Single line with score is not okay
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"0.42")
         self.assertEqual("", validator_result.info)
         self.assertNotEqual("", validator_result.error)
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.INTERNAL_ERROR, validator_result.status)
 
-        # Single line with score is okay
-        validator_result = Validator.validate_output_from_checker_or_tester(42, b"0.42")
+        # Single line with verdict
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"OK\n")
+        self.assertEqual("", validator_result.info)
+        self.assertEqual("Checker or tester's output didn't contain verdict or score!", validator_result.error)
+        self.assertEqual(0.0, validator_result.score)
+        self.assertIs(TestStatus.INTERNAL_ERROR, validator_result.status)
+
+        # Valid verdict and score is okay
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"OK\n0.42")
         self.assertEqual("", validator_result.info)
         self.assertEqual("", validator_result.error)
         self.assertEqual(0.42, validator_result.score)
         self.assertIs(TestStatus.ACCEPTED, validator_result.status)
 
-        # Single line with score greater than 1 is okay
-        validator_result = Validator.validate_output_from_checker_or_tester(42, b"133742")
+        # Valid verdict and score greater than 1 is okay
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"OK\n133742")
         self.assertEqual("", validator_result.info)
         self.assertEqual("", validator_result.error)
         self.assertEqual(133742, validator_result.score)
         self.assertIs(TestStatus.ACCEPTED, validator_result.status)
 
-        # Second line starting with OK is AC (message returned as info)
-        validator_result = Validator.validate_output_from_checker_or_tester(42, b"0.42\nOK - needed 42 queries")
-        self.assertEqual("OK - needed 42 queries", validator_result.info)
+        # Valid verdict and negative score is okay
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"OK\n-13")
+        self.assertEqual("", validator_result.info)
+        self.assertEqual("", validator_result.error)
+        self.assertEqual(-13, validator_result.score)
+        self.assertIs(TestStatus.ACCEPTED, validator_result.status)
+
+        # Verdict and score in reverse order are still fine (OK)
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"0.42\nOK")
+        self.assertEqual("", validator_result.info)
         self.assertEqual("", validator_result.error)
         self.assertEqual(0.42, validator_result.score)
         self.assertIs(TestStatus.ACCEPTED, validator_result.status)
 
-        # Second line not starting with OK is WA and score is zero
-        validator_result = Validator.validate_output_from_checker_or_tester(42, b"0.42\nNeeded 42 queries")
-        self.assertEqual("Needed 42 queries", validator_result.info)
+        # Verdict and score in reverse order are still fine (WA)
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"0.0\nWA")
+        self.assertEqual("", validator_result.info)
         self.assertEqual("", validator_result.error)
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
-        # Having third and further lines is okay, as long as the second one starts with OK
-        validator_result = Validator.validate_output_from_checker_or_tester(42, b"0.42\nOK\nNeeded 42 queries")
-        self.assertEqual("OK\nNeeded 42 queries", validator_result.info)
+        # Non-numeric score is not okay
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"OK\nfoo")
+        self.assertEqual("", validator_result.info)
+        self.assertNotEqual("", validator_result.error)
+        self.assertEqual(0.0, validator_result.score)
+        self.assertIs(TestStatus.INTERNAL_ERROR, validator_result.status)
+
+        # All non-OK verdicts have zero score.
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"WA\n133742")
+        self.assertEqual("", validator_result.info)
+        self.assertEqual("", validator_result.error)
+        self.assertEqual(0.0, validator_result.score)
+        self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
+
+        # IE is interpreted as Internal Error
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"IE\n-1")
+        self.assertEqual("", validator_result.info)
+        self.assertEqual("", validator_result.error)
+        self.assertEqual(0.0, validator_result.score)
+        self.assertIs(TestStatus.INTERNAL_ERROR, validator_result.status)
+
+        # Not recognized verdict (OK/WA/IE) is considered Internal Error
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"GL\n0.42")
+        self.assertEqual("", validator_result.info)
+        self.assertEqual("Checker or tester's verdict line seems invalid (value = 'GL')!", validator_result.error)
+        self.assertEqual(0.0, validator_result.score)
+        self.assertIs(TestStatus.INTERNAL_ERROR, validator_result.status)
+
+        # The optional third line is recorded in the validator result info field
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"OK\n0.42\nNeeded 42 queries.")
+        self.assertEqual("Needed 42 queries.", validator_result.info)
+        self.assertEqual("", validator_result.error)
+        self.assertEqual(0.42, validator_result.score)
+        self.assertIs(TestStatus.ACCEPTED, validator_result.status)
+
+        # There can be more than one info lines
+        validator_result = Validator.validate_output_from_checker_or_tester(42, b"OK\n0.42\nNeeded 42 queries.\nWon.")
+        self.assertEqual("Needed 42 queries.\nWon.", validator_result.info)
         self.assertEqual("", validator_result.error)
         self.assertEqual(0.42, validator_result.score)
         self.assertIs(TestStatus.ACCEPTED, validator_result.status)
