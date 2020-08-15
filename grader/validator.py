@@ -32,31 +32,39 @@ class Validator:
         """
         Determines the final execution status (OK, WA, TL, ML, RE, or IE) and score of the solution
         """
-        # TODO: We can be more specific what the RE actually is:
-        # Killed (TL): Killed (exit_code = 9)
-        # Killed (TL): Terminated (exit_code = 15)
-        # Killed (RE, division by zero): Floating point exception (exit_code = 8)
-        # Killed (RE, out of bounds): Segmentation fault (exit_code = 11)
-        # Killed (RE, allocated too much memory): Segmentation fault (exit_code = 11)
-        # Killed (RE, max output size exceeded): File size limit exceeded (exit_code = 25)
+
+        # Return info to the front-end
+        info = run_result.info
 
         # IE (Internal Error) - error message set previously
         if run_result.error != "":
             logger.error("Submit {id} | Got error while executing test {test_name}: \"{error}\"".format(
                 id=submit_id, test_name=test.inpFile, error=run_result.error))
-            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, error=run_result.error)
+            return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, info=info, error=run_result.error)
 
         # ML (Memory Limit)
         if run_result.exec_memory > run_config.memory_limit:
-            return ValidatorResult(status=TestStatus.MEMORY_LIMIT, score=0.0)
+            return ValidatorResult(status=TestStatus.MEMORY_LIMIT, score=0.0, info=info)
 
         # TL (Time Limit)
         if run_result.exec_time > run_config.time_limit:
-            return ValidatorResult(status=TestStatus.TIME_LIMIT, score=0.0)
+            return ValidatorResult(status=TestStatus.TIME_LIMIT, score=0.0, info=info)
 
         # RE (Runtime Error)
         if run_result.exit_code != 0:
-            return ValidatorResult(status=TestStatus.RUNTIME_ERROR, score=0.0)
+            # Killed (TL, sigkill): Killed (exit_code = 9)
+            # Killed (TL, sigterm): Terminated (exit_code = 15)
+            # Killed (RE, division by zero): Floating point exception (exit_code = 8)
+            # Killed (RE, out of bounds): Segmentation fault (exit_code = 11)
+            # Killed (RE, allocated too much memory): Segmentation fault (exit_code = 11)
+            # Killed (RE, max output size exceeded): File size limit exceeded (exit_code = 25)
+            if run_result.exit_code == 8:
+                info = "Floating point exception"
+            elif run_result.exit_code == 11:
+                info = "Segmentation fault"
+            elif run_result.exit_code == 25:
+                info = "File size limit exceeded"
+            return ValidatorResult(status=TestStatus.RUNTIME_ERROR, score=0.0, info=info)
 
         # AC (Accepted), WA (Wrong Answer), or IE (Internal Error)
         if run_config.checker_path is not None or run_config.tester_path is not None:
