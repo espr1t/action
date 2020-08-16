@@ -9,6 +9,7 @@ import json
 from unittest import TestCase, mock
 
 import config
+import common
 from common import TestStatus
 from compiler import Compiler
 from evaluator import Evaluator
@@ -78,7 +79,6 @@ class TestEvaluator(TestCase):
             data["language"] = language
             return Evaluator(data)
 
-    """
     def test_create_sandbox_dir(self):
         evaluator = self.get_evaluator("problem_submit_ok.json", config.LANGUAGE_CPP)
         self.assertFalse(os.path.exists(evaluator.path_sandbox))
@@ -128,9 +128,8 @@ class TestEvaluator(TestCase):
         self.assertFalse(os.path.isfile(evaluator.path_source))
         self.assertFalse(os.path.exists(evaluator.path_sandbox))
 
-    """
     @mock.patch("updater.Updater.add_info")
-    def standard_problem_helper(self, add_info, evaluator, language, source, time_lb, memory_lb, expected_counts={}):
+    def standard_problem_helper(self, add_info, evaluator, language, source, time_lb, memory_lb, expected_errors):
         evaluator.create_sandbox_dir()
 
         compilation_status = Compiler.compile(
@@ -172,15 +171,15 @@ class TestEvaluator(TestCase):
         self.assertLessEqual(max_memory, evaluator.memory_limit)
 
         for key in actual_non_ok.keys():
-            if key not in expected_counts:
+            if key not in expected_errors:
                 self.fail("Got status {} which was not expected.".format(key))
-            if actual_non_ok[key] != expected_counts[key]:
-                self.fail("Expected {} results with status {} but got {}.".format(expected_counts[key], key, actual_non_ok[key]))
-        for key in expected_counts.keys():
+            if actual_non_ok[key] != expected_errors[key]:
+                self.fail("Expected {} results with status {} but got {}.".format(
+                    expected_errors[key], key, actual_non_ok[key]))
+        for key in expected_errors.keys():
             if key not in actual_non_ok:
                 self.fail("Expected status {} but didn't receive it.".format(key))
 
-    """
     ########################################################
     #                      Three Sum                       #
     #                   (sample problem)                   #
@@ -192,7 +191,8 @@ class TestEvaluator(TestCase):
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.cpp"),
             time_lb=0.0,
-            memory_lb=1.0
+            memory_lb=1.0,
+            expected_errors={}
         )
 
     def test_standard_problem_three_sum_java(self):
@@ -202,7 +202,8 @@ class TestEvaluator(TestCase):
             language=config.LANGUAGE_JAVA,
             source=os.path.join(self.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.java"),
             time_lb=0.0,
-            memory_lb=0.0
+            memory_lb=0.0,
+            expected_errors={}
         )
 
     def test_standard_problem_three_sum_python(self):
@@ -212,9 +213,9 @@ class TestEvaluator(TestCase):
             language=config.LANGUAGE_PYTHON,
             source=os.path.join(self.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.py"),
             time_lb=0.1,
-            memory_lb=1.0
+            memory_lb=1.0,
+            expected_errors={}
         )
-
 
     ########################################################
     #                        Sheep                         #
@@ -227,7 +228,8 @@ class TestEvaluator(TestCase):
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "Sheep/Solutions/Sheep.cpp"),
             time_lb=0.1,
-            memory_lb=1.0
+            memory_lb=1.0,
+            expected_errors={}
         )
 
     def test_standard_problem_sheep_java(self):
@@ -237,7 +239,8 @@ class TestEvaluator(TestCase):
             language=config.LANGUAGE_JAVA,
             source=os.path.join(self.PATH_FIXTURES, "Sheep/Solutions/Sheep.java"),
             time_lb=0.2,
-            memory_lb=1.0
+            memory_lb=1.0,
+            expected_errors={}
         )
 
     ########################################################
@@ -263,7 +266,8 @@ class TestEvaluator(TestCase):
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "Ruler/Solutions/Ruler.cpp"),
             time_lb=0.0,
-            memory_lb=0.0
+            memory_lb=0.0,
+            expected_errors={}
         )
 
         # TL
@@ -273,7 +277,7 @@ class TestEvaluator(TestCase):
             source=os.path.join(self.PATH_FIXTURES, "Ruler/Solutions/RulerTL.cpp"),
             time_lb=0.2,
             memory_lb=1.0,
-            expected_counts={"TIME_LIMIT": 7}
+            expected_errors={"TIME_LIMIT": 7}
         )
 
         # WA
@@ -283,9 +287,8 @@ class TestEvaluator(TestCase):
             source=os.path.join(self.PATH_FIXTURES, "Ruler/Solutions/RulerWA.cpp"),
             time_lb=0.0,
             memory_lb=0.0,
-            expected_counts={"WRONG_ANSWER": 4}
+            expected_errors={"WRONG_ANSWER": 4}
         )
-    """
 
     ########################################################
     #                   Number Guessing                    #
@@ -295,7 +298,7 @@ class TestEvaluator(TestCase):
         evaluator = self.get_evaluator("games_interactive_ng.json", config.LANGUAGE_CPP)
 
         # Configure fake paths to the tester and its executable and compile it
-        evaluator.path_tester_source = os.path.join(self.PATH_FIXTURES, "NG/Tests/Tester/NumberGuessingTester.cpp")
+        evaluator.path_tester_source = os.path.join(self.PATH_FIXTURES, "NG/Tester/NumberGuessingTester.cpp")
         evaluator.path_tester_executable = os.path.join(config.PATH_TESTERS, "NumberGuessingTester.o")
 
         # Compile the tester
@@ -312,7 +315,8 @@ class TestEvaluator(TestCase):
             language=config.LANGUAGE_CPP,
             source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessing.cpp"),
             time_lb=0.0,
-            memory_lb=0.0
+            memory_lb=0.0,
+            expected_errors={}
         )
 
         # TL
@@ -322,7 +326,7 @@ class TestEvaluator(TestCase):
             source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessingTL.cpp"),
             time_lb=0.0,
             memory_lb=0.0,
-            expected_counts={"TIME_LIMIT": 4}
+            expected_errors={"TIME_LIMIT": 4}
         )
 
         # WA
@@ -332,20 +336,45 @@ class TestEvaluator(TestCase):
             source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessingWA.cpp"),
             time_lb=0.0,
             memory_lb=0.0,
-            expected_counts={"WRONG_ANSWER": 6}
+            expected_errors={"WRONG_ANSWER": 6}
         )
 
-    """
     ########################################################
     #                 Ultimate Tic-Tac-Toe                 #
     #                   (two-player game)                  #
     ########################################################
+    @mock.patch("updater.Updater.add_info")
+    def game_helper(self, add_info, evaluator, expected_messages):
+        # We expect two updates per test per match (forward and reverse games)
+        self.assertEqual(len(expected_messages), 2 * len(evaluator.tests) * len(evaluator.matches))
+
+        updater_results = []
+        add_info.side_effect = lambda result: updater_results.append(result)
+
+        # Run the match(es)
+        self.assertTrue(evaluator.run_solution())
+
+        # Validate that the expected number of calls and results are present
+        self.assertEqual(add_info.call_count, len(expected_messages))
+
+        for res in updater_results:
+            # print("MATCH RESULT:\n{}\n".format(res))
+            found = False
+            for i in range(len(expected_messages)):
+                if expected_messages[i] == res["message"]:
+                    del expected_messages[i]
+                    found = True
+                    break
+            self.assertTrue(found, msg="Found unexpected message '{}'!".format(res["message"]))
+        self.assertEqual(len(expected_messages), 0, msg="Remaining messages: {}".format(expected_messages))
+
     def test_two_player_game(self):
         evaluator = self.get_evaluator("games_two_player_uttt.json", config.LANGUAGE_CPP)
+        evaluator.create_sandbox_dir()
 
-        # Configure fake paths to source and executable of the checker and compile it
+        # Configure fake paths to the tester and its executable and compile it
         evaluator.path_tester_source = os.path.join(self.PATH_FIXTURES, "UTTT/Tester/UltimateTTTTester.cpp")
-        evaluator.path_tester_executable = os.path.join(config.PATH_TESTS, "UltimateTTTTester.o")
+        evaluator.path_tester_executable = os.path.join(config.PATH_TESTERS, "UltimateTTTTester.o")
         compilation_status = Compiler.compile(
             language=config.LANGUAGE_CPP,
             path_source=evaluator.path_tester_source,
@@ -353,18 +382,51 @@ class TestEvaluator(TestCase):
         )
         self.assertEqual(compilation_status, "")
 
-        with open(os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTT.java"), "rt") as inp:
-            opponent_source = inp.read()
-            for match in evaluator.matches:
-                match["source"] = opponent_source
-                match["language"] = config.LANGUAGE_JAVA
-
-        self.standard_problem_helper(
-            evaluator=evaluator,
+        # Configure fake paths to the solution and its executable and compile it
+        evaluator.path_source = os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTT.cpp")
+        compilation_status = Compiler.compile(
             language=config.LANGUAGE_CPP,
-            source=os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTT.cpp"),
-            time_lb=0.0,
-            memory_lb=0.0,
-            expected_counts={}
+            path_source=evaluator.path_source,
+            path_executable=evaluator.path_executable
         )
-    """
+        self.assertEqual(compilation_status, "")
+
+        # Finally configure the sources of the opponents to be a different solutions
+        # Solutions are chosen to cover different languages (C++, Java) and yield different results (win, lose, crash)
+        match_sources = {
+            "1": os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTT.cpp"),
+            "2": os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTT.java"),
+            "3": os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTTGood.cpp"),
+            "4": os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTTCrash.java"),
+            "5": os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTTInvalid.java"),
+            "6": os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTTWeak.cpp"),
+            "7": os.path.join(self.PATH_FIXTURES, "UTTT/Solutions/UltimateTTTSlow.py")
+        }
+
+        for match in evaluator.matches:
+            opponent_source_path = match_sources[str(match["player_two_id"])]
+            with open(opponent_source_path, "rt") as inp:
+                opponent_source = inp.read()
+            opponent_language = common.get_language_by_source_name(opponent_source_path)
+            match["source"] = opponent_source
+            match["language"] = opponent_language
+
+        self.game_helper(
+            evaluator=evaluator,
+            expected_messages=[
+                "The match ended in a draw.",  # Forward versus self
+                "The match ended in a draw.",  # Reverse versus self
+                "JavaPlayer won.",  # Forward versus Java
+                "JavaPlayer won.",  # Reverse versus Java
+                "W1nn3r won.",  # Forward versus Lose
+                "W1nn3r won.",  # Reverse versus Lose
+                "Cr4sh's solution crashed.",  # Forward versus Crash
+                "Cr4sh's solution crashed.",  # Reverse versus Crash
+                "Wr0ng wanted to play in a non-empty cell!",  # Forward versus Invalid
+                "espr1t won.",  # Reverse versus Invalid
+                "espr1t won.",  # Forward versus Weak
+                "espr1t won.",  # Reverse versus Weak
+                "5l33p3r's solution used more than the allowed 0.50 seconds.",  # Forward versus Slow
+                "5l33p3r's solution used more than the allowed 0.50 seconds.",  # Reverse versus Slow
+            ]
+        )

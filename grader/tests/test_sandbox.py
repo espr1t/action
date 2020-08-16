@@ -241,11 +241,9 @@ class TestSandbox(TestCase):
                 self.assertEqual(int(tokens[-2]), expected[tokens[0]][1])
                 self.assertEqual(tokens[-1], expected[tokens[0]][2])
 
-    # TODO: Remove if sticking with real-time priority
-    # def test_niceness_level(self):
-    #     stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="nice")
-    #     print("OUTPUT: {}".format(stdout))
-    #     self.assertEqual(str(config.PROCESS_PRIORITY), stdout)
+    def test_niceness_level(self):
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="nice")
+        self.assertEqual(str(config.PROCESS_PRIORITY_NICE), stdout)
 
     def test_executor_user(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="id -u")
@@ -253,17 +251,15 @@ class TestSandbox(TestCase):
 
     def test_scheduling_algorithm(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="chrt -p $$")
-        self.assertIn("scheduling policy: SCHED_RR", stdout.splitlines()[0])  # Real-time UNIX scheduler
-        # Priority 50 is in the middle of real-time
-        self.assertIn("current scheduling priority: {}".format(config.PROCESS_PRIORITY_REAL), stdout.splitlines()[1])
+        self.assertIn("scheduling policy: SCHED_OTHER", stdout.splitlines()[0])  # Standard UNIX scheduler
 
     def test_process_info(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="ps -o uid,pid,ppid,cls,pri,ni,rtprio -p $$")
         process_info = stdout.splitlines()[1].split()
         self.assertGreaterEqual(int(process_info[0]), 1000)  # User ID (again)
-        self.assertEqual(process_info[3], "RR")  # Scheduling algorithm, RR = ROUND ROBIN
-        self.assertEqual(process_info[5], "-")  # Nice level
-        self.assertEqual(process_info[6], str(config.PROCESS_PRIORITY_REAL))  # Priority
+        self.assertEqual(process_info[3], "TS")  # Scheduling algorithm, RR = real-time round robin, TS = standard
+        self.assertEqual(process_info[5], str(config.PROCESS_PRIORITY_NICE))  # Nice level
+        self.assertEqual(process_info[6], "-")  # Priority
 
     # ================================= #
     #            Sandbox API            #

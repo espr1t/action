@@ -107,3 +107,43 @@ def get_executable_extension(language):
     else:
         logger.error("Requested executable extension for unknown language: '{}'!".format(language))
         return ".unknown"
+
+
+def get_language_by_exec_name(executable_name):
+    if executable_name.endswith(config.EXECUTABLE_EXTENSION_CPP):
+        return config.LANGUAGE_CPP
+    elif executable_name.endswith(config.EXECUTABLE_EXTENSION_JAVA):
+        return config.LANGUAGE_JAVA
+    elif executable_name.endswith(config.EXECUTABLE_EXTENSION_PYTHON):
+        return config.LANGUAGE_PYTHON
+    raise Exception("Could not determine language for executable '{}'!".format(executable_name))
+
+
+def get_language_by_source_name(source_name):
+    if source_name.endswith(config.SOURCE_EXTENSION_CPP):
+        return config.LANGUAGE_CPP
+    elif source_name.endswith(config.SOURCE_EXTENSION_JAVA):
+        return config.LANGUAGE_JAVA
+    elif source_name.endswith(config.SOURCE_EXTENSION_PYTHON):
+        return config.LANGUAGE_PYTHON
+    raise Exception("Could not determine language for executable '{}'!".format(source_name))
+
+
+def get_time_offset(language):
+    if language == config.LANGUAGE_CPP:
+        return config.TIME_OFFSET_CPP
+    if language == config.LANGUAGE_JAVA:
+        return config.TIME_OFFSET_JAVA
+    if language == config.LANGUAGE_PYTHON:
+        return config.TIME_OFFSET_PYTHON
+    raise Exception("Unsupported language '{}'!".format(language))
+
+
+def get_memory_offset(language):
+    if language == config.LANGUAGE_CPP:
+        return config.MEMORY_OFFSET_CPP
+    if language == config.LANGUAGE_JAVA:
+        return config.MEMORY_OFFSET_JAVA
+    if language == config.LANGUAGE_PYTHON:
+        return config.MEMORY_OFFSET_PYTHON
+    raise Exception("Unsupported language '{}'!".format(language))

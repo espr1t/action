@@ -1,18 +1,66 @@
 {
     "id": 666,
     "source": "Source replaced in tests.",
-    "language": "C++",
+    "language": "Unknown",
     "matches": [
         {
-            "player_one_id": 1,
+            "player_one_id": 0,
             "player_one_name": "espr1t",
-            "player_two_id": 42,
-            "player_two_name": "0pp0n3n7",
+            "player_two_id": 1,
+            "player_two_name": "self",
+            "language": "Unknown",
+            "source": "Source of opponent."
+        },
+        {
+            "player_one_id": 0,
+            "player_one_name": "espr1t",
+            "player_two_id": 2,
+            "player_two_name": "JavaPlayer",
+            "language": "Unknown",
+            "source": "Source of opponent."
+        },
+        {
+            "player_one_id": 0,
+            "player_one_name": "espr1t",
+            "player_two_id": 3,
+            "player_two_name": "W1nn3r",
+            "language": "Unknown",
+            "source": "Source of opponent."
+        },
+        {
+            "player_one_id": 0,
+            "player_one_name": "espr1t",
+            "player_two_id": 4,
+            "player_two_name": "Cr4sh",
+            "language": "Unknown",
+            "source": "Source of opponent."
+        },
+        {
+            "player_one_id": 0,
+            "player_one_name": "espr1t",
+            "player_two_id": 5,
+            "player_two_name": "Wr0ng",
+            "language": "Unknown",
+            "source": "Source of opponent."
+        },
+        {
+            "player_one_id": 0,
+            "player_one_name": "espr1t",
+            "player_two_id": 6,
+            "player_two_name": "W34k",
+            "language": "Unknown",
+            "source": "Source of opponent."
+        },
+        {
+            "player_one_id": 0,
+            "player_one_name": "espr1t",
+            "player_two_id": 7,
+            "player_two_name": "5l33p3r",
             "language": "Unknown",
             "source": "Source of opponent."
         }
     ],
-    "tester": "87cfbaad7102df95cb77bfc41cfe6da2",
+    "tester": "F4k373573r",
     "floats": false,
     "problemType": "game",
     "timeLimit": 0.5,

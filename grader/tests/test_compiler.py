@@ -112,6 +112,7 @@ class TestCompiler(TestCase):
         self.assertFalse(os.path.exists(path_executable))
 
     def test_java_successful_compilation(self):
+        start_time = perf_counter()
         path_source = os.path.join(self.PATH_FIXTURES, "java/HelloWorldOK.java")
         path_executable = os.path.join(self.PATH_SANDBOX, "TargetName.jar")
 
@@ -119,6 +120,7 @@ class TestCompiler(TestCase):
         message = Compiler.compile(config.LANGUAGE_JAVA, path_source, path_executable)
         self.assertEqual("", message, "The Java compilation expected to pass, but failed.")
         self.assertTrue(os.path.exists(path_executable))
+        self.assertLess(perf_counter() - start_time, 3.0)  # 3 seconds should be enough for the compilation
 
     def test_java_unsuccessful_compilation(self):
         path_source = os.path.join(self.PATH_FIXTURES, "java/HelloWorldCE.java")

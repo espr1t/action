@@ -41,7 +41,7 @@ def parse_info(tester_stderr, solution_stderr, tester_timeout, solution_timeout,
     return info
 
 
-def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_timeout, extra_time, input_text):
+def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_timeout, input_text):
     sys.stderr.write("Starting tester process...\n")
     # Start the tester's process
 
@@ -76,7 +76,7 @@ def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_
     else:
         try:
             # Give the tester time to print the interaction log and finish its execution
-            tester_process.wait(timeout=extra_time)
+            tester_process.wait(timeout=tester_timeout-solution_timeout)
         except psutil.TimeoutExpired:
             # If the tester doesn't finish in one more second then it is most likely waiting
             # on input from the solution. It may be other issue, but let's assume the tester
@@ -108,14 +108,7 @@ def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_
     sys.stderr.write("Done.\n")
 
 
-def prepare_and_run(tester_run_cmd, solution_run_cmd, time_limit, input_text, log_file):
-    # Both the tester and the solution get extra time in order to account for time tester
-    # processes input/output. The tester gets additional time to make sure it is killed after
-    # the solution.
-    extra_time = min(1.0, time_limit)
-    solution_timeout = time_limit + max(0.2, time_limit * 0.2) + extra_time
-    tester_timeout = solution_timeout + extra_time
-
+def prepare_and_run(tester_run_cmd, solution_run_cmd, tester_timeout, solution_timeout, input_text, log_file):
     tester_wrapped_cmd = COMMAND_WRAPPER.format(timeout=tester_timeout, command=tester_run_cmd + " " + log_file)
     tester_wrapped_cmd = tester_wrapped_cmd.replace(" 2>/dev/null", "")
     solution_wrapped_cmd = COMMAND_WRAPPER.format(timeout=solution_timeout, command=solution_run_cmd)
@@ -124,7 +117,6 @@ def prepare_and_run(tester_run_cmd, solution_run_cmd, time_limit, input_text, lo
         solution_wrapped_cmd=solution_wrapped_cmd,
         tester_timeout=tester_timeout,
         solution_timeout=solution_timeout,
-        extra_time=extra_time,
         input_text=input_text
     )
 
@@ -138,7 +130,8 @@ def prod():
     prepare_and_run(
         tester_run_cmd=args["tester_run_command"],
         solution_run_cmd=args["solution_run_command"],
-        time_limit=args["time_limit"],
+        tester_timeout=args["tester_timeout"],
+        solution_timeout=args["solution_timeout"],
         input_text=input_text,
         log_file=args["log_file"]
     )

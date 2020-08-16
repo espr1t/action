@@ -147,7 +147,7 @@ class Executors:
         # Prepare the directory for chroot-ing by mounting vital system directories
         logger.info("  >> mounting system paths...")
 
-        for mount_dir in ["bin", "lib", "lib64", "usr", "dev", "sys", "proc", "etc"]:
+        for mount_dir in ["bin", "lib", "lib64", "usr", "dev", "sys", "proc", "etc/alternatives"]:
             mount_source = "/{}".format(mount_dir)
             mount_destination = os.path.join(executor_path, mount_dir)
             if not os.path.exists(mount_destination):

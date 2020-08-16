@@ -14,7 +14,7 @@ from tempfile import NamedTemporaryFile
 import config
 from common import TestStatus
 from compiler import Compiler
-from execute_problem import execute_problem
+from executor import execute_problem
 from runner import RunConfig
 import initializer
 
@@ -84,7 +84,6 @@ class TestExecuteProblem(TestCase):
         self.assertTrue(total_time < evaluator.time_limit * len(evaluator.tests) / config.MAX_PARALLEL_EXECUTORS)
         self.assertEqual(add_info.call_count, len(evaluator.tests) * 2)
     """
-
 
     """
     def test_full_run_errors(self, add_info):

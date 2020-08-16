@@ -187,8 +187,9 @@ int main(void) {
 
     char board[MAX][MAX];
     fscanf(in, "%d %d", &targetRow, &targetCol);
-    for (int row = 0; row < 11; row++)
+    for (int row = 0; row < 11; row++) {
         fscanf(in, "%s", board[row]);
+    }
 
     for (int i = 0; i < 3; i++) {
         for (int c = 0; c < 3; c++) {

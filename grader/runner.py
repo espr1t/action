@@ -3,17 +3,17 @@ from dataclasses import dataclass, field
 import fcntl
 
 import config
-from common import get_logger, TestStatus
+import common
 from sandbox import Sandbox
 from wrapper import COMMAND_WRAPPER, parse_exec_info
 
 
-logger = get_logger(__file__)
+logger = common.get_logger(__file__)
 
 
 @dataclass
 class RunResult:
-    status: TestStatus = TestStatus.UNKNOWN
+    status: common.TestStatus = common.TestStatus.UNKNOWN
     exit_code: int = 0
     exec_time: float = 0.0
     exec_memory: int = 0
@@ -39,36 +39,6 @@ class RunConfig:
 
 
 class Runner:
-    @staticmethod
-    def get_language_by_exec_name(executable_name):
-        if executable_name.endswith(config.EXECUTABLE_EXTENSION_CPP):
-            return config.LANGUAGE_CPP
-        elif executable_name.endswith(config.EXECUTABLE_EXTENSION_JAVA):
-            return config.LANGUAGE_JAVA
-        elif executable_name.endswith(config.EXECUTABLE_EXTENSION_PYTHON):
-            return config.LANGUAGE_PYTHON
-        raise Exception("Could not determine language for executable '{}'!".format(executable_name))
-
-    @staticmethod
-    def get_time_offset(language):
-        if language == config.LANGUAGE_CPP:
-            return config.TIME_OFFSET_CPP
-        if language == config.LANGUAGE_JAVA:
-            return config.TIME_OFFSET_JAVA
-        if language == config.LANGUAGE_PYTHON:
-            return config.TIME_OFFSET_PYTHON
-        raise Exception("Unsupported language '{}'!".format(language))
-
-    @staticmethod
-    def get_memory_offset(language):
-        if language == config.LANGUAGE_CPP:
-            return config.MEMORY_OFFSET_CPP
-        if language == config.LANGUAGE_JAVA:
-            return config.MEMORY_OFFSET_JAVA
-        if language == config.LANGUAGE_PYTHON:
-            return config.MEMORY_OFFSET_PYTHON
-        raise Exception("Unsupported language '{}'!".format(language))
-
     @staticmethod
     def get_run_command(language, executable, memory_limit):
         if language == config.LANGUAGE_CPP:
@@ -165,7 +135,7 @@ class Runner:
 
         # Generate the command which runs the executable (it is language-specific)
         executable_name = os.path.basename(executable_path)
-        executable_language = Runner.get_language_by_exec_name(executable_name)
+        executable_language = common.get_language_by_exec_name(executable_name)
         command = Runner.get_run_command(executable_language, executable_name, memory_limit)
 
         # If the executable depends on arguments, add them to the run command
@@ -184,8 +154,8 @@ class Runner:
         )
 
         # Calculate final time and memory (offset for VM start-up time)
-        run_result.exec_time = max(0, run_result.exec_time - Runner.get_time_offset(executable_language))
-        run_result.exec_memory = max(0, run_result.exec_memory - Runner.get_memory_offset(executable_language))
+        run_result.exec_time = max(0, run_result.exec_time - common.get_time_offset(executable_language))
+        run_result.exec_memory = max(0, run_result.exec_memory - common.get_memory_offset(executable_language))
 
         # The caller function should populate the rest of the fields of the RunResult
         return run_result

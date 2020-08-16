@@ -17,8 +17,7 @@ from common import TestStatus, TestInfo
 import network
 from updater import Updater
 from compiler import Compiler
-from execute_game import execute_game
-from execute_problem import execute_problem
+from executor import execute_problem, execute_game
 from runner import RunConfig
 
 

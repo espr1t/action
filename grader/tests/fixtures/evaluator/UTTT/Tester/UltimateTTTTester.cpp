@@ -9,7 +9,7 @@ KEYWORDS: Tester
 #include <string>
 
 using namespace std;
-FILE* in = stdin; FILE* out = stdout; FILE* log = stderr;
+FILE* in = stdin; FILE* out = stdout; FILE* log;
 
 const int MAX_BUFF_SIZE = 20000000;
 char dir[MAX_BUFF_SIZE], buff[MAX_BUFF_SIZE];

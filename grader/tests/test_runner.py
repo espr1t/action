@@ -216,7 +216,7 @@ class TestRunner(TestCase):
         # Output of factor is the number followed by its factors
         self.assertEqual(run_result.output.decode().strip(), "{}: {} {}".format(prime1 * prime2, prime1, prime2))
         # Clock time should be nearly the same as measured time
-        self.assertTrue(clock_time - 0.1 <= run_result.exec_time <= clock_time)
+        self.assertAlmostEqual(clock_time, run_result.exec_time, delta=0.1)
 
     def test_run_command_exec_memory(self):
         factor_input = "1234567890123456789012345678901"
