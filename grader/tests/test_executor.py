@@ -7,12 +7,12 @@ NOTE: Some of the tests in this file are heavily dependent on execution time
 import shutil
 import os
 from unittest import TestCase, mock
-from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter
-from tempfile import NamedTemporaryFile
 
+from updater import Updater
 import config
-from common import TestStatus
+import common
+from common import TestStatus, TestInfo
 from compiler import Compiler
 from executor import execute_problem
 from runner import RunConfig
@@ -20,167 +20,233 @@ import initializer
 
 
 class TestExecuteProblem(TestCase):
-    PATH_FIXTURES = os.path.abspath("tests/fixtures/execute_problem/")
+    PATH_FIXTURES = os.path.abspath("tests/fixtures/executor/")
 
     # Do it this way instead of using a class decorator since otherwise the patching
     # is not active in the setUp() / tearDown() methods -- and we need it there as well
-    patch_sandbox = mock.patch("config.PATH_SANDBOX", os.path.abspath("tests/test_sandbox/"))
+    patch_sandbox = mock.patch("config.PATH_SANDBOX", os.path.abspath("tests/fake_sandbox/"))
 
     @classmethod
     def setUpClass(cls):
         initializer.init()
-
         cls.patch_sandbox.start()
-        if not os.path.exists(config.PATH_SANDBOX):
-            os.makedirs(config.PATH_SANDBOX)
+        os.makedirs(config.PATH_SANDBOX, exist_ok=True)
+
+        cls.tests_abproblem = []
+        for pos in range(3):
+            test = TestInfo(inpFile="test.in", inpHash="hash.in", solFile="test.sol", solHash="hash.sol", position=pos)
+            test.inpPath = os.path.join(cls.PATH_FIXTURES, "ABProblem/Tests/ABProblem.{:02d}.in".format(pos))
+            test.solPath = os.path.join(cls.PATH_FIXTURES, "ABProblem/Tests/ABProblem.{:02d}.sol".format(pos))
+            cls.tests_abproblem.append(test)
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(config.PATH_SANDBOX)
         cls.patch_sandbox.stop()
 
-    @classmethod
-    def get_run_config(cls, evaluator):
-        return RunConfig(
-            time_limit=evaluator.time_limit,
-            memory_limit=evaluator.memory_limit,
-            executable_path=evaluator.path_executable,
-            checker_path=evaluator.path_checker_executable,
-            tester_path=evaluator.path_tester_executable,
-            compare_floats=evaluator.floats
+    @mock.patch("updater.Updater.add_info")
+    def exec_helper(self, add_info, path_source, tests, run_config, expected_results):
+        updater = Updater("fake/endpoint", 42, [])
+        updater_results = []
+        add_info.side_effect = lambda result: updater_results.append(result)
+
+        # Configure fake paths to the solution and its executable and compile it
+        language = common.get_language_by_source_name(path_source)
+        path_executable = os.path.join(config.PATH_SANDBOX, "solution.{}".format(common.get_executable_extension(language)))
+        compilation_status = Compiler.compile(
+            language=language,
+            path_source=path_source,
+            path_executable=path_executable
+        )
+        self.assertEqual(compilation_status, "")
+        run_config.executable_path = path_executable
+
+        try:
+            for test in tests:
+                execute_problem(updater=updater, submit_id=42, result_id=0, test=test, run_config=run_config)
+        except:
+            self.fail("Failed during execution of tests.")
+
+        self.assertEqual(add_info.call_count, len(tests) * 2)
+        for result in updater_results:
+            if result["status"] != TestStatus.TESTING.name:
+                # print(result)
+                found = False
+                for i in range(len(expected_results)):
+                    if result["status"] == expected_results[i].name:
+                        found = True
+                        del expected_results[i]
+                        break
+                self.assertTrue(found, msg="Status '{}' not among expected results.".format(result["status"]))
+
+    def test_successful_execution_cpp(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblem.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
         )
 
-    """
-    def test_successful_execution_cpp(self, add_info):
-        input_file = NamedTemporaryFile(mode="w+b", delete=False)
-        input_file.write(b"133742")
-        input_file.flush()
-        expected_output = 42
+    def test_successful_execution_cpp2(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblem2.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
+        )
 
-        start_time = perf_counter()
+    def test_unsuccessful_execution_cpp(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemWA1.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.WRONG_ANSWER, TestStatus.ACCEPTED]
+        )
 
-        call_args = []
-        add_info.side_effect = lambda result: call_args.append(result)
+    def test_successful_execution_java(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblem.java"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
+        )
 
-        evaluator = self.evaluator_cpp
-        run_config = self.get_run_config(evaluator)
+    def test_successful_execution_python(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblem.py"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
+        )
 
-        test_futures = []
-        result_id = 0
-        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
-        for test in evaluator.tests:
-            future = pool.submit(execute_problem, evaluator.updater, evaluator.id, result_id, test, run_config)
-            test_futures.append((test, future))
-            result_id += 1
+    def test_floating_point_comparison(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=False)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblem.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER]
+        )
 
-        for test, future in test_futures:
-            try:
-                future.result()  # Wait for the test to be executed
-            except Exception as ex:
-                self.fail("Got an exception: '{}'.".format(ex))
-        total_time = perf_counter() - start_time
-        print("Total time: {:.3f}s".format(total_time))
-        print(call_args)
-        self.assertTrue(total_time < evaluator.time_limit * len(evaluator.tests) / config.MAX_PARALLEL_EXECUTORS)
-        self.assertEqual(add_info.call_count, len(evaluator.tests) * 2)
-    """
+    def test_time_limit(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemTL.py"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.TIME_LIMIT, TestStatus.ACCEPTED]
+        )
 
-    """
-    def test_full_run_errors(self, add_info):
-    """
+    def test_printing_extra_output(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemWA2.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.WRONG_ANSWER, TestStatus.ACCEPTED]
+        )
 
-    """
-    # We'll use a dummy task for testing various run statuses. The task is the following:
-    # Given a number N, return the sum of products of all distinct triplets of numbers in [1, N] modulo 1000000007.
+    def test_writing_to_file(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemRE1.py"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR, TestStatus.ACCEPTED]
+        )
 
-    # Test ThreeSum_01: N = 20, the solution returns the correct answer (ACCEPTED)
-    def test_accepted(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[1])
-        self.assertIs(result.status, TestStatus.ACCEPTED)
-        self.assertEqual(result.error_message, "")
+    def test_exceeding_output_limit(self):
+        run_config = RunConfig(time_limit=3.0, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemRE2.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR, TestStatus.ACCEPTED]
+        )
 
-    # Test ThreeSum_02: N = 200, the solution returns a wrong answer (WRONG_ANSWER)
-    def test_wrong_answer(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[2])
-        self.assertIs(result.status, TestStatus.WRONG_ANSWER)
-        self.assertEqual("Expected", result.error_message[:8])
+    def test_forking(self):
+        run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemFork.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER]
+        )
 
-    # Test ThreeSum_03: N = 1700, the solution is slightly slow (TIME_LIMIT)
-    def test_time_limit_close(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[3])
-        self.assertIs(result.status, TestStatus.TIME_LIMIT)
-        self.assertGreater(result.exec_time, self.evaluator_cpp.time_limit)
+    def test_spawning_fork_bomb(self):
+        run_config = RunConfig(time_limit=1.0, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemFB.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.WRONG_ANSWER, TestStatus.ACCEPTED]
+        )
 
-    # Test ThreeSum_04: N = 2200, the solution is slightly slow but catches the SIGTERM so it is killed
-    def test_time_limit_close_handle_sigterm(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[4])
-        self.assertIs(result.status, TestStatus.TIME_LIMIT)
+    def test_counting_total_time_of_all_threads(self):
+        run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemThreads.java"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.TIME_LIMIT, TestStatus.ACCEPTED]
+        )
 
-    # Test ThreeSum_05: N = 3000, the solution is very slow (TIME_LIMIT)
-    def test_time_limit_not_close(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[5])
-        self.assertIs(result.status, TestStatus.TIME_LIMIT)
-        self.assertGreater(result.exec_time, self.evaluator_cpp.time_limit)
+    def test_counting_total_time_of_all_processes(self):
+        run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemTime.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.TIME_LIMIT, TestStatus.ACCEPTED]
+        )
 
-    # Test ThreeSum_06: N = 20000, the solution accesses invalid array index (RUNTIME_ERROR)
-    def test_runtime_error(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[6])
-        self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
-        self.assertNotEqual(result.exit_code, 0)
+    def test_segfaults_10_elements(self):
+        run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemSeg1.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR]
+        )
 
-    # Test ThreeSum_07: N = 200000, the solution uses too much memory (MEMORY_LIMIT)
-    def test_memory_limit(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[7])
-        self.assertIs(result.status, TestStatus.MEMORY_LIMIT)
-        self.assertGreater(result.exec_memory, self.evaluator_cpp.memory_limit)
+    def test_segfaults_4K_elements(self):
+        run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemSeg2.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR]
+        )
 
-    # Test ThreeSum_08: N = 13, the solution forks, but that's allowed (ACCEPTED)
-    def test_forking_works(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[8])
-        self.assertIs(result.status, TestStatus.ACCEPTED)
-        self.assertEqual("", result.error_message)
+    def test_segfaults_4M_elements(self):
+        run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemSeg3.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR]
+        )
 
-    # Test ThreeSum_09: N = 17, the solution tries a fork bomb but cannot spawn more than few threads
-    def test_forkbomb(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[9])
-        self.assertIs(result.status, TestStatus.WRONG_ANSWER)
-        self.assertEqual("Expected \"741285\" but received \"Cannot fork!\".", result.error_message)
+    def test_exec_from_program(self):
+        run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemExec.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            # Currently there is no limitation to exec with system() and possibly others =(
+            expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
+        )
 
-    # Test ThreeSum_10: N = 1777, the solution uses several threads to calculate the answer
-    # Make sure the combined time is reported. (TIME_LIMIT)
-    @mock.patch("Compiler.COMPILE_COMMAND_CPP", Compiler.COMPILE_COMMAND_CPP.replace("g++", "g++ -pthread"))
-    def test_threading(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[10])
-        self.assertIs(result.status, TestStatus.TIME_LIMIT)
-        self.assertEqual("", result.error_message)
-
-    # Test ThreeSum_11: N = 42, the solution is killed due to writing to file in current directory (RUNTIME_ERROR)
-    def test_killed_writing_file_curr(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[11])
-        self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
-        self.assertNotEqual(result.exit_code, 0)
-
-    # Test ThreeSum_12: N = 43, the solution is killed due to writing to file in home directory (RUNTIME_ERROR)
-    def test_killed_writing_file_home(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[12])
-        self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
-        self.assertNotEqual(result.exit_code, 0)
-
-    # Test ThreeSum_13: N = 665, the solution is printing a lot of output, but below the limit (WRONG_ANSWER)
-    def test_near_output_limit(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[13])
-        self.assertIs(result.status, TestStatus.WRONG_ANSWER)
-        self.assertEqual(result.exit_code, 0)
-
-    # Test ThreeSum_14: N = 666, the solution is killed due to exceeding output limit (RUNTIME_ERROR)
-    def test_killed_output_limit_exceeded(self):
-        result = Runner(self.evaluator_cpp).run_problem(-1, self.evaluator_cpp.tests[14])
-        self.assertIs(result.status, TestStatus.RUNTIME_ERROR)
-        self.assertNotEqual(result.exit_code, 0)
-
-    def test_java_solution_run(self):
-        # Run the solution
-        result = Runner(self.evaluator_java).run_problem(-1, self.evaluator_java.tests[15])
-        self.assertIs(result.status, TestStatus.ACCEPTED)
-        self.assertEqual(result.error_message, "")
-    """
+    def test_out_of_memory(self):
+        run_config = RunConfig(time_limit=3.0, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
+        self.exec_helper(
+            path_source=os.path.join(self.PATH_FIXTURES, "ABProblem/Solutions/ABProblemOOM.cpp"),
+            tests=self.tests_abproblem,
+            run_config=run_config,
+            expected_results=[TestStatus.ACCEPTED, TestStatus.MEMORY_LIMIT, TestStatus.ACCEPTED]
+        )

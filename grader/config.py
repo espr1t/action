@@ -45,11 +45,11 @@ PROCESS_PRIORITY_REAL = +50  # In [  1, 99], +99 is highest
 
 # Execution limits
 MAX_OPEN_FILES = 32
-MAX_PROCESSES = 256
+MAX_PROCESSES = 64
 MAX_EXECUTION_TIME = 300  # Seconds = 5 minutes
 MAX_EXECUTION_MEMORY = 2147483648  # Bytes = 2GB
 MAX_EXECUTION_STACK = 67108864  # Bytes = 64MB
-MAX_EXECUTION_OUTPUT = 16777216  # Bytes = 16MB
+MAX_EXECUTION_OUTPUT = 16777216  # Bytes = 16MB (actually set to the nearest larger power of two)
 
 # Games
 MAX_GAME_LENGTH = MAX_EXECUTION_TIME - 1

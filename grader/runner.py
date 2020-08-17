@@ -56,6 +56,7 @@ class Runner:
         pipe = os.pipe()
         # Change the pipe buffers to be much larger so writes don't block
         # (it is very easy to get to a deadlock here, and this solves the issue to some extent)
+        # Please note that this limit is rounded to the nearest power of 2, larger than the limit
         if not hasattr(fcntl, "F_SETPIPE_SZ"):
             fcntl.F_SETPIPE_SZ = 1031
         fcntl.fcntl(pipe[1], fcntl.F_SETPIPE_SZ, max_size)

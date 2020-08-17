@@ -97,7 +97,7 @@ class Sandbox:
         # Set the stack to be 64MB
         setrlimit(RLIMIT_STACK, (config.MAX_EXECUTION_STACK, config.MAX_EXECUTION_STACK))
 
-        # Kill the solution if it writes more than 16MB of output
+        # Kill the solution if it writes more than a certain amount of output
         setrlimit(RLIMIT_FSIZE, (config.MAX_EXECUTION_OUTPUT, config.MAX_EXECUTION_OUTPUT))
 
         # Limit creation of new processes and threads
