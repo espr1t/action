@@ -2,6 +2,7 @@ import sys
 import subprocess
 import json
 import psutil
+from time import sleep
 from wrapper import COMMAND_WRAPPER, parse_exec_info
 
 
@@ -45,7 +46,7 @@ def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_
     sys.stderr.write("Starting tester process...\n")
     # Start the tester's process
 
-    tester_process = psutil.Popen(
+    tester_parent = psutil.Popen(
         args=tester_wrapped_cmd,
         shell=True,
         stdin=subprocess.PIPE,
@@ -56,16 +57,16 @@ def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_
 
     sys.stderr.write("Writing input data...\n")
     # Write the input file to the tester
-    tester_process.stdin.write(input_text)
-    tester_process.stdin.flush()
+    tester_parent.stdin.write(input_text)
+    tester_parent.stdin.flush()
 
     sys.stderr.write("Starting solution process...\n")
     # Start the solution's process (piping the tester's input and output directly)
     solution_process = psutil.Popen(
         args=solution_wrapped_cmd,
         shell=True,
-        stdin=tester_process.stdout,
-        stdout=tester_process.stdin,
+        stdin=tester_parent.stdout,
+        stdout=tester_parent.stdin,
         stderr=subprocess.PIPE,
         universal_newlines=True
     )
@@ -74,23 +75,48 @@ def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_
     if solution_process.wait() != 0:
         solution_exited_unexpectedly = True
     else:
-        try:
-            # Give the tester time to print the interaction log and finish its execution
-            tester_process.wait(timeout=tester_timeout-solution_timeout)
-        except psutil.TimeoutExpired:
-            # If the tester doesn't finish in one more second then it is most likely waiting
-            # on input from the solution. It may be other issue, but let's assume the tester
-            # is written properly and this is not the case.
-            solution_exited_unexpectedly = True
+        # Get a handle to the actual tester's executable process
+        # (and not the shell it is ran in, time or timeout commands)
+        tester_process = tester_parent
+        rem_time = 0.2
+        while rem_time > 0:
+            sleep(0.01)
+            rem_time -= 0.01
+            while len(tester_process.children()) > 0:
+                tester_process = tester_process.children()[0]
+            if tester_process.name not in ["sh", "time", "timeout"]:
+                break
+        sys.stderr.write("Process = {}\n".format(tester_process))
+
+        if rem_time > 0:
+            # The tester can be waiting for more input from the solution until it is killed.
+            # This can happen if the solution crashed unexpectedly or simply exited in the middle of the interaction.
+            blocked_on_input = True
+            rem_checks = 10
+            while rem_checks > 0:
+                sleep(0.01)
+                rem_checks -= 1
+                if tester_process.is_running():
+                    sys.stderr.write("  >> status = {}\n".format(tester_process.status()))
+                    if tester_process.status() != "sleeping":
+                        blocked_on_input = False
+                        break
+
+            if blocked_on_input:
+                solution_exited_unexpectedly = True
+            else:
+                # Seems like the tester is not blocked, thus wait for it
+                # to print the interaction log and finish its execution
+                tester_parent.wait()
 
     if solution_exited_unexpectedly:
         # Apparently the solution process died unexpectedly, but the tester is still waiting
         # for its output. Kill it immediately, along with its children (if any).
-        for process in tester_process.children(recursive=True):
+        for process in tester_parent.children(recursive=True):
             process.kill()
-        tester_process.kill()
+        tester_parent.kill()
 
-    tester_stderr = tester_process.stderr.read()
+    tester_stderr = tester_parent.stderr.read()
     solution_stderr = solution_process.stderr.read()
 
     sys.stderr.write("Parsing output...\n")

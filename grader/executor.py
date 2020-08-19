@@ -135,11 +135,12 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
     solution_executable_name = "solution." + run_config.executable_path.split(".")[-1]
 
     # Both the tester and the solution get extra time in order to account for time tester
-    # processes input/output. The tester gets additional time to make sure it is killed
-    # after the solution.
-    extra_time = min(1.0, run_config.time_limit)
-    solution_timeout = run_config.timeout + extra_time
-    tester_timeout = solution_timeout + extra_time
+    # processes input/output. The tester gets additional time to make sure it can print
+    # the log and results properly after the solution completes its execution.
+    tester_communication_time = min(1.0, run_config.time_limit * 2)
+    tester_postprocessing_time = 1.0
+    solution_timeout = run_config.timeout + tester_communication_time
+    tester_timeout = solution_timeout + tester_postprocessing_time
 
     args = {
         "tester_timeout": tester_timeout,
@@ -156,6 +157,7 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
         ),
         "log_file": log_file
     }
+    # print(json.dumps(args, indent=4, sort_keys=True))
 
     empty_file = NamedTemporaryFile(mode="w+t", delete=False)
     empty_file_path = os.path.abspath(empty_file.name)

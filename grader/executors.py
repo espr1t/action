@@ -36,7 +36,6 @@ class Executors:
             Executors._setup_executors()
         if not Executors._have_been_queued:
             Executors._queue_executors()
-        logger.info("Executors initialized successfully.")
 
     @staticmethod
     def clean():

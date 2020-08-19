@@ -9,11 +9,19 @@ KEYWORDS: Easy, Binary Search
 
 int main(void) {
     int left = 1, right = 1000;
-    while (left < right) {
+    while (left <= right) {
         int mid = (left + right) / 2;
         if (mid >= 10 && mid <= 40) {
+            // This will cause unexpected (non-integer) output, which should be
+            // handled correctly by the tester. 3 tests fall into this category
             fprintf(stdout, "Boo!\n");
             fflush(stdout);
+            break;
+        }
+        if (mid >= 700 && mid <= 900) {
+            // This will cause sudden exit of the solution without printing output
+            // to the tester, which should be handled correctly by the system
+            // 4 tests fall into this category
             break;
         }
         fprintf(stdout, "%d\n", mid);

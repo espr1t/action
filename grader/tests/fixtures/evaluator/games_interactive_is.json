@@ -1,0 +1,23 @@
+{
+    "id": 1337,
+    "source": "Source replaced in tests.",
+    "language": "Unknown",
+    "tester": "ImageScannerTester",
+    "checker": "",
+    "floats": false,
+    "problemType": "interactive",
+    "timeLimit": 5.0,
+    "memoryLimit": 256,
+    "tests": [
+        {
+            "position": 0,
+            "inpFile": "ImageScanner.00.in",
+            "inpHash": "ImageScanner.00.in.hash",
+            "solFile": "ImageScanner.00.sol",
+            "solHash": "ImageScanner.00.sol.hash"
+        }
+    ],
+    "testsEndpoint": "",
+    "testerEndpoint": "",
+    "updateEndpoint": "http://192.168.1.123/actions/update"
+}

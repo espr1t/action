@@ -49,7 +49,8 @@ class TestEvaluator(TestCase):
             ("problems_standard_sheep.json", "Sheep"),
             ("problems_checker_ruler.json", "Ruler"),
             ("games_two_player_uttt.json", "UTTT"),
-            ("games_interactive_ng.json", "NG")
+            ("games_interactive_ng.json", "NG"),
+            ("games_interactive_is.json", "ImageScanner")
         ]
 
         # Create an Evaluator objects for each task and copy its tests in the test_data folder
@@ -294,7 +295,7 @@ class TestEvaluator(TestCase):
     #                   Number Guessing                    #
     #                  (interactive game)                  #
     ########################################################
-    def test_interactive_game(self):
+    def test_interactive_game_ng(self):
         evaluator = self.get_evaluator("games_interactive_ng.json", config.LANGUAGE_CPP)
 
         # Configure fake paths to the tester and its executable and compile it
@@ -336,7 +337,38 @@ class TestEvaluator(TestCase):
             source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessingWA.cpp"),
             time_lb=0.0,
             memory_lb=0.0,
-            expected_errors={"WRONG_ANSWER": 6}
+            expected_errors={"WRONG_ANSWER": 7}
+        )
+
+    ########################################################
+    #                    Image Scanner                     #
+    #                  (interactive game)                  #
+    ########################################################
+    def test_interactive_game_is(self):
+        # The only difference with the previous is that this problem has much larger input and output
+        # and the tester has to print lots of information in the end (thus, may take its time to finish)
+        evaluator = self.get_evaluator("games_interactive_is.json", config.LANGUAGE_CPP)
+
+        # Configure fake paths to the tester and its executable and compile it
+        evaluator.path_tester_source = os.path.join(self.PATH_FIXTURES, "ImageScanner/Tester/ImageScannerTester.cpp")
+        evaluator.path_tester_executable = os.path.join(config.PATH_TESTERS, "ImageScannerTester.o")
+
+        # Compile the tester
+        compilation_status = Compiler.compile(
+            language=config.LANGUAGE_CPP,
+            path_source=evaluator.path_tester_source,
+            path_executable=evaluator.path_tester_executable
+        )
+        self.assertEqual(compilation_status, "")
+
+        # OK
+        self.standard_problem_helper(
+            evaluator=evaluator,
+            language=config.LANGUAGE_CPP,
+            source=os.path.join(self.PATH_FIXTURES, "ImageScanner/Solutions/ImageScanner.cpp"),
+            time_lb=0.0,
+            memory_lb=0.0,
+            expected_errors={}
         )
 
     ########################################################
