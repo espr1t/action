@@ -4,7 +4,12 @@ function readFile(fileName, type) {
         if (xhttp.readyState == 4) {
             if(xhttp.status == 200) {
                 var code = xhttp.responseText;
-                console.log(detectLanguage(code) == type);
+                var detected = detectLanguage(code);
+                if (type === detected) {
+                    console.log("For file '" + fileName + "' expected " + type + ", got " + detected);
+                } else {
+                    console.error("For file '" + fileName + "' expected " + type + ", got " + detected);
+                }
             } else console.log('ERROR');
         }
     }
@@ -234,7 +239,13 @@ function removePyStyleComments(code) {
 
 function scoreByKeyword(code, scores, index, multiplier, keyword) {
     var re = new RegExp("(^|\\s)" + keyword + "(\\s|\\(|$)", 'g');
-    scores[index] += (code.match(re) || []).length * multiplier;
+    var removeChars = ['<', '>', '#', ':', ';', '=', '{', '}', '(', ')', '[', ']'];
+    for (var ch of removeChars) {
+        code = code.replace(ch, ' ');
+    }
+    var numMatches = (code.match(re) || []).length;
+    // console.log("Keyword " + keyword + " matched " + numMatches + " tokens.");
+    scores[index] += numMatches > 0 ? multiplier : 0;
 }
 
 /*
@@ -249,7 +260,8 @@ function detectLanguage(code) {
 
     var keywordsCpp = ["auto", "bool", "const", "constexpr", "const_cast", "delete", "dynamic_cast", "extern", "friend",
                        "inline", "nullptr", "operator", "reinterpret_cast", "signed", "sizeof", "static_cast",
-                       "struct", "template", "typedef", "typename", "union", "unsigned", "using", "virtual", "#include"];
+                       "struct", "template", "typedef", "typename", "union", "unsigned", "using", "virtual", "include",
+                       "std", "cout", "cerr", "endl"];
 
     var keywordsCppAndJava = ["case", "catch", "char", "default", "do", "double", "enum", "float", "int", "long", "namespace",
                               "new", "private", "protected", "public", "short", "static", "switch", "synchronized", "this",
@@ -287,6 +299,7 @@ function detectLanguage(code) {
     });
 
     keywordsPythonAndJava.forEach(function(item) {
+        scoreByKeyword(codeWithoutCStyleComments, scores, 1, keywordType.WEAK, item);
         scoreByKeyword(codeWithoutPyStyleComments, scores, 2, keywordType.WEAK, item);
     });
 
