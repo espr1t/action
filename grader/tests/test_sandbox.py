@@ -124,7 +124,7 @@ class TestSandbox(TestCase):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="chroot ..")
         self.assertIn("Operation not permitted", stderr)
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="sudo chroot ..")
-        self.assertIn("you do not exist in the passwd database", stderr)
+        self.assertIn("is not allowed to execute '/usr/sbin/chroot ..'", stderr)
 
     # ================================= #
     #         File System Access        #
@@ -203,7 +203,7 @@ class TestSandbox(TestCase):
     @mock.patch("config.MAX_EXECUTION_TIME", 1.0)
     def test_no_localhost_access(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="ping localhost")
-        self.assertIn("Name or service not known", stderr)
+        self.assertIn("Operation not permitted", stderr)
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="ping 127.0.0.1")
         self.assertIn("Operation not permitted", stderr)
 
@@ -245,9 +245,13 @@ class TestSandbox(TestCase):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="nice")
         self.assertEqual(str(config.PROCESS_PRIORITY_NICE), stdout)
 
-    def test_executor_user(self):
+    def test_executor_id(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="id -u")
         self.assertGreaterEqual(int(stdout), 1000)
+
+    def test_executor_user(self):
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="whoami")
+        self.assertTrue("executor" in stdout)
 
     def test_scheduling_algorithm(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="chrt -p $$")
@@ -403,7 +407,9 @@ class TestSandbox(TestCase):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="sleep 3; echo foo")
         self.assertEqual("", stdout)
         self.assertEqual("", stderr)
-        self.assertTrue(0.4 < perf_counter() - start_time < 0.6)
+        exec_time = perf_counter() - start_time
+        self.assertGreaterEqual(exec_time, 0.4)
+        self.assertLessEqual(exec_time, 0.6)
 
     @mock.patch("config.MAX_EXECUTION_TIME", 1.0)
     def test_fork_bomb(self):
@@ -491,7 +497,8 @@ class TestSandbox(TestCase):
         )
         self.assertTrue(sandbox.has_file("mem_allocator"))
 
-        command = "/usr/bin/time --quiet --format='%M' /bin/bash -c \"./mem_allocator heap {}\" ; >&2 echo $?"
+        command = "/usr/bin/time --quiet --format='%M' /bin/bash -c \"./mem_allocator heap {}\"" +\
+                  " ; code=$? ; >&2 echo $code ; exit $code"
 
         targets = [10000000, 100000000, 500000000, 1000000000, 2000000000]  # 10MB, 100MB, 500MB, 1GB, 2GB
         for target in targets:
@@ -500,15 +507,15 @@ class TestSandbox(TestCase):
             self.assertEqual(exit_code, 0)
             self.assertTrue(target <= exec_memory * 1024 <= target + 5000000)  # Up to 5MB overhead for C++ libraries
 
-        # Ten megabytes less than the threshold is okay
-        target = config.MAX_EXECUTION_MEMORY - 10000000
+        # Twenty megabytes less than the threshold is okay
+        target = config.MAX_EXECUTION_MEMORY - 20000000
         stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
         exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
         self.assertEqual(exit_code, 0)
         self.assertTrue(target <= exec_memory * 1024 <= target + 5000000)  # Up to 5MB overhead for C++ libraries
 
-        # Ten megabytes more than the threshold is not okay
-        target = config.MAX_EXECUTION_MEMORY + 10000000
+        # Allocating around the threshold is no longer okay
+        target = config.MAX_EXECUTION_MEMORY
         stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
         exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
         self.assertNotEqual(exit_code, 0)
@@ -522,7 +529,8 @@ class TestSandbox(TestCase):
         )
         self.assertTrue(sandbox.has_file("mem_allocator"))
 
-        command = "/usr/bin/time --quiet --format='%M' /bin/bash -c \"./mem_allocator stack {}\" ; >&2 echo $?"
+        command = "/usr/bin/time --quiet --format='%M' /bin/bash -c \"./mem_allocator stack {}\"" +\
+                  " ; code=$? ; >&2 echo $code ; exit $code"
 
         # Test different target stack sizes (should all be okay)
         targets = [1000000, 10000000, 50000000]  # 1MB, 10MB, 50MB
@@ -570,11 +578,12 @@ class TestSandbox(TestCase):
         self.assertEqual("", stderr)
         self.assertTrue(stdout.startswith("-rwx") and stdout.endswith("time"))
 
-        command = "/usr/bin/time --quiet --format='%x %U %S %e %M' /bin/bash -c 'sleep 0.33; echo foo'"
+        command = "/usr/bin/time --quiet --format='%U %S %e %M' /bin/bash -c 'sleep 0.33; echo foo'" + \
+                  " ; code=$? ; >&2 echo $code ; exit $code"
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command=command)
         self.assertEqual(stdout, "foo")
-        self.assertEqual(int(stderr.split()[0]), 0)  # Exit code
-        self.assertGreaterEqual(float(stderr.split()[3]), 0.33)  # Clock time
+        self.assertEqual(int(stderr.splitlines()[-1]), 0)  # Exit code
+        self.assertGreaterEqual(float(stderr.splitlines()[-2].split()[2]), 0.33)  # Clock time
 
     def test_timeout_command_available(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="ls -la /usr/bin | grep -w timeout")
@@ -610,10 +619,11 @@ class TestSandbox(TestCase):
 
         # Expecting none of the workers to wait for another one to finish, this get a Sandbox object immediately
         self.assertLess(max_waiting_time, 0.1)
+        exec_time = perf_counter() - start_time
         # Waiting all of them to complete takes at least 0.2 seconds
-        self.assertGreaterEqual(perf_counter() - start_time, 0.2)
+        self.assertGreaterEqual(exec_time, 0.2)
         # But not much more than 0.2 seconds
-        self.assertLess(perf_counter() - start_time, 0.3)
+        self.assertLess(exec_time, 0.3)
 
     def test_executors_over_limit(self):
         start_time = perf_counter()
@@ -633,6 +643,7 @@ class TestSandbox(TestCase):
 
         # Expecting one of the workers to wait for another one to finish before getting a Sandbox object
         self.assertGreaterEqual(max_waiting_time, 0.2)
+        self.assertLess(max_waiting_time, 0.3)
         # Waiting all of them to complete takes at least 0.4 seconds (twice as much)
         self.assertGreaterEqual(perf_counter() - start_time, 0.4)
         # But not much more than 0.4 seconds

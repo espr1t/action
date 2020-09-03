@@ -69,7 +69,7 @@ class Executors:
 
     @staticmethod
     def _create_user(username):
-        if os.system("useradd --shell /bin/bash -M {}".format(username)):
+        if os.system("useradd --shell /bin/bash -G executors -M {}".format(username)):
             logger.fatal("Cannot create user '{}'!".format(username))
             exit(-1)
         return Executors._get_user_id(username)
@@ -184,6 +184,7 @@ class Executors:
             limiter.set_rdt_limits()
 
             # Create the user and sandbox (chroot) directory for each executor
+            os.system("sudo groupadd executors")
             for i in range(config.MAX_PARALLEL_EXECUTORS):
                 executor = Executor(cpu=-1, user=-1, name="executor{:02d}".format(i + 1))
                 logger.info("Setting up {}...".format(executor.name))

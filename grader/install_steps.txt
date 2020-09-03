@@ -52,7 +52,13 @@ Installation steps:
 8.1. (Optional) Install fonts (needs to be in <root_dir>/grader/ folder):
     sudo cp fonts/* /usr/local/share/fonts
 9. Finally, run the service as root (from the project's base directory, e.g. /home/grader/action):
-    make run
+9.1. Create sandbox directories and users
+    >> make init
+9.2. Remove password prompts for "sudo" commands (not allowed, but prompts can lead to problems):
+    >> sudo visudo
+    >> Add the line "%executors ALL=(ALL) NOPASSWD: !ALL" at the bottom
+9.3. Run the actual service
+    >> make run
 10. (Optional) Run it automatically on OS load:
 10.1. Add it to the list of cronjobs on system start:
     >> sudo crontab -e
