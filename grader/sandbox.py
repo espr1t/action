@@ -121,7 +121,8 @@ class Sandbox:
         # A hard limit of 5 minutes for running anything in a sandbox
         # This is a very crude fail-safe mechanism if something really goes wrong
         # (shouldn't happen in practice if everything is working as intended)
-        setrlimit(RLIMIT_CPU, (config.MAX_EXECUTION_TIME, config.MAX_EXECUTION_TIME))
+        cpu_limit = max(1, round(config.MAX_EXECUTION_TIME))  # Tests may set this to non-integers, thus fix it
+        setrlimit(RLIMIT_CPU, (cpu_limit, cpu_limit))
 
         # Increase the priority of the process (in case realtime scheduler is not available)
         os.nice(config.PROCESS_PRIORITY_NICE)
