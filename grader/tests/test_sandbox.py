@@ -408,8 +408,8 @@ class TestSandbox(TestCase):
         self.assertEqual("", stdout)
         self.assertEqual("", stderr)
         exec_time = perf_counter() - start_time
-        self.assertGreaterEqual(exec_time, 0.4)
-        self.assertLessEqual(exec_time, 0.6)
+        self.assertGreaterEqual(exec_time, 0.5)
+        self.assertLess(exec_time, 0.7)
 
     @mock.patch("config.MAX_EXECUTION_TIME", 1.0)
     def test_fork_bomb(self):
@@ -461,6 +461,7 @@ class TestSandbox(TestCase):
         sleep(0.2)
         self.assertTrue(sandbox.is_running())
         ps_info = os.popen("ps -U {}".format(sandbox._executor.name)).read()
+        print("ps_info = {}".format(ps_info))
         self.assertEqual(len(ps_info.splitlines()) - 1, config.MAX_PROCESSES)
 
         # What's worse, even after that they are still alive
@@ -583,7 +584,9 @@ class TestSandbox(TestCase):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command=command)
         self.assertEqual(stdout, "foo")
         self.assertEqual(int(stderr.splitlines()[-1]), 0)  # Exit code
-        self.assertGreaterEqual(float(stderr.splitlines()[-2].split()[2]), 0.33)  # Clock time
+        self.assertLess(float(stderr.splitlines()[-2].split()[0]), 0.1)  # User time
+        self.assertLess(float(stderr.splitlines()[-2].split()[1]), 0.1)  # Kernel time
+        self.assertAlmostEqual(float(stderr.splitlines()[-2].split()[2]), 0.33, delta=0.1)  # Clock time
 
     def test_timeout_command_available(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="ls -la /usr/bin | grep -w timeout")
@@ -591,10 +594,10 @@ class TestSandbox(TestCase):
         self.assertTrue(stdout.startswith("-rwx") and stdout.endswith("timeout"))
 
         start_time = perf_counter()
-        command = "/usr/bin/timeout 0.2s /bin/bash -c 'sleep 1.0; echo foo'"
+        command = "/usr/bin/timeout 0.3s /bin/bash -c 'sleep 1.0; echo foo'"
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command=command)
         self.assertEqual(stdout, "")  # No output, killed before that
-        self.assertLess(perf_counter() - start_time, 0.3)  # Killed shortly after the timeout
+        self.assertLess(perf_counter() - start_time, 0.5)  # Killed shortly after the timeout
 
     # Up to MAX_PARALLEL_EXECUTORS run in parallel.
     # We expect if we run less than or equal to MAX_PARALLEL_EXECUTORS to take clock time equal to the longest
@@ -603,7 +606,7 @@ class TestSandbox(TestCase):
         start_time = perf_counter()
         sandbox = Sandbox()
         waiting_time = perf_counter() - start_time
-        self.sandbox_helper(sandbox=sandbox, command="sleep 0.2 ; echo foo")
+        self.sandbox_helper(sandbox=sandbox, command="sleep 0.5 ; echo foo")
         return waiting_time
 
     def test_executors_under_limit(self):
@@ -612,18 +615,21 @@ class TestSandbox(TestCase):
         pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
         futures = [pool.submit(self.dummy_sleep_helper) for _ in range(config.MAX_PARALLEL_EXECUTORS)]
 
+        # Each of the processes runs in ~0.5s, but since we schedule them through a thread pool
+        # we should reach this point much earlier.
+        self.assertLess(perf_counter() - start_time, 0.1)
+
         # Wait for all workers to complete and get the maximum waiting time for a Sandbox object
         max_waiting_time = 0.0
         for future in futures:
             max_waiting_time = max(max_waiting_time, future.result())
 
         # Expecting none of the workers to wait for another one to finish, this get a Sandbox object immediately
-        self.assertLess(max_waiting_time, 0.1)
-        exec_time = perf_counter() - start_time
-        # Waiting all of them to complete takes at least 0.2 seconds
-        self.assertGreaterEqual(exec_time, 0.2)
-        # But not much more than 0.2 seconds
-        self.assertLess(exec_time, 0.3)
+        self.assertLess(max_waiting_time, 0.2)
+        # Waiting all of them to complete takes at least 0.5 seconds
+        self.assertGreaterEqual(perf_counter() - start_time, 0.5)
+        # But not much more than 0.5 seconds
+        self.assertLess(perf_counter() - start_time, 0.7)
 
     def test_executors_over_limit(self):
         start_time = perf_counter()
@@ -631,7 +637,7 @@ class TestSandbox(TestCase):
         pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS + 1)
         futures = [pool.submit(self.dummy_sleep_helper) for _ in range(config.MAX_PARALLEL_EXECUTORS + 1)]
 
-        # Each of the processes runs in ~0.2s, but since we schedule them through a thread pool
+        # Each of the processes runs in ~0.5s, but since we schedule them through a thread pool
         # we should reach this point much earlier. One of the threads should be blocked on waiting
         # for a sandbox, though.
         self.assertLess(perf_counter() - start_time, 0.1)
@@ -642,9 +648,9 @@ class TestSandbox(TestCase):
             max_waiting_time = max(max_waiting_time, future.result())
 
         # Expecting one of the workers to wait for another one to finish before getting a Sandbox object
-        self.assertGreaterEqual(max_waiting_time, 0.2)
-        self.assertLess(max_waiting_time, 0.3)
-        # Waiting all of them to complete takes at least 0.4 seconds (twice as much)
-        self.assertGreaterEqual(perf_counter() - start_time, 0.4)
-        # But not much more than 0.4 seconds
-        self.assertLess(perf_counter() - start_time, 0.5)
+        self.assertGreaterEqual(max_waiting_time, 0.5)
+        self.assertLess(max_waiting_time, 0.7)
+        # Waiting all of them to complete takes at least 1 second (twice as much)
+        self.assertGreaterEqual(perf_counter() - start_time, 1.0)
+        # But not much more than 1 second
+        self.assertLess(perf_counter() - start_time, 1.2)
