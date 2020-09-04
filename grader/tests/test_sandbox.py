@@ -63,6 +63,15 @@ class TestSandbox(TestCase):
     def tearDownClass(cls):
         pass
 
+    def setUp(self) -> None:
+        self.sandbox = None
+
+    def tearDown(self) -> None:
+        if self.sandbox is not None:
+            self.sandbox.wait(0.1)
+            del self.sandbox
+            self.sandbox = None
+
     @staticmethod
     def sandbox_helper(sandbox: Sandbox, command, privileged=False):
         stdout, stderr = TemporaryFile("wb+"), TemporaryFile("wb+")
@@ -269,133 +278,133 @@ class TestSandbox(TestCase):
     #            Sandbox API            #
     # ================================= #
     def test_has_file(self):
-        sandbox = Sandbox()
-        self.assertFalse(sandbox.has_file("foo.txt"))
-        self.assertTrue(sandbox.has_file("../usr/bin/timeout"))
+        self.sandbox = Sandbox()
+        self.assertFalse(self.sandbox.has_file("foo.txt"))
+        self.assertTrue(self.sandbox.has_file("../usr/bin/timeout"))
 
     def test_get_file(self):
-        sandbox = Sandbox()
+        self.sandbox = Sandbox()
         self.assertFalse(os.path.isfile("./time_binary"))
-        sandbox.get_file("../usr/bin/timeout", "./timeout_binary")
+        self.sandbox.get_file("../usr/bin/timeout", "./timeout_binary")
         self.assertTrue(os.path.isfile("./timeout_binary"))
         os.remove("./timeout_binary")
 
     def test_put_file(self):
-        sandbox = Sandbox()
-        self.assertFalse(sandbox.has_file("foo.txt"))
-        sandbox.put_file("install_steps.txt", "foo.txt")
-        self.assertTrue(sandbox.has_file("foo.txt"))
+        self.sandbox = Sandbox()
+        self.assertFalse(self.sandbox.has_file("foo.txt"))
+        self.sandbox.put_file("install_steps.txt", "foo.txt")
+        self.assertTrue(self.sandbox.has_file("foo.txt"))
 
     def test_put_file_with_permissions_write(self):
-        sandbox = Sandbox()
-        self.assertFalse(sandbox.has_file("foo.txt"))
-        sandbox.put_file("install_steps.txt", "foo.txt")
-        self.assertTrue(sandbox.has_file("foo.txt"))
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="echo bar > foo.txt")
+        self.sandbox = Sandbox()
+        self.assertFalse(self.sandbox.has_file("foo.txt"))
+        self.sandbox.put_file("install_steps.txt", "foo.txt")
+        self.assertTrue(self.sandbox.has_file("foo.txt"))
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="echo bar > foo.txt")
         self.assertNotEqual(stderr, "")  # No permissions to write
-        sandbox.put_file("install_steps.txt", "foo.txt", 0o777)
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="echo bar > foo.txt")
+        self.sandbox.put_file("install_steps.txt", "foo.txt", 0o777)
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="echo bar > foo.txt")
         self.assertEqual(stderr, "")  # This time has permissions
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="cat foo.txt")
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="cat foo.txt")
         self.assertEqual(stdout, "bar")  # Double check by printing the file's contents
 
     def test_put_file_with_permissions_exec(self):
-        sandbox = Sandbox()
-        sandbox.put_file("/bin/ls", "ls_binary")
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="./ls_binary ..")
+        self.sandbox = Sandbox()
+        self.sandbox.put_file("/bin/ls", "ls_binary")
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="./ls_binary ..")
         self.assertEqual(stderr, "")
         self.assertIn("bin", stdout)  # Should list parent folder
 
-        sandbox.put_file("/bin/ls", "ls_binary", 0o766)
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="./ls_binary ..")
+        self.sandbox.put_file("/bin/ls", "ls_binary", 0o766)
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="./ls_binary ..")
         self.assertIn("Permission denied", stderr)  # Should be unable to execute
         self.assertEqual(stdout, "")
 
     def test_read_file(self):
-        sandbox = Sandbox()
-        sandbox.put_file("install_steps.txt", "foo.txt")
-        contents = sandbox.read_file("foo.txt").decode()
+        self.sandbox = Sandbox()
+        self.sandbox.put_file("install_steps.txt", "foo.txt")
+        contents = self.sandbox.read_file("foo.txt").decode()
         self.assertIn("python", contents)
 
     def test_execute_blocking(self):
-        sandbox = Sandbox()
+        self.sandbox = Sandbox()
         output = TemporaryFile(mode="w+b")
         start_time = perf_counter()
-        sandbox.execute(command="sleep 0.2 ; echo foo", stdin_fd=None, stdout_fd=output, stderr_fd=None, blocking=True)
+        self.sandbox.execute(command="sleep 0.2 ; echo foo", stdin_fd=None, stdout_fd=output, stderr_fd=None, blocking=True)
         self.assertGreaterEqual(perf_counter() - start_time, 0.2)
         self.assertEqual(output.tell(), 4)  # Already printed "foo\n"
 
     def test_execute_non_blocking(self):
-        sandbox = Sandbox()
+        self.sandbox = Sandbox()
         output = TemporaryFile(mode="w+b")
         start_time = perf_counter()
-        sandbox.execute(command="sleep 0.2 ; echo foo", stdin_fd=None, stdout_fd=output, stderr_fd=None, blocking=False)
+        self.sandbox.execute(command="sleep 0.2 ; echo foo", stdin_fd=None, stdout_fd=output, stderr_fd=None, blocking=False)
         self.assertLess(perf_counter() - start_time, 0.1)
         self.assertEqual(output.tell(), 0)  # Haven't yet printed anything
         sleep(0.3)
         self.assertEqual(output.tell(), 4)  # But printing it eventually
 
     def test_privileged_execution(self):
-        sandbox = Sandbox()
-        sandbox.put_file("/bin/ls", "ls_binary", 0o744)
+        self.sandbox = Sandbox()
+        self.sandbox.put_file("/bin/ls", "ls_binary", 0o744)
 
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="./ls_binary ..")
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="./ls_binary ..")
         self.assertIn("Permission denied", stderr)  # Should be unable to execute
         self.assertEqual("", stdout)
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="./ls_binary ..", privileged=True)
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="./ls_binary ..", privileged=True)
         self.assertEqual("", stderr)  # But privileged user should be able to do it
         self.assertIn("bin", stdout)
 
     def test_privileged_deletion(self):
-        sandbox = Sandbox()
-        sandbox.put_file("/bin/ls", "ls_binary", 0o744)
+        self.sandbox = Sandbox()
+        self.sandbox.put_file("/bin/ls", "ls_binary", 0o744)
 
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="rm ls_binary")
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="rm ls_binary")
         self.assertIn("Permission denied", stderr)  # Should be unable to execute
-        self.assertTrue(sandbox.has_file("ls_binary"))
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="rm ls_binary", privileged=True)
+        self.assertTrue(self.sandbox.has_file("ls_binary"))
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="rm ls_binary", privileged=True)
         self.assertEqual("", stderr)  # But privileged user should be able to do it
-        self.assertFalse(sandbox.has_file("ls_binary"))
+        self.assertFalse(self.sandbox.has_file("ls_binary"))
 
     # ================================= #
     #          Applied ulimits          #
     # ================================= #
     def test_output_limit(self):
-        sandbox = Sandbox()
+        self.sandbox = Sandbox()
 
         file_size = 1000000  # 1MB
         output = NamedTemporaryFile(mode="w+", delete=True)
         for i in range(file_size // 10):
             output.write("test test\n")
         output.flush()
-        sandbox.put_file(output.name, "foo.txt")
+        self.sandbox.put_file(output.name, "foo.txt")
 
         target_size = 0
         while target_size + file_size <= config.MAX_EXECUTION_OUTPUT:
             target_size += file_size
         stdout, stderr = self.sandbox_helper(
-            sandbox=sandbox, command="for i in {{1..{}}}; do cat foo.txt; done;".format(target_size // file_size))
+            sandbox=self.sandbox, command="for i in {{1..{}}}; do cat foo.txt; done;".format(target_size // file_size))
         self.assertEqual("", stderr)
         self.assertEqual(len(stdout), target_size - 1)
 
         target_size += file_size
         stdout, stderr = self.sandbox_helper(
-            sandbox=sandbox, command="for i in {{1..{}}}; do cat foo.txt; done;".format(target_size // file_size))
+            sandbox=self.sandbox, command="for i in {{1..{}}}; do cat foo.txt; done;".format(target_size // file_size))
         self.assertIn("File size limit exceeded", stderr)
         self.assertEqual(len(stdout), config.MAX_EXECUTION_OUTPUT)
 
     def test_no_input_limit(self):
-        sandbox = Sandbox()
+        self.sandbox = Sandbox()
 
-        file_size = 25000000  # 25MB
+        file_size = 50000000  # 50MB
         output = NamedTemporaryFile(mode="w+", delete=True)
         message = "Without IT I'm just espr\n"
         for i in range(file_size // len(message)):
             output.write(message)
         output.flush()
-        sandbox.put_file(output.name, "foo.txt")
+        self.sandbox.put_file(output.name, "foo.txt")
 
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="wc -c < foo.txt && wc -l < foo.txt")
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command="wc -c < foo.txt && wc -l < foo.txt")
         self.assertEqual("", stderr)
         self.assertEqual(len(stdout.splitlines()), 2)
         self.assertEqual(int(stdout.splitlines()[0]), file_size)
@@ -417,8 +426,8 @@ class TestSandbox(TestCase):
         start_time = perf_counter()
 
         stdout, stderr = TemporaryFile(mode="w+"), TemporaryFile(mode="w+")
-        sandbox = Sandbox()
-        sandbox.execute(command=":(){ :|:& };:", stdin_fd=None, stdout_fd=stdout, stderr_fd=stderr, blocking=False)
+        self.sandbox = Sandbox()
+        self.sandbox.execute(command=":(){ :|:& };:", stdin_fd=None, stdout_fd=stdout, stderr_fd=stderr, blocking=False)
 
         # Check number of processes by this executor and its CPU usage continuously
         # (but sleep for 0.01 seconds so we don't do it more than 100 times)
@@ -427,11 +436,11 @@ class TestSandbox(TestCase):
         max_processes = 0
         while perf_counter() - start_time < config.MAX_EXECUTION_TIME:
             if iteration % 2 == 0:
-                ps_info = os.popen("ps -U {}".format(sandbox._executor.name)).read()
+                ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
                 max_processes = max(max_processes, len(ps_info.splitlines()) - 1)
             else:
                 cpu_info = os.popen("top -b -n 1 -u {} | awk 'NR>7 {{ sum += $9; }} END {{ print sum; }}'".format(
-                    sandbox._executor.name)).read()
+                    self.sandbox._executor.name)).read()
                 max_cpu = max(max_cpu, float(cpu_info))
             iteration += 1
             sleep(0.01)
@@ -447,40 +456,40 @@ class TestSandbox(TestCase):
 
         # At this point the sandbox is still running (as the fork bomb processes are detached)
         # Make sure that wait() kills it entirely
-        self.assertTrue(sandbox.is_running())
-        sandbox.wait(0.1)
-        self.assertFalse(sandbox.is_running())
+        self.assertTrue(self.sandbox.is_running())
+        self.sandbox.wait(0.1)
+        self.assertFalse(self.sandbox.is_running())
 
     @mock.patch("config.MAX_EXECUTION_TIME", 0.3)
     def test_sandbox_wait_kills_sleepers(self):
         stdout, stderr = TemporaryFile(mode="w+"), TemporaryFile(mode="w+")
-        sandbox = Sandbox()
-        sandbox.execute(command=":(){ :|:& };:", stdin_fd=None, stdout_fd=stdout, stderr_fd=stderr, blocking=False)
+        self.sandbox = Sandbox()
+        self.sandbox.execute(command=":(){ :|:& };:", stdin_fd=None, stdout_fd=stdout, stderr_fd=stderr, blocking=False)
 
         # While the program is within its time limit it is at max processes
         sleep(0.2)
-        self.assertTrue(sandbox.is_running())
-        ps_info = os.popen("ps -U {}".format(sandbox._executor.name)).read()
-        print("ps_info = {}".format(ps_info))
+        self.assertTrue(self.sandbox.is_running())
+        ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
         self.assertEqual(len(ps_info.splitlines()) - 1, config.MAX_PROCESSES)
 
         # What's worse, even after that they are still alive
         # (as they don't use much CPU, so are not affected by MAX_EXECUTION_TIME)
         sleep(0.2)
-        self.assertTrue(sandbox.is_running())
-        ps_info = os.popen("ps -U {}".format(sandbox._executor.name)).read()
+        self.assertTrue(self.sandbox.is_running())
+        ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
         self.assertEqual(len(ps_info.splitlines()) - 1, config.MAX_PROCESSES)
 
         # However, wait() should terminate everything
-        sandbox.wait(0.1)
-        self.assertFalse(sandbox.is_running())
-        ps_info = os.popen("ps -U {}".format(sandbox._executor.name)).read()
+        self.sandbox.wait(0.1)
+        self.assertFalse(self.sandbox.is_running())
+        ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
         self.assertEqual(len(ps_info.splitlines()) - 1, 0)
 
     def test_cpu_usage(self):
-        sandbox = Sandbox()
-        sandbox.put_file(os.path.join(self.PATH_FIXTURES, "factor.py"))
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command="/usr/bin/time --format '%U %P' python3 factor.py")
+        self.sandbox = Sandbox()
+        self.sandbox.put_file(os.path.join(self.PATH_FIXTURES, "factor.py"))
+        stdout, stderr = self.sandbox_helper(
+            sandbox=self.sandbox, command="/usr/bin/time --format '%U %P' python3 factor.py")
         self.assertIn("1000000000000037", stdout)
         self.assertEqual(len(stderr.splitlines()), 1)
         user_time = float(stderr.split()[0])
@@ -491,44 +500,44 @@ class TestSandbox(TestCase):
         self.assertTrue(95 < percent_cpu <= 100)
 
     def test_memory_usage_heap(self):
-        sandbox = Sandbox()
-        sandbox.put_file(os.path.join(self.PATH_FIXTURES, "mem_allocator.cpp"))
+        self.sandbox = Sandbox()
+        self.sandbox.put_file(os.path.join(self.PATH_FIXTURES, "mem_allocator.cpp"))
         self.sandbox_helper(
-            sandbox=sandbox, command="g++ -O2 -std=c++17 -w -s -o mem_allocator mem_allocator.cpp", privileged=True
+            sandbox=self.sandbox, command="g++ -O2 -std=c++17 -w -s -o mem_allocator mem_allocator.cpp", privileged=True
         )
-        self.assertTrue(sandbox.has_file("mem_allocator"))
+        self.assertTrue(self.sandbox.has_file("mem_allocator"))
 
         command = "/usr/bin/time --quiet --format='%M' /bin/bash -c \"./mem_allocator heap {}\"" +\
                   " ; code=$? ; >&2 echo $code ; exit $code"
 
         targets = [10000000, 100000000, 500000000, 1000000000, 2000000000]  # 10MB, 100MB, 500MB, 1GB, 2GB
         for target in targets:
-            stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
+            stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command=command.format(target))
             exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
             self.assertEqual(exit_code, 0)
             self.assertTrue(target <= exec_memory * 1024 <= target + 5000000)  # Up to 5MB overhead for C++ libraries
 
         # Twenty megabytes less than the threshold is okay
         target = config.MAX_EXECUTION_MEMORY - 20000000
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command=command.format(target))
         exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
         self.assertEqual(exit_code, 0)
         self.assertTrue(target <= exec_memory * 1024 <= target + 5000000)  # Up to 5MB overhead for C++ libraries
 
         # Allocating around the threshold is no longer okay
         target = config.MAX_EXECUTION_MEMORY
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command=command.format(target))
         exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
         self.assertNotEqual(exit_code, 0)
         self.assertTrue(exec_memory * 1024 <= config.MAX_EXECUTION_MEMORY + 1024)
 
     def test_memory_usage_stack(self):
-        sandbox = Sandbox()
-        sandbox.put_file(os.path.join(self.PATH_FIXTURES, "mem_allocator.cpp"))
+        self.sandbox = Sandbox()
+        self.sandbox.put_file(os.path.join(self.PATH_FIXTURES, "mem_allocator.cpp"))
         self.sandbox_helper(
-            sandbox=sandbox, command="g++ -O2 -std=c++17 -w -s -o mem_allocator mem_allocator.cpp", privileged=True
+            sandbox=self.sandbox, command="g++ -O2 -std=c++17 -w -s -o mem_allocator mem_allocator.cpp", privileged=True
         )
-        self.assertTrue(sandbox.has_file("mem_allocator"))
+        self.assertTrue(self.sandbox.has_file("mem_allocator"))
 
         command = "/usr/bin/time --quiet --format='%M' /bin/bash -c \"./mem_allocator stack {}\"" +\
                   " ; code=$? ; >&2 echo $code ; exit $code"
@@ -536,21 +545,21 @@ class TestSandbox(TestCase):
         # Test different target stack sizes (should all be okay)
         targets = [1000000, 10000000, 50000000]  # 1MB, 10MB, 50MB
         for target in targets:
-            stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
+            stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command=command.format(target))
             exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
             self.assertEqual(exit_code, 0)
             self.assertTrue(target <= exec_memory * 1024 <= target + 5000000)  # Up to 5MB overhead for C++ libraries
 
         # Half a megabyte less than the threshold is okay
         target = config.MAX_EXECUTION_STACK - 500000
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command=command.format(target))
         exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
         self.assertEqual(exit_code, 0)
         self.assertTrue(target <= exec_memory * 1024 <= target + 5000000)  # Up to 5MB overhead for C++ libraries
 
         # Half a megabyte more than the threshold is not okay
         target = config.MAX_EXECUTION_STACK + 500000
-        stdout, stderr = self.sandbox_helper(sandbox=sandbox, command=command.format(target))
+        stdout, stderr = self.sandbox_helper(sandbox=self.sandbox, command=command.format(target))
         exit_code, exec_memory = int(stderr.splitlines()[-1]), int(stderr.splitlines()[-2])
         self.assertNotEqual(exit_code, 0)
         self.assertTrue(target <= exec_memory * 1024 <= target + 5000000)  # Up to 5MB overhead for C++ libraries
@@ -653,4 +662,4 @@ class TestSandbox(TestCase):
         # Waiting all of them to complete takes at least 1 second (twice as much)
         self.assertGreaterEqual(perf_counter() - start_time, 1.0)
         # But not much more than 1 second
-        self.assertLess(perf_counter() - start_time, 1.2)
+        self.assertLess(perf_counter() - start_time, 1.4)
