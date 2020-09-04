@@ -1,6 +1,7 @@
 import os
 import psutil
 import shutil
+from time import sleep
 from queue import Queue
 from threading import Lock
 from dataclasses import dataclass, field
@@ -89,7 +90,13 @@ class Executors:
             # Un-mount it if it is one of the mounted directories
             if common.is_mount(child_path):
                 # logger.info("    -- unmounting directory {}".format(child_path))
-                if os.system("sudo umount --recursive {}".format(child_path)) != 0:
+                umount_successful = False
+                for i in range(3):
+                    if os.system("sudo umount --recursive {}".format(child_path)) == 0:
+                        umount_successful = True
+                        break
+                    sleep(0.01)
+                if not umount_successful:
                     logger.fatal("Could not umount directory {}!".format(child_path))
                     exit(-1)
 
@@ -146,7 +153,7 @@ class Executors:
         # Prepare the directory for chroot-ing by mounting vital system directories
         logger.info("  >> mounting system paths...")
 
-        for mount_dir in ["bin", "lib", "lib64", "usr", "dev", "sys", "proc", "etc/alternatives"]:
+        for mount_dir in ["bin", "lib", "lib64", "usr", "dev", "sys", "proc", "etc"]:
             mount_source = "/{}".format(mount_dir)
             mount_destination = os.path.join(executor_path, mount_dir)
             if not os.path.exists(mount_destination):
