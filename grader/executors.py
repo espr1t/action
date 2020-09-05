@@ -91,11 +91,11 @@ class Executors:
             if common.is_mount(child_path):
                 # logger.info("    -- unmounting directory {}".format(child_path))
                 umount_successful = False
-                for i in range(3):
+                for _ in range(3):
                     if os.system("sudo umount --recursive {}".format(child_path)) == 0:
                         umount_successful = True
                         break
-                    sleep(0.01)
+                    sleep(0.1)
                 if not umount_successful:
                     logger.fatal("Could not umount directory {}!".format(child_path))
                     exit(-1)
