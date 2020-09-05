@@ -94,10 +94,8 @@ class Compiler:
         # Check for standard errors (time limit, internal error or compilation error)
         if run_result.exec_time > config.MAX_COMPILATION_TIME:
             return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
-        if run_result.output.decode() != "":
-            return "Compilation error: " + run_result.output.decode()
         if run_result.exit_code != 0:
-            return "Compilation exited with a non-zero exit code: {}".format(run_result.exit_code)
+            return "Compilation error: " + run_result.output.decode()
 
         # Do a sanity check that we have at least one class file with the public class
         if not sandbox.has_file(class_name + ".class"):
