@@ -84,8 +84,8 @@ class TestRunner(TestCase):
     def test_input_is_passed_correctly(self):
         start_time = perf_counter()
         Runner.run(sandbox=Sandbox(), command="read txt; sleep $txt", input_bytes=b"0.5")
-        print("TIME: {}".format(perf_counter() - start_time))
-        self.assertTrue(0.5 <= perf_counter() - start_time <= 0.6)
+        self.assertGreaterEqual(perf_counter() - start_time, 0.5)
+        self.assertLess(perf_counter() - start_time, 0.7)
 
     def test_output_is_returned_correctly(self):
         stdout_bytes, stderr_bytes = Runner.run(sandbox=Sandbox(), command="cat", input_bytes=b"Hello, World!")
@@ -119,8 +119,8 @@ class TestRunner(TestCase):
         stdout_bytes, stderr_bytes = Runner.run(sandbox=Sandbox(), command="pwd", input_bytes=input_bytes)
         self.assertEqual(stderr_bytes.decode().strip(), "")
         self.assertEqual(stdout_bytes.decode().strip(), "/home")
-        # The overhead for getting a sandbox, passing the input, and getting the output shouldn't be more than 0.1s
-        self.assertLess(perf_counter() - start_time, 0.1)
+        # The overhead for getting a sandbox, passing the input, and getting the output shouldn't be more than 0.2s
+        self.assertLess(perf_counter() - start_time, 0.2)
 
     def test_run_privileged(self):
         sandbox = Sandbox()
@@ -216,7 +216,7 @@ class TestRunner(TestCase):
         # Output of factor is the number followed by its factors
         self.assertEqual(run_result.output.decode().strip(), "{}: {} {}".format(prime1 * prime2, prime1, prime2))
         # Clock time should be nearly the same as measured time
-        self.assertAlmostEqual(clock_time, run_result.exec_time, delta=0.1)
+        self.assertAlmostEqual(clock_time, run_result.exec_time, delta=0.2)
 
     def test_run_command_exec_memory(self):
         factor_input = "1234567890123456789012345678901"
@@ -331,6 +331,7 @@ class TestRunner(TestCase):
         self.assertEqual(run_result.exit_code, 0)
         self.assertLess(run_result.exec_time, 0.1)
         self.assertGreaterEqual(perf_counter() - start_time, 0.4)
+        self.assertLess(perf_counter() - start_time, 0.6)
         self.assertEqual(run_result.output.decode().strip(), "2075")
 
         # ... except if they don't exceed the time limit, in which case their clock time is recorded
@@ -339,9 +340,9 @@ class TestRunner(TestCase):
                                         memory_limit=32000000, timeout=0.3, input_bytes=None)
         self.assertEqual(run_result.exit_code, 9)
         self.assertGreaterEqual(run_result.exec_time, 0.29)
-        self.assertGreaterEqual(perf_counter() - start_time, 0.3)
         self.assertLess(run_result.exec_time, 0.4)
-        self.assertLess(perf_counter() - start_time, 0.4)
+        self.assertGreaterEqual(perf_counter() - start_time, 0.3)
+        self.assertLess(perf_counter() - start_time, 0.5)
         self.assertEqual(run_result.output.decode().strip(), "")
 
     def test_run_program_exec_time_cpu_intensive(self):
@@ -358,7 +359,7 @@ class TestRunner(TestCase):
         self.assertGreaterEqual(run_result.exec_time, 0.29)
         self.assertGreaterEqual(perf_counter() - start_time, 0.3)
         self.assertLess(run_result.exec_time, 0.4)
-        self.assertLess(perf_counter() - start_time, 0.4)
+        self.assertLess(perf_counter() - start_time, 0.5)
         self.assertNotEqual(run_result.output.decode().strip(), "")
 
     def test_run_program_stderr_handling(self):

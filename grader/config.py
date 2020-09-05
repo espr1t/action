@@ -61,7 +61,7 @@ TIME_OFFSET_PYTHON = 0.0  # Seconds
 
 # Memory used by non-user code
 MEMORY_OFFSET_CPP = 2 * (1 << 20)  # Bytes = 2MB
-MEMORY_OFFSET_JAVA = 40 * (1 << 20)  # Bytes = 40MB
+MEMORY_OFFSET_JAVA = 34 * (1 << 20)  # Bytes = 34MB
 MEMORY_OFFSET_PYTHON = 9 * (1 << 20)  # Bytes = 9MB
 
 # Output Validation
