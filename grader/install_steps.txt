@@ -4,7 +4,10 @@ Installation steps:
     >> sudo apt update
     >> sudo apt upgrade
     >> sudo apt full-upgrade
-1. Install Python
+    >> sudo update-alternatives --config editor
+1. (optional) Install Python.
+    Similarly to other languages, if you are not satisfied with the current version installed with
+    your distribution (or there is none), proceed with the steps below.
 1.1. Install latest version of Python and make it the default
     >> sudo add-apt-repository ppa:deadsnakes/ppa
     >> sudo apt update
@@ -20,12 +23,16 @@ Installation steps:
 1.4. Install PIP (python's package manager)
     >> sudo apt install python3-pip
     >> pip3 install --upgrade pip
-2. Install latest version of GCC/G++
+2. (optional) Install latest version of GCC/G++.
+    Similarly to other languages, if you are not satisfied with the current version installed with
+    your distribution (or there is none), proceed with the steps below.
 2.1. Check which version of G++ is currently installed (if any)
     >> g++ --version
 3.2. If not installed (or too old), install a newer one
     >> sudo apt install g++
-3. Install latest version of Java
+3. (optional) Install latest version of Java
+    Similarly to other languages, if you are not satisfied with the current version installed with
+    your distribution (or there is none), proceed with the steps below.
 3.1. Check which version of Java is currently installed (if any)
     >> java --version
 3.2. If not installed (or too old), install the newest one:
@@ -51,16 +58,17 @@ Installation steps:
     >> sudo apt install xvfb libfontconfig wkhtmltopdf
 8.1. (Optional) Install fonts (needs to be in <root_dir>/grader/ folder):
     sudo cp fonts/* /usr/local/share/fonts
-9. Finally, run the service as root (from the project's base directory, e.g. /home/grader/action):
+9. One-time initialization of users and sandbox directories
 9.1. Create sandbox directories and users
     >> make init
-9.2. Remove password prompts for "sudo" commands (not allowed, but prompts can lead to problems):
+9.2. Remove password prompts for "sudo" commands
+    (sudo is not allowed for the executorXX users, but prompts for passwords can lead to problems):
     >> sudo visudo
     >> Add the line "%executors ALL=(ALL) NOPASSWD: !ALL" at the bottom
-9.3. Run the actual service
+10. Finally, run the service as root (from the project's base directory, e.g. /home/grader/action):
     >> make run
-10. (Optional) Run it automatically on OS load:
-10.1. Add it to the list of cronjobs on system start:
+11. (Optional) Run it automatically on OS load:
+11.1. Add it to the list of cronjobs on system start:
     >> sudo crontab -e
     Add "@reboot python3 /home/grader/action/grader/server.py" (with correct path to server.py)
-#10.2. Run "update-rc.d cron defaults" (may not be needed)
+#11.2. Run "update-rc.d cron defaults" (may not be needed)
