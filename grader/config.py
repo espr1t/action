@@ -56,8 +56,8 @@ MAX_GAME_LENGTH = MAX_EXECUTION_TIME - 1
 
 # Start time taken by non-user actions
 TIME_OFFSET_CPP = 0.0  # Seconds
-TIME_OFFSET_JAVA = 0.05  # Seconds
-TIME_OFFSET_PYTHON = 0.0  # Seconds
+TIME_OFFSET_JAVA = 0.15  # Seconds
+TIME_OFFSET_PYTHON = 0.02  # Seconds
 
 # Memory used by non-user code
 MEMORY_OFFSET_CPP = 2 * (1 << 20)  # Bytes = 2MB
