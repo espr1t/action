@@ -12,7 +12,7 @@ from sandbox import Sandbox
 
 
 class Compiler:
-    COMPILE_COMMAND_CPP = "g++ -O2 -std=c++17 -w -s -o {executable} {source}"
+    COMPILE_COMMAND_CPP = "g++ -O2 -std=c++17 -Werror=return-type -s -o {executable} {source}"
     COMPILE_COMMAND_PYTHON = "python3 -m pyflakes {source}"
     COMPILE_COMMAND_JAVA = "javac -nowarn {source}"
     COMPILE_COMMAND_JAVA_JAR = "jar --create --file=result.jar --main-class={class_name} *.class"
@@ -48,12 +48,10 @@ class Compiler:
             sandbox=sandbox, command=command, timeout=config.MAX_COMPILATION_TIME, print_stderr=True, privileged=True
         )
 
-        if run_result.output.decode() != "":
-            return "Compilation error: {}".format(run_result.output.decode())
         if run_result.exec_time > config.MAX_COMPILATION_TIME - 0.1:
             return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
         if run_result.exit_code != 0:
-            return "Compilation exited with a non-zero exit code: {}".format(run_result.exit_code)
+            return "Compilation error: {}".format(run_result.output.decode())
 
         sandbox.get_file(name_executable, path_executable)
         return ""
@@ -109,10 +107,8 @@ class Compiler:
 
         if run_result.exec_time > config.MAX_COMPILATION_TIME:
             return "Compilation exceeded the time limit of {0:.2f} seconds.".format(config.MAX_COMPILATION_TIME)
-        if run_result.output.decode() != "":
-            return "Compilation error: " + run_result.output.decode()
         if run_result.exit_code != 0:
-            return "Compilation exited with a non-zero exit code: {}".format(run_result.exit_code)
+            return "Compilation error: " + run_result.output.decode()
 
         sandbox.get_file("result.jar", path_executable)
         return ""

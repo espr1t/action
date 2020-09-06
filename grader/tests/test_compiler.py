@@ -111,6 +111,16 @@ class TestCompiler(TestCase):
         self.assertIn("error", message)
         self.assertFalse(os.path.exists(path_executable))
 
+    def test_cpp_no_return(self):
+        path_source = os.path.join(self.PATH_FIXTURES, "cpp/NoReturn.cpp")
+        path_executable = os.path.join(self.PATH_SANDBOX, "TargetName.o")
+
+        self.assertFalse(os.path.exists(path_executable))
+        message = Compiler.compile(config.LANGUAGE_CPP, path_source, path_executable)
+        self.assertNotEqual("", message, "The C++ compilation expected error message, but passed successfully.")
+        self.assertIn("error", message)
+        self.assertFalse(os.path.exists(path_executable))
+
     def test_java_successful_compilation(self):
         start_time = perf_counter()
         path_source = os.path.join(self.PATH_FIXTURES, "java/HelloWorldOK.java")
