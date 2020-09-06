@@ -10,7 +10,7 @@ class HelpPage extends Page {
     public function getContent() {
         $version = '
             <div class="help-version">
-                Версия на системата: <a href="https://github.com/espr1t/action/commit/06093488ff5c97bea725bd6603d0203e65846f08" target="_blank">v.200129.0609348</a>
+                Версия на системата: <a href="https://github.com/espr1t/action/commit/91f26db20657c199a1d33d667a9ae673a75c3d97" target="_blank">v.200907.91f26db</a>
             </div>
         ';
 
@@ -75,9 +75,9 @@ class HelpPage extends Page {
             <h2 id="compilation"><a href="#compilation">Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 7.4.0):</b> <pre>g++ -O2 -std=c++17 -w -s -static -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
-                <li><b>Java (OpenJDK 11.0.4):</b> <pre>javac -nowarn -d &lt;executable&gt; &lt;source&gt;.java</pre></li>
-                <li><b>Python (Python 3.6.8):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
+                <li><b>C++ (GCC 9.3.0):</b> <pre>g++ -O2 -std=c++17 -Werror=return-type -s -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>Java (OpenJDK 11.0.8):</b> <pre>javac -nowarn &lt;source&gt;.java</pre></li>
+                <li><b>Python (Python 3.8.5):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
             Максималното време за компилация е 10 секунди.<br>
             Максималният размер на стека е 64 мегабайта.
@@ -86,7 +86,7 @@ class HelpPage extends Page {
             Тестовата машина има следната хардуерна конфигурация:
             <ul>
                 <li><b>Процесор:</b> Intel Xeon 16 Core :: 2.1GHz</li>
-                <li><b>Рам:</b> DDR3 32GB :: 1333MHz ECC</li>
+                <li><b>Рам:</b> DDR3 32GB :: 2666MHz ECC</li>
                 <li><b>Харддиск:</b> Corsair Force SSD :: 520MB/s</li>
             </ul>
             Ползваната операционна система на тестовата машина е Ubuntu 18.04.
