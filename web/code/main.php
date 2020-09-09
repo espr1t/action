@@ -49,9 +49,9 @@ switch ($_GET['page']) {
         require_once('training.php');
         $page = new TrainingPage($user);
         break;
-    case 'queue':
-        require_once('queue.php');
-        $page = new QueuePage($user);
+    case 'status':
+        require_once('status.php');
+        $page = new StatusPage($user);
         break;
     case 'ranking':
         require_once('ranking.php');

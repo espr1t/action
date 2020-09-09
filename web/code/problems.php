@@ -575,8 +575,8 @@ class ProblemsPage extends Page {
 
     private function getSubmitInfoBox($problem, $submitId) {
         $redirectUrl = '/problems/' . $problem->id . '/submits';
-        if (isset($_SESSION['queueShortcut']))
-            $redirectUrl = '/queue';
+        if (isset($_SESSION['statusShortcut']))
+            $redirectUrl = '/status';
         $updatesUrl = '/problems/' . $problem->id . '/submits/' . $submitId . '/updates';
 
         $content = $this->getSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
@@ -635,10 +635,10 @@ class ProblemsPage extends Page {
     }
 
     public function getContent() {
-        $queueShortcut = false;
-        if (isset($_SESSION['queueShortcut'])) {
-            $queueShortcut = true;
-            unset($_SESSION['queueShortcut']);
+        $statusShortcut = false;
+        if (isset($_SESSION['statusShortcut'])) {
+            $statusShortcut = true;
+            unset($_SESSION['statusShortcut']);
         }
 
         $this->problemName = null;
@@ -668,8 +668,8 @@ class ProblemsPage extends Page {
                     } else if (isset($_GET['updates'])) {
                         $this->getSubmitUpdates($problem, $_GET['submitId']);
                     } else {
-                        if ($queueShortcut)
-                            $_SESSION['queueShortcut'] = true;
+                        if ($statusShortcut)
+                            $_SESSION['statusShortcut'] = true;
                         $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
                     }
                 }

@@ -966,8 +966,8 @@ class GamesPage extends Page {
 
     private function getSubmitInfoBox($problem, $submitId) {
         $redirectUrl = getGameUrl($problem->name) . '/submits';
-        if (isset($_SESSION['queueShortcut']))
-            $redirectUrl = '/queue';
+        if (isset($_SESSION['statusShortcut']))
+            $redirectUrl = '/status';
 
         $content = '';
         if ($problem->type == 'game') {

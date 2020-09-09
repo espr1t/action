@@ -538,7 +538,7 @@ Table::Reports
 ===========
 {
     "id": 1,
-    "page": "http://action.informatika.bg/queue",
+    "page": "http://action.informatika.bg/status",
     "content": "Reports are currently not saved in the DB!",
     "user": 42,
     "date": 2016-08-19

@@ -5,14 +5,14 @@ require_once('config.php');
 require_once('common.php');
 require_once('page.php');
 
-class QueuePage extends Page {
+class StatusPage extends Page {
     public function getTitle() {
-        return 'O(N)::Queue';
+        return 'O(N)::Status';
     }
 
-    private function getQueueTable($data) {
+    private function getStatusTable($data) {
         // Return links for submit shortcuts
-        $_SESSION['queueShortcut'] = true;
+        $_SESSION['statusShortcut'] = true;
 
         $brain = new Brain();
         $allGames = $brain->getAllGames();
@@ -85,10 +85,10 @@ class QueuePage extends Page {
 
         $adminExtras = '';
         if ($this->user->access >= $GLOBALS['ACCESS_REGRADE_SUBMITS']) {
-            $adminExtras = '<th style="width: 16px;"></th>';
+            $adminExtras = '<th style="width: 1rem;"></th>';
         }
 
-        $table = '
+        return '
             <table class="default">
                 <tr>
                     <th style="width: 3.5rem;">#</th>
@@ -103,13 +103,11 @@ class QueuePage extends Page {
                 ' . $list . '
             </table>
         ';
-
-        return $table;
     }
 
     public function getContent() {
         $head = inBox('
-            <h1>Опашка</h1>
+            <h1>Статус</h1>
             Информация за системата и опашката от решения.
         ');
 
@@ -131,12 +129,12 @@ class QueuePage extends Page {
 
         $latest = inBox('
             <h2>Последно тествани</h2>
-            ' . QueuePage::getQueueTable($brain->getLatest()) . '
+            ' . StatusPage::getStatusTable($brain->getLatest()) . '
         ');
 
         $pending = inBox('
             <h2>Изчакващи тестване</h2>
-            ' . QueuePage::getQueueTable($brain->getPending()) . '
+            ' . StatusPage::getStatusTable($brain->getPending()) . '
         ');
 
         $compilers = '<div class="center" style="font-size: smaller; margin-top: -0.25rem; margin-bottom: 0.375rem;">Информация за ползваните
