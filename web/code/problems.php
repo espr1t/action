@@ -652,7 +652,8 @@ class ProblemsPage extends Page {
                 redirect('/problems', 'ERROR', 'Нямате права да видите тази задача.');
             }
             if ($problem->type == 'game' || $problem->type == 'relative') {
-                redirect('/games', 'ERROR', 'Поисканата задача всъщност е игра. Моля съобщете на администратор за проблема.');
+//                redirect('/games', 'ERROR', 'Поисканата задача всъщност е игра. Моля съобщете на администратор за проблема.');
+                redirect(str_replace(getProblemUrl($problem->id), getGameUrl($problem->name), getCurrentUrl()));
             }
 
             $content = $this->getStatement($problem);
