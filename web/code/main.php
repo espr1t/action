@@ -19,16 +19,7 @@ $logMessage = sprintf('User %s opened page "%s".', $user->username, $_SERVER['RE
 write_log($GLOBALS['LOG_PAGE_VIEWS'], $logMessage);
 
 # Show notifications (set in $_SESSION from server or $_POST from client)
-$showNotification = '';
-if (isset($_SESSION['notificationType']) && isset($_SESSION['notificationText'])) {
-    $showNotification .= '<script>showNotification("' . $_SESSION['notificationType'] . '", "' . $_SESSION['notificationText'] . '");</script>';
-    unset($_SESSION['notificationType']);
-    unset($_SESSION['notificationText']);
-}
-if (isset($_POST['notificationType']) && isset($_POST['notificationText'])) {
-    $showNotification .= '<script>showNotification("' . $_POST['notificationType'] . '", "' . $_POST['notificationText'] . '");</script>';
-    $showNotification .= '<script>setTimeout(function() {window.location=window.location;}, 3000);</script>';
-}
+$showNotification = getNotification();
 
 
 // Decide which Page should generate the content

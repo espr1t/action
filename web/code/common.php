@@ -87,6 +87,20 @@ function showNotification($notificationType, $notificationText) {
     return '<script>showNotification("' . $notificationType . '", "' . $notificationText . '");</script>';
 }
 
+function getNotification() {
+    $showNotification = '';
+    if (isset($_SESSION['notificationType']) && isset($_SESSION['notificationText'])) {
+        $showNotification .= '<script>showNotification("' . $_SESSION['notificationType'] . '", "' . $_SESSION['notificationText'] . '");</script>';
+        unset($_SESSION['notificationType']);
+        unset($_SESSION['notificationText']);
+    }
+    if (isset($_POST['notificationType']) && isset($_POST['notificationText'])) {
+        $showNotification .= '<script>showNotification("' . $_POST['notificationType'] . '", "' . $_POST['notificationText'] . '");</script>';
+        $showNotification .= '<script>setTimeout(function() {window.location=window.location;}, 3000);</script>';
+    }
+    return $showNotification;
+}
+
 function redirect($url, $notificationType = null, $notificationText = null) {
     // Redirect with arguments (pass them using session data).
     if ($notificationType != null && $notificationText != null) {
