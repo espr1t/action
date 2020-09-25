@@ -4,6 +4,8 @@ require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../entities/problem.php');
 require_once(__DIR__ . '/../entities/submit.php');
 
+global $user;
+
 // User doesn't have access level needed for submitting a solution
 if ($user->access < $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
     printAjaxResponse(array(
@@ -50,23 +52,13 @@ if ($problem->waitFull == 0 && $remainFull >= -5) {
 }
 
 // User has rights to submit and has not exceeded the limit for the day
-$submit = Submit::newSubmit($user, $problemId, $language, $source, $full, false /* hidden */);
+$submit = Submit::create($user, $problemId, $language, $source, $full);
 
-// In case the solution cannot be written to the database,
-// return an error so the user knows something is wrong
-if (!$submit->write()) {
+// Add the submit to the database and queue it for grading.
+if (!$submit->add()) {
     printAjaxResponse(array(
         'status' => 'ERROR',
-        'message' => 'Възникна проблем при записването на решението.'
-    ));
-}
-
-// In case the submission cannot be sent to the grader, return a warning, but record
-// it for later evaluation
-if (!$submit->send()) {
-    printAjaxResponse(array(
-        'status' => 'WARNING',
-        'message' => 'Решението ще бъде тествано по-късно.'
+        'message' => 'Възникна проблем при изпращането на решението.'
     ));
 }
 

@@ -15,6 +15,8 @@ $DB_USERNAME = 'action';
 $DB_PASSWORD = 'password';
 $DB_DATABASE = 'action';
 
+$ADMIN_EMAIL = 'admin.email@example.com';
+
 // Google re-CAPTCHA secret key
 $RE_CAPTCHA_PROD_SITE_KEY = 'f4k3pr0ds173k3y';
 $RE_CAPTCHA_PROD_SECRET_KEY = 'f4k3pr0ds3cr37k3y';
@@ -25,17 +27,22 @@ $RE_CAPTCHA_TEST_SECRET_KEY = 'f4k3t357s3cr37k3y';
 $COOKIE_NAME = 'action_informatika_bg';
 
 // Grader
-// # Use 192.168.1.XXX/ instead of localhost/ for this to work on dev
-$GRADER_URL = '192.168.1.123:5000';
+// Use actual IP instead of localhost/ for this to work on dev
+$GRADER_URL = '127.0.0.1:5000';
+// $GRADER_URL = '192.168.1.112:5000';
 
 // Will not work with random UTF-8 characters since the utf8_encode() algorithm
 // in PHP and Python is apparently different. Will work with Latin letters, digits and most symbols.
 $GRADER_USERNAME = 'username';
 $GRADER_PASSWORD = 'password';
 
-$ADMIN_EMAIL = 'admin.email@example.com';
+// Maximum number of submits sent to the grader which are waiting to be tested
+// This prevents the front-end from spamming the grader with hundreds of submits at once
+// (happens when a rejudge is invoked on a problem with lots of submits)
+$GRADER_MAX_WAITING_SUBMITS = 20;
 
 $GRADER_ENDPOINT_AVAILABLE = '/available';
+$GRADER_ENDPOINT_RECENT = '/recent';
 $GRADER_ENDPOINT_EVALUATE = '/evaluate';
 $GRADER_ENDPOINT_PRINT_PDF = '/print-pdf';
 $GRADER_ENDPOINT_GET_REPLAY = '/replay';

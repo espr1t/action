@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . '/../entities/grader.php');
+require_once(__DIR__ . '/../entities/queue.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../config.php');
 
@@ -24,6 +25,9 @@ if ($okay) {
             'Grader Back to Normal',                            // Subject
             'Grader became accessible again at ' . $atTime      // Message
         );
+
+        // Also send pending submits to it if there are any
+        Queue::update();
     }
     // Record that it is OK
     file_put_contents($GRADER_CRON_CHECK_FILE, 'OK');

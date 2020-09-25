@@ -325,9 +325,9 @@ class ProfilePage extends Page {
             if (!array_key_exists($submit['problemId'], $problemType))
                 continue;
 
-            $exec_time = explode(',', $submit['exec_time']);
-            $totalTests += count($exec_time);
-            $totalTime += array_sum($exec_time);
+            $execTime = explode(',', $submit['execTime']);
+            $totalTests += count($execTime);
+            $totalTime += array_sum($execTime);
 
             if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
                 if (array_key_exists($submit['problemId'], $problemDifficulty)) {

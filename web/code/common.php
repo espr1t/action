@@ -187,6 +187,10 @@ function getValue($array, $key) {
     return $array[$key];
 }
 
+function lastElement($array) {
+    return empty($array) ? null : $array[array_key_last($array)];
+}
+
 function parseStringArray($str) {
     return $str == '' ? array() : explode(',', $str);
 }
@@ -205,7 +209,7 @@ function passSpamProtection($user, $type, $limit) {
     return false;
 }
 
-function canSeeProblem($user, $problemVisible, $problemId) {
+function canSeeProblem($user, $problemVisible) {
     if ($problemVisible)
         return true;
     return $user->access >= $GLOBALS['ACCESS_HIDDEN_PROBLEMS'];

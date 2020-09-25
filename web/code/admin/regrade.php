@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/grader.php');
+require_once(__DIR__ . '/../entities/queue.php');
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../page.php');
@@ -8,6 +9,9 @@ require_once(__DIR__ . '/../events.php');
 require_once(__DIR__ . '/../entities/submit.php');
 
 class AdminRegradePage extends Page {
+    private $brain = null;
+    private $regradeId = -1;
+
     public function getTitle() {
         return 'O(N)::Admin - Regrade';
     }
@@ -173,49 +177,43 @@ class AdminRegradePage extends Page {
         return 'TODO: Regrade Options';
     }
 
+    private function regrade($submit) {
+        $this->brain->addRegradeSubmit($this->regradeId, $submit);
+        $submit->regrade(false);
+    }
+
     private function regradeSubmit($submitId) {
         $submit = Submit::get($submitId);
-        $this->brain->addRegradeSubmit($this->regradeId, $submit);
-        $submit->reset();
-        $submit->send();
+        $this->regrade($submit);
+        Queue::update();
     }
 
     private function regradeProblem($problemId) {
-        $submits = $this->brain->getProblemSubmits($problemId);
+        $submits = Submit::getProblemSubmits($problemId);
         foreach ($submits as $submit) {
-            $this->regradeSubmit($submit['id']);
+            $this->regrade($submit);
         }
+        Queue::update();
     }
 
     private function regradeLatest($problemId) {
-        $submits = $this->brain->getProblemSubmits($problemId);
+        $submits = Submit::getProblemSubmits($problemId);
         $seen = array();
         for ($i = count($submits) - 1; $i >= 0; $i--) {
-            if (!in_array($submits[$i]['userId'], $seen)) {
-                array_push($seen, $submits[$i]['userId']);
-                $this->regradeSubmit($submits[$i]['id']);
+            if (!in_array($submits[$i]->userId, $seen)) {
+                array_push($seen, $submits[$i]->userId);
+                $this->regrade($submits[$i]);
             }
         }
+        Queue::update();
     }
 
     private function regradePending() {
-        $pendingStatus = array(
-            $GLOBALS['STATUS_WAITING'],
-            $GLOBALS['STATUS_PREPARING'],
-            $GLOBALS['STATUS_COMPILING'],
-            $GLOBALS['STATUS_TESTING']
-        );
-
-        $pendingSubmits = array();
-        foreach ($pendingStatus as $status) {
-            $submits = $this->brain->getAllSubmits($status);
-            if ($submits != null) {
-                $pendingSubmits = array_merge($pendingSubmits, $submits);
-            }
+        $submits = Submit::getPendingSubmits();
+        foreach ($submits as $submit) {
+            $this->regrade($submit);
         }
-        foreach ($pendingSubmits as $submit) {
-            $this->regradeSubmit($submit['id']);
-        }
+        Queue::update();
     }
 
     public function getContent() {
@@ -252,6 +250,7 @@ class AdminRegradePage extends Page {
                 $this->getRegradeViewUpdates();
             }
         }
+        return '';
     }
 
 }

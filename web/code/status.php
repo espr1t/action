@@ -1,6 +1,7 @@
 <?php
 require_once('db/brain.php');
 require_once('entities/grader.php');
+require_once('entities/queue.php');
 require_once('config.php');
 require_once('common.php');
 require_once('page.php');
@@ -10,7 +11,7 @@ class StatusPage extends Page {
         return 'O(N)::Status';
     }
 
-    private function getStatusTable($data) {
+    private function getStatusTable($submits) {
         // Return links for submit shortcuts
         $_SESSION['statusShortcut'] = true;
 
@@ -30,30 +31,28 @@ class StatusPage extends Page {
             if ($problem['visible'] == '0') array_push($hidden, $problem['id']);
 
         $list = '';
-        for ($i = 0; $i < count($data); $i = $i + 1) {
-            $entry = $data[$i];
-
+        foreach ($submits as $submit) {
             // Hidden submits should not be shown to standard users
-            if (in_array($entry['problemId'], $hidden) && !canSeeProblem($this->user, false, $entry['problemId']))
+            if (in_array($submit->problemId, $hidden) && !canSeeProblem($this->user, false))
                 continue;
 
             // The ID of the submit with possibly a link if accessible by the user
-            $submitEl = $entry['submitId'];
-            if ($this->user->id == $entry['userId'] || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
-                $submitLink = getProblemUrl($entry['problemId']) . '/submits/' . $entry['submitId'];
-                if (in_array(intval($entry['problemId']), $games)) {
-                    $submitLink = getGameUrl($entry['problemName']) . '/submits/' . $entry['submitId'];
+            $submitEl = $submit->id;
+            if ($this->user->id == $submit->userId || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
+                $submitLink = getProblemUrl($submit->problemId) . '/submits/' . $submit->id;
+                if (in_array(intval($submit->problemId), $games)) {
+                    $submitLink = getGameUrl($submit->problemName) . '/submits/' . $submit->id;
                 }
-                $submitEl = '<a href="' . $submitLink . '">' . $entry['submitId'] . '</a>';
+                $submitEl = '<a href="' . $submitLink . '">' . $submit->id . '</a>';
             }
 
             // The user's nickname with a link to his/her profile
-            $userEl = getUserLink($entry['userName']);
+            $userEl = getUserLink($submit->userName);
 
             // The problem's name with a link to the problem
-            $problemEl = getProblemLink($entry['problemId'], $entry['problemName']);
-            if (in_array(intval($entry['problemId']), $games)) {
-                $problemEl = getGameLink($entry['problemName']);
+            $problemEl = getProblemLink($submit->problemId, $submit->problemName);
+            if (in_array(intval($submit->problemId), $games)) {
+                $problemEl = getGameLink($submit->problemName);
             }
 
             // Optional regrade button shown to privileged users
@@ -61,7 +60,7 @@ class StatusPage extends Page {
             if ($this->user->access >= $GLOBALS['ACCESS_REGRADE_SUBMITS']) {
                 $regradeSubmission = '
                     <td style="width: 16px;">
-                        <a onclick="regradeSubmission(' . $entry['submitId'] . ');" title="Regrade submission ' . $entry['submitId'] . '">
+                        <a onclick="regradeSubmission(' . $submit->id . ');" title="Regrade submission ' . $submit->id . '">
                            <i class="fa fa-sync-alt"></i>
                         </a>
                     </td>
@@ -69,14 +68,14 @@ class StatusPage extends Page {
             }
 
             $listEntry = '
-                <tr' . (in_array($entry['problemId'], $hidden) ? ' style="opacity: 0.33"' : '') . '>
+                <tr' . (in_array($submit->problemId, $hidden) ? ' style="opacity: 0.33"' : '') . '>
                     <td>' . $submitEl . '</td>
                     <td>' . $userEl . '</td>
                     <td>' . $problemEl . '</td>
-                    <td title="' . $entry['time'] . '">' . explode(' ', $entry['time'])[1] . '</td>
-                    <td>' . $entry['language'] . '</td>
-                    <td>' . intval($entry['progress'] * 100) . '%</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$entry['status']] . '</td>
+                    <td title="' . $submit->submitted . '">' . explode(' ', $submit->submitted)[1] . '</td>
+                    <td>' . $submit->language . '</td>
+                    <td>' . intval($submit->calcProgress() * 100) . '%</td>
+                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->status] . '</td>
                     ' . $regradeSubmission . '
                 </tr>
             ';
@@ -125,16 +124,14 @@ class StatusPage extends Page {
             </div>
         ';
 
-        $brain = new Brain();
-
         $latest = inBox('
             <h2>Последно тествани</h2>
-            ' . StatusPage::getStatusTable($brain->getLatest()) . '
+            ' . StatusPage::getStatusTable(Queue::getLatest()) . '
         ');
 
         $pending = inBox('
             <h2>Изчакващи тестване</h2>
-            ' . StatusPage::getStatusTable($brain->getPending()) . '
+            ' . StatusPage::getStatusTable(Queue::getPending()) . '
         ');
 
         $compilers = '<div class="center" style="font-size: smaller; margin-top: -0.25rem; margin-bottom: 0.375rem;">Информация за ползваните

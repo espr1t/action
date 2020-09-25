@@ -34,18 +34,6 @@ class Brain {
         return $results;
     }
 
-    // Generic
-    function getCount($tableName) {
-        $response = $this->db->query("
-            SELECT COUNT(*) FROM `" . $tableName . "`
-        ");
-        if (!$response) {
-            error_log('Could not execute getCount() query on table `' . $tableName . '`!');
-            return null;
-        }
-        return $this->getIntResults($response)[0];
-    }
-
     // News
     function addNews() {
         $response = $this->db->query("
@@ -351,7 +339,8 @@ class Brain {
             return null;
         }
 
-        $extension = end(explode('.', $name));
+        $tokens = explode('.', $name);
+        $extension = end($tokens);
         $response = $this->db->query("
             UPDATE `Tests` SET
                 " . (($extension == 'in' || $extension == 'inp') ? 'inpFile' : 'solFile') . " = '" . $name . "',
@@ -380,22 +369,22 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, graded, userId, userName, problemId, problemName, language, results, exec_time, exec_memory, status, message, full, hidden, ip, info)
+            INSERT INTO `Submits` (submitted, gradingStart, gradingFinish, userId, userName, problemId, problemName, language, results, execTime, execMemory, status, message, full, ip, info)
             VALUES (
                 '" . $submit->submitted . "',
-                '" . $submit->graded . "',
+                '" . $submit->gradingStart . "',
+                '" . $submit->gradingFinish . "',
                 '" . $submit->userId . "',
                 '" . $submit->userName . "',
                 '" . $submit->problemId . "',
                 '" . $submit->problemName . "',
                 '" . $this->db->escape($submit->language) . "',
                 '" . implode(',', $submit->results) . "',
-                '" . implode(',', $submit->exec_time) . "',
-                '" . implode(',', $submit->exec_memory) . "',
+                '" . implode(',', $submit->execTime) . "',
+                '" . implode(',', $submit->execMemory) . "',
                 '" . $submit->status . "',
                 '" . $this->db->escape($submit->message) . "',
                 '" . ($submit->full ? 1 : 0) . "',
-                '" . ($submit->hidden ? 1 : 0) . "',
                 '" . $this->db->escape($submit->ip) . "',
                 '" . $this->db->escape($submit->info) . "'
             )
@@ -415,7 +404,7 @@ class Brain {
                 '" . $submit->userId . "',
                 '" . $submit->problemId . "',
                 '" . $this->db->escape($submit->language) . "',
-                '" . $this->db->escape($submit->source) . "'
+                '" . $this->db->escape($submit->getSource()) . "'
             )
         ");
         if (!$response) {
@@ -438,13 +427,14 @@ class Brain {
         return $this->getResult($response);
     }
 
-    function updateSubmit($submit) {
+    function updateSubmit(Submit $submit) {
         $response = $this->db->query("
             UPDATE `Submits` SET
-                graded = '" . $submit->graded . "',
+                gradingStart = '" . $submit->gradingStart . "',
+                gradingFinish = '" . $submit->gradingFinish . "',
                 results = '" . implode(',', $submit->results) . "',
-                exec_time = '" . implode(',', $submit->exec_time) . "',
-                exec_memory = '" . implode(',', $submit->exec_memory) . "',
+                execTime = '" . implode(',', $submit->execTime) . "',
+                execMemory = '" . implode(',', $submit->execMemory) . "',
                 status = '" . $submit->status . "',
                 message = '" . $this->db->escape($submit->message) . "',
                 info = '" . $this->db->escape($submit->info) . "'
@@ -493,19 +483,52 @@ class Brain {
         return $this->getResults($response);
     }
 
+    function getPendingSubmits() {
+        $response = $this->db->query("
+            SELECT * FROM `Submits` WHERE status IN (
+                '" . $GLOBALS['STATUS_WAITING'] . "',
+                '" . $GLOBALS['STATUS_PREPARING'] . "',
+                '" . $GLOBALS['STATUS_COMPILING'] . "',
+                '" . $GLOBALS['STATUS_TESTING'] . "'
+            )
+            ORDER BY id
+        ");
+        if (!$response) {
+            error_log('Could not execute getPendingSubmits() query!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
+    function getLatestSubmits() {
+        $response = $this->db->query("
+            SELECT * FROM `Submits` WHERE status IN (
+                '" . $GLOBALS['STATUS_INTERNAL_ERROR'] . "',
+                '" . $GLOBALS['STATUS_COMPILATION_ERROR'] . "',
+                '" . $GLOBALS['STATUS_WRONG_ANSWER'] . "',
+                '" . $GLOBALS['STATUS_TIME_LIMIT'] . "',
+                '" . $GLOBALS['STATUS_MEMORY_LIMIT'] . "',
+                '" . $GLOBALS['STATUS_RUNTIME_ERROR'] . "',
+                '" . $GLOBALS['STATUS_ACCEPTED'] . "'
+            )
+            ORDER BY id DESC LIMIT 100
+        ");
+        if (!$response) {
+            error_log('Could not execute getLatestSubmits() query!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
     function getProblemSubmits($problemId, $status = 'all') {
-        if ($status == 'all') {
-            $response = $this->db->query("
+        $where = "problemId = " . $problemId;
+        if ($status != 'all')
+            $where .= " AND status = '" . $status . "'";
+        $response = $this->db->query("
                 SELECT * FROM `Submits`
-                WHERE problemId = " . $problemId . "
-            ");
-        } else {
-            $response = $this->db->query("
-                SELECT * FROM `Submits`
-                WHERE problemId = " . $problemId . " AND status = '" . $status . "'
+                WHERE " . $where . "
                 ORDER BY submitted
             ");
-        }
         if (!$response) {
             error_log('Could not execute getProblemSubmits() query properly!');
             return null;
@@ -513,13 +536,19 @@ class Brain {
         return $this->getResults($response);
     }
 
-    function getUserSubmits($userId, $problemId = -1) {
+    function getUserSubmits($userId, $problemId = -1, $status = 'all') {
+        $where = "userId = " . $userId;
+        if ($problemId != -1)
+            $where .= " AND problemId = " . $problemId;
+        if ($status != 'all')
+            $where .= " AND status = '" . $status . "'";
         $response = $this->db->query("
             SELECT * FROM `Submits`
-            WHERE userId = " . $userId . ($problemId == -1 ? '' : (' AND problemId = ' . $problemId)) . "
+            WHERE " . $where . "
         ");
         if (!$response) {
-            error_log('Could not execute getUserSubmits() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
+            error_log('Could not execute getUserSubmits() query with ' .
+                'userId = ' . $userId . ', problemId = ' . $problemId . ', and status = "' . $status . '"!');
             return null;
         }
         return $this->getResults($response);
@@ -559,123 +588,6 @@ class Brain {
             return null;
         }
         return $this->getResults($response);
-    }
-
-    // Pending
-    function getPending() {
-        $response = $this->db->query("
-            SELECT * FROM `Pending` ORDER BY submitId ASC
-        ");
-        if (!$response) {
-            error_log('Could not execute getPending() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
-    function addPending($submit) {
-        $response = $this->db->query("
-            INSERT INTO `Pending`(submitId, userId, userName, problemId, problemName, time, language, progress, status)
-            VALUES (
-                '" . $submit->id . "',
-                '" . $submit->userId . "',
-                '" . $submit->userName . "',
-                '" . $submit->problemId . "',
-                '" . $submit->problemName . "',
-                '" . $submit->submitted . "',
-                '" . $submit->language . "',
-                '" . 0 . "',
-                '" . $submit->status . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not add submit ' . $submit->id . ' to pending queue!');
-            return null;
-        }
-        return $this->db->lastId();
-    }
-
-    function updatePending($submit) {
-        $response = $this->db->query("
-            UPDATE `Pending` SET
-                progress = '" . $submit->calcProgress() . "'
-            WHERE submitId = " . $submit->id . "
-        ");
-
-        if (!$response) {
-            error_log('Could not update submit ' . $submit->id . ' in pending queue!');
-            return null;
-        }
-        return true;
-    }
-
-    function erasePending($submitId) {
-        $response = $this->db->query("
-            DELETE FROM `Pending`
-            WHERE submitId = " . $submitId . "
-        ");
-        if (!$response) {
-            error_log('Could not erase submit ' . $submitId . ' from pending queue!');
-            return null;
-        }
-        return true;
-    }
-
-    // Latest
-    function getLatest() {
-        $response = $this->db->query("
-            SELECT * FROM `Latest` ORDER BY submitId DESC
-        ");
-        if (!$response) {
-            error_log('Could not execute getLatest() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
-    function addLatest($submit) {
-        $response = $this->db->query("
-            INSERT INTO `Latest`(submitId, userId, userName, problemId, problemName, time, language, progress, status)
-            VALUES (
-                '" . $submit->id . "',
-                '" . $submit->userId . "',
-                '" . $submit->userName . "',
-                '" . $submit->problemId . "',
-                '" . $submit->problemName . "',
-                '" . $submit->submitted . "',
-                '" . $submit->language . "',
-                '" . 1 . "',
-                '" . $submit->status . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not add submit ' . $submit->id . ' to latest queue!');
-            return null;
-        }
-        return $this->db->lastId();
-    }
-
-    function eraseLatest($submitId) {
-        $response = $this->db->query("
-            DELETE FROM `Latest`
-            WHERE submitId = " . $submitId . "
-        ");
-        if (!$response) {
-            error_log('Could not erase submit ' . $submitId . ' from latest queue!');
-            return null;
-        }
-        return true;
-    }
-
-    function trimLatest($submitId) {
-        $response = $this->db->query("
-            DELETE FROM `Latest` WHERE submitId <= " . ($submitId - 100) . "
-        ");
-        if (!$response) {
-            error_log('Could not trim Latest submits!');
-            return null;
-        }
-        return true;
     }
 
     // Users
@@ -1123,8 +1035,8 @@ class Brain {
     }
 
     function addRegradeSubmit($id, $submit) {
-        $maxTime = max($submit->exec_time);
-        $maxMemory = max($submit->exec_memory);
+        $maxTime = max($submit->execTime);
+        $maxMemory = max($submit->execMemory);
         $response = $this->db->query("
             INSERT INTO `Regrades` (id, submitId, userName, problemName, submitted, regraded, oldTime, newTime, oldMemory, newMemory, oldStatus, newStatus)
             VALUES('" . $id . "',
@@ -1149,8 +1061,8 @@ class Brain {
     }
 
     function updateRegradeSubmit($id, $submit) {
-        $maxTime = max($submit->exec_time);
-        $maxMemory = max($submit->exec_memory);
+        $maxTime = max($submit->execTime);
+        $maxMemory = max($submit->execMemory);
         $response = $this->db->query("
             UPDATE `Regrades` SET
                 newTime = '" . $maxTime . "',

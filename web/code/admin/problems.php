@@ -79,8 +79,8 @@ class AdminProblemsPage extends Page {
                     \'name\': \'' . $solutions[$i]['name'] . '\',
                     \'submitId\': ' . $solutions[$i]['submitId'] . ',
                     \'path\': \'' . $sourcePath . '\',
-                    \'time\': \'' . sprintf("%.2fs", max($submit->exec_time)) . '\',
-                    \'memory\': \'' . sprintf("%.2f MiB", max($submit->exec_memory)) . '\',
+                    \'time\': \'' . sprintf("%.2fs", max($submit->execTime)) . '\',
+                    \'memory\': \'' . sprintf("%.2f MiB", max($submit->execMemory)) . '\',
                     \'score\': ' . $submit->calcScore() . ',
                     \'status\': \'' . $submit->calcStatus() . '\'
                 });

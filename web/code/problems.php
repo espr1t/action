@@ -190,7 +190,7 @@ class ProblemsPage extends Page {
         $problems = '';
         foreach ($problemsInfo as $problemInfo) {
             // Don't show hidden problems
-            if (!canSeeProblem($this->user, $problemInfo['visible'] == '1', $problemInfo['id']))
+            if (!canSeeProblem($this->user, $problemInfo['visible'] == '1'))
                 continue;
             $problems .= $problemInfo['box'];
         }
@@ -230,8 +230,8 @@ class ProblemsPage extends Page {
             $allSubmits += 1;
             if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
                 $acceptedSubmits += 1;
-                $time = array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time']));
-                $memory = array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory']));
+                $time = array_map(function ($el) {return floatval($el);}, explode(',', $submit['execTime']));
+                $memory = array_map(function ($el) {return floatval($el);}, explode(',', $submit['execMemory']));
                 $bestTime = min([$bestTime, max($time)]);
                 $bestMemory = min([$bestMemory, max($memory)]);
             }
@@ -288,10 +288,10 @@ class ProblemsPage extends Page {
             } else {
                 // Otherwise, see if this submission is better than the current best
                 $current = $usersBest[$submit['userId']];
-                $curWorstTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $current['exec_time'])));
-                $curWorstMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $current['exec_memory'])));
-                $newWorstTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time'])));
-                $newWorstMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory'])));
+                $curWorstTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $current['execTime'])));
+                $curWorstMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $current['execMemory'])));
+                $newWorstTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['execTime'])));
+                $newWorstMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['execMemory'])));
                 if ($newWorstTime < $curWorstTime || ($newWorstTime == $curWorstTime && $newWorstMemory < $curWorstMemory)) {
                     $usersBest[$submit['userId']] = $submit;
                 }
@@ -300,8 +300,8 @@ class ProblemsPage extends Page {
 
         $tableContent = '';
         foreach ($usersBest as $user => $submit) {
-            $maxTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_time'])));
-            $maxMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['exec_memory'])));
+            $maxTime = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['execTime'])));
+            $maxMemory = max(array_map(function ($el) {return floatval($el);}, explode(',', $submit['execMemory'])));
             $tableContent .= '
                 <tr>
                     <td>' . getUserLink($submit['userName']) . '</td>
@@ -449,8 +449,8 @@ class ProblemsPage extends Page {
                 </tr>
                 <tr>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->status] . '</td>
-                    <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
-                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
+                    <td>' . sprintf("%.2fs", max($submit->execTime)) . '</td>
+                    <td>' . sprintf("%.2f MiB", max($submit->execMemory)) . '</td>
                     <td>' . $submit->calcScore() . '</td>
                 </tr>
             </table>
@@ -476,8 +476,8 @@ class ProblemsPage extends Page {
                 'Тест ' . $i . PHP_EOL .
                 'Статус: ' . (is_numeric($result) ? 'OK' : $result) . PHP_EOL .
                 'Точки: ' . sprintf('%.1f', $points[$i]) . PHP_EOL .
-                'Време: ' . sprintf('%.2fs', $submit->exec_time[$i]) . PHP_EOL .
-                'Памет: ' . sprintf('%.2f MiB', $submit->exec_memory[$i])
+                'Време: ' . sprintf('%.2fs', $submit->execTime[$i]) . PHP_EOL .
+                'Памет: ' . sprintf('%.2f MiB', $submit->execMemory[$i])
             ;
             $icon = 'WTF?';
             $background = '';
@@ -520,7 +520,7 @@ class ProblemsPage extends Page {
     private function getSource($problem, $submitId) {
         $redirectUrl = getProblemUrl($problem->id) . '/submits';
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
-        echo '<plaintext>' . $submit->source;
+        echo '<plaintext>' . $submit->getSource();
         exit(0);
     }
 
@@ -648,7 +648,7 @@ class ProblemsPage extends Page {
                 redirect('/problems', 'ERROR', 'Няма задача с такъв идентификатор.');
             }
             $this->problemName = $problem->name;
-            if (!canSeeProblem($this->user, $problem->visible, $problem->id)) {
+            if (!canSeeProblem($this->user, $problem->visible)) {
                 redirect('/problems', 'ERROR', 'Нямате права да видите тази задача.');
             }
             if ($problem->type == 'game' || $problem->type == 'relative') {

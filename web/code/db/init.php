@@ -299,19 +299,19 @@ Table::Submits
 {
     "id": 1,
     "submitted": "2016-08-30 00:24:11",
-    "graded": 1484868592.086328,
+    "gradingStart": 1484868589.421337,
+    "gradingFinish": 1484868592.086328,
     "userId": 1,
     "userName": "espr1t",
     "problemId": 1,
     "problemName": "Input/Output",
     "language": "Java",
     "results": "1,1,TL,0.42,WA",
-    "exec_time": "0,0.11,0.08,0.13,0.20",
-    "exec_memory": "2.90234375,2.83203125,2.9140625,2.90234375,2.94140",
+    "execTime": "0,0.11,0.08,0.13,0.20",
+    "execMemory": "2.90234375,2.83203125,2.9140625,2.90234375,2.94140",
     "status": "T",
     "message": "Undefined variable 'foo'",
     "full": true,
-    "hidden": false,
     "ip": "2001:db8:0:0:0:ff00:42:8329",
     "info": "Either log or some info about the execution."
 }
@@ -326,19 +326,19 @@ if ($db->tableExists('Submits')) {
         CREATE TABLE `Submits`(
             id INT NOT NULL AUTO_INCREMENT,
             submitted DATETIME NOT NULL,
-            graded DOUBLE NOT NULL,
+            gradingStart DOUBLE NOT NULL,
+            gradingFinish DOUBLE NOT NULL,
             userId INT NOT NULL,
             userName VARCHAR(32) NOT NULL,
             problemId INT NOT NULL,
             problemName VARCHAR(32) NOT NULL,
             language ENUM('C++', 'Java', 'Python') NOT NULL,
             results TEXT NOT NULL,
-            exec_time TEXT NOT NULL,
-            exec_memory TEXT NOT NULL,
+            execTime TEXT NOT NULL,
+            execMemory TEXT NOT NULL,
             status VARCHAR(2) NOT NULL,
             message TEXT NOT NULL,
             full BOOLEAN NOT NULL DEFAULT FALSE,
-            hidden BOOLEAN NOT NULL DEFAULT FALSE,
             ip VARCHAR(40) NOT NULL,
             info TEXT NOT NULL,
             PRIMARY KEY (id)
@@ -372,86 +372,6 @@ if ($db->tableExists('Sources')) {
             language ENUM('C++', 'Java', 'Python') NOT NULL,
             source TEXT NOT NULL,
             PRIMARY KEY (submitId)
-        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
-    ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
-}
-
-/*
-Table::Pending
-===========
-{
-    "id": 1,
-    "submitId": 421337,
-    "userId": 1,
-    "userName": "espr1t",
-    "problemId": 1,
-    "problemName": "Input/Output",
-    "time": "2016-08-30 00:24:11",
-    "language": "C++",
-    "progress": 0.66,
-    "status": "W"
-}
-*/
-output('');
-output('Creating table Pending...');
-
-if ($db->tableExists('Pending')) {
-    output('  >> already exists.');
-} else {
-    $result = $db->query("
-        CREATE TABLE `Pending`(
-            id INT NOT NULL AUTO_INCREMENT,
-            submitId INT NOT NULL,
-            userId INT NOT NULL,
-            userName VARCHAR(32) NOT NULL,
-            problemId INT NOT NULL,
-            problemName VARCHAR(32) NOT NULL,
-            time DATETIME NOT NULL,
-            language VARCHAR(8) NOT NULL,
-            progress FLOAT NOT NULL,
-            status VARCHAR(2) NOT NULL,
-            PRIMARY KEY (id)
-        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
-    ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
-}
-
-/*
-Table::Latest
-===========
-{
-    "id": 1,
-    "submitId": 421337,
-    "userId": 1,
-    "userName": "espr1t",
-    "problemId": 1,
-    "problemName": "Input/Output",
-    "time": "2016-08-29 23:54:33",
-    "language": "C++",
-    "progress": 1.0,
-    "status": "AC"
-}
-*/
-output('');
-output('Creating table Latest...');
-
-if ($db->tableExists('Latest')) {
-    output('  >> already exists.');
-} else {
-    $result = $db->query("
-        CREATE TABLE `Latest`(
-            id INT NOT NULL AUTO_INCREMENT,
-            submitId INT NOT NULL,
-            userId INT NOT NULL,
-            userName VARCHAR(32) NOT NULL,
-            problemId INT NOT NULL,
-            problemName VARCHAR(32) NOT NULL,
-            time DATETIME NOT NULL,
-            language VARCHAR(8) NOT NULL,
-            progress FLOAT NOT NULL,
-            status VARCHAR(2) NOT NULL,
-            PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');

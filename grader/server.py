@@ -16,10 +16,12 @@ import common
 import config
 import network
 import initializer
+from threading import Lock
 from evaluator import Evaluator
 from printer import Printer
 
 app = flask.Flask("Grader")
+lock = Lock()
 
 logger = common.get_logger(__file__)
 # NOTE: Do not remove, this is done to initialize the werkzeug's logger
@@ -33,16 +35,28 @@ def available():
     return network.create_response(200, "Grader is healthy.")
 
 
+@app.route("/recent", methods=["GET"])
+@network.requires_auth
+def recent():
+    """ Used for getting the grader's queue (last up to 100 entries). """
+    return network.create_response(status=200, message="", data={"submits": common.recent_submits})
+
+
 @app.route("/evaluate", methods=["POST"])
 @network.requires_auth
 def evaluate():
+    global lock
     """ Used for grading a submission. """
     data = json.loads(flask.request.form["data"])
     try:
-        # Sleep for a very short while so werkzeug can print its log BEFORE we start printing from here
-        sleep(0.01)
-        evaluator = Evaluator(data)
-        common.request_pool.submit(evaluator.evaluate)
+        with lock:
+            # Sleep for a very short while so werkzeug can print its log BEFORE we start printing from here
+            sleep(0.01)
+            evaluator = Evaluator(data)
+            common.recent_submits.append(data["key"])
+            if len(common.recent_submits) > 100:
+                common.recent_submits = common.recent_submits[-100:]
+            common.request_pool.submit(evaluator.evaluate)
     except RuntimeError as exception:
         return network.create_response(500, exception)
 

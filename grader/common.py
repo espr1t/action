@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 import config
 
 # Use static thread pools for processing requests and jobs
+recent_submits = []
 request_pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_SUBMITS)
 job_pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_SUBMITS)
 

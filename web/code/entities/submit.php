@@ -3,12 +3,13 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/problem.php');
-require_once(__DIR__ . '/grader.php');
+require_once(__DIR__ . '/queue.php');
 
 class Submit {
     public $id = -1;
     public $submitted = '';
-    public $graded = 0.0;
+    public $gradingStart = 0.0;
+    public $gradingFinish = 0.0;
     public $userId = -1;
     public $userName = '';
     public $problemId = -1;
@@ -16,72 +17,102 @@ class Submit {
     public $source = '';
     public $language = '';
     public $results = array();
-    public $exec_time = array();
-    public $exec_memory = array();
-    public $status = -1;
+    public $execTime = array();
+    public $execMemory = array();
+    public $status = '';
     public $message = '';
     public $full = true;
-    public $hidden = false;
     public $ip = '';
     public $info = '';
 
-    public static function newSubmit($user, $problemId, $language, $source, $full, $hidden = false) {
-        $brain = new Brain();
+    private static function instanceFromArray($info) {
         $submit = new Submit();
+        $submit->id = intval(getValue($info, 'id'));
+        $submit->submitted = getValue($info, 'submitted');
+        $submit->gradingStart = floatval(getValue($info, 'gradingStart'));
+        $submit->gradingFinish = floatval(getValue($info, 'gradingFinish'));
+        $submit->userId = intval(getValue($info, 'userId'));
+        $submit->userName = getValue($info, 'userName');
+        $submit->problemId = intval(getValue($info, 'problemId'));
+        $submit->problemName = getValue($info, 'problemName');
+        $submit->language = getValue($info, 'language');
+        $submit->results = explode(',', getValue($info, 'results'));
+        $submit->execTime = explode(',', getValue($info, 'execTime'));
+        $submit->execMemory = explode(',', getValue($info, 'execMemory'));
+        $submit->status = getValue($info, 'status');
+        $submit->message = getValue($info, 'message');
+        $submit->full = boolval(getValue($info, 'full'));
+        $submit->info = getValue($info, 'info');
+        return $submit;
+    }
 
+    public static function get($id) {
+        $brain = new Brain();
+        try {
+            $info = $brain->getSubmit($id);
+            if ($info == null) {
+                error_log('Could not get submit or source with id ' . $id . '!');
+                return null;
+            }
+            return Submit::instanceFromArray($info);
+        } catch (Exception $ex) {
+            error_log('Could not get submit ' . $id . '. Exception: ' . $ex->getMessage());
+        }
+        return null;
+    }
+
+    private static function init($submit) {
+        $brain = new Brain();
+        $numTests = count($brain->getProblemTests($submit->problemId));
+        $submit->results = array_fill(0, $numTests, $GLOBALS['STATUS_WAITING']);
+        $submit->execTime = array_fill(0, $numTests, 0);
+        $submit->execMemory = array_fill(0, $numTests, 0);
+        $submit->status = $GLOBALS['STATUS_WAITING'];
+        $submit->gradingStart = microtime(true);
+        $submit->gradingFinish = 0.0;
+        $submit->message = '';
+        $submit->info = '';
+    }
+
+    public static function create($user, $problemId, $language, $source, $full) {
+        $submit = new Submit();
         $problem = Problem::get($problemId);
 
         // The submission doesn't have an ID until it is inserted in the database
         $submit->id = -1;
 
-        // Mark the time of the submission
-        $submit->submitted = date('Y-m-d H:i:s');
-        $submit->graded = 0.0;
-
-        // Populate the remaining submission info
+        // Populate the static submission info
         $submit->userId = $user->id;
         $submit->userName = $user->username;
         $submit->problemId = $problem->id;
         $submit->problemName = $problem->name;
         $submit->source = $source;
         $submit->language = $language;
-        $submit->results = array();
-        $submit->exec_time = array();
-        $submit->exec_memory = array();
-        $numTests = count($brain->getProblemTests($problem->id));
-        for ($i = 0; $i < $numTests; $i = $i + 1) {
-            $submit->results[$i] = $GLOBALS['STATUS_WAITING'];
-            $submit->exec_time[$i] = 0;
-            $submit->exec_memory[$i] = 0;
-        }
-        $submit->status = $GLOBALS['STATUS_WAITING'];
-        $submit->message = '';
-
         $submit->full = $full;
-        $submit->hidden = $hidden;
 
+        // Initialize the volatile submission info
+        Submit::init($submit);
+
+        // Mark the time and IP of the submission
         $submit->ip = getUserIP();
-        $submit->info = '';
+        $submit->submitted = date('Y-m-d H:i:s');
+
         return $submit;
     }
 
-    public function reset() {
-        $brain = new Brain();
-        $this->results = array();
-        $this->exec_time = array();
-        $this->exec_memory = array();
-        $numTests = count($brain->getProblemTests($this->problemId));
-        for ($i = 0; $i < $numTests; $i = $i + 1) {
-            $this->results[$i] = $GLOBALS['STATUS_WAITING'];
-            $this->exec_time[$i] = 0;
-            $this->exec_memory[$i] = 0;
+    public function getSource() {
+        if ($this->source == '') {
+            $brain = new Brain();
+            $source = $brain->getSource($this->id);
+            $this->source = strval(getValue($source, 'source'));
         }
-        $this->status = $GLOBALS['STATUS_WAITING'];
-        $this->message = '';
-        $this->info = '';
-        $brain->updateSubmit($this);
-        $brain->erasePending($this->id);
-        $brain->eraseLatest($this->id);
+        return $this->source;
+    }
+
+    private function test() {
+        // TODO: Run the update in a separate process so the user doesn't have to wait for the update
+        // Finally force an update of the queue so the submit may be sent for grading immediately
+        Queue::update();
     }
 
     public function update() {
@@ -89,39 +120,34 @@ class Submit {
         $brain->updateSubmit($this);
     }
 
-    public function write() {
+    public function regrade($forceUpdate=true) {
+        Submit::init($this);
+        $this->update();
+        if ($forceUpdate) {
+            $this->test();
+        }
+    }
+
+    public function add($forceUpdate=true) {
         $brain = new Brain();
         $this->id = $brain->addSubmit($this);
-        $brain->addSource($this);
-        return $this->id >= 0;
+        if ($this->id >= 0) {
+            $brain->addSource($this);
+            if ($forceUpdate) {
+                $this->test();
+            }
+            return true;
+        }
+        return false;
     }
 
-    public function send() {
-        // Record the request in the submission queue, if not hidden
-        if (!$this->hidden) {
-            $brain = new Brain();
-            $brain->addPending($this);
-        }
+    public function getKey() {
+        return sprintf("%d@%f", $this->id, $this->gradingStart);
+    }
 
-        // Record invoking this test run in the logs
-        $logMessage = sprintf('Sending submit %d for grading...', $this->id);
-        write_log($GLOBALS['LOG_SUBMITS'], $logMessage);
-
+    public function getGradingData() {
+        // Get problem, tests, and matches info
         $problem = Problem::get($this->problemId);
-        if ($problem->type == 'game') {
-            return $this->sendGame($problem);
-        } else if ($problem->type == 'relative') {
-            return $this->sendTask($problem);
-        } else {
-            return $this->sendTask($problem);
-        }
-    }
-
-    private function sendTask($problem) {
-        $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
-        $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
-        $checkerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_CHECKER'], $problem->folder);
-        $testerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTER'], $problem->folder);
 
         $brain = new Brain();
         $tests = $brain->getProblemTests($this->problemId);
@@ -138,70 +164,55 @@ class Submit {
             $tests[$i]['position'] = intval($tests[$i]['position']);
         }
 
-        // Also add the md5 hash of the checker (if there is one)
-        $checkerHash = '';
-        if ($problem->checker != '') {
-            $checkerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
-                    $GLOBALS['PROBLEM_CHECKER_FOLDER'], $problem->checker);
-            $checkerHash = md5(file_get_contents($checkerPath));
-            $checkerEndpoint .= $problem->checker;
-        }
-        $testerHash = '';
-        if ($problem->tester != '') {
-            $testerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
-                    $GLOBALS['PROBLEM_TESTER_FOLDER'], $problem->tester);
-            $testerHash = md5(file_get_contents($testerPath));
-            $testerEndpoint .= $problem->tester;
+        $matches = null;
+        if ($problem->type == 'game') {
+            // Each game needs to have a tester
+            assert($problem->tester != '');
+            $matches = $this->getGameMatches($problem, $tests);
         }
 
         // Compile all the data, required by the grader to evaluate the solution
+        $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
+        $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
+
         $data = array(
             'id' => $this->id,
-            'source' => $this->source,
+            'key' => $this->getKey(),
+            'source' => $this->getSource(),
             'language' => $this->language,
-            'tester' => $testerHash,
-            'checker' => $checkerHash,
             'floats' => $problem->floats,
             'problemType' => $problem->type,
             'timeLimit' => $problem->timeLimit,
             'memoryLimit' => $problem->memoryLimit,
             'tests' => $tests,
             'testsEndpoint' => $testsEndpoint,
-            'updateEndpoint' => $updateEndpoint,
-            'testerEndpoint' => $testerEndpoint,
-            'checkerEndpoint' => $checkerEndpoint
+            'updateEndpoint' => $updateEndpoint
         );
 
-        $grader = new Grader();
-        return $grader->evaluate($data);
-    }
-
-    private function sendGame($problem) {
-        $updateEndpoint = $GLOBALS['WEB_ENDPOINT_UPDATE'];
-        $testsEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTS'], $problem->folder);
-        $testerEndpoint = sprintf($GLOBALS['WEB_ENDPOINT_TESTER'], $problem->folder);
-
-        // Also add the md5 hash of the tester (there should be one)
-        assert($problem->tester != '');
-
-        $testerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
-                $GLOBALS['PROBLEM_TESTER_FOLDER'], $problem->tester);
-        $testerHash = md5(file_get_contents($testerPath));
-        $testerEndpoint .= $problem->tester;
-
-        // Find all submitted solutions so far
-        $brain = new Brain();
-
-        $tests = $brain->getProblemTests($this->problemId);
-
-        // Remove unnecessary data
-        for ($i = 0; $i < count($tests); $i = $i + 1) {
-            unset($tests[$i]['id']);
-            unset($tests[$i]['problem']);
-            unset($tests[$i]['score']);
+        if ($matches != null) {
+            $data['matches'] = $matches;
         }
 
-        // Now create a set of matches to be played (depending on whether the submit is full or not)
+        // Also add the checker or tester if they are present
+        if ($problem->checker != '') {
+            $checkerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
+                $GLOBALS['PROBLEM_CHECKER_FOLDER'], $problem->checker);
+            $data['checker'] = md5(file_get_contents($checkerPath));
+            $data['checkerEndpoint'] = sprintf($GLOBALS['WEB_ENDPOINT_CHECKER'], $problem->folder) . $problem->checker;
+        }
+        if ($problem->tester != '') {
+            $testerPath = sprintf('%s/%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder,
+                $GLOBALS['PROBLEM_TESTER_FOLDER'], $problem->tester);
+            $data['tester'] = md5(file_get_contents($testerPath));
+            $data['testerEndpoint'] = sprintf($GLOBALS['WEB_ENDPOINT_TESTER'], $problem->folder) . $problem->tester;
+        }
+        return $data;
+    }
+
+    private function getGameMatches($problem, $tests) {
+        $brain = new Brain();
+
+        // Create a set of matches to be played (depending on whether the submit is full or not)
         $matches = array();
 
         // Partial submission - run only against author's solutions.
@@ -278,85 +289,39 @@ class Submit {
                     'player_two_id' => $submit->userId,
                     'player_two_name' => $submit->userName,
                     'language' => $submit->language,
-                    'source' => $submit->source
+                    'source' => $submit->getSource()
                 ));
             }
         }
+        return $matches;
+    }
 
-        // Compile all the data, required by the grader to evaluate the game
-        $data = array(
-            'id' => $this->id,
-            'source' => $this->source,
-            'language' => $this->language,
-            'matches' => $matches,
-            'tester' => $testerHash,
-            'floats' => false,
-            'problemType' => $problem->type,
-            'timeLimit' => $problem->timeLimit,
-            'memoryLimit' => $problem->memoryLimit,
-            'tests' => $tests,
-            'testsEndpoint' => $testsEndpoint,
-            'updateEndpoint' => $updateEndpoint,
-            'testerEndpoint' => $testerEndpoint
+    private static function getObjects($objectsAsArrays) {
+        return array_map(
+            function ($entry) {
+                return Submit::instanceFromArray($entry, array('source' => ''));
+            }, $objectsAsArrays
         );
-
-        $grader = new Grader();
-        return $grader->evaluate($data);
     }
 
-    public static function instanceFromArray($info, $source) {
-        $submit = new Submit();
-        $submit->id = intval(getValue($info, 'id'));
-        $submit->submitted = getValue($info, 'submitted');
-        $submit->graded = floatval(getValue($info, 'graded'));
-        $submit->userId = intval(getValue($info, 'userId'));
-        $submit->userName = getValue($info, 'userName');
-        $submit->problemId = intval(getValue($info, 'problemId'));
-        $submit->problemName = getValue($info, 'problemName');
-        $submit->language = getValue($info, 'language');
-        $submit->source = getValue($source, 'source');
-        $submit->results = explode(',', getValue($info, 'results'));
-        $submit->exec_time = explode(',', getValue($info, 'exec_time'));
-        $submit->exec_memory = explode(',', getValue($info, 'exec_memory'));
-        $submit->status = getValue($info, 'status');
-        $submit->message = getValue($info, 'message');
-        $submit->full = boolval(getValue($info, 'full'));
-        $submit->hidden = boolval(getValue($info, 'hidden'));
-        $submit->info = getValue($info, 'info');
-        return $submit;
-    }
-
-    public static function get($id) {
+    public static function getProblemSubmits($problemId, $status = 'all') {
         $brain = new Brain();
-        try {
-            $info = $brain->getSubmit($id);
-            $source = $brain->getSource($id);
-            if ($info == null || $source == null) {
-                error_log('Could not get submit or source with id ' . $id . '!');
-                return null;
-            }
-            return Submit::instanceFromArray($info, $source);
-        } catch (Exception $ex) {
-            error_log('Could not get submit ' . $id . '. Exception: ' . $ex->getMessage());
-        }
-        return null;
+        return self::getObjects($brain->getProblemSubmits($problemId, $status));
     }
 
-    public static function getUserSubmits($userId, $problemId) {
+    public static function getUserSubmits($userId, $problemId = -1, $status = 'all') {
         $brain = new Brain();
-        $submitMaps = $brain->getUserSubmits($userId, $problemId);
-        $sourcesMaps = $brain->getUserSources($userId, $problemId);
-        $submits = array();
-        // This can be done better than O(N^2) if need be.
-        foreach ($submitMaps as $submitMap) {
-            foreach ($sourcesMaps as $sourceMap) {
-                if ($submitMap['id'] == $sourceMap['submitId']) {
-                    array_push($submits, Submit::instanceFromArray($submitMap, $sourceMap));
-                    break;
-                }
-            }
-        }
-        return $submits;
+        return self::getObjects($brain->getUserSubmits($userId, $problemId, $status));
+    }
+
+    public static function getPendingSubmits() {
+        $brain = new Brain();
+        return self::getObjects($brain->getPendingSubmits());
+    }
+
+    public static function getLatestSubmits() {
+        $brain = new Brain();
+        return self::getObjects($brain->getLatestSubmits());
     }
 
     public function calcStatus() {
@@ -401,7 +366,8 @@ class Submit {
         $tests = $brain->getProblemTests($this->problemId);
 
         if (count($this->results) != count($tests)) {
-            error_log('Number of tests of problem ' . $this->problemId . ' differs from results in submission ' . $this->id . '!');
+            error_log(sprintf('Number of tests of problem %d differs from results in submission %d!', $this->problemId, $this->id));
+            return [];
         }
 
         $scores = [];

@@ -10,7 +10,7 @@ class Grader {
     private static $METHOD_GET = 'GET';
     private static $METHOD_POST = 'POST';
 
-    function call($path, $data, $method, $json=true) {
+    static function call($path, $data, $method, $json=true) {
         $curl = curl_init();
 
         // Setup the connection
@@ -51,29 +51,37 @@ class Grader {
         return $response;
     }
 
-    function available() {
-        $response = $this->call($GLOBALS['GRADER_ENDPOINT_AVAILABLE'], [], Grader::$METHOD_GET);
+    static function available() {
+        $response = self::call($GLOBALS['GRADER_ENDPOINT_AVAILABLE'], [], Grader::$METHOD_GET);
         return $response['status'] == 200;
     }
 
-    function evaluate($data) {
-        $response = $this->call($GLOBALS['GRADER_ENDPOINT_EVALUATE'], $data, Grader::$METHOD_POST);
-        return true;
+    static function recent() {
+        $response = self::call($GLOBALS['GRADER_ENDPOINT_RECENT'], [], Grader::$METHOD_GET);
+        return $response['status'] != 200 ? null : $response['submits'];
     }
 
-    private function updateTest(&$submit, $test, $score, $exec_time, $exec_memory) {
+    static function evaluate(Submit $submit) {
+        // Record invoking this test run in the logs
+        write_log($GLOBALS['LOG_SUBMITS'], sprintf('Sending submit %d for grading...', $submit->id));
+
+        $response = self::call($GLOBALS['GRADER_ENDPOINT_EVALUATE'], $submit->getGradingData(), Grader::$METHOD_POST);
+        return $response['status'] == 200;
+    }
+
+    private function updateTest($submit, $test, $score, $execTime, $execMemory) {
         // Update the test score
         if (!is_numeric($submit->results[$test]))
             $submit->results[$test] = 0;
         $submit->results[$test] += $score;
         // Update the test execution time (we've already checked that the match has ended, so it should be set)
-        $submit->exec_time[$test] = max($submit->exec_time[$test], $exec_time);
+        $submit->execTime[$test] = max($submit->execTime[$test], $execTime);
         // Update the test execution memory (we've already checked that the match has ended, so it should be set)
-        $submit->exec_memory[$test] = max($submit->exec_memory[$test], $exec_memory);
+        $submit->execMemory[$test] = max($submit->execMemory[$test], $execMemory);
         $submit->update();
     }
 
-    private function updateGameTest(&$submit, $result) {
+    private function updateGameTest($submit, $result) {
         // Update the information about this match
         $test = intval($result['position']);
         $userOne = intval($result['player_one_id']);
@@ -87,9 +95,9 @@ class Grader {
 
         // Update the information about this test in the user's submit
         $score = $submit->userId == $userOne ? $match->scoreOne : $match->scoreTwo;
-        $exec_time = floatval($submit->userId == $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time']);
-        $exec_memory = floatval($submit->userId == $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory']);
-        $this->updateTest($submit, $test, $score, $exec_time, $exec_memory);
+        $execTime = floatval($submit->userId == $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time']);
+        $execMemory = floatval($submit->userId == $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory']);
+        $this->updateTest($submit, $test, $score, $execTime, $execMemory);
 
         // Update the information about this test in the opponent's submit
         $opponentSubmitId = $submit->userId == $userOne ? $match->submitTwo : $match->submitOne;
@@ -99,14 +107,14 @@ class Grader {
                 error_log('Couldn\'t find opponent\'s submit with id ' . $opponentSubmitId . ', although should be present!');
             } else {
                 $score = $submit->userId != $userOne ? $match->scoreOne : $match->scoreTwo;
-                $exec_time = floatval($submit->userId != $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time']);
-                $exec_memory = floatval($submit->userId != $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory']);
-                $this->updateTest($opponentSubmit, $test, $score, $exec_time, $exec_memory);
+                $execTime = floatval($submit->userId != $userOne ? $result['player_one_exec_time'] : $result['player_two_exec_time']);
+                $execMemory = floatval($submit->userId != $userOne ? $result['player_one_exec_memory'] : $result['player_two_exec_memory']);
+                $this->updateTest($opponentSubmit, $test, $score, $execTime, $execMemory);
             }
         }
     }
 
-    private function updateTaskTest(&$submit, $result) {
+    private function updateTaskTest($submit, $result) {
         // Update the status of a single test
         if ($result['status'] == 'ACCEPTED') {
             $submit->results[$result['position']] = floatval($result['score']);
@@ -115,11 +123,11 @@ class Grader {
         }
         // Update the execution time (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
         if (array_key_exists('exec_time', $result)) {
-            $submit->exec_time[$result['position']] = floatval($result['exec_time']);
+            $submit->execTime[$result['position']] = floatval($result['exec_time']);
         }
         // Update the execution memory (if provided, can be missing if in state WAITING, COMPILING, or TESTING)
         if (array_key_exists('exec_memory', $result)) {
-            $submit->exec_memory[$result['position']] = floatval($result['exec_memory']);
+            $submit->execMemory[$result['position']] = floatval($result['exec_memory']);
         }
         // Update the info fields for tests other than the sample
         if (array_key_exists('info', $result) && $result['info'] != '') {
@@ -142,13 +150,14 @@ class Grader {
         // If already updated, skip this update
         // NOTE: This logic still imposes some small risk of a race condition
         // (between this check and the updateSubmit() call bellow)
-        if ($submit->graded > $timestamp) {
+        if ($submit->gradingFinish > $timestamp) {
             error_log(sprintf('Skipping update on submit %d with message "%s": requested update for %f, but already at %f.',
-                    $submitId, $message, $timestamp, $submit->graded));
+                    $submitId, $message, $timestamp, $submit->gradingFinish));
             exit();
         }
         // Update the timestamp of the latest submit
-        $submit->graded = $timestamp;
+        $submit->gradingFinish = $timestamp;
+
         $brain = new Brain();
         $brain->updateSubmit($submit);
 
@@ -181,26 +190,15 @@ class Grader {
             $history['time02'] = $history['time03'];
             $history['time03'] = $history['time04'];
             $history['time04'] = $history['time05'];
-            $history['time05'] = implode(',', $submit->exec_time);
+            $history['time05'] = implode(',', $submit->execTime);
             $brain->updateHistory($submit->id, $history);
-        }
-
-        // Update Pending and Latest lists if the submission is not hidden
-        if (!$submit->hidden) {
-            $brain->updatePending($submit);
-
-            // If last update, move submission from Pending to Latest
-            if ($submit->message != '') {
-                $brain->erasePending($submit->id);
-                $brain->addLatest($submit);
-                $brain->trimLatest($submit->id);
-            }
         }
 
         // Record the completed test run in the logs
         if ($submit->message != '') {
             $logMessage = sprintf('Submit %d has been processed.', $submit->id);
             write_log($GLOBALS['LOG_SUBMITS'], $logMessage);
+            Queue::update();
         }
     }
 

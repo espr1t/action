@@ -125,13 +125,11 @@ class GamesPage extends Page {
     }
 
     private static function populateRelativePoints($problem, &$bestScores, &$userSubmits) {
-        $brain = new Brain();
-        $submits = $brain->getProblemSubmits($problem->id);
+        $submits = Submit::getProblemSubmits($problem->id);
         // Take into account only the latest submission of each user
         $submits = array_reverse($submits);
 
-        foreach ($submits as $submitDict) {
-            $submit = Submit::instanceFromArray($submitDict, array('source' => ''));
+        foreach ($submits as $submit) {
             // Skip system submits
             if ($submit->userId == 0) {
                 continue;
@@ -236,7 +234,7 @@ class GamesPage extends Page {
             $problem = Problem::instanceFromArray($game);
 
             // Don't show hidden games
-            if (!canSeeProblem($this->user, $problem->visible, $problem->id))
+            if (!canSeeProblem($this->user, $problem->visible))
                 continue;
 
             $ranking = array();
@@ -481,8 +479,21 @@ class GamesPage extends Page {
             ';
         }
 
-        if ($problem->name == 'HyperWords' || $problem->name == 'Airports' || $problem->name == 'ImageScanner') {
+        $withoutVisualizer = [
+            'HyperWords',
+            'Airports',
+            'ImageScanner',
+            'NumberGuessing'
+        ];
+        if (in_array($problem->name, $withoutVisualizer)) {
             $visualizerButton = '';
+        }
+
+        $withoutScoreboard = [
+            'NumberGuessing'
+        ];
+        if (in_array($problem->name, $withoutScoreboard)) {
+            $scoreboardButton = '';
         }
 
         $controlButtons = '
@@ -549,8 +560,8 @@ class GamesPage extends Page {
                 </tr>
                 <tr>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$status] . '</td>
-                    <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
-                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
+                    <td>' . sprintf("%.2fs", max($submit->execTime)) . '</td>
+                    <td>' . sprintf("%.2f MiB", max($submit->execMemory)) . '</td>
                     <td>' . $score . '</td>
                 </tr>
             </table>
@@ -736,8 +747,8 @@ class GamesPage extends Page {
                 </tr>
                 <tr>
                     <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->status] . '</td>
-                    <td>' . sprintf("%.2fs", max($submit->exec_time)) . '</td>
-                    <td>' . sprintf("%.2f MiB", max($submit->exec_memory)) . '</td>
+                    <td>' . sprintf("%.2fs", max($submit->execTime)) . '</td>
+                    <td>' . sprintf("%.2f MiB", max($submit->execMemory)) . '</td>
                     <td>' . sprintf("%.3f", array_sum($points) - $points[0]) . '</td>
                 </tr>
             </table>
@@ -768,8 +779,8 @@ class GamesPage extends Page {
                 'Тест ' . $i . PHP_EOL .
                 'Статус: ' . (is_numeric($result) ? 'OK' : $result) . PHP_EOL .
                 'Точки: ' . sprintf('%.1f', $points[$i]) . ' (' . $result . ')' . PHP_EOL .
-                'Време: ' . sprintf('%.2fs', $submit->exec_time[$i]) . PHP_EOL .
-                'Памет: ' . sprintf('%.2f MiB', $submit->exec_memory[$i])
+                'Време: ' . sprintf('%.2fs', $submit->execTime[$i]) . PHP_EOL .
+                'Памет: ' . sprintf('%.2f MiB', $submit->execMemory[$i])
             ;
 
             $icon = 'WTF?';
@@ -960,7 +971,7 @@ class GamesPage extends Page {
     private function getSource($problem, $submitId) {
         $redirectUrl = getGameUrl($problem->name) . '/submits';
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
-        echo '<plaintext>' . $submit->source;
+        echo '<plaintext>' . $submit->getSource();
         exit(0);
     }
 
@@ -1289,10 +1300,10 @@ class GamesPage extends Page {
     }
 
     public function getContent() {
-        $queueShortcut = false;
-        if (isset($_SESSION['queueShortcut'])) {
-            $queueShortcut = true;
-            unset($_SESSION['queueShortcut']);
+        $statusShortcut = false;
+        if (isset($_SESSION['statusShortcut'])) {
+            $statusShortcut = true;
+            unset($_SESSION['statusShortcut']);
         }
 
         if (isset($_GET['game'])) {
@@ -1300,7 +1311,7 @@ class GamesPage extends Page {
             if ($problem == null) {
                 return $this->getMainPage();
             }
-            if (!canSeeProblem($this->user, $problem->visible, $problem->id)) {
+            if (!canSeeProblem($this->user, $problem->visible)) {
                 redirect('/games', 'ERROR', 'Нямате права да видите тази игра.');
             }
 
@@ -1334,8 +1345,8 @@ class GamesPage extends Page {
                     } else if (isset($_GET['updates'])) {
                         $this->getSubmitUpdates($problem, $_GET['submitId']);
                     } else {
-                        if ($queueShortcut)
-                            $_SESSION['queueShortcut'] = true;
+                        if ($statusShortcut)
+                            $_SESSION['statusShortcut'] = true;
                         if (!isset($_GET['matchId'])) {
                             $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
                         } else {

@@ -5,6 +5,8 @@ require_once(__DIR__ . '/../entities/problem.php');
 require_once(__DIR__ . '/../entities/submit.php');
 require_once(__DIR__ . '/../entities/user.php');
 
+global $user;
+
 // User doesn't have access level needed for uploading solutions
 if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
@@ -25,7 +27,7 @@ if ($problem == null) {
 $solutionName = $_POST['solutionName'];
 
 // Determine language by the file extention
-$language = end(explode('.', $solutionName));
+$language = lastElement(explode('.', $solutionName));
 if (!array_key_exists($language, $GLOBALS['SUPPORTED_LANGUAGES'])) {
     printAjaxResponse(array(
         'status' => 'ERROR',
@@ -44,16 +46,13 @@ file_put_contents($solutionPath, $solutionSource);
 
 // Solutions should be uploaded with System's user
 $user = User::get(0);
+$submit = Submit::create($user, $problemId, $language, $solutionSource, false);
 
-// Create a hidden judge submit
-$submit = Submit::newSubmit($user, $problemId, $language, $solutionSource, false /* full */, true /* hidden */);
-
-// In case the solution cannot be written to the database, return an error
-// so the user knows something is wrong
-if (!$submit->write()) {
+// Add the submit to the database and queue it for grading.
+if (!$submit->add()) {
     printAjaxResponse(array(
         'status' => 'ERROR',
-        'message' => 'Възникна проблем при записването на решението.'
+        'message' => 'Възникна проблем при изпращането на решението.'
     ));
 }
 
@@ -64,20 +63,10 @@ $brain->addSolution($problemId, $solutionName, $submit->id, $solutionSource, $la
 // Return the relative path to the solution so it is displayed properly on the frontend
 $solutionPath = explode($_SERVER['DOCUMENT_ROOT'], $solutionPath)[1];
 
-$status = 'OK';
-$message = 'Решението беше качено успешно.';
-
-// In case the submission cannot be sent to the grader, return a warning, but record
-// it for later evaluation
-if ($problem->type != 'game' && !$submit->send()) {
-    $status = 'WARNING';
-    $message = 'Решението ще бъде тествано по-късно.';
-}
-
 // Otherwise print success and return the submit ID
 printAjaxResponse(array(
-    'status' => $status,
-    'message' => $message,
+    'status' => 'OK',
+    'message' => 'Решението беше предадено успешно.',
     'id' => $submit->id,
     'path' => $solutionPath
 ));
