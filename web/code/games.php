@@ -708,7 +708,7 @@ class GamesPage extends Page {
                     'scoreUser' => $scoreUser,
                     'scoreOpponent' => $scoreOpponent,
                     'message' => $match['message'],
-                    'log' => $match['log']
+                    'log' => $match['replayId']
                 ));
             }
         }
@@ -1097,14 +1097,11 @@ class GamesPage extends Page {
         $playerTwo = User::get($match->userTwo);
         $playerTwo = $playerTwo != null ? $playerTwo->username : sprintf('Author%d', -$match->userTwo);
 
-        $functionName = $this->getReplayFunction($_GET['game']);
-        $content = '
+        return '
             <script>
-                ' . $functionName . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->log . '");
+                ' . $this->getReplayFunction($_GET['game']) . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->replayId . '");
             </script>
         ';
-
-        return $content;
     }
 
     private function getOtherReplay($problem, $submitId, $testId) {
@@ -1127,37 +1124,30 @@ class GamesPage extends Page {
             }
         }
 
-        $submitInfo = explode(',', $submit->info);
-
-        $logId = '';
-        if (count($submitInfo) == count($submit->results)) {
-            if ($testId >= 0 && $testId < count($submitInfo))
-                $logId = $submitInfo[$testId];
+        $replayId = '';
+        $replayIds = explode(',', $submit->replayId);
+        if (count($replayIds) == count($submit->results)) {
+            if ($testId >= 0 && $testId < count($replayIds))
+                $replayId = $replayIds[$testId];
         }
-        if ($logId == '') {
+        if ($replayId == '') {
             redirect($returnUrl, 'ERROR', 'Този събмит няма визуализация!');
         }
-
-        $functionName = $this->getReplayFunction($_GET['game']);
 
         $ranking = $this->getRelativeRanking($problem);
         $position = 0;
         for (; $position < count($ranking); $position += 1)
             if ($ranking[$position]['user'] == $submit->userId)
                 break;
-        $rank = '';
-        if ($position == 0) $rank = '1-st';
-        if ($position == 1) $rank = '2-nd';
-        if ($position == 2) $rank = '3-rd';
-        if ($position >= 3) $rank = '' . ($position + 1) . '-th';
+        $suffix = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th'];
+        $rank = '' . ($position + 1) . '-' . $suffix[$position % 10];
         $userName = $submit->userName . ' (ranked ' . $rank . ' out of ' . count($ranking) . ')';
 
-        $content = '
+        return '
             <script>
-                ' . $functionName . '("' . $userName . '", "'. $logId . '");
+                ' . $this->getReplayFunction($_GET['game']) . '("' . $userName . '", "'. $replayId . '");
             </script>
         ';
-        return $content;
     }
 
     private function getReplay($problem, $submitId, $matchId) {
@@ -1257,7 +1247,6 @@ class GamesPage extends Page {
 
         $brain = new Brain();
         $scoreboard = $this->getScoreboard($problem);
-        $functionName = $this->getReplayFunction($_GET['game']);
 
         $allSubmits = $brain->getProblemSubmits($problem->id, $GLOBALS['STATUS_ACCEPTED']);
         $users = array();
@@ -1281,12 +1270,13 @@ class GamesPage extends Page {
         /*
         $matches = $brain->getGameMatches($problem->id);
         $idx = rand() % count($matches);
-        while ($matches[$idx]['userOne'] < 0 || $matches[$idx]['userTwo'] < 0 || $matches[$idx]['log'] == '')
+        while ($matches[$idx]['userOne'] < 0 || $matches[$idx]['userTwo'] < 0 || $matches[$idx]['replayId'] == '')
             $idx = rand() % count($matches);
 
         $playerOne = User::get($matches[$idx]['userOne']);
         $playerTwo = User::get($matches[$idx]['userTwo']);
-        $replay = $functionName . '("'. $playerOne->username . '", "' . $playerTwo->username .'", "' . $matches[$idx]['log'] . '", true);';
+        // TODO: This may not be using the newest logic for match->log vs. match->replayId
+        $replay = $this->getReplayFunction($_GET['game']) . '("'. $playerOne->username . '", "' . $playerTwo->username .'", "' . $matches[$idx]['replayId'] . '", true);';
         */
 
         $demoActions = '

@@ -369,7 +369,7 @@ class Brain {
     // Submits
     function addSubmit($submit) {
         $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, gradingStart, gradingFinish, userId, userName, problemId, problemName, language, results, execTime, execMemory, status, message, full, ip, info)
+            INSERT INTO `Submits` (submitted, gradingStart, gradingFinish, userId, userName, problemId, problemName, language, results, execTime, execMemory, status, message, full, ip, info, replayId)
             VALUES (
                 '" . $submit->submitted . "',
                 '" . $submit->gradingStart . "',
@@ -386,7 +386,8 @@ class Brain {
                 '" . $this->db->escape($submit->message) . "',
                 '" . ($submit->full ? 1 : 0) . "',
                 '" . $this->db->escape($submit->ip) . "',
-                '" . $this->db->escape($submit->info) . "'
+                '" . $this->db->escape($submit->info) . "',
+                '" . $this->db->escape($submit->replayId) . "'
             )
         ");
         if (!$response) {
@@ -437,7 +438,8 @@ class Brain {
                 execMemory = '" . implode(',', $submit->execMemory) . "',
                 status = '" . $submit->status . "',
                 message = '" . $this->db->escape($submit->message) . "',
-                info = '" . $this->db->escape($submit->info) . "'
+                info = '" . $this->db->escape($submit->info) . "',
+                replayId = '" . $this->db->escape($submit->replayId) . "'
             WHERE id = " . $submit->id . "
         ");
         if (!$response) {
@@ -944,7 +946,7 @@ class Brain {
 
     function updateMatch($match) {
         $response = $this->db->query("
-            INSERT INTO `Matches` (problemId, test, userOne, userTwo, submitOne, submitTwo, scoreOne, scoreTwo, message, log)
+            INSERT INTO `Matches` (problemId, test, userOne, userTwo, submitOne, submitTwo, scoreOne, scoreTwo, message, replayId)
                 VALUES (
                     '" . $match->problemId . "',
                     '" . $match->test . "',
@@ -955,7 +957,7 @@ class Brain {
                     '" . $match->scoreOne . "',
                     '" . $match->scoreTwo . "',
                     '" . $this->db->escape($match->message) . "',
-                    '" . $this->db->escape($match->log) . "'
+                    '" . $this->db->escape($match->replayId) . "'
                 )
             ON DUPLICATE KEY UPDATE
                 submitOne = '" . $match->submitOne . "',
@@ -963,7 +965,7 @@ class Brain {
                 scoreOne = '" . $match->scoreOne . "',
                 scoreTwo = '" . $match->scoreTwo . "',
                 message = '" . $this->db->escape($match->message) . "',
-                log = '" . $this->db->escape($match->log) . "'
+                replayId = '" . $this->db->escape($match->replayId) . "'
         ");
         if (!$response) {
             error_log('Could not add or update match on problem ' . $match->problemId . '!');

@@ -21,6 +21,7 @@ class RunResult:
     output: bytes = None
     info: str = ""
     error: str = ""
+    replay_id: str = ""
 
 
 @dataclass

@@ -234,7 +234,7 @@ Table::Matches
     "scoreOne": 7.2,
     "scoreTwo": 9.3,
     "message": "Player One's solution timed out.",
-    "log": "RUUDLLRLLRRD(5,3)...RL"
+    "replayId": "6a841f45308534a24199b263ec465b32"
 }
 */
 output('');
@@ -255,7 +255,7 @@ if ($db->tableExists('Matches')) {
             scoreOne FLOAT NOT NULL,
             scoreTwo FLOAT NOT NULL,
             message TINYTEXT NOT NULL,
-            log TEXT NOT NULL,
+            replayId TEXT NOT NULL,
             PRIMARY KEY (problemId, test, userOne, userTwo),
             KEY `id` (`id`)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -313,7 +313,8 @@ Table::Submits
     "message": "Undefined variable 'foo'",
     "full": true,
     "ip": "2001:db8:0:0:0:ff00:42:8329",
-    "info": "Either log or some info about the execution."
+    "info": "Either log or some info about the execution.",
+    "replayId": "A comma-separated list of replay IDs (if a problem with tester)."
 }
 */
 output('');
@@ -341,6 +342,7 @@ if ($db->tableExists('Submits')) {
             full BOOLEAN NOT NULL DEFAULT FALSE,
             ip VARCHAR(40) NOT NULL,
             info TEXT NOT NULL,
+            replayId TEXT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");

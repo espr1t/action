@@ -14,7 +14,7 @@ class Match {
     public $scoreOne = 0;
     public $scoreTwo = 0;
     public $message = '';
-    public $log = '';
+    public $replayId = '';
 
     public function __construct($problemId, $test, $userOne, $userTwo, $submitOne = -1, $submitTwo = -1) {
         $this->id = -1;
@@ -27,7 +27,7 @@ class Match {
         $this->scoreOne = 0;
         $this->scoreTwo = 0;
         $this->message = '';
-        $this->log = '';
+        $this->replayId = '';
     }
 
     static function instanceFromArray($info) {
@@ -42,7 +42,7 @@ class Match {
         $match->scoreOne = floatval(getValue($info, 'scoreOne'));
         $match->scoreTwo = floatval(getValue($info, 'scoreTwo'));
         $match->message = getValue($info, 'message');
-        $match->log = getValue($info, 'log');
+        $match->replayId = getValue($info, 'replayId');
         return $match;
     }
 

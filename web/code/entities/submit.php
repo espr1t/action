@@ -24,6 +24,7 @@ class Submit {
     public $full = true;
     public $ip = '';
     public $info = '';
+    public $replayId = '';
 
     private static function instanceFromArray($info) {
         $submit = new Submit();
@@ -43,6 +44,7 @@ class Submit {
         $submit->message = getValue($info, 'message');
         $submit->full = boolval(getValue($info, 'full'));
         $submit->info = getValue($info, 'info');
+        $submit->replayId = getValue($info, 'replayId');
         return $submit;
     }
 
@@ -72,6 +74,7 @@ class Submit {
         $submit->gradingFinish = 0.0;
         $submit->message = '';
         $submit->info = '';
+        $submit->replayId = '';
     }
 
     public static function create($user, $problemId, $language, $source, $full) {

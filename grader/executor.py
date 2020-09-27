@@ -71,7 +71,8 @@ def execute_problem(updater, submit_id, result_id, test: TestInfo, run_config: R
         "exec_memory": round(run_result.exec_memory / 1048576, 2),  # Convert back to megabytes
         "score": run_result.score,
         "info": run_result.info,
-        "error_message": run_result.error
+        "error_message": run_result.error,
+        "replay_id": run_result.replay_id
     })
     return run_result
 
@@ -127,6 +128,17 @@ def execute_standard(submit_id, test: TestInfo, run_config: RunConfig) -> RunRes
         run_result.output = checker_result.output
 
     return run_result
+
+
+def save_replay_log(interaction_log):
+    log_id = ""
+    if interaction_log is not None:
+        log_id = md5(interaction_log).hexdigest()
+        # Record the log in the /replays folder using the hash as a name
+        log_path = os.path.abspath(os.path.join(config.PATH_REPLAYS, log_id))
+        with open(log_path, "wb") as out:
+            out.write(interaction_log)
+    return log_id
 
 
 def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> RunResult:
@@ -187,16 +199,19 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
     interaction_log = sandbox.read_file(log_file)
     del sandbox
 
+    # Record the game log to the /replays folder
+    replay_id = save_replay_log(interaction_log)
+
     # The interactor crashed or got killed
     # Don't check memory limit, as it can be caused by child processes (including solution)
     if run_result.exec_time >= config.MAX_GAME_LENGTH:
         message = "Interactor took too much time to complete ({:.3f}s).".format(run_result.exec_time)
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
     if run_result.exit_code != 0:
         message = "Interactor exited with non-zero exit code ({}).".format(run_result.exit_code)
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 
     # Parse the response from the interactor
     try:
@@ -204,7 +219,7 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
     except ValueError:
         message = "Could not decode interactor's output: {}!".format(run_result.output.decode())
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 
     # print("RESULTS:\n{}".format(json.dumps(results, indent=4, sort_keys=True)))
 
@@ -212,7 +227,7 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
     if results["internal_error"] or results["tester_exit_code"] != 0:
         message = "Tester crashed or some other internal error happened."
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 
     # Everything with the system seems okay.
     # Get the score and the solution's exit_code, exec_time, and exec_memory
@@ -224,19 +239,8 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
     # Get tester's output
     output = ("" if "tester_message" not in results else results["tester_message"]).encode()
 
-    # Put the replay log in the replays folder if everything seems normal
-    replay_id = ""
-    if exit_code == 0 and exec_time <= run_config.time_limit and exec_memory <= run_config.memory_limit:
-        # Record the game log to the /replays folder if not empty
-        if interaction_log is not None:
-            replay_id = md5(interaction_log).hexdigest()
-            # Record the log in the /replays folder using the hash as a name
-            replay_path = os.path.abspath(os.path.join(config.PATH_REPLAYS, replay_id))
-            with open(replay_path, "wb") as out:
-                out.write(interaction_log)
-
     # Leave the caller function decide what the test status will be
-    return RunResult(exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=output, info=replay_id)
+    return RunResult(exit_code=exit_code, exec_time=exec_time, exec_memory=exec_memory, output=output, replay_id=replay_id)
 
 
 def execute_game(updater, submit_id, result_id, test: TestInfo, run_config: RunConfig,
@@ -270,7 +274,7 @@ def execute_game(updater, submit_id, result_id, test: TestInfo, run_config: RunC
             "player_two_score": 0.0,
             "player_two_exec_time": 0.0,
             "player_two_exec_memory": 0.0,
-            "match_log": run_result.info
+            "replay_id": run_result.replay_id
     }
 
     if run_result.status is not TestStatus.INTERNAL_ERROR:
@@ -294,7 +298,7 @@ def execute_game(updater, submit_id, result_id, test: TestInfo, run_config: RunC
 def execute_two_player_game(submit_id, test: TestInfo, run_config: RunConfig,
                  player_one_executable_path, player_two_executable_path) -> RunResult:
 
-    log_file_name = "interaction.log"
+    log_file = "interaction.log"
     tester_executable_name = "tester." + run_config.tester_path.split(".")[-1]
     player_one_executable_name = "solution1." + player_one_executable_path.split(".")[-1]
     player_two_executable_name = "solution2." + player_two_executable_path.split(".")[-1]
@@ -319,7 +323,7 @@ def execute_two_player_game(submit_id, test: TestInfo, run_config: RunConfig,
         "solution_timeout": run_config.timeout,
         "time_limit": run_config.time_limit,
         "memory_limit": run_config.memory_limit,
-        "log_file": log_file_name
+        "log_file": log_file
     }
 
     empty_file = NamedTemporaryFile(mode="w+t", delete=False)
@@ -339,7 +343,7 @@ def execute_two_player_game(submit_id, test: TestInfo, run_config: RunConfig,
     sandbox.put_file(player_one_executable_path, target_name=player_one_executable_name)
     sandbox.put_file(player_two_executable_path, target_name=player_two_executable_name)
     sandbox.put_file(test.inpPath, target_name="input.txt", mode=0o777)
-    sandbox.put_file(empty_file_path, target_name=log_file_name, mode=0o777)
+    sandbox.put_file(empty_file_path, target_name=log_file, mode=0o777)
 
     # Run the executable, while measuring CPU and Memory consumption
     run_result = Runner.run_program(
@@ -349,28 +353,22 @@ def execute_two_player_game(submit_id, test: TestInfo, run_config: RunConfig,
         timeout=config.MAX_GAME_LENGTH,
         input_bytes=json.dumps(args, indent=4, sort_keys=True).encode()
     )
-    interaction_log = sandbox.read_file(log_file_name)
+    interaction_log = sandbox.read_file(log_file)
     del sandbox
 
-    # Record the game log to the /replays folder if not empty
-    replay_id = ""
-    if interaction_log is not None:
-        replay_id = md5(interaction_log).hexdigest()
-        # Record the log in the /replays folder using the hash as a name
-        replay_path = os.path.abspath(os.path.join(config.PATH_REPLAYS, replay_id))
-        with open(replay_path, "wb") as out:
-            out.write(interaction_log)
+    # Record the game log to the /replays folder
+    replay_id = save_replay_log(interaction_log)
 
     # The interactor crashed or got killed
     # Don't check memory limit, as it can be caused by child processes (including solution)
     if run_result.exec_time >= config.MAX_GAME_LENGTH:
         message = "Interactor took too much time to complete ({:.3f}s).".format(run_result.exec_time)
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, info=replay_id)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
     if run_result.exit_code != 0:
         message = "Interactor exited with non-zero exit code ({}).".format(run_result.exit_code)
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, info=replay_id)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 
     # Parse the response from the interactor
     try:
@@ -378,7 +376,7 @@ def execute_two_player_game(submit_id, test: TestInfo, run_config: RunConfig,
     except ValueError:
         message = "Could not decode interactor's output: {}!".format(run_result.output.decode())
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, info=replay_id)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 
     # print("RESULTS:\n{}".format(json.dumps(results, indent=4, sort_keys=True)))
 
@@ -386,8 +384,8 @@ def execute_two_player_game(submit_id, test: TestInfo, run_config: RunConfig,
     if results["internal_error"]:
         message = results["message"]
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
-        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, info=replay_id)
+        return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 
     # Everything with the system seems okay.
     # Leave the caller function decide what the test status will be
-    return RunResult(status=TestStatus.ACCEPTED, output=run_result.output, info=replay_id)
+    return RunResult(status=TestStatus.ACCEPTED, output=run_result.output, replay_id=replay_id)

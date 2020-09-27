@@ -90,7 +90,7 @@ class Grader {
         $match->scoreOne = floatval($result['player_one_score']);
         $match->scoreTwo = floatval($result['player_two_score']);
         $match->message = $result['message'];
-        $match->log = $result['match_log'];
+        $match->replayId = $result['replay_id'];
         $match->update();
 
         // Update the information about this test in the user's submit
@@ -137,6 +137,15 @@ class Grader {
             }
             $results_info[$result['position']] = $result['info'];
             $submit->info = implode(',', $results_info);
+        }
+        // Update the replayId for the test (only for problems with testers)
+        if (array_key_exists('replay_id', $result) && $result['replay_id'] != '') {
+            $replayIds = explode(',', $submit->replayId);
+            if (count($replayIds) != count($submit->results)) {
+                $replayIds = array_fill(0, count($submit->results), '');
+            }
+            $replayIds[$result['position']] = $result['replay_id'];
+            $submit->replayId = implode(',', $replayIds);
         }
     }
 
