@@ -84,8 +84,11 @@ def interact(tester_wrapped_cmd, solution_wrapped_cmd, tester_timeout, solution_
         while rem_time > 0:
             sleep(0.01)
             rem_time -= 0.01
-            while len(tester_process.children()) > 0:
-                tester_process = tester_process.children()[0]
+            while True:
+                try:
+                    tester_process = tester_process.children()[0]
+                except Exception:
+                    break
             if tester_process.name not in ["sh", "time", "timeout"]:
                 break
         sys.stderr.write("Process = {}\n".format(tester_process))
