@@ -15,7 +15,7 @@ import shutil
 import subprocess
 from time import sleep
 from sys import platform
-from executors import Executors
+from workers import Workers
 from threading import Lock
 
 logger = common.get_logger(__file__)
@@ -50,10 +50,10 @@ class Sandbox:
 
     def __init__(self):
         # Get or wait for an available worker
-        self._executor = Executors.get()
+        self._worker = Workers.get()
 
         # Define the path to the working directory
-        self._path = os.path.join(self._executor.path, "home")
+        self._path = os.path.join(self._worker.path, "home")
 
         # Process handle and saved execution result
         self._lock = Lock()
@@ -67,18 +67,18 @@ class Sandbox:
 
     def __del__(self):
         self.wait(timeout=0.2)
-        Executors.release(self._executor)
+        Workers.release(self._worker)
 
     def _check(self):
         # Test if the home directory exits
         if not os.path.exists(self._path):
             logger.fatal("Sandbox {} check failed: directory '{}' does not exist!".format(
-                self._executor.name, self._path)
+                self._worker.name, self._path)
             )
             exit(0)
         # Test that /bin exists and is mounted properly (other mount points should be there as well)
         if not common.is_mount(os.path.join(self._path, os.pardir, "bin")):
-            logger.fatal("Sandbox {} check failed: directory '/bin' is not mounted!".format(self._executor.name))
+            logger.fatal("Sandbox {} check failed: directory '/bin' is not mounted!".format(self._worker.name))
             exit(0)
 
     def _clean(self):
@@ -148,17 +148,17 @@ class Sandbox:
         """
 
         # Limit the process and its children to use a concrete CPU core
-        os.system("taskset -p -c {} {} > /dev/null".format(self._executor.cpu, os.getpid()))
+        os.system("taskset -p -c {} {} > /dev/null".format(self._worker.cpu, os.getpid()))
 
         # Move the process in the user's working directory and chroot its parent
         os.chdir(self._path)
         os.chroot(os.path.join(self._path, os.path.pardir))
 
         if not privileged:
-            # Set the user to a more unprivileged one (executorXX)
+            # Set the user to a more unprivileged one (workerXX)
             os.setgroups([])
-            os.setgid(self._executor.user)
-            os.setuid(self._executor.user)
+            os.setgid(self._worker.user)
+            os.setuid(self._worker.user)
 
         os.environ["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         # Reduces Java memory footprint to work with ulimit
@@ -196,9 +196,9 @@ class Sandbox:
             return byte_stream.read()
 
     def is_running(self):
-        # Check that at least one processes started by the executor user is running
+        # Check that at least one processes started by the worker user is running
         # (Please note that the first line of output is table column names, thus check for > 1)
-        return len(os.popen("ps -U {}".format(self._executor.name)).read().strip().splitlines()) > 1
+        return len(os.popen("ps -U {}".format(self._worker.name)).read().strip().splitlines()) > 1
 
     def wait(self, timeout=None):
         if self._process is not None and self._process.poll() is None:
@@ -214,7 +214,7 @@ class Sandbox:
                 del self._process
             self._process = None
             # As a fail-safe also invoke killall
-            os.system("killall -signal SIGKILL --user {}".format(self._executor.name))
+            os.system("killall -signal SIGKILL --user {}".format(self._worker.name))
             # Wait until all children are actually killed
             while self.is_running():
                 sleep(0.01)

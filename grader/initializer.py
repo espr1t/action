@@ -9,7 +9,7 @@ import os
 import sys
 
 import common
-from executors import Executors
+from workers import Workers
 
 logger = common.get_logger(__file__)
 
@@ -37,9 +37,9 @@ def init():
         logger.info("Setting working directory to '{}'.".format(root_dir))
         os.chdir(root_dir)
 
-    # Create the sandbox directories for each of the executors and prepare them
+    # Create the sandbox directories for each of the workers and prepare them
     # to be chrooted (mounting /bin, /dev, /lib and similar directories inside)
-    Executors.init()
+    Workers.init()
 
     logger.info("Initialization completed successfully!")
 
@@ -51,8 +51,8 @@ def clean():
     # This is required for creating the chroot jails and running the solutions.
     escalate_permissions()
 
-    # Clean and delete the sandbox directories for each of the executors
-    Executors.clean()
+    # Clean and delete the sandbox directories for each of the workers
+    Workers.clean()
 
 
 if __name__ == "__main__":

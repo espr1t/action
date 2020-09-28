@@ -17,7 +17,7 @@ Tests whether the sandbox is behaving as expected:
     >> appropriate ulimits are present
     >> processes are ran with very high priority
     >> scheduling algorithm is as expected
-    >> effective user is executorXX
+    >> effective user is workerXX
 5. Sandbox API
     >> has file
     >> get file
@@ -254,13 +254,13 @@ class TestSandbox(TestCase):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="nice")
         self.assertEqual(str(config.PROCESS_PRIORITY_NICE), stdout)
 
-    def test_executor_id(self):
+    def test_worker_id(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="id -u")
         self.assertGreaterEqual(int(stdout), 1000)
 
-    def test_executor_user(self):
+    def test_worker_user(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="whoami")
-        self.assertTrue("executor" in stdout)
+        self.assertTrue("worker" in stdout)
 
     def test_scheduling_algorithm(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="chrt -p $$")
@@ -429,18 +429,18 @@ class TestSandbox(TestCase):
         self.sandbox = Sandbox()
         self.sandbox.execute(command=":(){ :|:& };:", stdin_fd=None, stdout_fd=stdout, stderr_fd=stderr, blocking=False)
 
-        # Check number of processes by this executor and its CPU usage continuously
+        # Check number of processes by this worker and its CPU usage continuously
         # (but sleep for 0.01 seconds so we don't do it more than 100 times)
         iteration = 0
         max_cpu = 0.0
         max_processes = 0
         while perf_counter() - start_time < config.MAX_EXECUTION_TIME:
             if iteration % 2 == 0:
-                ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
+                ps_info = os.popen("ps -U {}".format(self.sandbox._worker.name)).read()
                 max_processes = max(max_processes, len(ps_info.splitlines()) - 1)
             else:
                 cpu_info = os.popen("top -b -n 1 -u {} | awk 'NR>7 {{ sum += $9; }} END {{ print sum; }}'".format(
-                    self.sandbox._executor.name)).read()
+                    self.sandbox._worker.name)).read()
                 max_cpu = max(max_cpu, float(cpu_info))
             iteration += 1
             sleep(0.01)
@@ -469,20 +469,20 @@ class TestSandbox(TestCase):
         # While the program is within its time limit it is at max processes
         sleep(0.2)
         self.assertTrue(self.sandbox.is_running())
-        ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
+        ps_info = os.popen("ps -U {}".format(self.sandbox._worker.name)).read()
         self.assertEqual(len(ps_info.splitlines()) - 1, config.MAX_PROCESSES)
 
         # What's worse, even after that they are still alive
         # (as they don't use much CPU, so are not affected by MAX_EXECUTION_TIME)
         sleep(0.2)
         self.assertTrue(self.sandbox.is_running())
-        ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
+        ps_info = os.popen("ps -U {}".format(self.sandbox._worker.name)).read()
         self.assertEqual(len(ps_info.splitlines()) - 1, config.MAX_PROCESSES)
 
         # However, wait() should terminate everything
         self.sandbox.wait(0.1)
         self.assertFalse(self.sandbox.is_running())
-        ps_info = os.popen("ps -U {}".format(self.sandbox._executor.name)).read()
+        ps_info = os.popen("ps -U {}".format(self.sandbox._worker.name)).read()
         self.assertEqual(len(ps_info.splitlines()) - 1, 0)
 
     def test_cpu_usage(self):
@@ -608,8 +608,8 @@ class TestSandbox(TestCase):
         self.assertEqual(stdout, "")  # No output, killed before that
         self.assertLess(perf_counter() - start_time, 0.5)  # Killed shortly after the timeout
 
-    # Up to MAX_PARALLEL_EXECUTORS run in parallel.
-    # We expect if we run less than or equal to MAX_PARALLEL_EXECUTORS to take clock time equal to the longest
+    # Up to MAX_PARALLEL_WORKERS run in parallel.
+    # We expect if we run less than or equal to MAX_PARALLEL_WORKERS to take clock time equal to the longest
     # of them. If we run even a single one more, we expect the clock time to be roughly twice as long.
     def dummy_sleep_helper(self):
         start_time = perf_counter()
@@ -618,11 +618,11 @@ class TestSandbox(TestCase):
         self.sandbox_helper(sandbox=sandbox, command="sleep 0.5 ; echo foo")
         return waiting_time
 
-    def test_executors_under_limit(self):
+    def test_workers_under_limit(self):
         start_time = perf_counter()
 
-        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
-        futures = [pool.submit(self.dummy_sleep_helper) for _ in range(config.MAX_PARALLEL_EXECUTORS)]
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_WORKERS)
+        futures = [pool.submit(self.dummy_sleep_helper) for _ in range(config.MAX_PARALLEL_WORKERS)]
 
         # Each of the processes runs in ~0.5s, but since we schedule them through a thread pool
         # we should reach this point much earlier.
@@ -640,11 +640,11 @@ class TestSandbox(TestCase):
         # But not much more than 0.5 seconds
         self.assertLess(perf_counter() - start_time, 0.7)
 
-    def test_executors_over_limit(self):
+    def test_workers_over_limit(self):
         start_time = perf_counter()
 
-        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS + 1)
-        futures = [pool.submit(self.dummy_sleep_helper) for _ in range(config.MAX_PARALLEL_EXECUTORS + 1)]
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_WORKERS + 1)
+        futures = [pool.submit(self.dummy_sleep_helper) for _ in range(config.MAX_PARALLEL_WORKERS + 1)]
 
         # Each of the processes runs in ~0.5s, but since we schedule them through a thread pool
         # we should reach this point much earlier. One of the threads should be blocked on waiting

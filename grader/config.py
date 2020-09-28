@@ -11,21 +11,21 @@ from os import path
 AUTH_USERNAME = "username"
 AUTH_PASSWORD = "password"
 
-# NOTE: The number of simultaneously processed jobs is greater than the executor
+# NOTE: The number of simultaneously processed jobs is greater than the worker
 # count as there is some non CPU-intensive work that can be done in parallel to
 # the (CPU-intensive) running solutions - like preparing the runs, downloading
 # tests, writing sources, sending updates, etc.
 
-# The best count for MAX_PARALLEL_EXECUTORS is around 75% of the CPU cores
+# The best count for MAX_PARALLEL_WORKERS is around 75% of the CPU cores
 # available (and at least one less than the number of cores) as this prevents
 # the system from freezing while executing solutions. This way it is able to
 # process requests and do other miscellaneous work in the meantime.
 
 # Parallelism
 NUM_PHYSICAL_CPUS = 1
-MAX_PARALLEL_EXECUTORS = 3
-MAX_PARALLEL_SUBMITS = MAX_PARALLEL_EXECUTORS
-MAX_PARALLEL_JOBS = MAX_PARALLEL_EXECUTORS * 2
+MAX_PARALLEL_WORKERS = 3
+MAX_PARALLEL_SUBMITS = MAX_PARALLEL_WORKERS
+MAX_PARALLEL_JOBS = MAX_PARALLEL_WORKERS * 2
 
 # Communication with the front-end
 UPDATE_INTERVAL = 0.33  # Seconds

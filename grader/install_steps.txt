@@ -62,9 +62,9 @@ Installation steps:
 9.1. Create sandbox directories and users
     >> make init
 9.2. Remove password prompts for "sudo" commands
-    (sudo is not allowed for the executorXX users, but prompts for passwords can lead to problems):
+    (sudo is not allowed for the workerXX users, but prompts for passwords can lead to problems):
     >> sudo visudo
-    >> Add the line "%executors ALL=(ALL) NOPASSWD: !ALL" at the bottom
+    >> Add the line "%workers ALL=(ALL) NOPASSWD: !ALL" at the bottom
 10. Finally, run the service as root (from the project's base directory, e.g. /home/grader/action):
     >> make run
 11. (Optional) Run it automatically on OS load:

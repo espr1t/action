@@ -46,7 +46,7 @@ class TestConcurrency(TestCase):
 
     @staticmethod
     def get_num_runs(minimum_runs):
-        return minimum_runs + config.MAX_PARALLEL_EXECUTORS - minimum_runs % config.MAX_PARALLEL_EXECUTORS + 1
+        return minimum_runs + config.MAX_PARALLEL_WORKERS - minimum_runs % config.MAX_PARALLEL_WORKERS + 1
 
     def test_run_program_concurrent_cpu_access_small_tl(self):
         path_source = os.path.join(self.PATH_FIXTURES, "summer_cpu.cpp")
@@ -61,7 +61,7 @@ class TestConcurrency(TestCase):
 
         # Run the same thing over and over again as quickly as possible to see if there is any inconsistency
         times = [1e100] * num_runs
-        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_WORKERS)
         futures = [pool.submit(self.concurrent_helper, input_file.name, path_executable) for _ in range(num_runs)]
         for i in range(len(futures)):
             run_result = futures[i].result()
@@ -90,7 +90,7 @@ class TestConcurrency(TestCase):
 
         # Run the same thing over and over again as quickly as possible to see if there is any inconsistency
         times = [1e100] * num_runs
-        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_WORKERS)
         futures = [pool.submit(self.concurrent_helper, input_file.name, path_executable) for _ in range(num_runs)]
         for i in range(len(futures)):
             run_result = futures[i].result()
@@ -108,7 +108,7 @@ class TestConcurrency(TestCase):
 
     def test_run_program_concurrent_hdd_access(self):
         # Cannot test concurrency if there is none
-        if config.MAX_PARALLEL_EXECUTORS <= 1:
+        if config.MAX_PARALLEL_WORKERS <= 1:
             return
 
         path_source = os.path.join(self.PATH_FIXTURES, "summer_hdd.cpp")
@@ -130,7 +130,7 @@ class TestConcurrency(TestCase):
 
         times = [1e100] * num_runs
         # Run the same thing several times as quickly as possible to see if there is any significant increase
-        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_WORKERS)
         futures = [pool.submit(self.concurrent_helper, input_file.name, path_executable) for _ in range(num_runs)]
         for i in range(len(futures)):
             run_result = futures[i].result()
@@ -159,7 +159,7 @@ class TestConcurrency(TestCase):
 
         # Run the same thing over and over again as quickly as possible to see if there is any inconsistency
         times = [1e100] * num_runs
-        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_EXECUTORS)
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_WORKERS)
         futures = [pool.submit(self.concurrent_helper, input_file.name, path_executable) for _ in range(num_runs)]
         for i in range(len(futures)):
             run_result = futures[i].result()

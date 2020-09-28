@@ -384,7 +384,7 @@ class TestEvaluator(TestCase):
         add_info.side_effect = lambda result: updater_results.append(result)
 
         # Run the match(es)
-        self.assertTrue(evaluator.run_solution())
+        self.assertTrue(evaluator.run_solution(), msg="evaluator.run_solution() failed.")
 
         # Validate that the expected number of calls and results are present
         self.assertEqual(add_info.call_count, len(expected_messages))

@@ -60,10 +60,10 @@ def set_rdt_limits():
 
     # Print miscellaneous information about current setup
     logger.info("Number of CPU sockets (set in config.py): {}".format(config.NUM_PHYSICAL_CPUS))
-    logger.info("Number of executors (set in config.py): {}".format(config.MAX_PARALLEL_EXECUTORS))
+    logger.info("Number of workers (set in config.py): {}".format(config.MAX_PARALLEL_WORKERS))
 
-    cores_per_cpu = config.MAX_PARALLEL_EXECUTORS // config.NUM_PHYSICAL_CPUS
-    if config.MAX_PARALLEL_EXECUTORS % config.NUM_PHYSICAL_CPUS != 0:
+    cores_per_cpu = config.MAX_PARALLEL_WORKERS // config.NUM_PHYSICAL_CPUS
+    if config.MAX_PARALLEL_WORKERS % config.NUM_PHYSICAL_CPUS != 0:
         cores_per_cpu += 1
     logger.info("Using {} cores per CPU.".format(cores_per_cpu))
 
