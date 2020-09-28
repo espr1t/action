@@ -254,6 +254,16 @@ function getUserLink($userName, $unofficial=array()) {
     return '<a href="/users/' . $userName . '"><div class="user">' . $userName . $suffix . '</div></a>';
 }
 
+function getUserBox($userName) {
+    return '<a href="/users/' . $userName . '">
+                <div class="achievement">
+                    <div class="user" style="color: white; margin-left: 0.25rem;">
+                        <i class="fa fa-user-circle"></i> ' . $userName . '</div>
+                </div>
+            </a>
+    ';
+}
+
 function userInfo($user) {
     if ($user->username != 'anonymous') {
         $numUnreadMessages = $user->numUnreadMessages();

@@ -56,19 +56,23 @@ class User {
         }
     }
 
-    public static function instanceFromArray($main, $info) {
-        $user = new User;
-        $user->id = getValue($main, 'id');
-        $user->access = getValue($main, 'access');
-        $user->registered = getValue($main, 'registered');
-        $user->username = getValue($main, 'username');
-        $user->name = getValue($main, 'name');
-        $user->email = getValue($main, 'email');
-        $user->town = getValue($main, 'town');
-        $user->country = getValue($main, 'country');
-        $user->gender = getValue($main, 'gender');
-        $user->birthdate = getValue($main, 'birthdate');
-        $user->avatar = getValue($main, 'avatar');
+    private static function parseMainInfo($user, $info) {
+        $user->id = intval(getValue($info, 'id'));
+        $user->access = getValue($info, 'access');
+        $user->registered = getValue($info, 'registered');
+        $user->username = getValue($info, 'username');
+        $user->name = getValue($info, 'name');
+        $user->email = getValue($info, 'email');
+        $user->town = getValue($info, 'town');
+        $user->country = getValue($info, 'country');
+        $user->gender = getValue($info, 'gender');
+        $user->birthdate = getValue($info, 'birthdate');
+        $user->avatar = getValue($info, 'avatar');
+    }
+
+    private static function parseSecondaryInfo($user, $info) {
+        $user->id = intval(getValue($info, 'id'));
+        $user->username = getValue($info, 'username');
         $user->actions = intval(getValue($info, 'actions'));
         $user->totalTime = intval(getValue($info, 'totalTime'));
         $user->lastSeen = getValue($info, 'lastSeen');
@@ -76,6 +80,14 @@ class User {
         $user->lastViewers = getValue($info, 'lastViewers');
         $user->loginCount = intval(getValue($info, 'loginCount'));
         $user->lastIP = getValue($info, 'lastIP');
+    }
+
+    public static function instanceFromArray($main, $secondary) {
+        $user = new User;
+        if ($main != null)
+            User::parseMainInfo($user, $main);
+        if ($secondary != null)
+            User::parseSecondaryInfo($user, $secondary);
         return $user;
     }
 
@@ -143,7 +155,17 @@ class User {
         write_log($GLOBALS['LOG_REGISTERS'], $logMessage);
 
         return $user;
-   }
+    }
+
+    static public function getActive() {
+        $brain = new Brain();
+        return array_map(
+            function ($entry) {
+                // echo json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . PHP_EOL;
+                return User::instanceFromArray(null, $entry);
+            }, $brain->getActiveUsersInfo()
+        );
+    }
 
     public function getMessages() {
         $brain = new Brain();

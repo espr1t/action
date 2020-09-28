@@ -742,6 +742,18 @@ class Brain {
         return $this->getResults($response);
     }
 
+    function getActiveUsersInfo() {
+        $response = $this->db->query("
+            SELECT * FROM `UsersInfo`
+            WHERE lastSeen >= '" . date('Y-m-d H:i:s', time() - 15 * 60) . "'
+        ");
+        if (!$response) {
+            error_log('Could not execute getActiveUsersInfo() query properly!');
+            return null;
+        }
+        return $this->getResults($response);
+    }
+
     // Credentials
     function addCredentials($userId, $userName, $password, $loginKey) {
         $response = $this->db->query("

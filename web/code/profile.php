@@ -43,6 +43,7 @@ class ProfilePage extends Page {
         return $solved[$tag] / $total[$tag];
     }
 
+    # TODO: Why not using this?
     private function getTopUsersSkills($problems) {
         // Get average stats for top 10% of the users
         $allUsers = $this->brain->getAllUsers();

@@ -11,6 +11,13 @@ class StatusPage extends Page {
         return 'O(N)::Status';
     }
 
+    private function getActiveList() {
+        $userList = '';
+        foreach (User::getActive() as $user)
+            $userList .= getUserBox($user->username);
+        return $userList;
+    }
+
     private function getStatusTable($submits) {
         // Return links for submit shortcuts
         $_SESSION['statusShortcut'] = true;
@@ -124,6 +131,11 @@ class StatusPage extends Page {
             </div>
         ';
 
+        $active = inBox('
+            <h2>Активни потребители</h2>
+            ' . StatusPage::getActiveList() . '
+        ');
+
         $latest = inBox('
             <h2>Последно тествани</h2>
             ' . StatusPage::getStatusTable(Queue::getLatest()) . '
@@ -138,7 +150,7 @@ class StatusPage extends Page {
                 <a href="help#compilation">компилатори</a> и конфигурацията на <a href="help#grader">тестващата машина</a>.</div>';
 
 
-        return $head . $time . $pending . $latest . $compilers . $invokeGraderCheck;
+        return $head . $time . $active . $pending . $latest . $compilers . $invokeGraderCheck;
     }
 
 }
