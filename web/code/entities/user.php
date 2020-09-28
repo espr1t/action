@@ -46,9 +46,9 @@ class User {
         if ($this->id >= 1) {
             $this->actions += 1;
 
-            // If last seen more than 15 minutes ago, count 15 minutes of
+            // If last seen more than 5 minutes ago, count 5 minutes of
             // activity, otherwise add the difference between now and then.
-            $this->totalTime += min(array(time() - strtotime($this->lastSeen), 15 * 60));
+            $this->totalTime += min(array(time() - strtotime($this->lastSeen), 5 * 60));
             $this->lastSeen = date('Y-m-d H:i:s', time());
             $this->lastIP = getUserIP();
             $brain = new Brain();
