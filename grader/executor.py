@@ -225,7 +225,8 @@ def execute_interactive(submit_id, test: TestInfo, run_config: RunConfig) -> Run
 
     # Okay, let's assume the interactor was okay. Now check if the tester crashed.
     if results["internal_error"] or results["tester_exit_code"] != 0:
-        message = "Tester crashed or some other internal error happened."
+        message = "Tester crashed or some other internal error happened. Result from interactor:\n{}".format(
+            json.dumps(results, indent=4, sort_keys=True))
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
         return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 
@@ -382,7 +383,8 @@ def execute_two_player_game(submit_id, test: TestInfo, run_config: RunConfig,
 
     # Okay, let's assume the interactor was okay. Now check if the tester crashed.
     if results["internal_error"]:
-        message = results["message"]
+        message = "Tester crashed or some other internal error happened. Result from interactor:\n{}".format(
+            json.dumps(results, indent=4, sort_keys=True))
         logger.error("Submit {id} | {message}".format(id=submit_id, message=message))
         return RunResult(status=TestStatus.INTERNAL_ERROR, error=message, replay_id=replay_id)
 

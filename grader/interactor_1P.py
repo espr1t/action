@@ -1,6 +1,8 @@
 import sys
 import subprocess
 import json
+import traceback
+
 import psutil
 from time import sleep
 from wrapper import COMMAND_WRAPPER, parse_exec_info
@@ -148,19 +150,27 @@ def prepare_and_run(tester_run_cmd, solution_run_cmd, tester_timeout, solution_t
 
 
 def prod():
-    args = json.loads(sys.stdin.read())
-    with open("input.txt", "rt") as inp:
-        input_text = inp.read()
-    with open("input.txt", "wt") as out:
-        out.write("Too late.")
-    prepare_and_run(
-        tester_run_cmd=args["tester_run_command"],
-        solution_run_cmd=args["solution_run_command"],
-        tester_timeout=args["tester_timeout"],
-        solution_timeout=args["solution_timeout"],
-        input_text=input_text,
-        log_file=args["log_file"]
-    )
+    try:
+        args = json.loads(sys.stdin.read())
+        with open("input.txt", "rt") as inp:
+            input_text = inp.read()
+        with open("input.txt", "wt") as out:
+            out.write("Too late.")
+        prepare_and_run(
+            tester_run_cmd=args["tester_run_command"],
+            solution_run_cmd=args["solution_run_command"],
+            tester_timeout=args["tester_timeout"],
+            solution_timeout=args["solution_timeout"],
+            input_text=input_text,
+            log_file=args["log_file"]
+        )
+
+    except Exception as ex:
+        sys.stderr.write("Got exception {}...\n".format(ex))
+        sys.stdout.write(json.dumps({
+            "internal_error": True,
+            "tester_message": traceback.format_exc()
+        }, indent=4, sort_keys=True) + "\n")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import sys
 import subprocess
 import json
 import psutil
+import traceback
 from time import perf_counter
 from string import printable
 from wrapper import COMMAND_WRAPPER, parse_exec_info
@@ -199,13 +200,21 @@ def prepare_and_run(args, input_text):
 
 
 def prod():
-    sys.stderr.write('Starting...\n')
-    args = json.loads(sys.stdin.read())
-    with open("input.txt", "rt") as inp:
-        input_text = inp.read()
-    with open("input.txt", "wt") as out:
-        out.write("Too late.")
-    prepare_and_run(args=args, input_text=input_text)
+    try:
+        sys.stderr.write("Starting...\n")
+        args = json.loads(sys.stdin.read())
+        with open("input.txt", "rt") as inp:
+            input_text = inp.read()
+        with open("input.txt", "wt") as out:
+            out.write("Too late.")
+        prepare_and_run(args=args, input_text=input_text)
+
+    except Exception as ex:
+        sys.stderr.write("Got exception {}...\n".format(ex))
+        sys.stdout.write(json.dumps({
+            "internal_error": True,
+            "tester_message": traceback.format_exc()
+        }, indent=4, sort_keys=True) + "\n")
 
 
 if __name__ == "__main__":
