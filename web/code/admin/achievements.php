@@ -8,6 +8,7 @@ require_once(__DIR__ . '/../entities/user.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
 class AdminAchievementsPage extends Page {
+    private Brain $brain;
     private $achievementTitle = array();
     private $PRIME_NUMBERS = array();
     private $FIBONACCI_NUMBERS = array();
@@ -70,8 +71,7 @@ class AdminAchievementsPage extends Page {
             'Sheep', 'Ssssss', 'Bribes', 'Sequence Members', 'Wordrow', 'Next', 'Shades', 'Seats',
             'Bazinga!', 'Crosses', 'Collatz', 'Passwords', 'Digit Holes', 'Directory Listing'
         );
-        $brain = new Brain();
-        $problems = $brain->getAllProblems();
+        $problems = $this->brain->getAllProblems();
         foreach ($problems as $problem) {
             if (in_array($problem['name'], $trickyNames))
                 $this->TRICKY_PROBLEMS[$problem['id']] = true;
@@ -178,6 +178,11 @@ class AdminAchievementsPage extends Page {
         if (!array_key_exists($key, $achieved)) {
             $date = '';
             foreach ($this->standings as $game => $ranking) {
+                // Games that haven't yet been played
+                if (count($ranking) == 0) {
+                    continue;
+                }
+                // Anything other
                 if ($ranking[0]['user'] == $user->id) {
                     foreach ($submitIds as $submitId) {
                         $submit = $this->submits[$submitId];
@@ -796,12 +801,11 @@ class AdminAchievementsPage extends Page {
     }
 
     private function recalcAll() {
-        $start = microtime(true);
+        $this->brain = new Brain();
 
         $this->initSpecialNumbers();
         $this->initTrickyProblems();
 
-        $this->brain = new Brain();
         $this->users = $this->brain->getAllUsers();
         $this->usersInfo = $this->brain->getAllUsersInfo();
         $this->games = $this->brain->getAllGames();
@@ -821,7 +825,7 @@ class AdminAchievementsPage extends Page {
         for ($i = 0; $i < $submitCount; $i++) {
             if ($allSubmits[$i]['id'] != $allSources[$i]['submitId'])
                 error_log('Mismatch in submits and sources at index ' . $i . '!');
-            // Ignore system and admin subits
+            // Ignore system and admin submits
             if ($allSubmits[$i]['userId'] >= 2) {
                 array_push($this->submits, $allSubmits[$i]);
                 array_push($this->sources, $allSources[$i]);
@@ -914,22 +918,20 @@ class AdminAchievementsPage extends Page {
             $user = User::instanceFromArray($this->users[$i], $this->usersInfo[$i]);
             $this->updateAll($user, $userSubmits[$user->id], $userAchievements[$user->id], $userReports[$user->id]);
         }
-
-        return microtime(true) - $start;
     }
 
     private function getAchievementsList($achievementsData) {
-        $brain = new Brain();
+        $this->brain = new Brain();
 
         $userName = array();
-        foreach ($brain->getAllUsers() as $user)
+        foreach ($this->brain->getAllUsers() as $user)
             $userName[$user['id']] = $user['username'];
 
         $perType = array();
         foreach ($achievementsData as $achievement)
             $perType[$achievement['key']] = array();
 
-        $achievements = $brain->getAchievements();
+        $achievements = $this->brain->getAchievements();
         foreach ($achievements as $achievement)
             array_push($perType[$achievement['achievement']], $userName[$achievement['user']]);
 
@@ -974,6 +976,8 @@ class AdminAchievementsPage extends Page {
     }
 
     public function getContent() {
+        $this->brain = new Brain();
+
         // First load the achievement data
         $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
         $achievementsData = json_decode($achievementsFile, true);
@@ -983,8 +987,9 @@ class AdminAchievementsPage extends Page {
 
         $elapsed = '';
         if (isset($_GET['recalc']) && $_GET['recalc'] == 'true') {
-            $execTime = $this->recalcAll();
-            $elapsed = sprintf('<p>Calculated in %.2f seconds.</p>', $execTime);
+            $startTime = microtime(true);
+            $this->recalcAll();
+            $elapsed = sprintf('<p>Calculated in %.3f seconds.</p>', microtime(true) - $startTime);
         }
         $allAchievements = $this->getAchievementsList($achievementsData);
         $content = inBox('
