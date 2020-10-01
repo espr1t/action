@@ -116,6 +116,10 @@ function printAjaxResponse($response) {
     exit(0);
 }
 
+function printArray($arr) {
+    echo json_encode($arr, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "<br>\n";
+}
+
 function saltHashPassword($password) {
     return md5($password . $GLOBALS['PASSWORD_SALT']);
 }
@@ -181,7 +185,8 @@ function validateGender($gender) {
 
 function getValue($array, $key) {
     if (!array_key_exists($key, $array)) {
-        error_log('Array does not contain value for key "'. $key . '"!');
+        printf("ERROR: Array does not contain value for key '{$key}'!");
+        error_log("Array does not contain value for key '{$key}'!");
         return null;
     }
     return $array[$key];

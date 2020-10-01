@@ -23,7 +23,7 @@ $brain = new Brain();
 output('Migrating user notifications...');
 $users = $brain->getAllUsers();
 foreach ($users as $user) {
-    if ($brain->addNotifications($user['id'], $user['username'], '', '1')) {
+    if ($brain->addNotifications($user['id'], $user['username'], '', '1') !== null) {
         output('  >> added notifications for user "' . $user['username'] . '"');
     } else {
         output('ERROR: cannot add notifications for user "' . $user['username'] . '"');
@@ -88,7 +88,7 @@ foreach ($users as $u) {
 output('Migrating user credentials...');
 $users = $brain->getAllUsers();
 foreach ($users as $user) {
-    if ($brain->addCredentials($user['id'], $user['username'], $user['password'], $user['loginKey'])) {
+    if ($brain->addCreds($user['id'], $user['username'], $user['password'], $user['loginKey'])) {
         output('  >> added credentials for user "' . $user['username'] . '"');
     } else {
         output('ERROR: cannot add credentials for user "' . $user['username'] . '"');

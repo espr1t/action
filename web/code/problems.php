@@ -113,6 +113,7 @@ class ProblemsPage extends Page {
         return $box;
     }
 
+    // TODO: Make this function faster by pre-calculating problem stats
     public function getProblems($problemList=null) {
         $brain = new Brain();
         $allProblems = $brain->getAllProblems();

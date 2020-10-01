@@ -2,21 +2,101 @@
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/db.php');
 
+$globalDB = new DB();
+
 class Brain {
-    private $db;
+    private DB $db;
 
     function __construct() {
-        $this->db = new DB();
+        global $globalDB;
+        $this->db = $globalDB;
     }
 
-    // mysqli result converters
-    function getResult($sqlResponse) {
+    /*
+     * Query wrappers
+     */
+    function query(string $query) {
+//        $startTime = microtime(true);
+        $result = $this->db->query($query);
+//        printf("Query:<br><pre>%s</pre><br>  >> execution time: %.3fs<br>", $query, microtime(true) - $startTime);
+        if (!$result) {
+            error_log("Error while trying to execute query:\n{$query}");
+        }
+        return $result;
+    }
+
+    function select(string $table, string $where="", string $order="", int $limit=-1): ?mysqli_result {
+        $result = $this->query("
+            SELECT * FROM `{$table}`" .
+            ($where == "" ? "" : "\n            WHERE {$where}") .
+            ($order == "" ? "" : "\n            ORDER BY {$order}") .
+            ($limit == -1 ? "" : "\n            LIMIT {$limit}")
+        );
+        return !$result ? null : $result;
+    }
+
+    private function convertKey(string $key) {
+        return "`$key`";
+    }
+
+    private function convertVal(string $val) {
+            if (is_string($val)) {
+                $val = $this->db->escape($val);
+            }
+            return "'$val'";
+    }
+
+    function insert(string $table, array $keyValues): ?int {
+        $columns = implode(", ", array_map(function ($k) {return $this->convertKey($k);}, array_keys($keyValues)));
+        $values  = implode(", ", array_map(function ($v) {return $this->convertVal($v);}, array_values($keyValues)));
+        $result = $this->query("
+            INSERT INTO `{$table}`({$columns})
+            VALUES ({$values})
+        ");
+        return !$result ? null : $this->db->lastId();
+    }
+
+    function insertOrUpdate(string $table, array $keyValues, array $updateKeyValues): ?int {
+        $columns = implode(", ", array_map(function ($k) {return $this->convertKey($k);}, array_keys($keyValues)));
+        $values  = implode(", ", array_map(function ($v) {return $this->convertVal($v);}, array_values($keyValues)));
+        $updatePairs = array_map(function ($k, $v) {return $this->convertKey($k) . " = " . $this->convertVal($v);}, array_keys($updateKeyValues), $updateKeyValues);
+        $result = $this->query("
+            INSERT INTO `{$table}`({$columns})
+            VALUES ({$values})
+            ON DUPLICATE KEY UPDATE
+                " . implode(",\n                ", $updatePairs) . "
+        ");
+        return !$result ? null : $this->db->lastId();
+    }
+
+    function update(string $table, array $keyValues, string $where): bool {
+        $pairs = array_map(function ($k, $v) {return $this->convertKey($k) . " = " . $this->convertVal($v);}, array_keys($keyValues), $keyValues);
+        $result = $this->query("
+            UPDATE `{$table}` SET
+                " . implode(",\n                ", $pairs) . "
+            WHERE {$where}
+        ");
+        return !!$result;
+    }
+
+    function delete(string $table, string $where): bool {
+        $result = $this->query("
+            DELETE FROM `{$table}`
+            WHERE {$where}
+        ");
+        return !!$result;
+    }
+
+    /*
+     * Miscellaneous
+     */
+    function getResult(mysqli_result $sqlResponse): array {
         $result = $sqlResponse->fetch_assoc();
         $sqlResponse->close();
         return $result;
     }
 
-    function getResults($sqlResponse) {
+    function getResults(mysqli_result $sqlResponse): array {
         $results = array();
         while ($row = $sqlResponse->fetch_assoc()) {
             array_push($results, $row);
@@ -25,7 +105,7 @@ class Brain {
         return $results;
     }
 
-    function getIntResults($sqlResponse) {
+    function getIntResults(mysqli_result $sqlResponse): array {
         $results = array();
         while ($row = $sqlResponse->fetch_row()) {
             array_push($results, intval($row[0]));
@@ -34,1232 +114,918 @@ class Brain {
         return $results;
     }
 
-    // News
-    function addNews() {
-        $response = $this->db->query("
-            INSERT INTO `News`(date, title, content, icon, type)
-            VALUES ('', '', '', '', '')
-        ");
 
-        if (!$response) {
-            error_log('Could not execute addNews() query properly!');
-            return null;
-        }
-        return $this->db->lastId();
+    // TODO: Make functions have typed arguments and return values
+
+    /*
+     * News
+     */
+    function addNews(): ?int {
+        return $this->insert(
+            "News", [
+                "date" => "",
+                "title" => "",
+                "content" => "",
+                "icon" => "",
+                "type" => ""
+            ]
+        );
     }
 
-    function updateNews($news) {
-        $response = $this->db->query("
-            UPDATE `News` SET
-                date = '" . $news->date . "',
-                title = '" . $this->db->escape($news->title) . "',
-                content = '" . $this->db->escape($news->content) . "',
-                icon = '" . $this->db->escape($news->icon) . "',
-                type = '" . $this->db->escape($news->type) . "'
-            WHERE id = " . $news->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update news with id "' . $news->id . '"!');
-            return null;
-        }
-        return true;
+    function updateNews(News $news): bool {
+        return $this->update(
+            "News", [
+                "date" => $news->date,
+                "title" => $news->title,
+                "content" => $news->content,
+                "icon" => $news->icon,
+                "type" => $news->type
+            ], "id = {$news->id}"
+        );
     }
 
-    function getAllNews() {
-        $response = $this->db->query("
-            SELECT * FROM `News`
-            ORDER BY date DESC
-            LIMIT 20
-        ");
-        if (!$response) {
-            error_log('Could not execute getNews() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getAllNews(): ?array {
+        $response = $this->select(
+            "News",
+            "",
+            "`date` DESC",
+            20
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getNews($id) {
-        $response = $this->db->query("
-            SELECT * FROM `News`
-            WHERE id = " . $id . "
-            ORDER BY date DESC
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getNews(' . $id . ') query properly!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getNews(int $id): ?array {
+        $response = $this->select(
+            "News",
+            "`id` = {$id}",
+            "`date` DESC",
+            1
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    // Reports
-    function addReport($user, $page, $content) {
-        $response = $this->db->query("
-            INSERT INTO `Reports`(user, date, page, content)
-            VALUES ('" . $user . "', NOW(),
-                '" . $this->db->escape($page) . "',
-                '" . $this->db->escape($content) . "'
-            )
-        ");
-
-        if (!$response) {
-            error_log('Could not execute addReport() query properly!');
-            return null;
-        }
-        return $this->db->lastId();
+    /*
+     * Reports
+     */
+    function addReport(int $userId, string $page, string $content): ?int {
+        return $this->insert(
+            "Reports", [
+                "user" => $userId,
+                "date" => date('Y-m-d'),
+                "page" => $page,
+                "content" => $content
+            ]
+        );
     }
 
-    function getReports($userId = -1) {
-        $response = $this->db->query("
-            SELECT * FROM `Reports`
-            " . ($userId != -1 ? ("WHERE user = " . $userId) : "") . "
-        ");
-        if (!$response) {
-            error_log('Could not execute getReports(' . $userId . ') query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getReports(int $userId = -1): ?array {
+        $response = $this->select(
+            "Reports",
+            $userId == -1 ? "" : "`user` = {$userId}"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    // Problems
-    function addProblem() {
-        $response = $this->db->query("
-            INSERT INTO `Problems` (name, author, folder, timeLimit, memoryLimit, type, difficulty, statement, description, tags, origin, checker, tester, addedBy, visible)
-            VALUES ('', '', '', 0, 0, 'ioi', 'trivial', '', '', '', '', '', '', '', '0')
-        ");
-        if (!$response) {
-            error_log('Could not add new problem!');
-            return null;
-        }
-        return $this->db->lastId();
+    /*
+     * Problems
+     */
+    function addProblem(): ?int {
+        return $this->insert(
+            "Problems", [
+                "type" => "ioi",
+                "difficulty" => "trivial"
+            ]
+        );
     }
 
-    function updateProblem($problem) {
-        $response = $this->db->query("
-            UPDATE `Problems` SET
-                name = '" . $problem->name . "',
-                author = '" . $problem->author . "',
-                folder = '" . $problem->folder . "',
-                timeLimit = '" . $problem->timeLimit . "',
-                memoryLimit = '" . $problem->memoryLimit . "',
-                type = '" . $problem->type . "',
-                difficulty = '" . $problem->difficulty . "',
-                statement = '" . $this->db->escape($problem->statement) . "',
-                tags = '" . implode(',', $problem->tags) . "',
-                origin = '" . $problem->origin . "',
-                checker = '" . $problem->checker . "',
-                tester = '" . $problem->tester . "',
-                floats = '" . ($problem->floats ? '1' : '0') . "',
-                addedBy = '" . $problem->addedBy . "',
-                visible = '" . ($problem->visible ? '1' : '0') . "'
-            WHERE id = " . $problem->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update info for problem "' . $problem->name . '"!');
-            return null;
-        }
-        return true;
+    function updateProblem(Problem $problem): bool {
+        return $this->update(
+            "Problems", [
+                "name" => $problem->name,
+                "author" => $problem->author,
+                "folder" => $problem->folder,
+                "timeLimit" => $problem->timeLimit,
+                "memoryLimit" => $problem->memoryLimit,
+                "type" => $problem->type,
+                "difficulty" => $problem->difficulty,
+                "statement" => $problem->statement,
+                "origin" => $problem->origin,
+                "checker" => $problem->checker,
+                "tester" => $problem->tester,
+                "floats" => $problem->floats ? 1 : 0,
+                "tags" => implode(',', $problem->tags),
+                "addedBy" => $problem->addedBy,
+                "visible" => $problem->visible ? 1 : 0
+            ], "`id` = {$problem->id}"
+        );
     }
 
-    function updateChecker($problem) {
-        $response = $this->db->query("
-            UPDATE `Problems` SET
-                checker = '" . $problem->checker . "'
-            WHERE id = " . $problem->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update checker of problem "' . $problem->name . '"!');
-            return null;
-        }
-        return true;
+    function updateChecker(Problem $problem): bool {
+        return $this->update(
+            "Problems", [
+                "checker" => $problem->checker
+            ], "`id` = {$problem->id}"
+        );
     }
 
-    function updateTester($problem) {
-        $response = $this->db->query("
-            UPDATE `Problems` SET
-                tester = '" . $problem->tester . "'
-            WHERE id = " . $problem->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update tester of problem "' . $problem->name . '"!');
-            return null;
-        }
-        return true;
+    function updateTester(Problem $problem): bool {
+        return $this->update(
+            "Problems", [
+                "tester" => $problem->tester
+            ], "`id` = {$problem->id}"
+        );
     }
 
-    function getProblem($problemId) {
-        $response = $this->db->query("
-            SELECT * FROM `Problems`
-            WHERE id = " . $problemId . "
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getProblem() query properly!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getProblem(int $problemId): ?array {
+        $response = $this->select(
+            "Problems",
+            "`id` = {$problemId}",
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getAllProblems() {
-        $response = $this->db->query("
-            SELECT * FROM `Problems`
-            WHERE type != 'game' AND type != 'relative' AND type != 'interactive'
-            ORDER BY id
-        ");
-        if (!$response) {
-            error_log('Could not execute getAllProblems() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getAllProblems(): ?array {
+        $response = $this->select(
+            "Problems",
+            "`type` NOT IN ('game', 'relative', 'interactive')",
+            "`id`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getAllGames() {
-        $response = $this->db->query("
-            SELECT * FROM `Problems`
-            WHERE type = 'game' OR type = 'relative' OR type = 'interactive'
-            ORDER BY id
-        ");
-        if (!$response) {
-            error_log('Could not execute getAllGames() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getAllGames(): ?array {
+        $response = $this->select(
+            "Problems",
+            "`type` IN ('game', 'relative', 'interactive')",
+            "`id`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    // Solutions
-    function getProblemSolutions($problemId) {
-        $response = $this->db->query("
-            SELECT * FROM `Solutions`
-            WHERE problemId = " . $problemId . "
-        ");
-        if (!$response) {
-            error_log('Could not execute getProblemSolutions() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    /*
+     * Solutions
+     */
+    function getProblemSolutions(int $problemId): ?array {
+        $response = $this->select(
+            "Solutions",
+            "`problemId` = {$problemId}"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function addSolution($problemId, $name, $submitId, $source, $language) {
-        $response = $this->db->query("
-            INSERT INTO `Solutions` (problemId, name, submitId, source, language)
-            VALUES (
-                '" . $problemId . "',
-                '" . $name . "',
-                '" . $submitId . "',
-                '" . $this->db->escape($source) . "',
-                '" . $this->db->escape($language) . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not add solution with name "' . $name . '"!');
-            return null;
-        }
-        return $this->db->lastId();
+    function addSolution(int $problemId, string $name, int $submitId, string $source, string $language): ?int {
+        return $this->insert(
+            "Solutions", [
+                "problemId" => $problemId,
+                "name" => $name,
+                "submitId" => $submitId,
+                "source" => $source,
+                "language" => $language
+            ]
+        );
     }
 
-    function deleteSolution($problemId, $name) {
-        $response = $this->db->query("
-            DELETE FROM `Solutions`
-            WHERE problemId = " . $problemId . " AND name = '" . $name . "'
-        ");
-        if (!$response) {
-            error_log('Could not delete solution with name "' . $name . '"!');
-            return null;
-        }
-        return true;
+    function deleteSolution(int $problemId, string $name): bool {
+        return $this->delete(
+            "Solutions",
+            "`problemId` = {$problemId} AND `name` = '" . $this->db->escape($name) . "'"
+        );
     }
 
-    // Tests
-    function getProblemTests($problemId) {
-        $response = $this->db->query("
-            SELECT * FROM `Tests`
-            WHERE problem = " . $problemId . "
-            ORDER BY position
-        ");
-        if (!$response) {
-            error_log('Could not execute getProblemTests() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    /*
+     * Tests
+     */
+    function getProblemTests(int $problemId): ?array {
+        $response = $this->select(
+            "Tests",
+            "`problem` = {$problemId}",
+            "`position`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getTestId($problemId, $position, $insertIfNotFound) {
-        // Find the ID of the testcase (or create a new one and get its ID if not present)
-        $response = $this->db->query("
-            SELECT * FROM `Tests`
-            WHERE problem = " . $problemId . " AND position = " . $position . "
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute updateTest() query properly!');
-            return -1;
-        }
+    // Find the ID of a testcase (or create a new one and get its ID if not present)
+    function getTestId(int $problemId, int $position, bool $insertIfNotFound): ?int {
+        $response = $this->select(
+            "Tests",
+            "`problem` = {$problemId} AND `position` = {$position}"
+        );
         $result = $this->getResult($response);
 
-        $id = -1;
-        if (!$result) {
-            // Insert in the database if a new test
-            if ($insertIfNotFound) {
-                $response = $this->db->query("
-                    INSERT INTO `Tests` (problem, position, inpFile, inpHash, solFile, solHash, score)
-                    VALUES (" . $problemId . ", " . $position . ", '', '', '', '', 10)
-                ");
-                if (!$response) {
-                    error_log('Could not add new test for problem ' . $problemId . ' with position ' . $position . '!');
-                    return null;
-                }
-                $id = $this->db->lastId();
-            }
-        } else {
-            $id = $result['id'];
+        if ($result) {
+            return $result['id'];
         }
-        return $id;
+
+        // Insert in the database if a new test
+        if ($insertIfNotFound) {
+            return $this->insert(
+                "Tests", [
+                    "problem" => $problemId,
+                    "position" => $position,
+                    "score" => 10
+                ]
+            );
+        }
+        return null;
     }
 
-    function updateTestScore($problemId, $position, $score) {
+    function updateTestScore(int $problemId, int $position, int $score): bool {
         $id = $this->getTestId($problemId, $position, false);
-        if ($id == -1) {
-            return null;
+        if ($id === null) {
+            return false;
         }
-        $response = $this->db->query("
-            UPDATE `Tests` SET
-                score = " . $score . "
-            WHERE id = " . $id . "
-        ");
-        if (!$response) {
-            error_log('Could not update test score for problem ' . $problemId . ' with position ' . $position . '!');
-            return null;
-        }
-        return true;
+        return $this->update(
+            "Tests", [
+                "score" => $score
+            ], "`id` = {$id}"
+        );
     }
 
-    function updateTestFile($problemId, $position, $name, $hash) {
+    function updateTestFile(int $problemId, int $position, string $name, string $hash): bool {
         $id = $this->getTestId($problemId, $position, true);
-        if ($id == -1) {
-            return null;
+        if ($id === null) {
+            return false;
         }
-
-        $tokens = explode('.', $name);
-        $extension = end($tokens);
-        $response = $this->db->query("
-            UPDATE `Tests` SET
-                " . (($extension == 'in' || $extension == 'inp') ? 'inpFile' : 'solFile') . " = '" . $name . "',
-                " . (($extension == 'in' || $extension == 'inp') ? 'inpHash' : 'solHash') . " = '" . $hash . "'
-            WHERE id = " . $id . "
-        ");
-        if (!$response) {
-            error_log('Could not update test file for problem ' . $problemId . ' with position ' . $position . '!');
-            return null;
-        }
-        return true;
+        $extension = lastElement(explode('.', $name));
+        return $this->update(
+            "Tests", [
+                (($extension == 'in' || $extension == 'inp') ? 'inpFile' : 'solFile') => $name,
+                (($extension == 'in' || $extension == 'inp') ? 'inpHash' : 'solHash') => $hash
+            ], "`id` = {$id}"
+        );
     }
 
-    function deleteTest($problemId, $position) {
-        $response = $this->db->query("
-            DELETE FROM `Tests`
-            WHERE problem = " . $problemId . " AND position = " . $position . "
-        ");
-        if (!$response) {
-            error_log('Could not delete test from problem ' . $problemId . ' at position ' . $position . '!');
-            return null;
-        }
-        return true;
+    function deleteTest(int $problemId, int $position): bool {
+        return $this->delete(
+            "Tests",
+            "`problem` = {$problemId} AND `position` = {$position}"
+        );
     }
 
-    // Submits
-    function addSubmit($submit) {
-        $response = $this->db->query("
-            INSERT INTO `Submits` (submitted, gradingStart, gradingFinish, userId, userName, problemId, problemName, language, results, execTime, execMemory, status, message, full, ip, info, replayId)
-            VALUES (
-                '" . $submit->submitted . "',
-                '" . $submit->gradingStart . "',
-                '" . $submit->gradingFinish . "',
-                '" . $submit->userId . "',
-                '" . $submit->userName . "',
-                '" . $submit->problemId . "',
-                '" . $submit->problemName . "',
-                '" . $this->db->escape($submit->language) . "',
-                '" . implode(',', $submit->results) . "',
-                '" . implode(',', $submit->execTime) . "',
-                '" . implode(',', $submit->execMemory) . "',
-                '" . $submit->status . "',
-                '" . $this->db->escape($submit->message) . "',
-                '" . ($submit->full ? 1 : 0) . "',
-                '" . $this->db->escape($submit->ip) . "',
-                '" . $this->db->escape($submit->info) . "',
-                '" . $this->db->escape($submit->replayId) . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not add new submit from user "' . $submit->userName . '"!');
-            return null;
-        }
-        return $this->db->lastId();
+    /*
+     * Submits
+     */
+    function addSubmit(Submit $submit): ?int {
+        return $this->insert(
+            "Submits", [
+                "submitted" => $submit->submitted,
+                "gradingStart" => $submit->gradingStart,
+                "gradingFinish" => $submit->gradingFinish,
+                "userId" => $submit->userId,
+                "userName" => $submit->userName,
+                "problemId" => $submit->problemId,
+                "problemName" => $submit->problemName,
+                "language" => $submit->language,
+                "results" => implode(",", $submit->results),
+                "execTime" => implode(",", $submit->execTime),
+                "execMemory" => implode(",", $submit->execMemory),
+                "status" => $submit->status,
+                "message" => $submit->message,
+                "full" => $submit->full ? 1 : 0,
+                "ip" => $submit->ip,
+                "info" => $submit->info,
+                "replayId" => $submit->replayId
+            ]
+        );
     }
 
-    function addSource($submit) {
-        $response = $this->db->query("
-            INSERT INTO `Sources` (submitId, userId, problemId, language, source)
-            VALUES (
-                '" . $submit->id . "',
-                '" . $submit->userId . "',
-                '" . $submit->problemId . "',
-                '" . $this->db->escape($submit->language) . "',
-                '" . $this->db->escape($submit->getSource()) . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not add source for submit "' . $submit->id . '"!');
-            return null;
-        }
-        return $this->db->lastId();
+    function updateSubmit(Submit $submit): bool {
+        return $this->update(
+            "Submits", [
+            "gradingStart" => $submit->gradingStart,
+            "gradingFinish" => $submit->gradingFinish,
+            "results" => implode(',', $submit->results),
+            "execTime" => implode(',', $submit->execTime),
+            "execMemory" => implode(',', $submit->execMemory),
+            "status" => $submit->status,
+            "message" => $submit->message,
+            "info" => $submit->info,
+            "replayId" => $submit->replayId
+
+        ], "`id` = {$submit->id}"
+        );
     }
 
-    function getSource($submitId) {
-        $response = $this->db->query("
-            SELECT * FROM `Sources`
-            WHERE submitId = " . $submitId . "
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getSource() query for submit = ' . $submitId . '!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getSubmit(int $submitId): ?array {
+        $response = $this->select(
+            "Submits",
+            "`id` = {$submitId}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function updateSubmit(Submit $submit) {
-        $response = $this->db->query("
-            UPDATE `Submits` SET
-                gradingStart = '" . $submit->gradingStart . "',
-                gradingFinish = '" . $submit->gradingFinish . "',
-                results = '" . implode(',', $submit->results) . "',
-                execTime = '" . implode(',', $submit->execTime) . "',
-                execMemory = '" . implode(',', $submit->execMemory) . "',
-                status = '" . $submit->status . "',
-                message = '" . $this->db->escape($submit->message) . "',
-                info = '" . $this->db->escape($submit->info) . "',
-                replayId = '" . $this->db->escape($submit->replayId) . "'
-            WHERE id = " . $submit->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update submit with id ' . $submit->id . '!');
-            return null;
-        }
-        return true;
+    function getAllSubmits(string $status="all"): ?array {
+        $response = $this->select(
+            "Submits",
+            $status == "all" ? "" : "`status` = '{$status}'"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getSubmit($submitId) {
-        $response = $this->db->query("
-            SELECT * FROM `Submits`
-            WHERE id = " . $submitId . "
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getSubmit() query with submitId = ' . $submitId . '!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getPendingSubmits(): ?array {
+        $response = $this->select(
+            "Submits",
+            "`status` IN (
+                '{$GLOBALS['STATUS_WAITING']}',
+                '{$GLOBALS['STATUS_PREPARING']}',
+                '{$GLOBALS['STATUS_COMPILING']}',
+                '{$GLOBALS['STATUS_TESTING']}'
+            )",
+            "`id`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getAllSubmits($status = 'all') {
-        $response = $this->db->query("
-            SELECT * FROM `Submits`
-            " . ($status == 'all' ? '' : 'WHERE status = \'' . $status . '\'') . "
-        ");
-        if (!$response) {
-            error_log('Could not execute getAllSubmits() query!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getLatestSubmits(): ?array {
+        $response = $this->select(
+            "Submits",
+            "`status` IN (
+                '{$GLOBALS['STATUS_INTERNAL_ERROR']}',
+                '{$GLOBALS['STATUS_COMPILATION_ERROR']}',
+                '{$GLOBALS['STATUS_WRONG_ANSWER']}',
+                '{$GLOBALS['STATUS_TIME_LIMIT']}',
+                '{$GLOBALS['STATUS_MEMORY_LIMIT']}',
+                '{$GLOBALS['STATUS_RUNTIME_ERROR']}',
+                '{$GLOBALS['STATUS_ACCEPTED']}'
+            )",
+            "`id` DESC",
+            100
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getAllSources() {
-        $response = $this->db->query("
-            SELECT * FROM `Sources`
-        ");
-        if (!$response) {
-            error_log('Could not execute getAllSources() query!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getProblemSubmits(int $problemId, string $status="all"): ?array {
+        $response = $this->select(
+            "Submits",
+            "`problemId` = {$problemId}" . ($status == "all" ? "" : " AND `status` = '{$status}'"),
+            "`submitted`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getPendingSubmits() {
-        $response = $this->db->query("
-            SELECT * FROM `Submits` WHERE status IN (
-                '" . $GLOBALS['STATUS_WAITING'] . "',
-                '" . $GLOBALS['STATUS_PREPARING'] . "',
-                '" . $GLOBALS['STATUS_COMPILING'] . "',
-                '" . $GLOBALS['STATUS_TESTING'] . "'
-            )
-            ORDER BY id
-        ");
-        if (!$response) {
-            error_log('Could not execute getPendingSubmits() query!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getUserSubmits(int $userId, int $problemId=-1, string $status="all"): ?array {
+        $response = $this->select(
+            "Submits",
+            "`userId` = {$userId}" .
+                ($problemId == -1 ? "" : " AND `problemId` = {$problemId}") .
+                ($status == "all" ? "" : " AND `status` = '{$status}'"),
+            "`submitted`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getLatestSubmits() {
+    function getSolved(int $userId): ?array {
         $response = $this->db->query("
-            SELECT * FROM `Submits` WHERE status IN (
-                '" . $GLOBALS['STATUS_INTERNAL_ERROR'] . "',
-                '" . $GLOBALS['STATUS_COMPILATION_ERROR'] . "',
-                '" . $GLOBALS['STATUS_WRONG_ANSWER'] . "',
-                '" . $GLOBALS['STATUS_TIME_LIMIT'] . "',
-                '" . $GLOBALS['STATUS_MEMORY_LIMIT'] . "',
-                '" . $GLOBALS['STATUS_RUNTIME_ERROR'] . "',
-                '" . $GLOBALS['STATUS_ACCEPTED'] . "'
-            )
-            ORDER BY id DESC LIMIT 100
+            SELECT DISTINCT `problemId` FROM `Submits`
+            WHERE `userId` = {$userId} AND `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
         ");
         if (!$response) {
-            error_log('Could not execute getLatestSubmits() query!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
-    function getProblemSubmits($problemId, $status = 'all') {
-        $where = "problemId = " . $problemId;
-        if ($status != 'all')
-            $where .= " AND status = '" . $status . "'";
-        $response = $this->db->query("
-                SELECT * FROM `Submits`
-                WHERE " . $where . "
-                ORDER BY submitted
-            ");
-        if (!$response) {
-            error_log('Could not execute getProblemSubmits() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
-    function getUserSubmits($userId, $problemId = -1, $status = 'all') {
-        $where = "userId = " . $userId;
-        if ($problemId != -1)
-            $where .= " AND problemId = " . $problemId;
-        if ($status != 'all')
-            $where .= " AND status = '" . $status . "'";
-        $response = $this->db->query("
-            SELECT * FROM `Submits`
-            WHERE " . $where . "
-        ");
-        if (!$response) {
-            error_log('Could not execute getUserSubmits() query with ' .
-                'userId = ' . $userId . ', problemId = ' . $problemId . ', and status = "' . $status . '"!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
-    function getUserSources($userId, $problemId = -1) {
-        $response = $this->db->query("
-            SELECT * FROM `Sources`
-            WHERE userId = " . $userId . ($problemId == -1 ? '' : (' AND problemId = ' . $problemId)) . "
-        ");
-        if (!$response) {
-            error_log('Could not execute getUserSources() query with userId = ' . $userId . ' and problemId = ' . $problemId . '!');
-            return null;
-        }
-        return $this->getResults($response);
-    }
-
-    function getSolved($userId) {
-        $response = $this->db->query("
-            SELECT DISTINCT problemId FROM `Submits`
-            WHERE userId = " . $userId . " AND status = '" . $GLOBALS['STATUS_ACCEPTED'] . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getSolved() query for user with id ' . $userId . '!');
+            error_log("Could not execute getSolved() query for user {$userId}!");
             return null;
         }
         return $this->getIntResults($response);
     }
 
-    function getAllSolved() {
+    function getAllSolved(): ?array {
         $response = $this->db->query("
-            SELECT DISTINCT problemId, userId FROM `Submits`
-            WHERE status = '" . $GLOBALS['STATUS_ACCEPTED'] . "'
+            SELECT DISTINCT `problemId`, `userId` FROM `Submits`
+            WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
         ");
         if (!$response) {
-            error_log('Could not execute getAllSolved() query!');
+            error_log("Could not execute getAllSolved() query!");
             return null;
         }
         return $this->getResults($response);
     }
 
-    // Users
-    function addUser($user) {
-        $response = $this->db->query("
-            INSERT INTO `Users`(access, registered, username, name, email, town, country, gender, birthdate, avatar)
-            VALUES (
-                '" . $user->access . "',
-                '" . $user->registered . "',
-                '" . $user->username . "',
-                '" . $user->name . "',
-                '" . $user->email . "',
-                '" . $user->town . "',
-                '" . $user->country . "',
-                '" . $user->gender . "',
-                '" . $user->birthdate . "',
-                '" . $this->db->escape($user->avatar) . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not create user "' . $user->username . '"!');
-            return null;
-        }
-        return $this->db->lastId();
+    /*
+     * Sources
+     */
+    function addSource(Submit $submit): ?int {
+        return $this->insert(
+            "Sources", [
+                "submitId" => $submit->id,
+                "userId" => $submit->userId,
+                "problemId" => $submit->problemId,
+                "language" => $submit->language,
+                "source" => $submit->getSource()
+            ]
+        );
     }
 
-    function updateUser($user) {
-        $response = $this->db->query("
-            UPDATE `Users` SET
-                access = '" . $user->access . "',
-                registered = '" . $user->registered . "',
-                username = '" . $user->username . "',
-                password = '" . $user->password . "',
-                loginKey = '" . $user->loginKey . "',
-                name = '" . $user->name . "',
-                email = '" . $user->email . "',
-                town = '" . $user->town . "',
-                country = '" . $user->country . "',
-                gender = '" . $user->gender . "',
-                birthdate = '" . $user->birthdate . "',
-                avatar = '" . $this->db->escape($user->avatar) . "'
-            WHERE id = " . $user->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update info for user "' . $user->username . '"!');
-            return null;
-        }
-        return true;
+    function getSource(int $submitId): ?array {
+        $response = $this->select(
+            "Sources",
+            "`submitId` = {$submitId}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getUser($userId) {
-        $response = $this->db->query("
-            SELECT * FROM `Users`
-            WHERE id = '" . $userId . "'
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getUser() query with id = "' . $userId . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getAllSources(): ?array {
+        $response = $this->select(
+            "Sources"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getUserByUsername($username) {
-        $response = $this->db->query("
-            SELECT * FROM `Users`
-            WHERE username = '" . $username . "'
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getUserByUsername() query with username = "' . $username . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getUserSources(int $userId, int $problemId=-1): ?array {
+        $response = $this->select(
+            "Sources",
+            "`userId` = {$userId}" .
+                ($problemId == -1 ? "" : " AND `problemId` = {$problemId}"),
+            "`submitted`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getAllUsers() {
-        $response = $this->db->query("
-            SELECT * FROM `Users` ORDER BY id
-        ");
-        if (!$response) {
-            error_log('Could not execute getAllUsers() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    /*
+     * Users
+     */
+    function addUser(User $user): ?int {
+        return $this->insert(
+            "Users", [
+                "access" => $user->access,
+                "registered" => $user->registered,
+                "username" => $user->username,
+                "name" => $user->name,
+                "email" => $user->email,
+                "town" => $user->town,
+                "country" => $user->country,
+                "gender" => $user->gender,
+                "birthdate" => $user->birthdate,
+                "avatar" => $user->avatar,
+            ]
+        );
     }
 
-    // User Info
-    function addUserInfo($user) {
-        $response = $this->db->query("
-            INSERT INTO `UsersInfo`(id, username, actions, totalTime, lastSeen, profileViews, lastViewers, loginCount)
-            VALUES (
-                '" . $user->id . "',
-                '" . $user->username . "',
-                '" . $user->actions . "',
-                '" . $user->totalTime . "',
-                '" . $user->lastSeen . "',
-                '" . $user->profileViews . "',
-                '" . $user->lastViewers . "',
-                '" . $user->loginCount . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not add user info for user "' . $user->username . '"!');
-            return false;
-        }
-        return true;
+    function updateUser(User $user): bool {
+        return $this->update(
+            "Users", [
+                "access" => $user->access,
+                "registered" => $user->registered,
+                "username" => $user->username,
+                "name" => $user->name,
+                "email" => $user->email,
+                "town" => $user->town,
+                "country" => $user->country,
+                "gender" => $user->gender,
+                "birthdate" => $user->birthdate,
+                "avatar" => $user->avatar
+            ], "id = {$user->id}"
+        );
     }
 
-    function updateUserInfo($user) {
-        $response = $this->db->query("
-            UPDATE `UsersInfo` SET
-                actions = '" . $user->actions . "',
-                totalTime = '" . $user->totalTime . "',
-                lastSeen = '" . $user->lastSeen . "',
-                profileViews = '" . $user->profileViews . "',
-                lastViewers = '" . $user->lastViewers . "',
-                loginCount = '" . $user->loginCount . "',
-                lastIP = '" . $user->lastIP . "'
-            WHERE id = " . $user->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update activity info for user "' . $user->username . '"!');
-            return null;
-        }
-        return true;
+    function getUser(int $userId): ?array {
+        $response = $this->select(
+            "Users",
+            "`id` = {$userId}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getUserInfo($userId) {
-        $response = $this->db->query("
-            SELECT * FROM `UsersInfo`
-            WHERE id = '" . $userId . "'
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getUserInfo() query with id = "' . $userId . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getUserByUsername(string $username): ?array {
+        $response = $this->select(
+            "Users",
+            "`username` = '{$username}'"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getAllUsersInfo() {
-        $response = $this->db->query("
-            SELECT * FROM `UsersInfo` ORDER BY id
-        ");
-        if (!$response) {
-            error_log('Could not execute getAllUsersInfo() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getAllUsers(): ?array {
+        $response = $this->select(
+            "Users",
+            "",
+            "`id`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getActiveUsersInfo() {
-        $response = $this->db->query("
-            SELECT * FROM `UsersInfo`
-            WHERE lastSeen >= '" . date('Y-m-d H:i:s', time() - 15 * 60) . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getActiveUsersInfo() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    /*
+     * User info
+     */
+    function addUserInfo(User $user): bool {
+        return $this->insert(
+            "UsersInfo", [
+                "id" => $user->id,
+                "username" => $user->username,
+                "actions" => $user->actions,
+                "totalTime" => $user->totalTime,
+                "lastSeen" => $user->lastSeen,
+                "profileViews" => $user->profileViews,
+                "lastViewers" => $user->lastViewers,
+                "loginCount" => $user->loginCount,
+                "lastIP" => $user->lastIP
+            ]
+        );
     }
 
-    // Credentials
-    function addCredentials($userId, $userName, $password, $loginKey) {
-        $response = $this->db->query("
-            INSERT INTO `Credentials`(userId, username, password, loginKey, resetKey, resetTime)
-            VALUES (
-                '" . $userId . "',
-                '" . $userName . "',
-                '" . $password . "',
-                '" . $loginKey . "',
-                '',
-                ''
-            )
-        ");
-        if (!$response) {
-            error_log('Could not insert credentials entry for username "' . $userName . '"!');
-            return null;
-        }
-        return true;
+    function updateUserInfo(User $user): bool {
+        return $this->update(
+            "UsersInfo", [
+                "actions" => $user->actions,
+                "totalTime" => $user->totalTime,
+                "lastSeen" => $user->lastSeen,
+                "profileViews" => $user->profileViews,
+                "lastViewers" => $user->lastViewers,
+                "loginCount" => $user->loginCount,
+                "lastIP" => $user->lastIP
+            ], "`id` = {$user->id}"
+        );
     }
 
-    function updateCreds($creds) {
-        $response = $this->db->query("
-            UPDATE `Credentials` SET
-                password = '" . $creds['password'] . "',
-                loginKey = '" . $creds['loginKey'] . "',
-                resetKey = '" . $creds['resetKey'] . "',
-                resetTime = '" . $creds['resetTime'] . "',
-                lastReset = '" . $creds['lastReset'] . "'
-            WHERE userId = " . $creds['userId'] . "
-        ");
-        if (!$response) {
-            error_log('Could not update credentials for user "' . $creds['username'] . '"!');
-            return null;
-        }
-        return true;
+    function getUserInfo(int $userId): ?array {
+        $response = $this->select(
+            "UsersInfo",
+            "`id` = {$userId}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getCreds($userId) {
-        $response = $this->db->query("
-            SELECT * FROM `Credentials`
-            WHERE userId = '" . $userId . "'
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getCreds() query with id = "' . $userId . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getAllUsersInfo(): ?array {
+        $response = $this->select(
+            "UsersInfo",
+            "",
+            "`id`"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getCredsByLoginKey($loginKey) {
-        $response = $this->db->query("
-            SELECT * FROM `Credentials`
-            WHERE loginKey = '" . $loginKey . "'
-            LIMIT 1
-        ");
-
-        if (!$response) {
-            error_log('Could not execute getCredsByLoginKey() query with loginKey = "' . $loginKey . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getActiveUsersInfo(): ?array {
+        $response = $this->select(
+            "UsersInfo",
+            "`lastSeen` >= '" . date('Y-m-d H:i:s', time() - 15 * 60) . "'",
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getCredsByResetKey($resetKey) {
-        $response = $this->db->query("
-            SELECT * FROM `Credentials`
-            WHERE resetKey = '" . $resetKey . "'
-            LIMIT 1
-        ");
-
-        if (!$response) {
-            error_log('Attempt to reset password with invalid resetKey: "' . $resetKey . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    /*
+     * Credentials
+     */
+    function addCreds(int $userId, string $userName, string $password, string $loginKey): bool {
+        return $this->insert(
+            "Credentials", [
+                "userId" => $userId,
+                "username" => $userName,
+                "password" => $password,
+                "loginKey" => $loginKey
+            ]
+        );
     }
 
-    // Achievements
-    function getAchievements($userId = -1) {
-        $response = $this->db->query("
-            SELECT * FROM `Achievements`
-            " . ($userId == -1 ? '' : 'WHERE user = ' . $userId) . "
-            ORDER BY date, id ASC
-        ");
-        if (!$response) {
-            error_log('Could not execute getAchievements() query for user with id ' . $userId . '!');
-            return null;
-        }
-        return $this->getResults($response);
+    // TODO: The argument may be object? Either User or Credentials.
+    function updateCreds(array $creds): bool {
+        return $this->update(
+            "Credentials", [
+                "password" => $creds['password'],
+                "loginKey" => $creds['loginKey'],
+                "resetKey" => $creds['resetKey'],
+                "resetTime" => $creds['resetTime'],
+                "lastReset" => $creds['lastReset']
+            ], "`userId` = {$creds['userId']}"
+        );
     }
 
-    function addAchievement($userId, $achievement, $date) {
-        $response = $this->db->query("
-            INSERT INTO `Achievements` (user, achievement, date)
-            VALUES(" . $userId . ", '" . $achievement ."', '" . $date . "')
-            ON DUPLICATE KEY UPDATE user = " . $userId . "
-        ");
-        if (!$response) {
-            error_log('Could not execute addAchievements() query for user with id ' . $userId . ' and achievement "' . $achievement . '"!');
-            return null;
-        }
-        return true;
+    function getCreds(int $userId): ?array {
+        $response = $this->select(
+            "Credentials",
+            "`userId` = {$userId}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function markAsSeenAchievement($achievementId) {
-        $response = $this->db->query("
-            UPDATE `Achievements` SET
-                seen = TRUE
-            WHERE id = " . $achievementId . "
-        ");
-        if (!$response) {
-            error_log('Could not execute markAsSeenAchievement() query for achievement with id ' . $achievementId . '"!');
-            return null;
-        }
-        return true;
+    function getCredsByLoginKey(string $loginKey): ?array {
+        $response = $this->select(
+            "Credentials",
+            "`loginKey` = '{$loginKey}'"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    // Spam counters
-    function refreshSpamCounters($minTime) {
-        $response = $this->db->query("
-            DELETE FROM `Spam`
-            WHERE time < " . $minTime . "
-        ");
-        if (!$response) {
-            error_log('Could not refresh spam counters with minTime = ' . $minTime . '!');
-            return null;
-        }
-        return true;
+    function getCredsByResetKey(string $resetKey): ?array {
+        $response = $this->select(
+            "Credentials",
+            "`resetKey` = '{$resetKey}'"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getSpamCounter($user, $type) {
-        $response = $this->db->query("
-            SELECT time FROM `Spam`
-            WHERE user = " . $user->id . " AND type = " . $type . "
-        ");
-        if (!$response) {
-            error_log('Could not get spam counter of type = ' . $type . ' for user ' . $user->name . '!');
-            return null;
-        }
-        return count($this->getResults($response));
+    /*
+     * Achievements
+     */
+    function getAchievements(int $userId = -1): ?array {
+        $response = $this->select(
+            "Achievements",
+            $userId == -1 ? "" : "`user` = {$userId}",
+            "`date`, `id` ASC"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function incrementSpamCounter($user, $type, $time) {
-        $response = $this->db->query("
-            INSERT INTO `Spam` (type, user, time)
-            VALUES (
-                " . $type . ", " . $user->id . ", " . $time . ")
-        ");
-        if (!$response) {
-            error_log('Could not increment spam counter of type = ' . $type . ' for user ' . $user->name . '!');
-            return null;
-        }
-        return true;
+    function addAchievement(int $userId, string $achievement, string $date): bool {
+        return $this->insertOrUpdate(
+            "Achievements", [
+                "user" => $userId,
+                "achievement" => $achievement,
+                "date" => $date
+            ], [
+                "user" => $userId
+            ]
+        );
     }
 
-    // Games
-    function getMatch($problemId, $test, $userOne, $userTwo) {
-        $response = $this->db->query("
-            SELECT * FROM `Matches`
-            WHERE problemId = " . $problemId . " AND test = " . $test . " AND userOne = " . $userOne . " AND userTwo = " . $userTwo . "
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getMatch() query properly!');
-            return null;
-        }
-        return $this->getResult($response);
+    function markAsSeenAchievement(int $achievementId): bool {
+        return $this->update(
+            "Achievements", [
+                "seen" => "TRUE"
+            ], "`id` = {$achievementId}"
+        );
     }
 
-    function getMatchById($matchId) {
-        $response = $this->db->query("
-            SELECT * FROM `Matches`
-            WHERE id = " . $matchId . "
-            LIMIT 1
-        ");
-        if (!$response) {
-            error_log('Could not execute getMatchById() query properly!');
-            return null;
-        }
-        return $this->getResult($response);
+    /*
+     * SPAM counters
+     */
+    function refreshSpamCounters(int $minTime): bool {
+        return $this->delete(
+            "Spam",
+            "`time` < {$minTime}"
+        );
     }
 
-    function getGameMatches($problemId, $userId='all') {
-        if ($userId == 'all') {
-            $response = $this->db->query("
-                SELECT * FROM `Matches`
-                WHERE problemId = " . $problemId . "
-            ");
-        } else {
-            $response = $this->db->query("
-                SELECT * FROM `Matches`
-                WHERE problemId = " . $problemId . " AND (userOne = " . $userId . " OR userTwo = " . $userId . ")
-            ");
-        }
-        if (!$response) {
-            error_log('Could not execute getGameMatches() query properly!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getSpamCounter(User $user, int $type): ?int {
+        $response = $this->select(
+            "Spam",
+            "`user` = {$user->id} AND `type` = {$type}"
+        );
+        return !$response ? null : count($this->getResults($response));
     }
 
-    function updateMatch($match) {
-        $response = $this->db->query("
-            INSERT INTO `Matches` (problemId, test, userOne, userTwo, submitOne, submitTwo, scoreOne, scoreTwo, message, replayId)
-                VALUES (
-                    '" . $match->problemId . "',
-                    '" . $match->test . "',
-                    '" . $match->userOne . "',
-                    '" . $match->userTwo . "',
-                    '" . $match->submitOne . "',
-                    '" . $match->submitTwo . "',
-                    '" . $match->scoreOne . "',
-                    '" . $match->scoreTwo . "',
-                    '" . $this->db->escape($match->message) . "',
-                    '" . $this->db->escape($match->replayId) . "'
-                )
-            ON DUPLICATE KEY UPDATE
-                submitOne = '" . $match->submitOne . "',
-                submitTwo = '" . $match->submitTwo . "',
-                scoreOne = '" . $match->scoreOne . "',
-                scoreTwo = '" . $match->scoreTwo . "',
-                message = '" . $this->db->escape($match->message) . "',
-                replayId = '" . $this->db->escape($match->replayId) . "'
-        ");
-        if (!$response) {
-            error_log('Could not add or update match on problem ' . $match->problemId . '!');
-            return null;
-        }
-        return true;
+    function incrementSpamCounter(User $user, int $type, int $time): bool {
+        return $this->insert(
+            "Spam", [
+                "type" => $type,
+                "user" => $user->id,
+                "time" => $time
+            ]
+        );
     }
 
-    // Training
-    function addTopic($id, $key, $link, $title, $summary, $expanded, $problems) {
-        $response = $this->db->query("
-            INSERT INTO `Training` (`id`, `key`, `link`, `title`, `summary`, `expanded`, `problems`)
-            VALUES(" . $id . ", '" . $key . "', '" . $link . "', '" . $title . "', '" . $summary . "', '" . $expanded . "', '" . $problems . "')
-            ON DUPLICATE KEY UPDATE link = '" . $link . "', title = '" . $title . "', summary = '" . $summary . "', expanded = '" . $expanded . "', problems = '" . $problems . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute addTopic() query for topic "' . $key . '"!');
-            return null;
-        }
-        return true;
+    /*
+     * Games
+     */
+    function getMatch(int $problemId, int $test, int $userOne, int $userTwo): ?array {
+        $response = $this->select(
+            "Matches",
+            "`problemId` = {$problemId} AND `test` = {$test} AND `userOne` = {$userOne} AND `userTwo` = {$userTwo}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getTopic($key) {
-        $response = $this->db->query("
-            SELECT * FROM `Training`
-            WHERE `key` = '" . $key . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getTopic() query for topic "' . $key . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getMatchById(int $matchId): ?array {
+        $response = $this->select(
+            "Matches",
+            "`id` = {$matchId}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function getTrainingTopics() {
-        $response = $this->db->query("
-            SELECT * FROM `Training`
-        ");
-        if (!$response) {
-            error_log('Could not execute getTrainingTopics() query!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getGameMatches(int $problemId, int $userId = -1): ?array {
+        $response = $this->select(
+            "Matches",
+            "`problemId` = {$problemId}" . ($userId == -1 ? "" : "AND (`userOne` = {$userId} OR `userTwo` = {$userId})")
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    // Regrading
-    function getRegradeList($id) {
-        $response = $this->db->query("
-            SELECT * FROM `Regrades`
-            WHERE id = '" . $id . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getRegradeList() query for regradeId "' . $id . '"!');
-            return null;
-        }
-        return $this->getResults($response);
+    function updateMatch(Match $match): bool {
+        return $this->insertOrUpdate(
+            "Matches", [
+                "problemId" => $match->problemId,
+                "test" => $match->test,
+                "userOne" => $match->userOne,
+                "userTwo" => $match->userTwo,
+                "submitOne" => $match->submitOne,
+                "submitTwo" => $match->submitTwo,
+                "scoreOne" => $match->scoreOne,
+                "scoreTwo" => $match->scoreTwo,
+                "message" => $match->message,
+                "replayId" => $match->replayId,
+            ], [
+                "submitOne" => $match->submitOne,
+                "submitTwo" => $match->submitTwo,
+                "scoreOne" => $match->scoreOne,
+                "scoreTwo" => $match->scoreTwo,
+                "message" => $match->message,
+                "replayId" => $match->replayId
+            ]
+        );
     }
 
-    function getRegradeSubmit($id, $submit) {
-        $response = $this->db->query("
-            SELECT * FROM `Regrades`
-            WHERE id = '" . $id . "' AND submitId = '" . $submit->id . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getRegradeSubmit() query for regradeId "' . $id . '" and submitId "' . $submit->id . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    /*
+     * Training
+     */
+    function addTopic(int $id, string $key, string $link, string $title, string $summary, string $expanded, string $problems) {
+        return $this->insertOrUpdate(
+            "Training", [
+                "id" => $id,
+                "key" => $key,
+                "link" => $link,
+                "title" => $title,
+                "summary" => $summary,
+                "expanded" => $expanded,
+                "problems" => $problems
+            ], [
+                "link" => $link,
+                "title" => $title,
+                "summary" => $summary,
+                "expanded" => $expanded,
+                "problems" => $problems
+            ]
+        );
     }
 
-    function addRegradeSubmit($id, $submit) {
-        $maxTime = max($submit->execTime);
-        $maxMemory = max($submit->execMemory);
-        $response = $this->db->query("
-            INSERT INTO `Regrades` (id, submitId, userName, problemName, submitted, regraded, oldTime, newTime, oldMemory, newMemory, oldStatus, newStatus)
-            VALUES('" . $id . "',
-                   '" . $submit->id . "',
-                   '" . $submit->userName . "',
-                   '" . $submit->problemName . "',
-                   '" . $submit->submitted . "',
-                   '" . date('Y-m-d H:i:s') . "',
-                   '" . $maxTime . "',
-                   '" . -1.0 . "',
-                   '" . $maxMemory . "',
-                   '" . -1.0 . "',
-                   '" . $submit->status . "',
-                   '" . $GLOBALS['STATUS_WAITING'] . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not execute addRegradeSubmit() query for regradeId "' . $id . '" and submitId "' . $submit->id . '"!');
-            return null;
-        }
-        return true;
+    function getTopic(string $key): ?array {
+        $response = $this->select(
+            "Training",
+            "`key` = '{$key}'"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function updateRegradeSubmit($id, $submit) {
-        $maxTime = max($submit->execTime);
-        $maxMemory = max($submit->execMemory);
-        $response = $this->db->query("
-            UPDATE `Regrades` SET
-                newTime = '" . $maxTime . "',
-                newMemory = '" . $maxMemory . "',
-                newStatus = '" . $submit->status . "'
-            WHERE id = '" . $id . "' AND submitId = '" . $submit->id . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute updateRegradeSubmit() query for regradeId "' . $id . '" and submitId "' . $submit->id . '"!');
-            return null;
-        }
-        return true;
+    function getTrainingTopics(): ?array {
+        $response = $this->select(
+            "Training"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    // Notifications
-    function addNotifications($userId, $userName, $messages, $seen) {
-        $response = $this->db->query("
-            INSERT INTO `Notifications`(userId, username, messages, seen)
-            VALUES (
-                '" . $userId . "',
-                '" . $userName . "',
-                '" . $messages . "',
-                '" . $seen . "'
-            )
-        ");
-        if (!$response) {
-            error_log('Could not insert notifications entry for username "' . $userName . '"!');
-            return null;
-        }
-        return true;
+    /*
+     * Regrading
+     */
+    // TODO: Change the `id` column to `key`, as it is confusing.
+    function getRegradeList(string $id): ?array {
+        $response = $this->select(
+            "Regrades",
+            "`id` = '{$id}'"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function updateNotifications($notifications) {
-        $response = $this->db->query("
-            UPDATE `Notifications` SET
-                messages = '" . $notifications['messages'] . "',
-                seen = '" . $notifications['seen'] . "'
-            WHERE userId = " . $notifications['userId'] . "
-        ");
-        if (!$response) {
-            error_log('Could not update notifications for user "' . $notifications['username'] . '"!');
-            return null;
-        }
-        return true;
+    function getRegradeSubmit(string $id, Submit $submit): ?array {
+        $response = $this->select(
+            "Regrades",
+            "`id` = '{$id}' AND `submitId` = {$submit->id}"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function getNotifications($userId) {
-        $response = $this->db->query("
-            SELECT * FROM `Notifications`
-            WHERE userId = '" . $userId . "'
-            LIMIT 1
-        ");
-
-        if (!$response) {
-            error_log('Could not execute getNotifications() query for userId "' . $userId . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function addRegradeSubmit(string $id, Submit $submit): bool {
+        return $this->insert(
+            "Regrades", [
+                "id" => $id,
+                "submitId" => $submit->id,
+                "userName" => $submit->userName,
+                "problemName" => $submit->problemName,
+                "submitted" => $submit->submitted,
+                "regraded" => date('Y-m-d H:i:s'),
+                "oldTime" => max($submit->execTime),
+                "newTime" => -1.0,
+                "oldMemory" => max($submit->execMemory),
+                "newMemory" => -1.0,
+                "oldStatus" => $submit->status,
+                "newStatus" => $GLOBALS['STATUS_WAITING']
+            ]
+        );
     }
 
-    function getMessage($id) {
-        $response = $this->db->query("
-            SELECT * FROM `Messages`
-            WHERE id = '" . $id . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getMessage() query with id = "' . $id . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function updateRegradeSubmit(string $id, Submit $submit): bool {
+        return $this->update(
+            "Regrades", [
+                "newTime" => max($submit->execTime),
+                "newMemory" => max($submit->execMemory),
+                "newStatus" => $submit->status
+            ], "`id` = '{$id}' AND `submitId` = {$submit->id}"
+        );
     }
 
-    function getMessageByKey($key) {
-        $response = $this->db->query("
-            SELECT * FROM `Messages`
-            WHERE `key` = '" . $key . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute getMessageByKey() query with key = "' . $key . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    /*
+     * Notifications
+     */
+    // TODO: Pass arrays and implode the arrays here.
+    function addNotifications(int $userId, string $userName, string $messages, string $seen): ?int {
+        return $this->insert(
+            "Notifications", [
+                "userId" => $userId,
+                "username" => $userName,
+                "messages" => $messages,
+                "seen" => $seen
+            ]
+        );
     }
 
-    function getAllMessages() {
-        $response = $this->db->query("
-            SELECT * FROM `Messages`
-        ");
-        if (!$response) {
-            error_log('Could not execute getAllMessages() query!');
-            return null;
-        }
-        return $this->getResults($response);
+    // TODO: Convert argument to an object.
+    function updateNotifications(array $notifications): bool {
+        return $this->update(
+            "Notifications", [
+                "messages" => $notifications["messages"],
+                "seen" => $notifications["seen"]
+            ], "`userId` = {$notifications['userId']}"
+        );
     }
 
-    function getMessagesToEveryone() {
-        $response = $this->db->query("
-            SELECT * FROM `Messages`
-            WHERE userIds = '-1'
-        ");
-        if (!$response) {
-            error_log('Could not execute getMessagesToEveryone() query!');
-            return null;
-        }
-        return $this->getResults($response);
+    function getNotifications(int $userId): ?array {
+        $response = $this->select(
+            "Notifications",
+            "`userId` = {$userId}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function addMessage() {
-        $response = $this->db->query("
-            INSERT INTO `Messages` (`key`, `sent`, `authorId`, `authorName`, `title`, `content`, `userIds`, `userNames`)
-            VALUES ('', '', -1, '', '', '', '', '')
-        ");
-
-        if (!$response) {
-            error_log('Could not execute addMessage() query properly!');
-            return null;
-        }
-        return $this->db->lastId();
+    /*
+     * Messages
+     */
+    function getMessage(int $id): ?array {
+        $response = $this->select(
+            "Messages",
+            "`id` = {$id}"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-    function updateMessage($message) {
-        $response = $this->db->query("
-            UPDATE `Messages` SET
-                `key` = '" . $message->key . "',
-                `sent` = '" . $message->sent . "',
-                `authorId` = '" . $message->authorId . "',
-                `authorName` = '" . $message->authorName . "',
-                `title` = '" . $this->db->escape($message->title) . "',
-                `content` = '" . $this->db->escape($message->content) . "',
-                `userIds` = '" . implode(',', $message->userIds) . "',
-                `userNames` = '" . implode(',', $message->userNames) . "'
-            WHERE `id` = " . $message->id . "
-        ");
-        if (!$response) {
-            error_log('Could not update message with id "' . $message->id . '"!');
-            return null;
-        }
-        return true;
+    function getMessageByKey(string $key): ?array {
+        $response = $this->select(
+            "Messages",
+            "`key` = '{$key}'"
+        );
+        return !$response ? null : $this->getResult($response);
     }
 
-
-    // Submit run history
-    function getHistory($submitId) {
-        $response = $this->db->query("
-            SELECT * FROM `History`
-            WHERE submitId = '" . $submitId . "'
-            LIMIT 1
-        ");
-
-        if (!$response) {
-            error_log('Could not execute getHistory() query for submitId "' . $submitId . '"!');
-            return null;
-        }
-        return $this->getResult($response);
+    function getAllMessages(): ?array {
+        $response = $this->select(
+            "Messages"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function addHistory($submitId) {
-        $response = $this->db->query("
-            INSERT INTO `History` (submitId, time01, time02, time03, time04, time05)
-            VALUES ('" . $submitId . "', '', '', '', '', '')
-        ");
-        if (!$response) {
-            error_log('Could not insert new entry in addHistory() for submitId "' . $submitId . '"!');
-            return null;
-        }
-        return true;
+    function getMessagesToEveryone(): ?array {
+        $response = $this->select(
+            "Messages",
+            "`userIds` = '-1'"
+        );
+        return !$response ? null : $this->getResults($response);
     }
 
-    function updateHistory($submitId, $info) {
-        $response = $this->db->query("
-            UPDATE `History` SET
-                time01 = '" . $info['time01'] . "',
-                time02 = '" . $info['time02'] . "',
-                time03 = '" . $info['time03'] . "',
-                time04 = '" . $info['time04'] . "',
-                time05 = '" . $info['time05'] . "'
-            WHERE submitId = '" . $submitId . "'
-        ");
-        if (!$response) {
-            error_log('Could not execute updateHistory() query for submitId "' . $submitId . '"!');
-            return null;
-        }
-        return true;
+    function addMessage(): bool {
+        return $this->insert(
+            "Messages", [
+                "authorId" => -1
+            ]
+        );
+   }
+
+    function updateMessage(Message $message): bool {
+        return $this->update(
+            "Messages", [
+                "key" => $message->key,
+                "sent" => $message->sent,
+                "authorId" => $message->authorId,
+                "authorName" => $message->authorName,
+                "title" => $message->title,
+                "content" => $message->content,
+                "userIds" => implode(",", $message->userIds),
+                "userNames" => implode(",", $message->userNames)
+            ], "`id` = {$message->id}"
+        );
+    }
+
+    /*
+     * History
+     */
+    function getHistory(int $submitId): ?array {
+        $response = $this->select(
+            "History",
+            "`submitId` = {$submitId}"
+        );
+        return !$response ? null : $this->getResult($response);
+    }
+
+    function addHistory(int $submitId): bool {
+        return $this->insert(
+            "History", [
+                "submitId" => $submitId
+            ]
+        );
+    }
+
+    function updateHistory(int $submitId, array $info): bool {
+        return $this->update(
+            "History", [
+                "time01" => $info['time01'],
+                "time02" => $info['time02'],
+                "time03" => $info['time03'],
+                "time04" => $info['time04'],
+                "time05" => $info['time05']
+            ], "`submitId` = {$submitId}"
+        );
     }
 
 }

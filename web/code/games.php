@@ -66,7 +66,6 @@ class GamesPage extends Page {
         }
 
         // Get the scores, wins, draws, and losses for each player
-        $games = array();
         foreach ($matches as $match) {
             // If one of the users is negative, this means this is a partial submission match.
             if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)

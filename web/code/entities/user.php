@@ -139,7 +139,7 @@ class User {
         $brain->addUserInfo($user);
 
         // Add credentials entry
-        $brain->addCredentials($user->id, $username, $password, '');
+        $brain->addCreds($user->id, $username, $password, '');
 
         // Add notifications entry
         $brain->addNotifications($user->id, $username, '', '');
@@ -161,7 +161,7 @@ class User {
         $brain = new Brain();
         return array_map(
             function ($entry) {
-                // echo json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . PHP_EOL;
+                // printArray($entry);
                 return User::instanceFromArray(null, $entry);
             }, $brain->getActiveUsersInfo()
         );

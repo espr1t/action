@@ -924,13 +924,12 @@ class TrainingPage extends Page {
         return $sectionInfo . $sectionProblems;
     }
 
-    private function getTopicStats($key) {
+    private function getTopicStats($topic) {
         $brain = new Brain();
-        $topic = $brain->getTopic($key);
         $problems = explode(',', $topic['problems']);
         $solved = $brain->getSolved($this->user->id);
         $accepted = array_filter($solved, function($el) use ($problems) {return in_array($el, $problems);});
-        $parentId = 'topic-stats-' . $key;
+        $parentId = 'topic-stats-' . $topic['key'];
         return '<script>circularProgress(\'' . $parentId . '\', ' . count($accepted) . ', ' . count($problems) . ');</script>';
     }
 
@@ -942,7 +941,7 @@ class TrainingPage extends Page {
                     ' . $topic['summary'] . '
                 </div>
                 <div class="training-list-progress" id="topic-stats-' . $topic['key'] . '">
-                    ' . $this->getTopicStats($topic['key']) . '
+                    ' . $this->getTopicStats($topic) . '
                 </div>
             </div>
         ');

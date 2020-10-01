@@ -9,7 +9,7 @@ require_once(__DIR__ . '/../events.php');
 require_once(__DIR__ . '/../entities/submit.php');
 
 class AdminRegradePage extends Page {
-    private $brain = null;
+    private Brain $brain;
     private $regradeId = -1;
 
     public function getTitle() {
@@ -217,9 +217,11 @@ class AdminRegradePage extends Page {
     }
 
     public function getContent() {
-        $this->clearOldRegrades();
         $this->brain = new Brain();
         $this->regradeId = randomString(5, 'abcdefghijklmnopqrstuvwxyz');
+
+        // Not implemented yet
+        $this->clearOldRegrades();
 
         // If no id is given, show the main page
         if (!isset($_GET['id'])) {
