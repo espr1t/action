@@ -31,6 +31,14 @@ class DB {
         return $this->db->query("SELECT 1 FROM `{$tableName}` LIMIT 1") == true;
     }
 
+    function indexExists(string $indexName): bool {
+        return $this->db->query("
+            SELECT * FROM information_schema.statistics
+            WHERE table_schema = '{$GLOBALS['DB_DATABASE']}' AND index_name = '$indexName'
+            LIMIT 1
+        ")->num_rows > 0;
+    }
+
     function query(string $sqlQuery) {
         return $this->db->query($sqlQuery);
     }

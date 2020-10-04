@@ -31,14 +31,14 @@ class ProblemsPage extends Page {
         return 'addPreTags()';
     }
 
-    public function getProblemBox($problemInfo, $problemTriedBy, $problemSolvedBy) {
+    public function getProblemBox($problemInfo, $haveTried, $haveSolved) {
         $statusTooltip = 'Още не сте пробвали да решите тази задача.';
         $statusIconClass = 'fal fa-circle gray';
-        if (array_key_exists($this->user->id, $problemTriedBy)) {
+        if ($haveTried) {
             $statusTooltip = 'Пробвали сте неуспешно тази задача.';
             $statusIconClass = 'fas fa-times-circle red';
         }
-        if (array_key_exists($this->user->id, $problemSolvedBy)) {
+        if ($haveSolved) {
             $statusTooltip = 'Вече сте решили успешно тази задача.';
             $statusIconClass = 'fas fa-check-circle green';
         }
@@ -124,31 +124,18 @@ class ProblemsPage extends Page {
             }
         }
 
-        $allProblemsSubmits = $brain->getAllSubmits();
-
         $totalSubmits = array();
         $successfulSubmits = array();
-        $problemTriedBy = array();
-        $problemSolvedBy = array();
         foreach ($problemsInfo as $problem) {
             $totalSubmits[$problem['id']] = 0;
             $successfulSubmits[$problem['id']] = 0;
-            $problemTriedBy[$problem['id']] = array();
-            $problemSolvedBy[$problem['id']] = array();
         }
-        foreach ($allProblemsSubmits as $submit) {
-            // Evaluate only submits on specified problems
-            if (array_key_exists($submit['problemId'], $problemSolvedBy)) {
-                $problemTriedBy[$submit['problemId']][$submit['userId']] = true;
-                if ($submit['userId'] > 1) {
-                    $totalSubmits[$submit['problemId']]++;
-                }
-                if ($submit['status'] == $GLOBALS['STATUS_ACCEPTED']) {
-                    $problemSolvedBy[$submit['problemId']][$submit['userId']] = true;
-                    if ($submit['userId'] > 1) {
-                        $successfulSubmits[$submit['problemId']]++;
-                    }
-                }
+
+        foreach ($brain->getProblemStatusCounts() as $statusCnt) {
+            if (array_key_exists($statusCnt['problemId'], $totalSubmits)) {
+                $totalSubmits[$statusCnt['problemId']] += $statusCnt['count'];
+                if ($statusCnt['status'] == $GLOBALS['STATUS_ACCEPTED'])
+                    $successfulSubmits[$statusCnt['problemId']] += $statusCnt['count'];
             }
         }
 
@@ -159,10 +146,18 @@ class ProblemsPage extends Page {
                 round(100 * $successfulSubmits[$problemsInfo[$i]['id']] / $totalSubmits[$problemsInfo[$i]['id']]);
         }
 
+        $problemTried = array();
+        $problemSolved = array();
+        foreach (Submit::getUserSubmits($this->user->id) as $submit) {
+            $problemTried[$submit->problemId] = true;
+            if ($submit->status == $GLOBALS['STATUS_ACCEPTED'])
+                $problemSolved[$submit->problemId] = true;
+        }
+
         for ($i = 0; $i < count($problemsInfo); $i++) {
             $problemsInfo[$i]['box'] = $this->getProblemBox($problemsInfo[$i],
-                                                            $problemTriedBy[$problemsInfo[$i]['id']],
-                                                            $problemSolvedBy[$problemsInfo[$i]['id']]);
+                                                            isset($problemTried[$problemsInfo[$i]['id']]),
+                                                            isset($problemSolved[$problemsInfo[$i]['id']]));
         }
 
         // Order by solutions or difficulty, if requested

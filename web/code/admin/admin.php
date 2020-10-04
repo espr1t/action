@@ -55,4 +55,5 @@ $achievementsContent = '';
 
 $isAdminPage = true;
 require('../page.html');
+
 ?>

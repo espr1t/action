@@ -5,6 +5,8 @@ require_once('common.php');
 require_once('page.php');
 
 class StatsPage extends Page {
+    private Brain $brain;
+
     public function getTitle() {
         return 'O(N)::Stats';
     }
@@ -117,30 +119,24 @@ class StatsPage extends Page {
             Произволни статистики за системата и потребителите.
         ';
 
-        $problems = $this->brain->getAllProblems();
-        $games = $this->brain->getAllGames();
-        $users = $this->brain->getAllUsers();
-        $usersInfo = $this->brain->getAllUsersInfo();
-        $submits = $this->brain->getAllSubmits();
-
-        $problemStat = count($problems);
+        $problemStat = $this->brain->getAllProblemsCount();
         $problemTitle = 'задачи';
         $problemInfo = 'Брой задачи на системата.';
 
-        $gameStat = count($games);
+        $gameStat = $this->brain->getAllGamesCount();
         $gameTitle = 'игри';
         $gameInfo = 'Брой игри на системата.';
 
-        $userStat = count($users);
+        $userStat = $this->brain->getAllUsersCount();
         $userTitle = 'потребители';
         $userInfo = 'Брой потребители на системата.';
 
-        $submitStat = count($submits);
+        $submitStat = $this->brain->getAllSubmitsCount();
         $submitTitle = 'решения';
         $submitInfo = 'Брой предадени решения.';
 
         $actionStat = 0;
-        foreach ($usersInfo as $info) {
+        foreach ($this->brain->getAllUsersInfo() as $info) {
             $actionStat += $info['actions'];
         }
         $actionStat = sprintf("%dK", $actionStat / 1000);
@@ -460,8 +456,7 @@ class StatsPage extends Page {
     }
 
     private function wordCloud() {
-        $brain = new Brain();
-        $achievements = $brain->getAchievements();
+        $achievements = $this->brain->getAchievements();
 
         $keyCount = array();
         foreach ($achievements as $achievement) {

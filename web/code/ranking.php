@@ -30,10 +30,9 @@ class RankingPage extends Page {
             $numAchievements[$info['id']] = 0;
         }
 
-        $solved = $brain->getAllSolved();
-        foreach ($solved as $submit) {
-            if (array_key_exists($submit['userId'], $numSolved))
-                $numSolved[$submit['userId']] += 1;
+        foreach ($brain->getSolvedPerUser() as $solvedCount) {
+            if (array_key_exists($solvedCount['userId'], $numSolved))
+                $numSolved[$solvedCount['userId']] += $solvedCount['count'];
         }
 
         $achievements = $brain->getAchievements();

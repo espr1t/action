@@ -6,7 +6,8 @@ require_once('stats.php');
 require_once('ranking.php');
 
 class ProfilePage extends Page {
-    private $profile;
+    private Brain $brain;
+    private ?User $profile;
 
     public function getTitle() {
         return 'O(N)::' . $this->profile->username;

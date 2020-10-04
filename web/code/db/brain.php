@@ -35,6 +35,14 @@ class Brain {
         return !$result ? null : $result;
     }
 
+    function count(string $table, string $where=""): ?mysqli_result {
+        $result = $this->query("
+            SELECT COUNT(*) FROM `{$table}`" .
+            ($where == "" ? "" : "\n            WHERE {$where}")
+        );
+        return !$result ? null : $result;
+    }
+
     private function convertKey(string $key) {
         return "`$key`";
     }
@@ -103,6 +111,12 @@ class Brain {
         }
         $sqlResponse->close();
         return $results;
+    }
+
+    function getIntResult(mysqli_result $sqlResponse): int {
+        $result = intval($sqlResponse->fetch_row()[0]);
+        $sqlResponse->close();
+        return $result;
     }
 
     function getIntResults(mysqli_result $sqlResponse): array {
@@ -253,6 +267,14 @@ class Brain {
         return !$response ? null : $this->getResults($response);
     }
 
+    function getAllProblemsCount(): ?int {
+        $response = $this->count(
+            "Problems",
+            "`type` NOT IN ('game', 'relative', 'interactive')"
+        );
+        return !$response ? null : $this->getIntResult($response);
+    }
+
     function getAllGames(): ?array {
         $response = $this->select(
             "Problems",
@@ -260,6 +282,14 @@ class Brain {
             "`id`"
         );
         return !$response ? null : $this->getResults($response);
+    }
+
+    function getAllGamesCount(): ?int {
+        $response = $this->count(
+            "Problems",
+            "`type` IN ('game', 'relative', 'interactive')"
+        );
+        return !$response ? null : $this->getIntResult($response);
     }
 
     /*
@@ -422,6 +452,14 @@ class Brain {
         return !$response ? null : $this->getResults($response);
     }
 
+    function getAllSubmitsCount(string $status="all"): ?int {
+        $response = $this->count(
+            "Submits",
+            $status == "all" ? "" : "`status` = '{$status}'"
+        );
+        return !$response ? null : $this->getIntResult($response);
+    }
+
     function getPendingSubmits(): ?array {
         $response = $this->select(
             "Submits",
@@ -463,6 +501,15 @@ class Brain {
         return !$response ? null : $this->getResults($response);
     }
 
+    function getProblemStatusCounts(): ?array {
+        $response = $this->query("
+            SELECT `problemId`, `status`, COUNT(*) AS `count` FROM `Submits`
+            WHERE `userId` > 1
+            GROUP BY `problemId`, `status`
+        ");
+        return !$response ? null : $this->getResults($response);
+    }
+
     function getUserSubmits(int $userId, int $problemId=-1, string $status="all"): ?array {
         $response = $this->select(
             "Submits",
@@ -486,13 +533,16 @@ class Brain {
         return $this->getIntResults($response);
     }
 
-    function getAllSolved(): ?array {
-        $response = $this->db->query("
-            SELECT DISTINCT `problemId`, `userId` FROM `Submits`
-            WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
+    function getSolvedPerUser(): ?array {
+        $response = $this->query("
+            SELECT `userId`, COUNT(*) AS `count` FROM (
+                SELECT `userId`, `problemId` FROM `Submits`
+                WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
+                GROUP BY `userId`, `problemId`
+            ) AS tmp GROUP BY `userId`
         ");
         if (!$response) {
-            error_log("Could not execute getAllSolved() query!");
+            error_log("Could not execute getSolvedPerUser() query!");
             return null;
         }
         return $this->getResults($response);
@@ -598,6 +648,11 @@ class Brain {
             "`id`"
         );
         return !$response ? null : $this->getResults($response);
+    }
+
+    function getAllUsersCount(): ?int {
+        $response = $this->count("Users");
+        return !$response ? null : $this->getIntResult($response);
     }
 
     /*

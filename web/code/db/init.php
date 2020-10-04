@@ -7,6 +7,19 @@ function output($message) {
     echo $message . '<br>';
 }
 
+function createTableIndexes($table, $indexes) {
+    global $db;
+    foreach ($indexes as $indexName => $indexColumn) {
+        if (!$db->indexExists($indexName)) {
+            output("  >> creating index '{$indexName}'...");
+            $result = $db->query("
+                CREATE INDEX `{$indexName}` ON `{$table}`(`$indexColumn`);
+            ");
+            output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+        }
+    }
+}
+
 /*
 Table::Users
 ============
@@ -309,7 +322,7 @@ Table::Submits
     "results": "1,1,TL,0.42,WA",
     "execTime": "0,0.11,0.08,0.13,0.20",
     "execMemory": "2.90234375,2.83203125,2.9140625,2.90234375,2.94140",
-    "status": "T",
+    "status": "WA",
     "message": "Undefined variable 'foo'",
     "full": true,
     "ip": "2001:db8:0:0:0:ff00:42:8329",
@@ -348,6 +361,13 @@ if ($db->tableExists('Submits')) {
     ");
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
+
+createTableIndexes("Submits", [
+    "SubmitsUserId" => "userId",
+    "SubmitsProblemId" => "problemId",
+    "SubmitsStatus" => "status"
+]);
+
 
 /*
 Table::Sources
