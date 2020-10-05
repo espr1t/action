@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
+global $user;
+
 // User doesn't have access level needed for adding testcases
 if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
@@ -46,8 +48,7 @@ if ($_POST['action'] == 'upload') {
     file_put_contents($testerDir . '/' . $problem->tester, $testerContent);
 }
 
-$brain = new Brain();
-$brain->updateTester($problem);
+Brain::updateTester($problem);
 
 // Everything seems okay
 printAjaxResponse(array(

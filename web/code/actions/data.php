@@ -27,8 +27,7 @@ function obscureEmail($email) {
 }
 
 function getUsersBasicInfo() {
-    $brain = new Brain();
-    $users = $brain->getAllUsers();
+    $users = Brain::getAllUsers();
     $usersBasicInfo = array();
     foreach ($users as $user) {
         if ($user['id'] >= 1) {

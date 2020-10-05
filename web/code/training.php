@@ -15,7 +15,6 @@ class TrainingPage extends Page {
     }
 
     private function initIMPL($position) {
-        $brain = new Brain();
         $key = 'IMPL';
         $link = 'implementation';
         $title = 'Implementation';
@@ -38,11 +37,10 @@ class TrainingPage extends Page {
             имплементирате - тоест просто трябва да превърнете описаната процедура в код.
         ';
         $problems = '2,157,134,155,181,184,15,43,194,199,106,214,164,234,236,238,249';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initCCAS($position) {
-        $brain = new Brain();
         $key = 'CCAS';
         $title = 'Corner Cases';
         $link = 'corner-cases';
@@ -66,11 +64,10 @@ class TrainingPage extends Page {
             имплементацията. В темите по-нататък ще срещнете и други, по-сложни такива задачи.
         ';
         $problems = '119,195,144,171,191,95,251';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initRECU($position) {
-        $brain = new Brain();
         $key = 'RECU';
         $link = 'recursion-and-backtrack';
         $title = 'Recursion & Backtrack';
@@ -95,11 +92,10 @@ class TrainingPage extends Page {
             като, за съжаление, отговорите могат много лесно да бъдат намерени в интернет.
         ';
         $problems = '66,179,63,90,145,102,138,248,247';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initBRUT($position) {
-        $brain = new Brain();
         $key = 'BRUT';
         $link = 'bruteforce';
         $title = 'Bruteforce';
@@ -129,11 +125,10 @@ class TrainingPage extends Page {
             ги дебъгваме (знаем верния отговор за него от брутфорс решението).
         ';
         $problems = '166,200,229,153,220,203,4,175,217';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initSORT($position) {
-        $brain = new Brain();
         $key = 'SORT';
         $link = 'sorting';
         $title = 'Sorting';
@@ -159,11 +154,10 @@ class TrainingPage extends Page {
             трябва сами да имплементирате логиката на някои от сортиращите алгоритми.
         ';
         $problems = '123,127,215,132,221,45,182,222,128,256';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initGRDY($position) {
-        $brain = new Brain();
         $key = 'GRDY';
         $link = 'greedy';
         $title = 'Greedy';
@@ -191,11 +185,10 @@ class TrainingPage extends Page {
             трябва да направите - в някои то е много очевидно, докато в други съвсем не е!
         ';
         $problems = '143,165,206,170,72,58,178,190,230,138,81,112,120,218,223,67,208,55';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initMATH($position) {
-        $brain = new Brain();
         $key = 'MATH';
         $link = 'math';
         $title = 'Math';
@@ -233,11 +226,10 @@ class TrainingPage extends Page {
             комбинаторика.
         ';
         $problems = '225,24,228,187,201,140,156,192,92,93,4,172';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initSIDS($position) {
-        $brain = new Brain();
         $key = 'SIDS';
         $link = 'simple-data-structures';
         $title = 'Simple Data Structures';
@@ -276,11 +268,10 @@ class TrainingPage extends Page {
             ефективно да пресмятате отговора.
         ';
         $problems = '125,129,20,40,124,245';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initGRF1($position) {
-        $brain = new Brain();
         $key = 'GRF1';
         $link = 'simple-graphs';
         $title = 'Simple Graphs';
@@ -306,11 +297,10 @@ class TrainingPage extends Page {
             модификация.
         ';
         $problems = '114,122,115,147,151,158,177,180,12,27,99,100,104,83,87,78,121,133';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initBSTS($position) {
-        $brain = new Brain();
         $key = 'BSTS';
         $link = 'binary-search';
         $title = 'Binary & Ternary Search';
@@ -343,11 +333,10 @@ class TrainingPage extends Page {
             данни, потоци, 2-SAT, хеширане, и други).
         ';
         $problems = '117,130,141,168,226,118,28,30,60,76,185,209,22,250';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initDPDP($position) {
-        $brain = new Brain();
         $key = 'DPDP';
         $link = 'dynamic-programming';
         $title = 'Dynamic Programming';
@@ -375,11 +364,10 @@ class TrainingPage extends Page {
             разгледани в секциите по-нататък.
         ';
         $problems = '113,116,243,142,167,174,50,33,61,85,196,198,39,212,213,224,235';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initBUCK($position) {
-        $brain = new Brain();
         $key = 'BUCK';
         $link = 'bucketing';
         $title = 'Bucketing';
@@ -402,11 +390,10 @@ class TrainingPage extends Page {
             <br><br>
         ';
         $problems = '150,162,105,68';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initITDP($position) {
-        $brain = new Brain();
         $key = 'ITDP';
         $link = 'iterative-dynamic-programming';
         $title = 'Iterative Dynamic Programming';
@@ -431,11 +418,10 @@ class TrainingPage extends Page {
             Задачите в секцията изискват оптимизация на паметта, ползвайки итеративно динамично.
         ';
         $problems = '6,148,71,19,101,189';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initWIND($position) {
-        $brain = new Brain();
         $key = 'WIND';
         $link = 'sliding-window';
         $title = 'Sliding Window';
@@ -464,11 +450,10 @@ class TrainingPage extends Page {
             състезатели ползват наивното решение за да тестват бързото (с малки "рандом" тестове).
         ';
         $problems = '25,146,65,193';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initBMDP($position) {
-        $brain = new Brain();
         $key = 'BMDP';
         $link = 'bitmask-dynamic-programming';
         $title = 'Bitmask Dynamic Programming';
@@ -492,11 +477,10 @@ class TrainingPage extends Page {
             или числа в троична/четвъртична бройна система.
         ';
         $problems = '57,183,51,75,223,47,202,54,233';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initGAME($position) {
-        $brain = new Brain();
         $key = 'GAME';
         $link = 'game-theory';
         $title = 'Game Theory';
@@ -520,11 +504,10 @@ class TrainingPage extends Page {
             Задачите в секцията ползват или minimax, или SG, или комбинация на предните две с някакъв друг алгоритъм.
         ';
         $problems = '49,136,56,91,98,216';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initADDS($position) {
-        $brain = new Brain();
         $key = 'ADDS';
         $link = 'advanced-data-structures';
         $title = 'Advanced Data Structures';
@@ -555,11 +538,10 @@ class TrainingPage extends Page {
             Задачите покриват само някои от изброените структури, като трябва да видите коя къде е приложима.
         ';
         $problems = '149,34,37,94,5,254';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initSTRI($position) {
-        $brain = new Brain();
         $key = 'STRI';
         $link = 'strings';
         $title = 'Strings';
@@ -593,11 +575,10 @@ class TrainingPage extends Page {
             <a href="http://www.spoj.com/problems/LCS/" target="_blank">LCS</a>.
         ';
         $problems = '52,36,110';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initGEOM($position) {
-        $brain = new Brain();
         $key = 'GEOM';
         $link = 'geometry';
         $title = 'Geometry';
@@ -627,11 +608,10 @@ class TrainingPage extends Page {
             <a href="/problems/73">Spectre</a>, <a href="/problems/8">Towers</a>, или <a href="/problems/205">Deathstars</a>.
         ';
         $problems = '10,161,154,14';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initGRF2($position) {
-        $brain = new Brain();
         $key = 'GRF2';
         $link = 'medium-graphs';
         $title = 'Medium Graphs';
@@ -656,11 +636,10 @@ class TrainingPage extends Page {
             които показахме по-рано (например битови маски и разширяване на графа).
         ';
         $problems = '163,13,59,62,9,188,239';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initMITM($position) {
-        $brain = new Brain();
         $key = 'MITM';
         $link = 'meet-in-the-middle';
         $title = 'Meet in the Middle';
@@ -687,11 +666,10 @@ class TrainingPage extends Page {
             структури данни за "комбиниране" на двете части.
         ';
         $problems = '80,207,79,3,11,257';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initPROB($position) {
-        $brain = new Brain();
         $key = 'PROB';
         $link = 'probability';
         $title = 'Probability';
@@ -723,11 +701,10 @@ class TrainingPage extends Page {
             задачи за вероятности в състезателното програмиране.
         ';
         $problems = '227,84,131,210,211,135,48,97,41,26,89,252';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initINNR($position) {
-        $brain = new Brain();
         $key = 'INNR';
         $link = 'inner-cycle-optimization';
         $title = 'Inner Cycle Optimization';
@@ -754,11 +731,10 @@ class TrainingPage extends Page {
             обвивка), като се набляга по-скоро на ползването на структура данни за оптимизация.
         ';
         $problems = '107,38,21,137,82,204,255';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initSWLN($position) {
-        $brain = new Brain();
         $key = 'SWLN';
         $link = 'sweep-line';
         $title = 'Sweep Line';
@@ -785,11 +761,10 @@ class TrainingPage extends Page {
             решение, с което можете да тествате бързото си такова.
         ';
         $problems = '32,69,73,46';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initADDP($position) {
-        $brain = new Brain();
         $key = 'ADDP';
         $link = 'advanced-dynamic-programming';
         $title = 'Advanced Dynamic Programming';
@@ -815,11 +790,10 @@ class TrainingPage extends Page {
             <a href="http://www.informatika.bg/lectures/long-numbers" target="_blank">дълги числа</a>).
         ';
         $problems = '231,152,159,23,17,31,44,103,241';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initGRF3($position) {
-        $brain = new Brain();
         $key = 'GRF3';
         $link = 'advanced-graphs';
         $title = 'Advanced Graphs';
@@ -849,11 +823,10 @@ class TrainingPage extends Page {
             от другите.
         ';
         $problems = '139,88,7,18,126,29,35,8,205,160,219,169,176,70';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initVARI($position) {
-        $brain = new Brain();
         $key = 'VARI';
         $link = 'various';
         $title = 'Various';
@@ -872,7 +845,7 @@ class TrainingPage extends Page {
             би ви загубили много ценно време.
         ';
         $problems = '42,242,111,173,186,108,197,77,96,86,64,237,253';
-        $brain->addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
+        Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
     private function initTraining() {
@@ -913,8 +886,7 @@ class TrainingPage extends Page {
     }
 
     private function getSection($key) {
-        $brain = new Brain();
-        $topic = $brain->getTopic($key);
+        $topic = Brain::getTopic($key);
         $problemIds = explode(',', $topic['problems']);
 
         $sectionInfo = inBox('<h1>' . $topic['title'] . '</h1>' . $topic['expanded']);
@@ -925,9 +897,8 @@ class TrainingPage extends Page {
     }
 
     private function getTopicStats($topic) {
-        $brain = new Brain();
         $problems = explode(',', $topic['problems']);
-        $solved = $brain->getSolved($this->user->id);
+        $solved = Brain::getSolved($this->user->id);
         $accepted = array_filter($solved, function($el) use ($problems) {return in_array($el, $problems);});
         $parentId = 'topic-stats-' . $topic['key'];
         return '<script>circularProgress(\'' . $parentId . '\', ' . count($accepted) . ', ' . count($problems) . ');</script>';
@@ -949,8 +920,7 @@ class TrainingPage extends Page {
     }
 
     private function getTopics() {
-        $brain = new Brain();
-        $topics = $brain->getTrainingTopics();
+        $topics = Brain::getTrainingTopics();
 
         $content = '';
         foreach ($topics as $topic) {

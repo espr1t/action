@@ -57,8 +57,7 @@ if (!$submit->add()) {
 }
 
 // Record that this is an author's solution in the correct table
-$brain = new Brain();
-$brain->addSolution($problemId, $solutionName, $submit->id, $solutionSource, $language);
+Brain::addSolution($problemId, $solutionName, $submit->id, $solutionSource, $language);
 
 // Return the relative path to the solution so it is displayed properly on the frontend
 $solutionPath = explode($_SERVER['DOCUMENT_ROOT'], $solutionPath)[1];

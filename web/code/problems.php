@@ -10,7 +10,7 @@ require_once('events.php');
 
 
 class ProblemsPage extends Page {
-    private $problem;
+    private $problemName = null;
 
     public function getTitle() {
         if ($this->problemName == null) {
@@ -115,8 +115,7 @@ class ProblemsPage extends Page {
 
     // TODO: Make this function faster by pre-calculating problem stats
     public function getProblems($problemList=null) {
-        $brain = new Brain();
-        $allProblems = $brain->getAllProblems();
+        $allProblems = Brain::getAllProblems();
         $problemsInfo = array();
         foreach ($allProblems as $problem) {
             if ($problemList == null || in_array($problem['id'], $problemList)) {
@@ -131,7 +130,7 @@ class ProblemsPage extends Page {
             $successfulSubmits[$problem['id']] = 0;
         }
 
-        foreach ($brain->getProblemStatusCounts() as $statusCnt) {
+        foreach (Brain::getProblemStatusCounts() as $statusCnt) {
             if (array_key_exists($statusCnt['problemId'], $totalSubmits)) {
                 $totalSubmits[$statusCnt['problemId']] += $statusCnt['count'];
                 if ($statusCnt['status'] == $GLOBALS['STATUS_ACCEPTED'])
@@ -215,8 +214,7 @@ class ProblemsPage extends Page {
     }
 
     private function getStatsBox($problem) {
-        $brain = new Brain();
-        $submits = $brain->getProblemSubmits($problem->id);
+        $submits = Brain::getProblemSubmits($problem->id);
 
         $bestTime = 1e10;
         $bestMemory = 1e10;
@@ -269,8 +267,7 @@ class ProblemsPage extends Page {
     }
 
     private function getUsersBox($problem) {
-        $brain = new Brain();
-        $submits = $brain->getProblemSubmits($problem->id, 'AC');
+        $submits = Brain::getProblemSubmits($problem->id, 'AC');
 
         $usersBest = array();
         foreach ($submits as $submit) {

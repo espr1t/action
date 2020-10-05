@@ -13,19 +13,18 @@ class AdminHistoryPage extends Page {
     }
 
     private function getTable() {
-        $brain = new Brain();
         $submit = Submit::get($_GET['submitId']);
         if ($submit == null) {
             return 'Няма събмит с този идентификатор.';
         }
 
-        $tests = $brain->getProblemTests($submit->problemId);
+        $tests = Brain::getProblemTests($submit->problemId);
         $runInfo = array();
         foreach ($tests as $test) {
             $runInfo[$test['inpFile']] = array('-', '-', '-', '-', '-');
         }
 
-        $history = $brain->getHistory($submit->id);
+        $history = Brain::getHistory($submit->id);
         for ($run = 1; $run <= 5; $run++) {
             if ($history[sprintf("time%02d", $run)] != '') {
                 $times = explode(',', $history[sprintf("time%02d", $run)]);

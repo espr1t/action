@@ -60,8 +60,7 @@ class AdminMessagesPage extends Page {
             </div>
         ');
 
-        $brain = new Brain();
-        $messages = $brain->getAllMessages();
+        $messages = Brain::getAllMessages();
         $content .= MessagesPage::getMessageList($messages, null);
 
         // Specific message is open

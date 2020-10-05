@@ -22,9 +22,8 @@ class StatusPage extends Page {
         // Return links for submit shortcuts
         $_SESSION['statusShortcut'] = true;
 
-        $brain = new Brain();
-        $allGames = $brain->getAllGames();
-        $allProblems = $brain->getAllProblems();
+        $allGames = Brain::getAllGames();
+        $allProblems = Brain::getAllProblems();
 
         $games = array();
         foreach ($allGames as $game) {

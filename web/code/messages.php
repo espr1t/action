@@ -51,13 +51,12 @@ class MessagesPage extends Page {
             <h1>Съобщения</h1>
         ');
 
-        $brain = new Brain();
         $messages = array();
         foreach ($this->user->getMessages() as $messageId) {
-            $message = $brain->getMessage($messageId);
+            $message = Brain::getMessage($messageId);
             array_push($messages, $message);
         }
-        $notifications = $brain->getNotifications($this->user->id);
+        $notifications = Brain::getNotifications($this->user->id);
         $seen = parseIntArray($notifications['seen']);
         $messages = array_reverse($messages);
         $content .= $this->getMessageList($messages, $seen);
@@ -75,8 +74,7 @@ class MessagesPage extends Page {
                 if (!in_array($message->id, $seen)) {
                     array_push($seen, $message->id);
                     $notifications['seen'] = implode(',', $seen);
-                    $brain = new Brain();
-                    $brain->updateNotifications($notifications);
+                    Brain::updateNotifications($notifications);
                 }
             }
         }

@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
+global $user;
+
 // User doesn't have access level needed for editing a problem
 if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
@@ -57,11 +59,10 @@ else {
 }
 
 // Update the tests
-$brain = new Brain();
 for ($i = 0; $i <= 1000; $i++) {
     $key = sprintf("test_%d", $i);
     if (isset($_POST[$key])) {
-        $brain->updateTestScore($problem->id, $i, $_POST[$key]);
+        Brain::updateTestScore($problem->id, $i, $_POST[$key]);
     }
 }
 

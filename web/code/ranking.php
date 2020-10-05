@@ -17,8 +17,7 @@ class RankingPage extends Page {
     }
 
     public static function getRanking() {
-        $brain = new Brain();
-        $usersInfo = $brain->getAllUsers();
+        $usersInfo = Brain::getAllUsers();
 
         // Remove system and admin accounts from ranking
         $usersInfo = array_splice($usersInfo, 2);
@@ -30,12 +29,12 @@ class RankingPage extends Page {
             $numAchievements[$info['id']] = 0;
         }
 
-        foreach ($brain->getSolvedPerUser() as $solvedCount) {
+        foreach (Brain::getSolvedPerUser() as $solvedCount) {
             if (array_key_exists($solvedCount['userId'], $numSolved))
                 $numSolved[$solvedCount['userId']] += $solvedCount['count'];
         }
 
-        $achievements = $brain->getAchievements();
+        $achievements = Brain::getAchievements();
         foreach ($achievements as $achievement) {
             if (array_key_exists($achievement['user'], $numAchievements))
                 $numAchievements[$achievement['user']] += 1;

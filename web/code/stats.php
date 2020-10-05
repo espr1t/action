@@ -5,8 +5,6 @@ require_once('common.php');
 require_once('page.php');
 
 class StatsPage extends Page {
-    private Brain $brain;
-
     public function getTitle() {
         return 'O(N)::Stats';
     }
@@ -25,8 +23,7 @@ class StatsPage extends Page {
     }
 
     public function init() {
-        $this->brain = new Brain();
-        $this->FIRST_DATE = $this->brain->getUser(1)['registered'];
+        $this->FIRST_DATE = Brain::getUser(1)['registered'];
     }
 
     private function createWordCloud($wordCounts) {
@@ -119,24 +116,24 @@ class StatsPage extends Page {
             Произволни статистики за системата и потребителите.
         ';
 
-        $problemStat = $this->brain->getAllProblemsCount();
+        $problemStat = Brain::getAllProblemsCount();
         $problemTitle = 'задачи';
         $problemInfo = 'Брой задачи на системата.';
 
-        $gameStat = $this->brain->getAllGamesCount();
+        $gameStat = Brain::getAllGamesCount();
         $gameTitle = 'игри';
         $gameInfo = 'Брой игри на системата.';
 
-        $userStat = $this->brain->getAllUsersCount();
+        $userStat = Brain::getAllUsersCount();
         $userTitle = 'потребители';
         $userInfo = 'Брой потребители на системата.';
 
-        $submitStat = $this->brain->getAllSubmitsCount();
+        $submitStat = Brain::getAllSubmitsCount();
         $submitTitle = 'решения';
         $submitInfo = 'Брой предадени решения.';
 
         $actionStat = 0;
-        foreach ($this->brain->getAllUsersInfo() as $info) {
+        foreach (Brain::getAllUsersInfo() as $info) {
             $actionStat += $info['actions'];
         }
         $actionStat = sprintf("%dK", $actionStat / 1000);
@@ -166,7 +163,7 @@ class StatsPage extends Page {
             <h2>Задачи</h2>
         ';
 
-        $problems = $this->brain->getAllProblems();
+        $problems = Brain::getAllProblems();
 
         // Pie chart by difficulty
         $difficultyChartLabels = array('Сложност');
@@ -220,7 +217,7 @@ class StatsPage extends Page {
         $hourHistogram = array_fill(0, 24, 0);
         $monthHistogram = array_fill(0, 12, 0);
 
-        $submits = $this->brain->getAllSubmits();
+        $submits = Brain::getAllSubmits();
         $numSubmits = count($submits);
 
         foreach ($submits as $submit) {
@@ -336,8 +333,8 @@ class StatsPage extends Page {
             <h2>Потребители</h2>
         ';
 
-        $usersArr = $this->brain->getAllUsers();
-        $usersInfoArr = $this->brain->getAllUsersInfo();
+        $usersArr = Brain::getAllUsers();
+        $usersInfoArr = Brain::getAllUsersInfo();
         $numUsers = count($usersArr);
 
         $users = array();
@@ -456,7 +453,7 @@ class StatsPage extends Page {
     }
 
     private function wordCloud() {
-        $achievements = $this->brain->getAchievements();
+        $achievements = Brain::getAchievements();
 
         $keyCount = array();
         foreach ($achievements as $achievement) {

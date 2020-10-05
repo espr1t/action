@@ -14,8 +14,7 @@ class AdminProblemsPage extends Page {
     }
 
     private function getProblemList() {
-        $brain = new Brain();
-        $problemsInfo = array_merge($brain->getAllGames(), $brain->getAllProblems());
+        $problemsInfo = array_merge(Brain::getAllGames(), Brain::getAllProblems());
 
         $problems = '';
         foreach ($problemsInfo as $problemInfo) {
@@ -34,11 +33,10 @@ class AdminProblemsPage extends Page {
     }
 
     private function getEditProblemScript($problem) {
-        $brain = new Brain();
         $editProblemScript = '<script>';
 
         // Tests
-        $tests = $brain->getProblemTests($problem->id);
+        $tests = Brain::getProblemTests($problem->id);
         for ($i = 0; $i < count($tests); $i = $i + 1) {
             $inpPath = sprintf("%s/%s/%s/%s",
                     $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_TESTS_FOLDER'], $tests[$i]['inpFile']);
@@ -65,7 +63,7 @@ class AdminProblemsPage extends Page {
         $editProblemScript .= 'updateTestTable();';
 
         // Solutions
-        $solutions = $brain->getProblemSolutions($problem->id);
+        $solutions = Brain::getProblemSolutions($problem->id);
 
         for ($i = 0; $i < count($solutions); $i = $i + 1) {
             $submit = Submit::get(intval($solutions[$i]['submitId']));

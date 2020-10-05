@@ -16,14 +16,11 @@ if ($user == null || $user->access < $GLOBALS['ADMIN_USER_ACCESS']) {
 }
 
 
-$brain = new Brain();
-
-
 /*
 output('Migrating user notifications...');
-$users = $brain->getAllUsers();
+$users = Brain::getAllUsers();
 foreach ($users as $user) {
-    if ($brain->addNotifications($user['id'], $user['username'], '', '1') !== null) {
+    if (Brain::addNotifications($user['id'], $user['username'], '', '1') !== null) {
         output('  >> added notifications for user "' . $user['username'] . '"');
     } else {
         output('ERROR: cannot add notifications for user "' . $user['username'] . '"');
@@ -34,20 +31,20 @@ foreach ($users as $user) {
 
 /*
 output('Filling "language" info...');
-$data = $brain->getLatest();
+$data = Brain::getLatest();
 
 for ($i = 0; $i < count($data); $i = $i + 1) {
     $entry = $data[$i];
-    $submit = $brain->getSubmit($entry['submitId']);
-    $brain->addLatestLanguage($submit['id'], $submit['language']);
+    $submit = Brain::getSubmit($entry['submitId']);
+    Brain::addLatestLanguage($submit['id'], $submit['language']);
 }
 */
 
 /*
 output('Filling "last seen" info...');
 $numUpdated = 0;
-$usersArr = $brain->getAllUsers();
-$usersInfoArr = $brain->getAllUsersInfo();
+$usersArr = Brain::getAllUsers();
+$usersInfoArr = Brain::getAllUsersInfo();
 for ($i = 0; $i < count($usersArr); $i++) {
     $user = User::instanceFromArray($usersArr[$i], $usersInfoArr[$i]);
     output('&nbsp&nbsp>> User "' . $user->username . '"');
@@ -56,7 +53,7 @@ for ($i = 0; $i < count($usersArr); $i++) {
         output('&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-- already set! skipping...');
     } else {
         $numUpdated++;
-        $submits = $brain->getUserSubmits($user->id);
+        $submits = Brain::getUserSubmits($user->id);
         if (count($submits) > 0) {
             $user->lastSeen = $submits[count($submits) - 1]['submitted'];
             output('&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-- setting to last submit: "' . $user->lastSeen . '"');
@@ -64,7 +61,7 @@ for ($i = 0; $i < count($usersArr); $i++) {
             $user->lastSeen = $user->registered . ' 00:00:00';
             output('&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp-- setting register time: "' . $user->lastSeen . '"');
         }
-        $brain->updateUserInfo($user);
+        Brain::updateUserInfo($user);
     }
 }
 output('Finished! Updated ' . $numUpdated . ' users.');
@@ -73,10 +70,10 @@ output('Finished! Updated ' . $numUpdated . ' users.');
 
 /*
 output('Migrating user info...');
-$users = $brain->getAllUsers();
+$users = Brain::getAllUsers();
 foreach ($users as $u) {
     $user = User::instanceFromArray($u);
-    if ($brain->addUserInfo($user)) {
+    if (Brain::addUserInfo($user)) {
         output('  >> added user info for user "' . $user->username . '"');
     } else {
         output('ERROR: cannot add user info for user "' . $user->username . '"');
@@ -86,9 +83,9 @@ foreach ($users as $u) {
 
 /*
 output('Migrating user credentials...');
-$users = $brain->getAllUsers();
+$users = Brain::getAllUsers();
 foreach ($users as $user) {
-    if ($brain->addCreds($user['id'], $user['username'], $user['password'], $user['loginKey'])) {
+    if (Brain::addCreds($user['id'], $user['username'], $user['password'], $user['loginKey'])) {
         output('  >> added credentials for user "' . $user['username'] . '"');
     } else {
         output('ERROR: cannot add credentials for user "' . $user['username'] . '"');

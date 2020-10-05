@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../entities/news.php');
 
+global $user;
+
 // User doesn't have access level needed for publishing news
 if ($user->access < $GLOBALS['ACCESS_PUBLISH_NEWS']) {
     printAjaxResponse(array(

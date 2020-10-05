@@ -30,12 +30,11 @@ class LoginPage extends Page {
         if (isset($_POST['username']) && isset($_POST['password'])) {
             $saltedPassword = saltHashPassword($_POST['password']);
 
-            $brain = new Brain();
             $user = User::get($_POST['username']);
             if ($user == null) {
                 $error = 'Не съществува акаунт с това потребителско име!';
             } else {
-                $creds = $brain->getCreds($user->id);
+                $creds = Brain::getCreds($user->id);
                 if ($creds['password'] != $saltedPassword) {
                     $error = 'Въведената парола е невалидна!';
                 }
@@ -50,7 +49,7 @@ class LoginPage extends Page {
                 // Set cookie (avoid logging in again until cookie expires)
                 if ($creds['loginKey'] == '') {
                     $creds['loginKey'] = str_shuffle(md5(microtime()));
-                    $brain->updateCreds($creds);
+                    Brain::updateCreds($creds);
                 }
                 # Sign the login key with the user's IP so it cannot be used on another computer even if stolen
                 # Note that this wouldn't work for two computers on the same subnet (behind a router)
@@ -62,7 +61,7 @@ class LoginPage extends Page {
                 $logMessage = sprintf('User %s has logged in.', $user->username);
                 write_log($GLOBALS['LOG_LOGINS'], $logMessage);
                 $user->loginCount++;
-                $brain->updateUserInfo($user);
+                Brain::updateUserInfo($user);
 
                 // Redirect to home page with a success message
                 redirect('/home', 'INFO', 'Влязохте успешно в системата.');

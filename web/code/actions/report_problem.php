@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
 
+global $user;
+
 // User doesn't have access level needed for sending a mail
 if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
     printAjaxResponse(array(
@@ -19,8 +21,7 @@ if (!passSpamProtection($user, $GLOBALS['SPAM_EMAIL_ID'], $GLOBALS['SPAM_EMAIL_L
     ));
 }
 
-$brain = new Brain();
-$brain->addReport($user->id, $_POST['link'], $_POST['problem']);
+Brain::addReport($user->id, $_POST['link'], $_POST['problem']);
 
 
 $address = $GLOBALS['ADMIN_EMAIL'];

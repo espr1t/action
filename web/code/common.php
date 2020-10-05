@@ -205,10 +205,9 @@ function parseIntArray($str) {
 }
 
 function passSpamProtection($user, $type, $limit) {
-    $brain = new Brain();
-    $brain->refreshSpamCounters(time() - $GLOBALS['SPAM_INTERVAL']);
-    if ($brain->getSpamCounter($user, $type) < $limit) {
-        $brain->incrementSpamCounter($user, $type, time());
+    Brain::refreshSpamCounters(time() - $GLOBALS['SPAM_INTERVAL']);
+    if (Brain::getSpamCounter($user, $type) < $limit) {
+        Brain::incrementSpamCounter($user, $type, time());
         return true;
     }
     return false;
@@ -243,8 +242,7 @@ function getProblemLink($problemId, $problemName) {
 }
 
 function getGameByName($name) {
-    $brain = new Brain();
-    $gamesInfo = $brain->getAllGames();
+    $gamesInfo = Brain::getAllGames();
     foreach ($gamesInfo as $gameInfo) {
         if (getGameUrlName($gameInfo['name']) == $name)
             return Problem::get($gameInfo['id']);
@@ -364,8 +362,7 @@ function prettyPrintCompilationErrors($submit) {
 }
 
 function getWaitingTimes($user, $problem, &$remainPartial, &$remainFull) {
-    $brain = new Brain();
-    $submits = $brain->getUserSubmits($user->id, $problem->id);
+    $submits = Brain::getUserSubmits($user->id, $problem->id);
     $lastPartial = 0;
     $lastFull = 0;
     foreach ($submits as $submit) {

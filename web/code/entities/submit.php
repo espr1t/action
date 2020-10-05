@@ -49,9 +49,8 @@ class Submit {
     }
 
     public static function get($id) {
-        $brain = new Brain();
         try {
-            $info = $brain->getSubmit($id);
+            $info = Brain::getSubmit($id);
             if ($info == null) {
                 error_log('Could not get submit or source with id ' . $id . '!');
                 return null;
@@ -64,8 +63,7 @@ class Submit {
     }
 
     private static function init($submit) {
-        $brain = new Brain();
-        $numTests = count($brain->getProblemTests($submit->problemId));
+        $numTests = count(Brain::getProblemTests($submit->problemId));
         $submit->results = array_fill(0, $numTests, $GLOBALS['STATUS_WAITING']);
         $submit->execTime = array_fill(0, $numTests, 0);
         $submit->execMemory = array_fill(0, $numTests, 0);
@@ -105,8 +103,7 @@ class Submit {
 
     public function getSource() {
         if ($this->source == '') {
-            $brain = new Brain();
-            $source = $brain->getSource($this->id);
+            $source = Brain::getSource($this->id);
             $this->source = strval(getValue($source, 'source'));
         }
         return $this->source;
@@ -119,8 +116,7 @@ class Submit {
     }
 
     public function update() {
-        $brain = new Brain();
-        $brain->updateSubmit($this);
+        Brain::updateSubmit($this);
     }
 
     public function regrade($forceUpdate=true) {
@@ -132,10 +128,9 @@ class Submit {
     }
 
     public function add($forceUpdate=true) {
-        $brain = new Brain();
-        $this->id = $brain->addSubmit($this);
+        $this->id = Brain::addSubmit($this);
         if ($this->id >= 0) {
-            $brain->addSource($this);
+            Brain::addSource($this);
             if ($forceUpdate) {
                 $this->test();
             }
@@ -152,8 +147,7 @@ class Submit {
         // Get problem, tests, and matches info
         $problem = Problem::get($this->problemId);
 
-        $brain = new Brain();
-        $tests = $brain->getProblemTests($this->problemId);
+        $tests = Brain::getProblemTests($this->problemId);
 
         // Remove unnecessary data
         for ($i = 0; $i < count($tests); $i = $i + 1) {
@@ -213,15 +207,13 @@ class Submit {
     }
 
     private function getGameMatches($problem, $tests) {
-        $brain = new Brain();
-
         // Create a set of matches to be played (depending on whether the submit is full or not)
         $matches = array();
 
         // Partial submission - run only against author's solutions.
         if (!$this->full) {
             // Solutions
-            $solutions = $brain->getProblemSolutions($problem->id);
+            $solutions = Brain::getProblemSolutions($problem->id);
             $solutionId = 0;
             foreach ($solutions as $solution) {
                 $solutionId += 1;
@@ -249,7 +241,7 @@ class Submit {
         }
         // Full submission - run a game against every other competitor
         else {
-            $submits = $brain->getProblemSubmits($problem->id);
+            $submits = Brain::getProblemSubmits($problem->id);
             // Choose only the latest full submissions of each competitor
             $latest = array();
             foreach ($submits as $submit) {
@@ -308,23 +300,19 @@ class Submit {
     }
 
     public static function getProblemSubmits($problemId, $status = 'all') {
-        $brain = new Brain();
-        return self::getObjects($brain->getProblemSubmits($problemId, $status));
+        return self::getObjects(Brain::getProblemSubmits($problemId, $status));
     }
 
     public static function getUserSubmits($userId, $problemId = -1, $status = 'all') {
-        $brain = new Brain();
-        return self::getObjects($brain->getUserSubmits($userId, $problemId, $status));
+        return self::getObjects(Brain::getUserSubmits($userId, $problemId, $status));
     }
 
     public static function getPendingSubmits() {
-        $brain = new Brain();
-        return self::getObjects($brain->getPendingSubmits());
+        return self::getObjects(Brain::getPendingSubmits());
     }
 
     public static function getLatestSubmits() {
-        $brain = new Brain();
-        return self::getObjects($brain->getLatestSubmits());
+        return self::getObjects(Brain::getLatestSubmits());
     }
 
     public function calcStatus() {
@@ -339,8 +327,7 @@ class Submit {
             // We may, however, consider it not okay, if some of the results are not full scores
             // On non-relative problems consider the solution to be okay only if it has more than 80% of the points
             // TODO: Remove the 80-percent logic altogether (make all relative problems games)
-            $brain = new Brain();
-            $problem = $brain->getProblem($this->problemId);
+            $problem = Brain::getProblem($this->problemId);
             // TODO: This may be a problem later on. Interactive problems have their scores not normalized,
             // thus may pass this easily, however if their scores are in [0, 1] they will fall here.
             // Fix this by introducing 'scoring' flag in the problems (absolute/relative).
@@ -365,8 +352,7 @@ class Submit {
     }
 
     public function calcScores() {
-        $brain = new Brain();
-        $tests = $brain->getProblemTests($this->problemId);
+        $tests = Brain::getProblemTests($this->problemId);
 
         if (count($this->results) != count($tests)) {
             error_log(sprintf('Number of tests of problem %d differs from results in submission %d!', $this->problemId, $this->id));

@@ -37,9 +37,8 @@ class User {
         redirect('/login', 'INFO', 'Успешно излязохте от системата.');
     }
 
-    public function update() {
-        $brain = new Brain();
-        return $brain->updateUser($this);
+    public function update(): bool {
+        return Brain::updateUser($this);
     }
 
     public function updateStats() {
@@ -51,8 +50,7 @@ class User {
             $this->totalTime += min(array(time() - strtotime($this->lastSeen), 5 * 60));
             $this->lastSeen = date('Y-m-d H:i:s', time());
             $this->lastIP = getUserIP();
-            $brain = new Brain();
-            $brain->updateUserInfo($this);
+            Brain::updateUserInfo($this);
         }
     }
 
@@ -92,22 +90,20 @@ class User {
     }
 
     public static function get($userKey) {
-        $brain = new Brain();
         if (is_numeric($userKey)) {
-            $main = $brain->getUser($userKey);
+            $main = Brain::getUser($userKey);
         } else {
-            $main = $brain->getUserByUsername($userKey);
+            $main = Brain::getUserByUsername($userKey);
         }
         if (!$main) return null;
-        $info = $brain->getUserInfo($main['id']);
+        $info = Brain::getUserInfo($main['id']);
         return User::instanceFromArray($main, $info);
     }
 
     public static function getByLoginKey($loginKey) {
         if ($loginKey == '')
             return null;
-        $brain = new Brain();
-        $creds = $brain->getCredsByLoginKey($loginKey);
+        $creds = Brain::getCredsByLoginKey($loginKey);
         return !$creds ? null : User::get($creds['userId']);
     }
 
@@ -129,20 +125,19 @@ class User {
         $user->birthdate = $birthdate;
         // $user->avatar = $avatar;
 
-        $brain = new Brain();
-        $user->id = $brain->addUser($user);
+        $user->id = Brain::addUser($user);
         if (!$user->id) {
             return null;
         }
 
         // Add user info entry
-        $brain->addUserInfo($user);
+        Brain::addUserInfo($user);
 
         // Add credentials entry
-        $brain->addCreds($user->id, $username, $password, '');
+        Brain::addCreds($user->id, $username, $password, '');
 
         // Add notifications entry
-        $brain->addNotifications($user->id, $username, '', '');
+        Brain::addNotifications($user->id, $username, '', '');
 
         // Grant admin rights to the first user
         if ($user->id == 1) {
@@ -158,19 +153,17 @@ class User {
     }
 
     static public function getActive() {
-        $brain = new Brain();
         return array_map(
             function ($entry) {
                 // printArray($entry);
                 return User::instanceFromArray(null, $entry);
-            }, $brain->getActiveUsersInfo()
+            }, Brain::getActiveUsersInfo()
         );
     }
 
     public function getMessages() {
-        $brain = new Brain();
-        $notifications = $brain->getNotifications($this->id);
-        $toEveryone = $brain->getMessagesToEveryone();
+        $notifications = Brain::getNotifications($this->id);
+        $toEveryone = Brain::getMessagesToEveryone();
         $messages = parseIntArray($notifications['messages']);
         foreach ($toEveryone as $message) {
             // Only show messages sent after the user registered (except the welcome message)
@@ -185,8 +178,7 @@ class User {
     }
 
     public function numUnreadMessages() {
-        $brain = new Brain();
-        $notifications = $brain->getNotifications($this->id);
+        $notifications = Brain::getNotifications($this->id);
         $seen = parseIntArray($notifications['seen']);
         $messages = $this->getMessages();
         return count($messages) - count($seen);

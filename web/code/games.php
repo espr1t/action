@@ -47,8 +47,7 @@ class GamesPage extends Page {
         // The array is sorted from best to worst.
         // A user is ranked better than another user, if he/she has more points or has submitted earlier.
 
-        $brain = new Brain();
-        $matches = $brain->getGameMatches($problem->id);
+        $matches = Brain::getGameMatches($problem->id);
 
         $submit = array();
         $playerScore = array();
@@ -222,8 +221,7 @@ class GamesPage extends Page {
     }
 
     private function getAllGames() {
-        $brain = new Brain();
-        $games = $brain->getAllGames();
+        $games = Brain::getAllGames();
         // Show newest games first
         $games = array_reverse($games);
 
@@ -664,8 +662,7 @@ class GamesPage extends Page {
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
         $status = $submit->calcStatus();
 
-        $brain = new Brain();
-        $matches = $brain->getGameMatches($problem->id, $submit->userId);
+        $matches = Brain::getGameMatches($problem->id, $submit->userId);
 
         $matchesPerGame = count($submit->results) * 2;
 
@@ -1244,10 +1241,9 @@ class GamesPage extends Page {
     private function getDemo($problem) {
         // Show the standings for 10 seconds, then play 3 random replays
 
-        $brain = new Brain();
         $scoreboard = $this->getScoreboard($problem);
 
-        $allSubmits = $brain->getProblemSubmits($problem->id, $GLOBALS['STATUS_ACCEPTED']);
+        $allSubmits = Brain::getProblemSubmits($problem->id, $GLOBALS['STATUS_ACCEPTED']);
         $users = array();
         $submits = array();
         for ($i = count($allSubmits) - 1; $i >= 0; $i--) {
@@ -1267,7 +1263,7 @@ class GamesPage extends Page {
         $replay = str_replace('</script>', '', $replay);
 
         /*
-        $matches = $brain->getGameMatches($problem->id);
+        $matches = Brain::getGameMatches($problem->id);
         $idx = rand() % count($matches);
         while ($matches[$idx]['userOne'] < 0 || $matches[$idx]['userTwo'] < 0 || $matches[$idx]['replayId'] == '')
             $idx = rand() % count($matches);

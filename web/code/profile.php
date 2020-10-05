@@ -6,7 +6,6 @@ require_once('stats.php');
 require_once('ranking.php');
 
 class ProfilePage extends Page {
-    private Brain $brain;
     private ?User $profile;
 
     public function getTitle() {
@@ -35,7 +34,6 @@ class ProfilePage extends Page {
             header('Location: /error');
             exit();
         }
-        $this->brain = new Brain();
     }
 
     private function getPercentage($total, $solved, $tag) {
@@ -47,10 +45,10 @@ class ProfilePage extends Page {
     # TODO: Why not using this?
     private function getTopUsersSkills($problems) {
         // Get average stats for top 10% of the users
-        $allUsers = $this->brain->getAllUsers();
+        $allUsers = Brain::getAllUsers();
         $allSolved = array();
         for ($i = 0; $i < count($allUsers); $i = $i + 1) {
-            $allUsers[$i]['solved'] = $this->brain->getSolved($allUsers[$i]['id']);
+            $allUsers[$i]['solved'] = Brain::getSolved($allUsers[$i]['id']);
             array_push($allSolved, count($allUsers[$i]['solved']));
         }
         sort($allSolved);
@@ -105,8 +103,8 @@ class ProfilePage extends Page {
             $solvedTags[$tag] = 0;
         }
 
-        $problems = $this->brain->getAllProblems();
-        $solved = $this->brain->getSolved($this->profile->id);
+        $problems = Brain::getAllProblems();
+        $solved = Brain::getSolved($this->profile->id);
 
         foreach ($problems as $problem) {
             $tags = explode(',', $problem['tags']);
@@ -154,7 +152,7 @@ class ProfilePage extends Page {
     }
 
     private function submissionDotChart() {
-        $submits = $this->brain->getUserSubmits($this->profile->id);
+        $submits = Brain::getUserSubmits($this->profile->id);
         if (count($submits) == 0)
             return '';
 
@@ -201,7 +199,7 @@ class ProfilePage extends Page {
         $content = '
                 <h2>Активност</h2>
         ';
-        $submits = $this->brain->getUserSubmits($this->profile->id);
+        $submits = Brain::getUserSubmits($this->profile->id);
 
         // Submits activity over time
         $lastDate = time();
@@ -293,11 +291,11 @@ class ProfilePage extends Page {
                 <h2>Разни</h2>
         ';
 
-        $submits = $this->brain->getUserSubmits($this->profile->id);
+        $submits = Brain::getUserSubmits($this->profile->id);
         if (count($submits) == 0)
             return '';
 
-        $problems = $this->brain->getAllProblems();
+        $problems = Brain::getAllProblems();
         $problemDifficulty = array();
         foreach ($problems as $problem) {
             $problemDifficulty[$problem['id']] = $problem['difficulty'];
@@ -405,7 +403,7 @@ class ProfilePage extends Page {
                 <h2>Прогрес</h2>
         ';
 
-        $submits = $this->brain->getUserSubmits($this->profile->id);
+        $submits = Brain::getUserSubmits($this->profile->id);
         $tried = array();
         $solved = array();
 
@@ -431,7 +429,7 @@ class ProfilePage extends Page {
     private function getAchievements() {
         $fileName = sprintf('%s/achievements.json', $GLOBALS['PATH_ACHIEVEMENTS']);
         $achInfo = json_decode(file_get_contents($fileName), true);
-        $achievements = $this->brain->getAchievements($this->profile->id);
+        $achievements = Brain::getAchievements($this->profile->id);
 
         $content = '<h2>Постижения</h2>';
         $content .= '<div>';
@@ -468,7 +466,7 @@ class ProfilePage extends Page {
     }
 
     private function primaryStats() {
-        $submits = $this->brain->getUserSubmits($this->profile->id);
+        $submits = Brain::getUserSubmits($this->profile->id);
         if (count($submits) == 0)
             return '';
 
@@ -481,9 +479,7 @@ class ProfilePage extends Page {
         $position = 0;
         while ($position < count($ranking) && $ranking[$position]['id'] != $this->profile->id)
             $position++;
-        if ($position >= count($ranking)) {
-            $position = 0;
-        }
+        $position %= count($ranking);
 
         $percentileStat = '100%';
         if ($position <= count($ranking) / 100) {
@@ -578,7 +574,7 @@ class ProfilePage extends Page {
         }
         $this->profile->lastViewers = implode(',', $lastViewers);
         $this->profile->profileViews++;
-        $this->brain->updateUserInfo($this->profile);
+        Brain::updateUserInfo($this->profile);
     }
 
     public function getContent() {

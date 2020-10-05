@@ -1,5 +1,4 @@
 <?php
-require_once(__DIR__ . '/../db/brain.php');
 require_once('grader.php');
 
 

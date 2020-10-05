@@ -8,7 +8,6 @@ require_once(__DIR__ . '/../entities/user.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
 class AdminAchievementsPage extends Page {
-    private Brain $brain;
     private $achievementTitle = array();
     private $PRIME_NUMBERS = array();
     private $FIBONACCI_NUMBERS = array();
@@ -29,7 +28,7 @@ class AdminAchievementsPage extends Page {
 
     public function addAchievement($user, $achived, $key, $time) {
         // Add the achievement to the DB
-        $this->brain->addAchievement($user->id, $key, $time);
+        Brain::addAchievement($user->id, $key, $time);
         // Mark the achievement as achieved for the user
         $achieved[$key] = true;
         // Record the achievement in the logs
@@ -71,7 +70,7 @@ class AdminAchievementsPage extends Page {
             'Sheep', 'Ssssss', 'Bribes', 'Sequence Members', 'Wordrow', 'Next', 'Shades', 'Seats',
             'Bazinga!', 'Crosses', 'Collatz', 'Passwords', 'Digit Holes', 'Directory Listing'
         );
-        $problems = $this->brain->getAllProblems();
+        $problems = Brain::getAllProblems();
         foreach ($problems as $problem) {
             if (in_array($problem['name'], $trickyNames))
                 $this->TRICKY_PROBLEMS[$problem['id']] = true;
@@ -801,24 +800,22 @@ class AdminAchievementsPage extends Page {
     }
 
     private function recalcAll() {
-        $this->brain = new Brain();
-
         $this->initSpecialNumbers();
         $this->initTrickyProblems();
 
-        $this->users = $this->brain->getAllUsers();
-        $this->usersInfo = $this->brain->getAllUsersInfo();
-        $this->games = $this->brain->getAllGames();
-        $this->problems = $this->brain->getAllProblems();
+        $this->users = Brain::getAllUsers();
+        $this->usersInfo = Brain::getAllUsersInfo();
+        $this->games = Brain::getAllGames();
+        $this->problems = Brain::getAllProblems();
         $this->ranking = RankingPage::getRanking();
-        $this->reports = $this->brain->getReports();
-        $this->achievements = $this->brain->getAchievements();
-        $this->training = $this->brain->getTrainingTopics();
+        $this->reports = Brain::getReports();
+        $this->achievements = Brain::getAchievements();
+        $this->training = Brain::getTrainingTopics();
 
 
         // Consider only user submits (exclude system and admin ones)
-        $allSubmits = $this->brain->getAllSubmits();
-        $allSources = $this->brain->getAllSources();
+        $allSubmits = Brain::getAllSubmits();
+        $allSources = Brain::getAllSources();
         $this->submits = array();
         $this->sources = array();
         $submitCount = count($allSubmits);
@@ -921,17 +918,15 @@ class AdminAchievementsPage extends Page {
     }
 
     private function getAchievementsList($achievementsData) {
-        $this->brain = new Brain();
-
         $userName = array();
-        foreach ($this->brain->getAllUsers() as $user)
+        foreach (Brain::getAllUsers() as $user)
             $userName[$user['id']] = $user['username'];
 
         $perType = array();
         foreach ($achievementsData as $achievement)
             $perType[$achievement['key']] = array();
 
-        $achievements = $this->brain->getAchievements();
+        $achievements = Brain::getAchievements();
         foreach ($achievements as $achievement)
             array_push($perType[$achievement['achievement']], $userName[$achievement['user']]);
 
@@ -961,13 +956,12 @@ class AdminAchievementsPage extends Page {
         if ($user->id == -1)
             return array();
 
-        $brain = new Brain();
-        $achievements = $brain->getAchievements($user->id);
+        $achievements = Brain::getAchievements($user->id);
         $unseen = array();
         foreach ($achievements as $achievement) {
             if (!$achievement['seen']) {
                 array_push($unseen, $achievement['achievement']);
-                $brain->markAsSeenAchievement($achievement['id']);
+                Brain::markAsSeenAchievement($achievement['id']);
                 if (count($unseen) >= 3)
                     break;
             }
@@ -976,8 +970,6 @@ class AdminAchievementsPage extends Page {
     }
 
     public function getContent() {
-        $this->brain = new Brain();
-
         // First load the achievement data
         $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
         $achievementsData = json_decode($achievementsFile, true);

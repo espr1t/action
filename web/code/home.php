@@ -14,8 +14,7 @@ class HomePage extends Page {
             Тук ще намерите новини, свързани със системата и състезанията на нея.
         ');
 
-        $brain = new Brain();
-        foreach ($brain->getAllNews() as $entry) {
+        foreach (Brain::getAllNews() as $entry) {
             $news .= inBox('
                  <div class="news-content">
                     <div class="news-icon">

@@ -47,20 +47,17 @@ class Match {
     }
 
     static public function getById($matchId) {
-        $brain = new Brain();
-        $info = $brain->getMatchById($matchId);
+        $info = Brain::getMatchById($matchId);
         return $info == null ? null : Match::instanceFromArray($info);
     }
 
     static public function get($problemId, $test, $userOne, $userTwo) {
-        $brain = new Brain();
-        $info = $brain->getMatch($problemId, $test, $userOne, $userTwo);
+        $info = Brain::getMatch($problemId, $test, $userOne, $userTwo);
         return $info == null ? null : Match::instanceFromArray($info);
     }
 
     public function update() {
-        $brain = new Brain();
-        return $brain->updateMatch($this);
+        return Brain::updateMatch($this);
     }
 }
 

@@ -14,8 +14,7 @@ class AdminNewsPage extends Page {
 
     private function getNewsList() {
         $newsList = '';
-        $brain = new Brain();
-        foreach ($brain->getAllNews() as $entry) {
+        foreach (Brain::getAllNews() as $entry) {
             $newsList .= '
                 <div class="box boxlink" onclick="redirect(\'/admin/news/' . $entry['id'] . '\');">
                  <div class="news-content">

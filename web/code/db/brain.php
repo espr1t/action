@@ -2,31 +2,25 @@
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/db.php');
 
-$globalDB = new DB();
-
 class Brain {
-    private DB $db;
-
-    function __construct() {
-        global $globalDB;
-        $this->db = $globalDB;
-    }
-
     /*
      * Query wrappers
      */
-    function query(string $query) {
+    private static function query(string $query) {
 //        $startTime = microtime(true);
-        $result = $this->db->query($query);
-//        printf("Query:<br><pre>%s</pre><br>  >> execution time: %.3fs<br>", $query, microtime(true) - $startTime);
+        $result = DB::query($query);
+//        if (isset($GLOBALS['user'])) {
+//            // The check above fixes generating invalid JSON responses.
+//            printf("Query:<br><pre>%s</pre><br>  >> execution time: %.3fs<br>", $query, microtime(true) - $startTime);
+//        }
         if (!$result) {
             error_log("Error while trying to execute query:\n{$query}");
         }
         return $result;
     }
 
-    function select(string $table, string $where="", string $order="", int $limit=-1): ?mysqli_result {
-        $result = $this->query("
+    private static function select(string $table, string $where="", string $order="", int $limit=-1): ?mysqli_result {
+        $result = self::query("
             SELECT * FROM `{$table}`" .
             ($where == "" ? "" : "\n            WHERE {$where}") .
             ($order == "" ? "" : "\n            ORDER BY {$order}") .
@@ -35,51 +29,51 @@ class Brain {
         return !$result ? null : $result;
     }
 
-    function count(string $table, string $where=""): ?mysqli_result {
-        $result = $this->query("
+    private static function count(string $table, string $where=""): ?mysqli_result {
+        $result = self::query("
             SELECT COUNT(*) FROM `{$table}`" .
             ($where == "" ? "" : "\n            WHERE {$where}")
         );
         return !$result ? null : $result;
     }
 
-    private function convertKey(string $key) {
+    private static function convertKey(string $key) {
         return "`$key`";
     }
 
-    private function convertVal(string $val) {
+    private static function convertVal(string $val) {
             if (is_string($val)) {
-                $val = $this->db->escape($val);
+                $val = DB::escape($val);
             }
             return "'$val'";
     }
 
-    function insert(string $table, array $keyValues): ?int {
-        $columns = implode(", ", array_map(function ($k) {return $this->convertKey($k);}, array_keys($keyValues)));
-        $values  = implode(", ", array_map(function ($v) {return $this->convertVal($v);}, array_values($keyValues)));
-        $result = $this->query("
+    private static function insert(string $table, array $keyValues): ?int {
+        $columns = implode(", ", array_map(function ($k) {return self::convertKey($k);}, array_keys($keyValues)));
+        $values  = implode(", ", array_map(function ($v) {return self::convertVal($v);}, array_values($keyValues)));
+        $result = self::query("
             INSERT INTO `{$table}`({$columns})
             VALUES ({$values})
         ");
-        return !$result ? null : $this->db->lastId();
+        return !$result ? null : DB::lastId();
     }
 
-    function insertOrUpdate(string $table, array $keyValues, array $updateKeyValues): ?int {
-        $columns = implode(", ", array_map(function ($k) {return $this->convertKey($k);}, array_keys($keyValues)));
-        $values  = implode(", ", array_map(function ($v) {return $this->convertVal($v);}, array_values($keyValues)));
-        $updatePairs = array_map(function ($k, $v) {return $this->convertKey($k) . " = " . $this->convertVal($v);}, array_keys($updateKeyValues), $updateKeyValues);
-        $result = $this->query("
+    private static function insertOrUpdate(string $table, array $keyValues, array $updateKeyValues): ?int {
+        $columns = implode(", ", array_map(function ($k) {return self::convertKey($k);}, array_keys($keyValues)));
+        $values  = implode(", ", array_map(function ($v) {return self::convertVal($v);}, array_values($keyValues)));
+        $updatePairs = array_map(function ($k, $v) {return self::convertKey($k) . " = " . self::convertVal($v);}, array_keys($updateKeyValues), $updateKeyValues);
+        $result = self::query("
             INSERT INTO `{$table}`({$columns})
             VALUES ({$values})
             ON DUPLICATE KEY UPDATE
                 " . implode(",\n                ", $updatePairs) . "
         ");
-        return !$result ? null : $this->db->lastId();
+        return !$result ? null : DB::lastId();
     }
 
-    function update(string $table, array $keyValues, string $where): bool {
-        $pairs = array_map(function ($k, $v) {return $this->convertKey($k) . " = " . $this->convertVal($v);}, array_keys($keyValues), $keyValues);
-        $result = $this->query("
+    private static function update(string $table, array $keyValues, string $where): bool {
+        $pairs = array_map(function ($k, $v) {return self::convertKey($k) . " = " . self::convertVal($v);}, array_keys($keyValues), $keyValues);
+        $result = self::query("
             UPDATE `{$table}` SET
                 " . implode(",\n                ", $pairs) . "
             WHERE {$where}
@@ -87,8 +81,8 @@ class Brain {
         return !!$result;
     }
 
-    function delete(string $table, string $where): bool {
-        $result = $this->query("
+    private static function delete(string $table, string $where): bool {
+        $result = self::query("
             DELETE FROM `{$table}`
             WHERE {$where}
         ");
@@ -98,13 +92,13 @@ class Brain {
     /*
      * Miscellaneous
      */
-    function getResult(mysqli_result $sqlResponse): array {
+    private static function getResult(mysqli_result $sqlResponse): ?array {
         $result = $sqlResponse->fetch_assoc();
         $sqlResponse->close();
         return $result;
     }
 
-    function getResults(mysqli_result $sqlResponse): array {
+    private static function getResults(mysqli_result $sqlResponse): array {
         $results = array();
         while ($row = $sqlResponse->fetch_assoc()) {
             array_push($results, $row);
@@ -113,13 +107,13 @@ class Brain {
         return $results;
     }
 
-    function getIntResult(mysqli_result $sqlResponse): int {
+    private static function getIntResult(mysqli_result $sqlResponse): int {
         $result = intval($sqlResponse->fetch_row()[0]);
         $sqlResponse->close();
         return $result;
     }
 
-    function getIntResults(mysqli_result $sqlResponse): array {
+    private static function getIntResults(mysqli_result $sqlResponse): array {
         $results = array();
         while ($row = $sqlResponse->fetch_row()) {
             array_push($results, intval($row[0]));
@@ -129,13 +123,11 @@ class Brain {
     }
 
 
-    // TODO: Make functions have typed arguments and return values
-
     /*
      * News
      */
-    function addNews(): ?int {
-        return $this->insert(
+    public static function addNews(): ?int {
+        return self::insert(
             "News", [
                 "date" => "",
                 "title" => "",
@@ -146,8 +138,8 @@ class Brain {
         );
     }
 
-    function updateNews(News $news): bool {
-        return $this->update(
+    public static function updateNews(News $news): bool {
+        return self::update(
             "News", [
                 "date" => $news->date,
                 "title" => $news->title,
@@ -158,31 +150,31 @@ class Brain {
         );
     }
 
-    function getAllNews(): ?array {
-        $response = $this->select(
+    public static function getAllNews(): ?array {
+        $response = self::select(
             "News",
             "",
             "`date` DESC",
             20
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getNews(int $id): ?array {
-        $response = $this->select(
+    public static function getNews(int $id): ?array {
+        $response = self::select(
             "News",
             "`id` = {$id}",
             "`date` DESC",
             1
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
     /*
      * Reports
      */
-    function addReport(int $userId, string $page, string $content): ?int {
-        return $this->insert(
+    public static function addReport(int $userId, string $page, string $content): ?int {
+        return self::insert(
             "Reports", [
                 "user" => $userId,
                 "date" => date('Y-m-d'),
@@ -192,19 +184,19 @@ class Brain {
         );
     }
 
-    function getReports(int $userId = -1): ?array {
-        $response = $this->select(
+    public static function getReports(int $userId = -1): ?array {
+        $response = self::select(
             "Reports",
             $userId == -1 ? "" : "`user` = {$userId}"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
     /*
      * Problems
      */
-    function addProblem(): ?int {
-        return $this->insert(
+    public static function addProblem(): ?int {
+        return self::insert(
             "Problems", [
                 "type" => "ioi",
                 "difficulty" => "trivial"
@@ -212,8 +204,8 @@ class Brain {
         );
     }
 
-    function updateProblem(Problem $problem): bool {
-        return $this->update(
+    public static function updateProblem(Problem $problem): bool {
+        return self::update(
             "Problems", [
                 "name" => $problem->name,
                 "author" => $problem->author,
@@ -234,77 +226,77 @@ class Brain {
         );
     }
 
-    function updateChecker(Problem $problem): bool {
-        return $this->update(
+    public static function updateChecker(Problem $problem): bool {
+        return self::update(
             "Problems", [
                 "checker" => $problem->checker
             ], "`id` = {$problem->id}"
         );
     }
 
-    function updateTester(Problem $problem): bool {
-        return $this->update(
+    public static function updateTester(Problem $problem): bool {
+        return self::update(
             "Problems", [
                 "tester" => $problem->tester
             ], "`id` = {$problem->id}"
         );
     }
 
-    function getProblem(int $problemId): ?array {
-        $response = $this->select(
+    public static function getProblem(int $problemId): ?array {
+        $response = self::select(
             "Problems",
             "`id` = {$problemId}",
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getAllProblems(): ?array {
-        $response = $this->select(
+    public static function getAllProblems(): ?array {
+        $response = self::select(
             "Problems",
             "`type` NOT IN ('game', 'relative', 'interactive')",
             "`id`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getAllProblemsCount(): ?int {
-        $response = $this->count(
+    public static function getAllProblemsCount(): ?int {
+        $response = self::count(
             "Problems",
             "`type` NOT IN ('game', 'relative', 'interactive')"
         );
-        return !$response ? null : $this->getIntResult($response);
+        return !$response ? null : self::getIntResult($response);
     }
 
-    function getAllGames(): ?array {
-        $response = $this->select(
+    public static function getAllGames(): ?array {
+        $response = self::select(
             "Problems",
             "`type` IN ('game', 'relative', 'interactive')",
             "`id`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getAllGamesCount(): ?int {
-        $response = $this->count(
+    public static function getAllGamesCount(): ?int {
+        $response = self::count(
             "Problems",
             "`type` IN ('game', 'relative', 'interactive')"
         );
-        return !$response ? null : $this->getIntResult($response);
+        return !$response ? null : self::getIntResult($response);
     }
 
     /*
      * Solutions
      */
-    function getProblemSolutions(int $problemId): ?array {
-        $response = $this->select(
+    public static function getProblemSolutions(int $problemId): ?array {
+        $response = self::select(
             "Solutions",
             "`problemId` = {$problemId}"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function addSolution(int $problemId, string $name, int $submitId, string $source, string $language): ?int {
-        return $this->insert(
+    public static function addSolution(int $problemId, string $name, int $submitId, string $source, string $language): ?int {
+        return self::insert(
             "Solutions", [
                 "problemId" => $problemId,
                 "name" => $name,
@@ -315,32 +307,32 @@ class Brain {
         );
     }
 
-    function deleteSolution(int $problemId, string $name): bool {
-        return $this->delete(
+    public static function deleteSolution(int $problemId, string $name): bool {
+        return self::delete(
             "Solutions",
-            "`problemId` = {$problemId} AND `name` = '" . $this->db->escape($name) . "'"
+            "`problemId` = {$problemId} AND `name` = '" . DB::escape($name) . "'"
         );
     }
 
     /*
      * Tests
      */
-    function getProblemTests(int $problemId): ?array {
-        $response = $this->select(
+    public static function getProblemTests(int $problemId): ?array {
+        $response = self::select(
             "Tests",
             "`problem` = {$problemId}",
             "`position`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
     // Find the ID of a testcase (or create a new one and get its ID if not present)
-    function getTestId(int $problemId, int $position, bool $insertIfNotFound): ?int {
-        $response = $this->select(
+    public static function getTestId(int $problemId, int $position, bool $insertIfNotFound): ?int {
+        $response = self::select(
             "Tests",
             "`problem` = {$problemId} AND `position` = {$position}"
         );
-        $result = $this->getResult($response);
+        $result = self::getResult($response);
 
         if ($result) {
             return $result['id'];
@@ -348,7 +340,7 @@ class Brain {
 
         // Insert in the database if a new test
         if ($insertIfNotFound) {
-            return $this->insert(
+            return self::insert(
                 "Tests", [
                     "problem" => $problemId,
                     "position" => $position,
@@ -359,25 +351,25 @@ class Brain {
         return null;
     }
 
-    function updateTestScore(int $problemId, int $position, int $score): bool {
-        $id = $this->getTestId($problemId, $position, false);
+    public static function updateTestScore(int $problemId, int $position, int $score): bool {
+        $id = self::getTestId($problemId, $position, false);
         if ($id === null) {
             return false;
         }
-        return $this->update(
+        return self::update(
             "Tests", [
                 "score" => $score
             ], "`id` = {$id}"
         );
     }
 
-    function updateTestFile(int $problemId, int $position, string $name, string $hash): bool {
-        $id = $this->getTestId($problemId, $position, true);
+    public static function updateTestFile(int $problemId, int $position, string $name, string $hash): bool {
+        $id = self::getTestId($problemId, $position, true);
         if ($id === null) {
             return false;
         }
         $extension = lastElement(explode('.', $name));
-        return $this->update(
+        return self::update(
             "Tests", [
                 (($extension == 'in' || $extension == 'inp') ? 'inpFile' : 'solFile') => $name,
                 (($extension == 'in' || $extension == 'inp') ? 'inpHash' : 'solHash') => $hash
@@ -385,8 +377,8 @@ class Brain {
         );
     }
 
-    function deleteTest(int $problemId, int $position): bool {
-        return $this->delete(
+    public static function deleteTest(int $problemId, int $position): bool {
+        return self::delete(
             "Tests",
             "`problem` = {$problemId} AND `position` = {$position}"
         );
@@ -395,8 +387,8 @@ class Brain {
     /*
      * Submits
      */
-    function addSubmit(Submit $submit): ?int {
-        return $this->insert(
+    public static function addSubmit(Submit $submit): ?int {
+        return self::insert(
             "Submits", [
                 "submitted" => $submit->submitted,
                 "gradingStart" => $submit->gradingStart,
@@ -419,8 +411,8 @@ class Brain {
         );
     }
 
-    function updateSubmit(Submit $submit): bool {
-        return $this->update(
+    public static function updateSubmit(Submit $submit): bool {
+        return self::update(
             "Submits", [
             "gradingStart" => $submit->gradingStart,
             "gradingFinish" => $submit->gradingFinish,
@@ -436,32 +428,32 @@ class Brain {
         );
     }
 
-    function getSubmit(int $submitId): ?array {
-        $response = $this->select(
+    public static function getSubmit(int $submitId): ?array {
+        $response = self::select(
             "Submits",
             "`id` = {$submitId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getAllSubmits(string $status="all"): ?array {
-        $response = $this->select(
+    public static function getAllSubmits(string $status="all"): ?array {
+        $response = self::select(
             "Submits",
             $status == "all" ? "" : "`status` = '{$status}'"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getAllSubmitsCount(string $status="all"): ?int {
-        $response = $this->count(
+    public static function getAllSubmitsCount(string $status="all"): ?int {
+        $response = self::count(
             "Submits",
             $status == "all" ? "" : "`status` = '{$status}'"
         );
-        return !$response ? null : $this->getIntResult($response);
+        return !$response ? null : self::getIntResult($response);
     }
 
-    function getPendingSubmits(): ?array {
-        $response = $this->select(
+    public static function getPendingSubmits(): ?array {
+        $response = self::select(
             "Submits",
             "`status` IN (
                 '{$GLOBALS['STATUS_WAITING']}',
@@ -471,11 +463,11 @@ class Brain {
             )",
             "`id`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getLatestSubmits(): ?array {
-        $response = $this->select(
+    public static function getLatestSubmits(): ?array {
+        $response = self::select(
             "Submits",
             "`status` IN (
                 '{$GLOBALS['STATUS_INTERNAL_ERROR']}',
@@ -489,70 +481,62 @@ class Brain {
             "`id` DESC",
             100
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getProblemSubmits(int $problemId, string $status="all"): ?array {
-        $response = $this->select(
+    public static function getProblemSubmits(int $problemId, string $status="all"): ?array {
+        $response = self::select(
             "Submits",
             "`problemId` = {$problemId}" . ($status == "all" ? "" : " AND `status` = '{$status}'"),
             "`submitted`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getProblemStatusCounts(): ?array {
-        $response = $this->query("
+    public static function getProblemStatusCounts(): ?array {
+        $response = self::query("
             SELECT `problemId`, `status`, COUNT(*) AS `count` FROM `Submits`
             WHERE `userId` > 1
             GROUP BY `problemId`, `status`
         ");
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getUserSubmits(int $userId, int $problemId=-1, string $status="all"): ?array {
-        $response = $this->select(
+    public static function getUserSubmits(int $userId, int $problemId=-1, string $status="all"): ?array {
+        $response = self::select(
             "Submits",
             "`userId` = {$userId}" .
                 ($problemId == -1 ? "" : " AND `problemId` = {$problemId}") .
                 ($status == "all" ? "" : " AND `status` = '{$status}'"),
             "`submitted`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getSolved(int $userId): ?array {
-        $response = $this->db->query("
+    public static function getSolved(int $userId): ?array {
+        $response = self::query("
             SELECT DISTINCT `problemId` FROM `Submits`
             WHERE `userId` = {$userId} AND `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
         ");
-        if (!$response) {
-            error_log("Could not execute getSolved() query for user {$userId}!");
-            return null;
-        }
-        return $this->getIntResults($response);
+        return !$response ? null : self::getIntResults($response);
     }
 
-    function getSolvedPerUser(): ?array {
-        $response = $this->query("
+    public static function getSolvedPerUser(): ?array {
+        $response = self::query("
             SELECT `userId`, COUNT(*) AS `count` FROM (
                 SELECT `userId`, `problemId` FROM `Submits`
                 WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
                 GROUP BY `userId`, `problemId`
             ) AS tmp GROUP BY `userId`
         ");
-        if (!$response) {
-            error_log("Could not execute getSolvedPerUser() query!");
-            return null;
-        }
-        return $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
     /*
      * Sources
      */
-    function addSource(Submit $submit): ?int {
-        return $this->insert(
+    public static function addSource(Submit $submit): ?int {
+        return self::insert(
             "Sources", [
                 "submitId" => $submit->id,
                 "userId" => $submit->userId,
@@ -563,36 +547,36 @@ class Brain {
         );
     }
 
-    function getSource(int $submitId): ?array {
-        $response = $this->select(
+    public static function getSource(int $submitId): ?array {
+        $response = self::select(
             "Sources",
             "`submitId` = {$submitId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getAllSources(): ?array {
-        $response = $this->select(
+    public static function getAllSources(): ?array {
+        $response = self::select(
             "Sources"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getUserSources(int $userId, int $problemId=-1): ?array {
-        $response = $this->select(
+    public static function getUserSources(int $userId, int $problemId=-1): ?array {
+        $response = self::select(
             "Sources",
             "`userId` = {$userId}" .
                 ($problemId == -1 ? "" : " AND `problemId` = {$problemId}"),
             "`submitted`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
     /*
      * Users
      */
-    function addUser(User $user): ?int {
-        return $this->insert(
+    public static function addUser(User $user): ?int {
+        return self::insert(
             "Users", [
                 "access" => $user->access,
                 "registered" => $user->registered,
@@ -608,8 +592,8 @@ class Brain {
         );
     }
 
-    function updateUser(User $user): bool {
-        return $this->update(
+    public static function updateUser(User $user): bool {
+        return self::update(
             "Users", [
                 "access" => $user->access,
                 "registered" => $user->registered,
@@ -625,41 +609,41 @@ class Brain {
         );
     }
 
-    function getUser(int $userId): ?array {
-        $response = $this->select(
+    public static function getUser(int $userId): ?array {
+        $response = self::select(
             "Users",
             "`id` = {$userId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getUserByUsername(string $username): ?array {
-        $response = $this->select(
+    public static function getUserByUsername(string $username): ?array {
+        $response = self::select(
             "Users",
             "`username` = '{$username}'"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getAllUsers(): ?array {
-        $response = $this->select(
+    public static function getAllUsers(): ?array {
+        $response = self::select(
             "Users",
             "",
             "`id`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getAllUsersCount(): ?int {
-        $response = $this->count("Users");
-        return !$response ? null : $this->getIntResult($response);
+    public static function getAllUsersCount(): ?int {
+        $response = self::count("Users");
+        return !$response ? null : self::getIntResult($response);
     }
 
     /*
      * User info
      */
-    function addUserInfo(User $user): bool {
-        return $this->insert(
+    public static function addUserInfo(User $user): bool {
+        return self::insert(
             "UsersInfo", [
                 "id" => $user->id,
                 "username" => $user->username,
@@ -674,8 +658,8 @@ class Brain {
         );
     }
 
-    function updateUserInfo(User $user): bool {
-        return $this->update(
+    public static function updateUserInfo(User $user): bool {
+        return self::update(
             "UsersInfo", [
                 "actions" => $user->actions,
                 "totalTime" => $user->totalTime,
@@ -688,36 +672,36 @@ class Brain {
         );
     }
 
-    function getUserInfo(int $userId): ?array {
-        $response = $this->select(
+    public static function getUserInfo(int $userId): ?array {
+        $response = self::select(
             "UsersInfo",
             "`id` = {$userId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getAllUsersInfo(): ?array {
-        $response = $this->select(
+    public static function getAllUsersInfo(): ?array {
+        $response = self::select(
             "UsersInfo",
             "",
             "`id`"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getActiveUsersInfo(): ?array {
-        $response = $this->select(
+    public static function getActiveUsersInfo(): ?array {
+        $response = self::select(
             "UsersInfo",
             "`lastSeen` >= '" . date('Y-m-d H:i:s', time() - 15 * 60) . "'",
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
     /*
      * Credentials
      */
-    function addCreds(int $userId, string $userName, string $password, string $loginKey): bool {
-        return $this->insert(
+    public static function addCreds(int $userId, string $userName, string $password, string $loginKey): bool {
+        return self::insert(
             "Credentials", [
                 "userId" => $userId,
                 "username" => $userName,
@@ -728,8 +712,8 @@ class Brain {
     }
 
     // TODO: The argument may be object? Either User or Credentials.
-    function updateCreds(array $creds): bool {
-        return $this->update(
+    public static function updateCreds(array $creds): bool {
+        return self::update(
             "Credentials", [
                 "password" => $creds['password'],
                 "loginKey" => $creds['loginKey'],
@@ -740,44 +724,44 @@ class Brain {
         );
     }
 
-    function getCreds(int $userId): ?array {
-        $response = $this->select(
+    public static function getCreds(int $userId): ?array {
+        $response = self::select(
             "Credentials",
             "`userId` = {$userId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getCredsByLoginKey(string $loginKey): ?array {
-        $response = $this->select(
+    public static function getCredsByLoginKey(string $loginKey): ?array {
+        $response = self::select(
             "Credentials",
             "`loginKey` = '{$loginKey}'"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getCredsByResetKey(string $resetKey): ?array {
-        $response = $this->select(
+    public static function getCredsByResetKey(string $resetKey): ?array {
+        $response = self::select(
             "Credentials",
             "`resetKey` = '{$resetKey}'"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
     /*
      * Achievements
      */
-    function getAchievements(int $userId = -1): ?array {
-        $response = $this->select(
+    public static function getAchievements(int $userId = -1): ?array {
+        $response = self::select(
             "Achievements",
             $userId == -1 ? "" : "`user` = {$userId}",
             "`date`, `id` ASC"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function addAchievement(int $userId, string $achievement, string $date): bool {
-        return $this->insertOrUpdate(
+    public static function addAchievement(int $userId, string $achievement, string $date): bool {
+        return self::insertOrUpdate(
             "Achievements", [
                 "user" => $userId,
                 "achievement" => $achievement,
@@ -788,8 +772,8 @@ class Brain {
         );
     }
 
-    function markAsSeenAchievement(int $achievementId): bool {
-        return $this->update(
+    public static function markAsSeenAchievement(int $achievementId): bool {
+        return self::update(
             "Achievements", [
                 "seen" => "TRUE"
             ], "`id` = {$achievementId}"
@@ -799,23 +783,23 @@ class Brain {
     /*
      * SPAM counters
      */
-    function refreshSpamCounters(int $minTime): bool {
-        return $this->delete(
+    public static function refreshSpamCounters(int $minTime): bool {
+        return self::delete(
             "Spam",
             "`time` < {$minTime}"
         );
     }
 
-    function getSpamCounter(User $user, int $type): ?int {
-        $response = $this->select(
+    public static function getSpamCounter(User $user, int $type): ?int {
+        $response = self::count(
             "Spam",
             "`user` = {$user->id} AND `type` = {$type}"
         );
-        return !$response ? null : count($this->getResults($response));
+        return !$response ? null : self::getIntResult($response);
     }
 
-    function incrementSpamCounter(User $user, int $type, int $time): bool {
-        return $this->insert(
+    public static function incrementSpamCounter(User $user, int $type, int $time): bool {
+        return self::insert(
             "Spam", [
                 "type" => $type,
                 "user" => $user->id,
@@ -827,32 +811,32 @@ class Brain {
     /*
      * Games
      */
-    function getMatch(int $problemId, int $test, int $userOne, int $userTwo): ?array {
-        $response = $this->select(
+    public static function getMatch(int $problemId, int $test, int $userOne, int $userTwo): ?array {
+        $response = self::select(
             "Matches",
             "`problemId` = {$problemId} AND `test` = {$test} AND `userOne` = {$userOne} AND `userTwo` = {$userTwo}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getMatchById(int $matchId): ?array {
-        $response = $this->select(
+    public static function getMatchById(int $matchId): ?array {
+        $response = self::select(
             "Matches",
             "`id` = {$matchId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getGameMatches(int $problemId, int $userId = -1): ?array {
-        $response = $this->select(
+    public static function getGameMatches(int $problemId, int $userId = -1): ?array {
+        $response = self::select(
             "Matches",
             "`problemId` = {$problemId}" . ($userId == -1 ? "" : "AND (`userOne` = {$userId} OR `userTwo` = {$userId})")
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function updateMatch(Match $match): bool {
-        return $this->insertOrUpdate(
+    public static function updateMatch(Match $match): bool {
+        return self::insertOrUpdate(
             "Matches", [
                 "problemId" => $match->problemId,
                 "test" => $match->test,
@@ -878,8 +862,9 @@ class Brain {
     /*
      * Training
      */
-    function addTopic(int $id, string $key, string $link, string $title, string $summary, string $expanded, string $problems) {
-        return $this->insertOrUpdate(
+    // TODO: Make arguments of this a class?
+    public static function addTopic(int $id, string $key, string $link, string $title, string $summary, string $expanded, string $problems) {
+        return self::insertOrUpdate(
             "Training", [
                 "id" => $id,
                 "key" => $key,
@@ -898,43 +883,43 @@ class Brain {
         );
     }
 
-    function getTopic(string $key): ?array {
-        $response = $this->select(
+    public static function getTopic(string $key): ?array {
+        $response = self::select(
             "Training",
             "`key` = '{$key}'"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getTrainingTopics(): ?array {
-        $response = $this->select(
+    public static function getTrainingTopics(): ?array {
+        $response = self::select(
             "Training"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
     /*
      * Regrading
      */
     // TODO: Change the `id` column to `key`, as it is confusing.
-    function getRegradeList(string $id): ?array {
-        $response = $this->select(
+    public static function getRegradeList(string $id): ?array {
+        $response = self::select(
             "Regrades",
             "`id` = '{$id}'"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getRegradeSubmit(string $id, Submit $submit): ?array {
-        $response = $this->select(
+    public static function getRegradeSubmit(string $id, Submit $submit): ?array {
+        $response = self::select(
             "Regrades",
             "`id` = '{$id}' AND `submitId` = {$submit->id}"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function addRegradeSubmit(string $id, Submit $submit): bool {
-        return $this->insert(
+    public static function addRegradeSubmit(string $id, Submit $submit): bool {
+        return self::insert(
             "Regrades", [
                 "id" => $id,
                 "submitId" => $submit->id,
@@ -952,8 +937,8 @@ class Brain {
         );
     }
 
-    function updateRegradeSubmit(string $id, Submit $submit): bool {
-        return $this->update(
+    public static function updateRegradeSubmit(string $id, Submit $submit): bool {
+        return self::update(
             "Regrades", [
                 "newTime" => max($submit->execTime),
                 "newMemory" => max($submit->execMemory),
@@ -966,8 +951,8 @@ class Brain {
      * Notifications
      */
     // TODO: Pass arrays and implode the arrays here.
-    function addNotifications(int $userId, string $userName, string $messages, string $seen): ?int {
-        return $this->insert(
+    public static function addNotifications(int $userId, string $userName, string $messages, string $seen): ?int {
+        return self::insert(
             "Notifications", [
                 "userId" => $userId,
                 "username" => $userName,
@@ -978,8 +963,8 @@ class Brain {
     }
 
     // TODO: Convert argument to an object.
-    function updateNotifications(array $notifications): bool {
-        return $this->update(
+    public static function updateNotifications(array $notifications): bool {
+        return self::update(
             "Notifications", [
                 "messages" => $notifications["messages"],
                 "seen" => $notifications["seen"]
@@ -987,58 +972,58 @@ class Brain {
         );
     }
 
-    function getNotifications(int $userId): ?array {
-        $response = $this->select(
+    public static function getNotifications(int $userId): ?array {
+        $response = self::select(
             "Notifications",
             "`userId` = {$userId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
     /*
      * Messages
      */
-    function getMessage(int $id): ?array {
-        $response = $this->select(
+    public static function getMessage(int $id): ?array {
+        $response = self::select(
             "Messages",
             "`id` = {$id}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getMessageByKey(string $key): ?array {
-        $response = $this->select(
+    public static function getMessageByKey(string $key): ?array {
+        $response = self::select(
             "Messages",
             "`key` = '{$key}'"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function getAllMessages(): ?array {
-        $response = $this->select(
+    public static function getAllMessages(): ?array {
+        $response = self::select(
             "Messages"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function getMessagesToEveryone(): ?array {
-        $response = $this->select(
+    public static function getMessagesToEveryone(): ?array {
+        $response = self::select(
             "Messages",
             "`userIds` = '-1'"
         );
-        return !$response ? null : $this->getResults($response);
+        return !$response ? null : self::getResults($response);
     }
 
-    function addMessage(): bool {
-        return $this->insert(
+    public static function addMessage(): bool {
+        return self::insert(
             "Messages", [
                 "authorId" => -1
             ]
         );
    }
 
-    function updateMessage(Message $message): bool {
-        return $this->update(
+    public static function updateMessage(Message $message): bool {
+        return self::update(
             "Messages", [
                 "key" => $message->key,
                 "sent" => $message->sent,
@@ -1055,24 +1040,24 @@ class Brain {
     /*
      * History
      */
-    function getHistory(int $submitId): ?array {
-        $response = $this->select(
+    public static function getHistory(int $submitId): ?array {
+        $response = self::select(
             "History",
             "`submitId` = {$submitId}"
         );
-        return !$response ? null : $this->getResult($response);
+        return !$response ? null : self::getResult($response);
     }
 
-    function addHistory(int $submitId): bool {
-        return $this->insert(
+    public static function addHistory(int $submitId): bool {
+        return self::insert(
             "History", [
                 "submitId" => $submitId
             ]
         );
     }
 
-    function updateHistory(int $submitId, array $info): bool {
-        return $this->update(
+    public static function updateHistory(int $submitId, array $info): bool {
+        return self::update(
             "History", [
                 "time01" => $info['time01'],
                 "time02" => $info['time02'],

@@ -92,9 +92,8 @@ class Problem {
     }
 
     public static function get($id) {
-        $brain = new Brain();
         try {
-            $info = $brain->getProblem($id);
+            $info = Brain::getProblem($id);
             if ($info == null) {
                 return null;
             }
@@ -119,15 +118,12 @@ class Problem {
             error_log('Unable to write statement to file "' . $statementPath . '"!');
             return false;
         }
-
-        $brain = new Brain();
-        return $brain->updateProblem($this);
+        return Brain::updateProblem($this);
     }
 
     public function create() {
         // Add the problem to the database
-        $brain = new Brain();
-        $result = $brain->addProblem();
+        $result = Brain::addProblem();
         if (!$result) {
             return false;
         }

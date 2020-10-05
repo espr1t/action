@@ -59,8 +59,7 @@ class ResetPage extends Page {
         }
 
         // There is currently another reset link active.
-        $brain = new Brain();
-        $creds = $brain->getCreds($user->id);
+        $creds = Brain::getCreds($user->id);
         $timeNow = date('Y-m-d H:i:s');
         if ($creds['resetTime'] != '0000-00-00 00:00:00') {
             $timeDiff = strtotime($timeNow) - strtotime($creds['resetTime']);
@@ -72,7 +71,7 @@ class ResetPage extends Page {
         // Generate a reset code
         $creds['resetTime'] = $timeNow;
         $creds['resetKey'] = str_shuffle(md5(microtime()));
-        $brain->updateCreds($creds);
+        Brain::updateCreds($creds);
 
         // Send an e-mail to the user with instructions and activation link
         $resetLink = 'https://action.informatika.bg/reset/' . $creds['resetKey'];
@@ -97,8 +96,7 @@ class ResetPage extends Page {
     }
 
     private function resetPassword() {
-        $brain = new Brain();
-        $creds = $brain->getCredsByResetKey($_POST['key']);
+        $creds = Brain::getCredsByResetKey($_POST['key']);
         if (!$creds) {
             return false;
         }
@@ -110,7 +108,7 @@ class ResetPage extends Page {
         $creds['resetKey'] = '';
         $creds['resetTime'] = '0000-00-00 00:00:00';
         $creds['lastReset'] = date('Y-m-d H:i:s');
-        if ($brain->updateCreds($creds)) {
+        if (Brain::updateCreds($creds)) {
             // Record the updated password in the logs
             $logMessage = sprintf('User %s has updated his/her password.', $creds['username']);
             write_log($GLOBALS['LOG_PASS_RESETS'], $logMessage);
@@ -218,8 +216,7 @@ class ResetPage extends Page {
 
         // Clicked on the link in the e-mail, make him or her enter the new passwords
         if (isset($_GET['key'])) {
-            $brain = new Brain();
-            $creds = $brain->getCredsByResetKey($_GET['key']);
+            $creds = Brain::getCredsByResetKey($_GET['key']);
             if (!$creds) {
                 return $this->getSendEmailForm() . showNotification('ERROR', 'Използваният ключ е невалиден.');
             }

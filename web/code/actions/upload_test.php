@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
+global $user;
+
 // User doesn't have access level needed for adding testcases
 if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
@@ -31,8 +33,7 @@ file_put_contents($testPath, $testContent);
 
 $testHash = md5($testContent);
 
-$brain = new Brain();
-$brain->updateTestFile($_POST['problemId'], $_POST['testPosition'], $testName, $testHash);
+Brain::updateTestFile($_POST['problemId'], $_POST['testPosition'], $testName, $testHash);
 
 // Return the relative path to the thest so it is displayed properly on the frontend
 $testPath = explode($_SERVER['DOCUMENT_ROOT'], $testPath)[1];

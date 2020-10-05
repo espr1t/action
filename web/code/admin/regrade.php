@@ -9,7 +9,6 @@ require_once(__DIR__ . '/../events.php');
 require_once(__DIR__ . '/../entities/submit.php');
 
 class AdminRegradePage extends Page {
-    private Brain $brain;
     private $regradeId = -1;
 
     public function getTitle() {
@@ -33,7 +32,7 @@ class AdminRegradePage extends Page {
     }
 
     private function getRegradeView($isUpdateRequest=false) {
-        $regradeList = $this->brain->getRegradeList($this->regradeId);
+        $regradeList = Brain::getRegradeList($this->regradeId);
 
         $content = inBox('
             <h1>Ретестване</h1>
@@ -66,8 +65,8 @@ class AdminRegradePage extends Page {
             $el = $regradeList[$i];
             $submit = Submit::get($el['submitId']);
             if ($submit->status != $el['newStatus']) {
-                $this->brain->updateRegradeSubmit($this->regradeId, $submit);
-                $el = $this->brain->getRegradeSubmit($this->regradeId, $submit);
+                Brain::updateRegradeSubmit($this->regradeId, $submit);
+                $el = Brain::getRegradeSubmit($this->regradeId, $submit);
             }
 
             $submitId = '<a href="/problems/' . $submit->problemId . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
@@ -178,7 +177,7 @@ class AdminRegradePage extends Page {
     }
 
     private function regrade($submit) {
-        $this->brain->addRegradeSubmit($this->regradeId, $submit);
+        Brain::addRegradeSubmit($this->regradeId, $submit);
         $submit->regrade(false);
     }
 
@@ -217,7 +216,6 @@ class AdminRegradePage extends Page {
     }
 
     public function getContent() {
-        $this->brain = new Brain();
         $this->regradeId = randomString(5, 'abcdefghijklmnopqrstuvwxyz');
 
         // Not implemented yet

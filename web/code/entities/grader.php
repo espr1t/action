@@ -167,8 +167,7 @@ class Grader {
         // Update the timestamp of the latest submit
         $submit->gradingFinish = $timestamp;
 
-        $brain = new Brain();
-        $brain->updateSubmit($submit);
+        Brain::updateSubmit($submit);
 
         $submit->message = $message;
         $problem = Problem::get($submit->problemId);
@@ -185,22 +184,22 @@ class Grader {
         $submit->status = $submit->calcStatus();
 
         // Save the updated submit info in the database
-        $brain->updateSubmit($submit);
+        Brain::updateSubmit($submit);
 
         // Update the submit history
         if ($submit->message != '') {
-            $history = $brain->getHistory($submit->id);
+            $history = Brain::getHistory($submit->id);
             if ($history == null) {
                 // If we still haven't added history for this submit
-                $brain->addHistory($submit->id);
-                $history = $brain->getHistory($submit->id);
+                Brain::addHistory($submit->id);
+                $history = Brain::getHistory($submit->id);
             }
             $history['time01'] = $history['time02'];
             $history['time02'] = $history['time03'];
             $history['time03'] = $history['time04'];
             $history['time04'] = $history['time05'];
             $history['time05'] = implode(',', $submit->execTime);
-            $brain->updateHistory($submit->id, $history);
+            Brain::updateHistory($submit->id, $history);
         }
 
         // Record the completed test run in the logs

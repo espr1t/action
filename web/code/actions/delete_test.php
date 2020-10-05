@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
+global $user;
+
 // User doesn't have access level needed for deleting testcases
 if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
@@ -31,8 +33,7 @@ unlink($solFilePath);
 restore_error_handler();
 
 // Also delete from database
-$brain = new Brain();
-if ($brain->deleteTest($problem->id, $_POST['position']) == null) {
+if (Brain::deleteTest($problem->id, $_POST['position']) == null) {
     printAjaxResponse(array(
         'status' => 'ERROR',
         'message' => 'Тестът не беше изтрит от базата.'

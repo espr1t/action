@@ -31,9 +31,8 @@ class News {
     }
 
     public static function get($id) {
-        $brain = new Brain();
         try {
-            $info = $brain->getNews($id);
+            $info = Brain::getNews($id);
             if ($info == null) {
                 return null;
             }
@@ -45,13 +44,11 @@ class News {
     }
 
     public function update() {
-        $brain = new Brain();
-        return $brain->updateNews($this);
+        return Brain::updateNews($this);
     }
 
     public function publish() {
-        $brain = new Brain();
-        $result = $brain->addNews();
+        $result = Brain::addNews();
         if (!$result) {
             return false;
         }

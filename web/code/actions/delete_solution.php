@@ -3,6 +3,8 @@ require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../db/brain.php');
 require_once(__DIR__ . '/../entities/problem.php');
 
+global $user;
+
 // User doesn't have access level needed for deleting solutions
 if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
     printAjaxResponse(array(
@@ -28,8 +30,7 @@ unlink($solutionPath);
 restore_error_handler();
 
 // Also delete from database
-$brain = new Brain();
-if ($brain->deleteSolution($problem->id, $_POST['name']) == null) {
+if (Brain::deleteSolution($problem->id, $_POST['name']) == null) {
     printAjaxResponse(array(
         'status' => 'ERROR',
         'message' => 'Решението не беше изтрит от базата.'

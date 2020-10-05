@@ -40,20 +40,18 @@ class Message {
     }
 
     public static function get($key) {
-        $brain = new Brain();
         try {
-            $info = $brain->getMessageByKey($key);
+            $info = Brain::getMessageByKey($key);
             return $info == null ? null : Message::instanceFromArray($info);
         } catch (Exception $ex) {
-            error_log('Could not get message with id ' . $id . '. Exception: ' . $ex->getMessage());
+            error_log('Could not get message with id ' . $key . '. Exception: ' . $ex->getMessage());
         }
         return null;
     }
 
     public function update() {
-        $brain = new Brain();
-        $oldVersion = $brain->getMessage($this->id);
-        if (!$brain->updateMessage($this)) {
+        $oldVersion = Brain::getMessage($this->id);
+        if (!Brain::updateMessage($this)) {
             return false;
         }
         $oldUserIds = parseIntArray($oldVersion['userIds']);
@@ -67,7 +65,7 @@ class Message {
                 continue;
 
             if (!in_array($userId, $this->userIds)) {
-                $notifications = $brain->getNotifications($userId);
+                $notifications = Brain::getNotifications($userId);
                 $notifications['messages'] = implode(',', array_filter(
                     parseIntArray($notifications['messages']),
                     function($el) {return $el != $this->id;}
@@ -76,7 +74,7 @@ class Message {
                     parseIntArray($notifications['seen']),
                     function($el) {return $el != $this->id;}
                 ));
-                if (!$brain->updateNotifications($notifications))
+                if (!Brain::updateNotifications($notifications))
                     return false;
             }
         }
@@ -90,13 +88,13 @@ class Message {
                 continue;
 
             if (!in_array($userId, $oldUserIds)) {
-                $notifications = $brain->getNotifications($userId);
+                $notifications = Brain::getNotifications($userId);
                 $messages = parseIntArray($notifications['messages']);
                 if (!in_array($this->id, $messages)) {
                     array_push($messages, $this->id);
                 }
                 $notifications['messages'] = implode(',', $messages);
-                if (!$brain->updateNotifications($notifications))
+                if (!Brain::updateNotifications($notifications))
                     return false;
             }
         }
@@ -105,8 +103,7 @@ class Message {
     }
 
     public function send() {
-        $brain = new Brain();
-        $result = $brain->addMessage();
+        $result = Brain::addMessage();
         if (!$result) {
             return false;
         }
