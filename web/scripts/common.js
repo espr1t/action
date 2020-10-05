@@ -344,17 +344,26 @@ function orderRanking(orderBy) {
     var tableBody = table.tBodies[1];
     var rows = Array.prototype.slice.call(tableBody.rows, 0);
     rows = rows.sort(function(a, b) {
-        var townA = a.cells[3].textContent, tasksA = parseInt(a.cells[4].textContent), achievementsA = parseInt(a.cells[5].textContent);
-        var townB = b.cells[3].textContent, tasksB = parseInt(b.cells[4].textContent), achievementsB = parseInt(b.cells[5].textContent);
+        var userNameA = a.cells[1].textContent, townA = a.cells[3].textContent, tasksA = parseInt(a.cells[4].textContent), achievementsA = parseInt(a.cells[5].textContent);
+        var userNameB = b.cells[1].textContent, townB = b.cells[3].textContent, tasksB = parseInt(b.cells[4].textContent), achievementsB = parseInt(b.cells[5].textContent);
         switch (orderBy) {
             // You expected this to be a standard operator < ? Well - no. It is designed after the C-style qsort() function,
             // which requires an integer result: less than 0 for "less", 0 for "equal", and greater-than 0 for "greater".
             case 'town':
-                return townA != townB ? (townA < townB ? -1 : +1) : (tasksA != tasksB ? tasksA - tasksB : achievementsA - achievementsB);
+                return townA !== townB ? (townA < townB ? -1 : +1)
+                        : (tasksA !== tasksB ? tasksA - tasksB
+                            : (achievementsA !== achievementsB ? achievementsA - achievementsB
+                                : (userNameA < userNameB ? -1 : +1)));
             case 'achievements':
-                return achievementsA != achievementsB ? achievementsA - achievementsB : (tasksA != tasksB ? tasksA - tasksB : (townA < townB ? -1 : +1));
+                return achievementsA !== achievementsB ? achievementsA - achievementsB
+                        : (tasksA !== tasksB ? tasksA - tasksB
+                            : (townA !== townB ? (townA < townB ? -1 : +1)
+                                : (userNameA < userNameB ? -1 : +1)));
             default:
-                return tasksA != tasksB ? tasksA - tasksB : (achievementsA != achievementsB ? achievementsA - achievementsB : (townA < townB ? -1 : +1));
+                return tasksA !== tasksB ? tasksA - tasksB
+                        : (achievementsA !== achievementsB ? achievementsA - achievementsB
+                            : (townA !== townB ? (townA < townB ? -1 : +1)
+                                : (userNameA < userNameB ? -1 : +1)));
         }
     });
     rows.reverse();
