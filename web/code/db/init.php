@@ -65,6 +65,10 @@ if ($db->tableExists('Users')) {
     output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
 }
 
+createTableIndexes("Users", [
+    "UsersUsername" => "username"
+]);
+
 /*
 Table::UsersInfo
 ============
