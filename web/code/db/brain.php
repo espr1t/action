@@ -642,7 +642,7 @@ class Brain {
     /*
      * User info
      */
-    public static function addUserInfo(User $user): bool {
+    public static function addUserInfo(User $user): ?int {
         return self::insert(
             "UsersInfo", [
                 "id" => $user->id,
@@ -700,7 +700,7 @@ class Brain {
     /*
      * Credentials
      */
-    public static function addCreds(int $userId, string $userName, string $password, string $loginKey): bool {
+    public static function addCreds(int $userId, string $userName, string $password, string $loginKey): ?int {
         return self::insert(
             "Credentials", [
                 "userId" => $userId,
@@ -760,7 +760,7 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function addAchievement(int $userId, string $achievement, string $date): bool {
+    public static function addAchievement(int $userId, string $achievement, string $date): ?int {
         return self::insertOrUpdate(
             "Achievements", [
                 "user" => $userId,
@@ -798,7 +798,7 @@ class Brain {
         return !$response ? null : self::getIntResult($response);
     }
 
-    public static function incrementSpamCounter(User $user, int $type, int $time): bool {
+    public static function incrementSpamCounter(User $user, int $type, int $time): ?int {
         return self::insert(
             "Spam", [
                 "type" => $type,
@@ -835,7 +835,7 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function updateMatch(Match $match): bool {
+    public static function updateMatch(Match $match): ?int {
         return self::insertOrUpdate(
             "Matches", [
                 "problemId" => $match->problemId,
@@ -863,7 +863,7 @@ class Brain {
      * Training
      */
     // TODO: Make arguments of this a class?
-    public static function addTopic(int $id, string $key, string $link, string $title, string $summary, string $expanded, string $problems) {
+    public static function addTopic(int $id, string $key, string $link, string $title, string $summary, string $expanded, string $problems): ?int {
         return self::insertOrUpdate(
             "Training", [
                 "id" => $id,
@@ -918,7 +918,7 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function addRegradeSubmit(string $id, Submit $submit): bool {
+    public static function addRegradeSubmit(string $id, Submit $submit): ?int {
         return self::insert(
             "Regrades", [
                 "id" => $id,
@@ -1014,7 +1014,7 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function addMessage(): bool {
+    public static function addMessage(): ?int {
         return self::insert(
             "Messages", [
                 "authorId" => -1
@@ -1048,7 +1048,7 @@ class Brain {
         return !$response ? null : self::getResult($response);
     }
 
-    public static function addHistory(int $submitId): bool {
+    public static function addHistory(int $submitId): ?int {
         return self::insert(
             "History", [
                 "submitId" => $submitId
