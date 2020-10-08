@@ -1,7 +1,12 @@
 import re
 import random
 import string
-import subprocess
+
+import common
+from sandbox import Sandbox
+from runner import Runner
+
+logger = common.get_logger(__file__)
 
 
 class Printer:
@@ -20,9 +25,20 @@ class Printer:
     def get_pdf(url):
         if not Printer.validate_url(url):
             return None
-        pdf_path = "/tmp/{}.pdf".format("".join(random.choice(string.digits) for _ in range(10)))
-        try:
-            subprocess.run(["xvfb-run", "wkhtmltopdf", url, pdf_path], timeout=10)
-        except subprocess.TimeoutExpired:
+        sandbox = Sandbox()
+        Runner.run_command(
+            sandbox=sandbox, command="wkhtmltopdf", timeout=10, args=[url, "output.pdf"], privileged=True
+        )
+
+        # Hack for WSL2 which has this as a left-over
+        if sandbox.has_file("../root/.cache/gstreamer-1.0/registry.x86_64.bin"):
+            sandbox.del_file("../root/.cache/gstreamer-1.0/registry.x86_64.bin")
+
+        # Check if the output is properly produced and return an error if it is not.
+        if not sandbox.has_file("output.pdf"):
             return None
+
+        # Copy the file from the sandbox to a temp folder and send it back to the user from there
+        pdf_path = "/tmp/{}.pdf".format("".join(random.choice(string.digits) for _ in range(10)))
+        sandbox.get_file("output.pdf", pdf_path)
         return pdf_path

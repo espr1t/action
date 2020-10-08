@@ -150,11 +150,14 @@ class Sandbox:
         # Limit the process and its children to use a concrete CPU core
         os.system("taskset -p -c {} {} > /dev/null".format(self._worker.cpu, os.getpid()))
 
-        # Move the process in the user's working directory and chroot its parent
+        # Move the process in the user's working directory
         os.chdir(self._path)
-        os.chroot(os.path.join(self._path, os.path.pardir))
 
         if not privileged:
+            # Chroot the process in the current sandbox
+            # (it's parent, actually, we are currently in /home)
+            os.chroot(os.path.join(self._path, os.path.pardir))
+
             # Set the user to a more unprivileged one (workerXX)
             os.setgroups([])
             os.setgid(self._worker.user)
@@ -179,6 +182,14 @@ class Sandbox:
                 self._path, target_name if target_name is not None else os.path.basename(file_path))
         shutil.copyfile(file_path, file_path_on_sandbox)
         os.chmod(file_path_on_sandbox, mode)
+
+    # Deletes a file from the sandbox's /home directory
+    def del_file(self, file_path):
+        complete_path = os.path.join(self._path, file_path)
+        if not os.path.exists(complete_path):
+            logger.error("Requested to delete file '{}' which does not exist on sandbox.".format(file_path))
+        else:
+            os.remove(complete_path)
 
     # Copies a file named <file_name> from sandbox /home directory to <target_path>
     def get_file(self, file_name, target_path):

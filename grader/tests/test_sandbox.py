@@ -320,6 +320,14 @@ class TestSandbox(TestCase):
         self.assertIn("Permission denied", stderr)  # Should be unable to execute
         self.assertEqual(stdout, "")
 
+    def test_del_file(self):
+        self.sandbox = Sandbox()
+        self.assertFalse(self.sandbox.has_file("foo.txt"))
+        self.sandbox.put_file("install_steps.txt", "foo.txt")
+        self.assertTrue(self.sandbox.has_file("foo.txt"))
+        self.sandbox.del_file("foo.txt")
+        self.assertFalse(self.sandbox.has_file("foo.txt"))
+
     def test_read_file(self):
         self.sandbox = Sandbox()
         self.sandbox.put_file("install_steps.txt", "foo.txt")

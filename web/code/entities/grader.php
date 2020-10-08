@@ -10,7 +10,7 @@ class Grader {
     private static $METHOD_GET = 'GET';
     private static $METHOD_POST = 'POST';
 
-    static function call($path, $data, $method, $json=true) {
+    static function call($path, $data, $method, $json=true, $timeout=3) {
         $curl = curl_init();
 
         // Setup the connection
@@ -19,7 +19,7 @@ class Grader {
             curl_setopt($curl, CURLOPT_POSTFIELDS, array('data' => json_encode($data)));
         }
 
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $timeout);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_URL, $GLOBALS['GRADER_URL'] . $path);
 
@@ -211,20 +211,17 @@ class Grader {
     }
 
     function print_to_pdf($url) {
-        $response = $this->call($GLOBALS['GRADER_ENDPOINT_PRINT_PDF'], array("url" => $url), Grader::$METHOD_POST, false);
-        if ($response['status'] != 200) {
-            // Try a second time?
-            $response = $this->call($GLOBALS['GRADER_ENDPOINT_PRINT_PDF'], array("url" => $url), Grader::$METHOD_POST, false);
-            if ($response['status'] != 200) {
-                return null;
-            }
-        }
-        return $response['data'];
+        $response = $this->call(
+            $GLOBALS['GRADER_ENDPOINT_PRINT_PDF'], array("url" => $url), Grader::$METHOD_POST, false, 10
+        );
+        return $response['status'] != 200 ? null : $response['data'];
     }
 
     function get_replay($replayId) {
-        $response = $this->call($GLOBALS['GRADER_ENDPOINT_GET_REPLAY'], array("id" => $replayId), Grader::$METHOD_POST, false);
-        return $response['status'] == 200 ? $response['data'] : null;
+        $response = $this->call(
+            $GLOBALS['GRADER_ENDPOINT_GET_REPLAY'], array("id" => $replayId), Grader::$METHOD_POST, false
+        );
+        return $response['status'] != 200 ? null : $response['data'];
     }
 }
 

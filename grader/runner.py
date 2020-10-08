@@ -113,7 +113,12 @@ class Runner:
 
     @staticmethod
     def run_command(sandbox: Sandbox, command, timeout,
-                    input_bytes=None, print_stderr=False, privileged=False) -> RunResult:
+                    input_bytes=None, print_stderr=False, args=None, privileged=False) -> RunResult:
+        # If the executable depends on arguments, add them to the run command
+        if args is not None:
+            for arg in args:
+                command = command + " " + arg
+
         # Wrap the command in a timing and time limiting functions
         command = COMMAND_WRAPPER.format(command=command, timeout=timeout)
 
@@ -140,11 +145,6 @@ class Runner:
         executable_language = common.get_language_by_exec_name(executable_name)
         command = Runner.get_run_command(executable_language, executable_name, memory_limit)
 
-        # If the executable depends on arguments, add them to the run command
-        if args is not None:
-            for arg in args:
-                command = command + " " + arg
-
         # Run the program and measure its time and memory consumption
         run_result = Runner.run_command(
             sandbox=sandbox,
@@ -152,6 +152,7 @@ class Runner:
             timeout=timeout,
             input_bytes=input_bytes,
             print_stderr=print_stderr,
+            args=args,
             privileged=privileged
         )
 
