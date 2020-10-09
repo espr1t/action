@@ -191,7 +191,7 @@ class TestSandbox(TestCase):
     @mock.patch("config.MAX_EXECUTION_TIME", 1.0)
     def test_no_ping_dns_resolving(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="ping www.google.com")
-        self.assertIn("Name or service not known", stderr)
+        self.assertIn("Temporary failure in name resolution", stderr)
 
     @mock.patch("config.MAX_EXECUTION_TIME", 1.0)
     def test_no_ping_to_ip_address(self):
@@ -201,7 +201,7 @@ class TestSandbox(TestCase):
     @mock.patch("config.MAX_EXECUTION_TIME", 1.0)
     def test_no_wget_dns_resolving(self):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="wget www.google.com/robots.txt")
-        self.assertIn("Name or service not known", stderr)
+        self.assertIn("Temporary failure in name resolution", stderr)
 
     @mock.patch("config.MAX_EXECUTION_TIME", 1.0)
     def test_no_wget_from_ip_address(self):
