@@ -38,8 +38,10 @@ class StatusPage extends Page {
 
         $list = '';
         foreach ($submits as $submit) {
-            // Hidden submits should not be shown to standard users
-            if (in_array($submit->problemId, $hidden) && !canSeeProblem($this->user, false))
+            // System submits are hidden by default
+            // Also all submits on hidden problems should be hidden
+            $shouldHide = $submit->userId == 0 || in_array($submit->problemId, $hidden);
+            if ($shouldHide && $this->user->access < $GLOBALS['ACCESS_HIDDEN_PROBLEMS'])
                 continue;
 
             // The ID of the submit with possibly a link if accessible by the user
@@ -74,7 +76,7 @@ class StatusPage extends Page {
             }
 
             $listEntry = '
-                <tr' . (in_array($submit->problemId, $hidden) ? ' style="opacity: 0.33"' : '') . '>
+                <tr' . ($shouldHide ? ' style="opacity: 0.33"' : '') . '>
                     <td>' . $submitEl . '</td>
                     <td>' . $userEl . '</td>
                     <td>' . $problemEl . '</td>
