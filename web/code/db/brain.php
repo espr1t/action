@@ -45,6 +45,8 @@ class Brain {
             if (is_string($val)) {
                 $val = DB::escape($val);
             }
+            if (strtoupper($val) == "TRUE") return "TRUE";
+            if (strtoupper($val) == "FALSE") return "FALSE";
             return "'$val'";
     }
 
