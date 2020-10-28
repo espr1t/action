@@ -1,3 +1,10 @@
+# Project folders
 data/**
 sandbox/**
 logs/**
+
+# Miscellaneous
+.idea/**
+/__pycache__/**
+.python-version
+

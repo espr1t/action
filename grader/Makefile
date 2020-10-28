@@ -1,7 +1,5 @@
-# Use "--preserve-env=PATH env" after sudo in case you depend on local user paths (e.g. pyenv)
-
 clean:
-	sudo python3 initializer.py clean
+	sudo --preserve-env=PATH env python initializer.py clean
 	sudo rm -rf Action.egg-info
 	sudo rm -rf build
 	sudo rm -rf .pytest_cache
@@ -9,13 +7,13 @@ clean:
 	sudo rm -rf tests/__pycache__
 
 install:
-	pip3 install --target=/usr/local/lib/python3.8/dist-packages .
+	pip install .
 
 init:
-	sudo python3 initializer.py init
+	sudo --preserve-env=PATH env python initializer.py init
 
 start run:
-	sudo python3 server.py
+	sudo --preserve-env=PATH env python server.py
 
 test:
 #	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/test_evaluator.py
