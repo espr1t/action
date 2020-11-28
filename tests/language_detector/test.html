@@ -1,15 +1,47 @@
 <html>
+    <body>
+    </body>
     <script type="text/javascript" src="/scripts/language_detector.js"></script>
+
     <script>
-        readFile("sources/EllysBounceGame.java", "Java");
-        readFile("sources/EllysXors.java", "Java");
-        readFile("sources/IncludeWithSpace.cpp", "C++");
-        readFile("sources/problem08.cpp", "C++");
-        readFile("sources/problem09.cpp", "C++");
-        readFile("sources/TrySail.cpp", "C++");
-        readFile("sources/problem55.py", "Python");
-        readFile("sources/problem56.py", "Python");
-        readFile("sources/problem57.py", "Python");
-        readFile("sources/NumberGuessing.cpp", "C++");
+        function evalFile(fileName, expected) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == 4) {
+                    if(xhttp.status == 200) {
+                        // Detect language based on code
+                        let code = xhttp.responseText;
+                        let detected = detectLanguage(code);
+
+                        // Print the result on the page
+                        let el = document.createElement("div");
+                        let style = detected === expected ? "" : "color: red;";
+                        let resultText = detected === expected ?
+                            `<div>Detected correctly.</div>` :
+                            `<div style="color: red;">Expected ` + expected + `, got ` + detected + `!`;
+                        el.innerHTML = `
+                            <div style="font-size: larger; font-weight: bold;">` + fileName + `</div>
+                            ` + resultText + `
+                            <br>
+                        `;
+                        document.body.appendChild(el);
+                    } else console.log('ERROR');
+                }
+            }
+            xhttp.open('GET', fileName, true);
+            xhttp.send();
+        }
+
+        evalFile("sources/EllysBounceGame.java", "Java");
+        evalFile("sources/EllysXors.java", "Java");
+        evalFile("sources/IncludeWithSpace.cpp", "C++");
+        evalFile("sources/problem08.cpp", "C++");
+        evalFile("sources/problem09.cpp", "C++");
+        evalFile("sources/TrySail.cpp", "C++");
+        evalFile("sources/problem55.py", "Python");
+        evalFile("sources/problem56.py", "Python");
+        evalFile("sources/problem57.py", "Python");
+        evalFile("sources/NumberGuessing.cpp", "C++");
+        evalFile("sources/Cars.cpp", "C++");
     </script>
 </html>

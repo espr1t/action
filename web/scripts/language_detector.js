@@ -1,22 +1,3 @@
-function readFile(fileName, type) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (xhttp.readyState == 4) {
-            if(xhttp.status == 200) {
-                var code = xhttp.responseText;
-                var detected = detectLanguage(code);
-                if (type === detected) {
-                    console.log("For file '" + fileName + "' expected " + type + ", got " + detected);
-                } else {
-                    console.error("For file '" + fileName + "' expected " + type + ", got " + detected);
-                }
-            } else console.log('ERROR');
-        }
-    }
-    xhttp.open('GET', fileName, true);
-    xhttp.send();
-}
-
 /* Removes spaces after # */
 function removeSpaces(code) {
     var curIndex = 0;
@@ -244,7 +225,9 @@ function scoreByKeyword(code, scores, index, multiplier, keyword) {
         code = code.replace(ch, ' ');
     }
     var numMatches = (code.match(re) || []).length;
-    // console.log("Keyword " + keyword + " matched " + numMatches + " tokens.");
+    // if (numMatches > 0) {
+    //     console.log("Keyword " + keyword + " matched " + numMatches + " tokens.");
+    // }
     scores[index] += numMatches > 0 ? multiplier : 0;
 }
 
@@ -258,21 +241,28 @@ function detectLanguage(code) {
         WEAK : 1    // keyword in more than one language
     }
 
-    var keywordsCpp = ["auto", "bool", "const", "constexpr", "const_cast", "delete", "dynamic_cast", "extern", "friend",
-                       "inline", "nullptr", "operator", "reinterpret_cast", "signed", "sizeof", "static_cast",
-                       "struct", "template", "typedef", "typename", "union", "unsigned", "using", "virtual", "include",
-                       "std", "cout", "cerr", "endl"];
+    var keywordsCpp = [
+        "auto", "bool", "const", "constexpr", "const_cast", "delete", "dynamic_cast", "extern", "friend", "inline",
+        "nullptr", "operator", "reinterpret_cast", "signed", "sizeof", "static_cast", "struct", "template", "typedef",
+        "typename", "union", "unsigned", "using", "virtual", "include", "std", "cout", "cerr", "endl", "scanf", "fscanf",
+        "printf", "fprintf", "define", "pragma"
+    ];
 
-    var keywordsCppAndJava = ["case", "catch", "char", "default", "do", "double", "enum", "float", "int", "long", "namespace",
-                              "new", "private", "protected", "public", "short", "static", "switch", "synchronized", "this",
-                              "throw", "void", "volatile"];
+    var keywordsCppAndJava = [
+        "case", "catch", "char", "default", "do", "this", "double", "enum", "float", "int", "long", "namespace", "new",
+        "private", "protected", "public", "short", "static", "switch", "synchronized", "throw", "void", "volatile"
+    ];
 
-    var keywordsJava = ["abstract", "boolean", "byte", "extends", "final", "finally", "implements", "import", "instanceof",
-                        "interface", "native", "package", "super", "throws", "transient", "java", "System.out.println",
-                        "public(\\s)+static", "public(\\s)+class", "String"];
+    var keywordsJava = [
+        "abstract", "boolean", "byte", "extends", "final", "finally", "implements", "import", "instanceof", "interface",
+        "native", "package", "super", "throws", "transient", "java", "String", "System.out.println", "System.out.printf",
+        "public(\\s)+static", "public(\\s)+class"
+    ];
 
-    var keywordsPython = ["as", "def", "elif", "except", "exec", "from", "global", "in", "is", "lambda", "pass", "print", "raise",
-                          "with", "yield"];
+    var keywordsPython = [
+        "as", "def", "elif", "except", "exec", "from", "global", "in", "is", "lambda", "pass", "print", "raise", "with",
+        "yield", "range",
+    ];
 
     var keywordsPythonAndJava = ["import"];
 
@@ -311,11 +301,9 @@ function detectLanguage(code) {
     javaScore   /= codeWithoutCStyleComments.length;  // java score
     pythonScore /= codeWithoutPyStyleComments.length; // python score
 
-    /*
     console.log("C++ score: " + cppScore)
     console.log("Java score: " + javaScore)
     console.log("Python score: " + pythonScore)
-    */
 
     return (javaScore < cppScore) ? ((pythonScore < cppScore) ? "C++" : "Python") : ((javaScore < pythonScore) ? "Python" : "Java");
 }
