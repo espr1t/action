@@ -138,15 +138,15 @@ function removePyStyleComments(code) {
         switch (code[curIndex]) {
             case '\'':
                if (curState == states.DEFAULT) {
-                    if ((curIndex + 1) < code.length && code[curIndex + 1] != '\'') {
-                        startOneSQ = curIndex;
-                        curState = states.ONE_SQ;
-                        ++curIndex;
-                    } else if ((curIndex + 2) < code.length && code[curIndex + 1] == '\'' && code[curIndex + 2] == '\'') {
-                        startThreeSQ = curIndex;
-                        curState = states.THREE_SQ;
-                        curIndex += 3;
-                    } else ++curIndex;
+                   if ((curIndex + 2) < code.length && code[curIndex + 1] == '\'' && code[curIndex + 2] == '\'') {
+                       startThreeSQ = curIndex;
+                       curState = states.THREE_SQ;
+                       curIndex += 3;
+                   } else {
+                       startOneSQ = curIndex;
+                       curState = states.ONE_SQ;
+                       ++curIndex;
+                   }
                 } else if (curState == states.ONE_SQ) {
                     // remove string in single quotes
                     code = code.substring(0, startOneSQ + 1) + code.substring(curIndex);
@@ -163,15 +163,15 @@ function removePyStyleComments(code) {
                 break;
             case '"':
                 if (curState == states.DEFAULT) {
-                    if ((curIndex + 1) < code.length && code[curIndex + 1] != '"') {
-                        startOneDQ = curIndex;
-                        curState = states.ONE_DQ;
-                        ++curIndex;
-                    } else if ((curIndex + 2) < code.length && code[curIndex + 1] == '"' && code[curIndex + 2] == '"') {
+                    if ((curIndex + 2) < code.length && code[curIndex + 1] == '"' && code[curIndex + 2] == '"') {
                         startThreeDQ = curIndex;
                         curState = states.THREE_DQ;
                         curIndex += 3;
-                    } else ++curIndex;
+                    } else {
+                        startOneDQ = curIndex;
+                        curState = states.ONE_DQ;
+                        ++curIndex;
+                    }
                 } else if (curState == states.ONE_DQ) {
                     // remove string in double quotes
                     code = code.substring(0, startOneDQ + 1) + code.substring(curIndex);
@@ -218,92 +218,100 @@ function removePyStyleComments(code) {
     return code;
 }
 
-function scoreByKeyword(code, scores, index, multiplier, keyword) {
-    var re = new RegExp("(^|\\s)" + keyword + "(\\s|\\(|$)", 'g');
-    var removeChars = ['<', '>', '#', ':', ';', '=', '{', '}', '(', ')', '[', ']'];
-    for (var ch of removeChars) {
-        code = code.replace(ch, ' ');
-    }
-    var numMatches = (code.match(re) || []).length;
+function scoreByKeyword(code, keyword, modifier) {
+    let re = new RegExp("(^|\\s)" + keyword + "(\\s|\\(|$)", 'g');
+    let numMatches = (code.match(re) || []).length;
     // if (numMatches > 0) {
-    //     console.log("Keyword " + keyword + " matched " + numMatches + " tokens.");
+    //     console.log("Keyword " + keyword + " with modifier " + modifier + " matched " + numMatches + " tokens.");
     // }
-    scores[index] += numMatches > 0 ? multiplier : 0;
+    return numMatches > 0 ? modifier : 0;
 }
 
 /*
  * Detect language
  * Possible languages: {C++, Java, Python}
  */
-function detectLanguage(code) {
-    var keywordType = {
+function detectLanguage(code, name="SourceName") {
+    let keywordScore = {
         STRONG : 3, // keyword in only one language
-        WEAK : 1    // keyword in more than one language
+        WEAK : 1,   // keyword in more than one language
+        OTHER: -2   // keyword in another language
     }
 
-    var keywordsCpp = [
+    let keywordsCpp = [
         "auto", "bool", "const", "constexpr", "const_cast", "delete", "dynamic_cast", "extern", "friend", "inline",
         "nullptr", "operator", "reinterpret_cast", "signed", "sizeof", "static_cast", "struct", "template", "typedef",
         "typename", "union", "unsigned", "using", "virtual", "include", "std", "cout", "cerr", "endl", "scanf", "fscanf",
         "printf", "fprintf", "define", "pragma"
     ];
 
-    var keywordsCppAndJava = [
+    let keywordsCppAndJava = [
         "case", "catch", "char", "default", "do", "this", "double", "enum", "float", "int", "long", "namespace", "new",
         "private", "protected", "public", "short", "static", "switch", "synchronized", "throw", "void", "volatile"
     ];
 
-    var keywordsJava = [
-        "abstract", "boolean", "byte", "extends", "final", "finally", "implements", "import", "instanceof", "interface",
-        "native", "package", "super", "throws", "transient", "java", "String", "System.out.println", "System.out.printf",
+    let keywordsJava = [
+        "abstract", "boolean", "byte", "extends", "final", "finally", "implements", "instanceof", "interface", "native",
+        "package", "super", "throws", "transient", "java", "String", "System.out.println", "System.out.printf",
         "public(\\s)+static", "public(\\s)+class"
     ];
 
-    var keywordsPython = [
+    let keywordsPython = [
         "as", "def", "elif", "except", "exec", "from", "global", "in", "is", "lambda", "pass", "print", "raise", "with",
-        "yield", "range",
+        "yield", "range", "xrange", "raw_input"
     ];
 
-    var keywordsPythonAndJava = ["import"];
+    let keywordsPythonAndJava = ["import"];
 
-    var scores = [0, 0, 0];
+    let candidates = [
+        {
+            "language": "C++",
+            "code": removeCStyleComments(code),
+            "strong": keywordsCpp,
+            "weak": keywordsCppAndJava,
+            "other": keywordsJava.concat(keywordsPython).concat(keywordsPythonAndJava)
+        },
+        {
+            "language": "Java",
+            "code": removeCStyleComments(code),
+            "strong": keywordsJava,
+            "weak": keywordsCppAndJava,
+            "other": keywordsCpp.concat(keywordsPython)
+        },
+        {
+            "language": "Python",
+            "code": removePyStyleComments(code),
+            "strong": keywordsPython,
+            "weak": keywordsPythonAndJava,
+            "other": keywordsCpp.concat(keywordsJava).concat(keywordsCppAndJava)
+        },
+    ];
 
-    var codeWithoutCStyleComments = removeCStyleComments(code);
-    var codeWithoutPyStyleComments = removePyStyleComments(code);
+    let bestScore = 0.0;
+    let bestLanguage = "C++";
 
-    keywordsCpp.forEach(function(item) {
-        scoreByKeyword(codeWithoutCStyleComments, scores, 0, keywordType.STRONG, item);
-    });
+    console.log("Evaluating file: " + name);
+    for (let candidate of candidates) {
+        for (let remChar of ['<', '>', '#', ':', ';', '=', '{', '}', '(', ')', '[', ']']) {
+            candidate["code"] = candidate["code"].replace(remChar, ' ');
+        }
 
-    keywordsCppAndJava.forEach(function(item) {
-        scoreByKeyword(codeWithoutCStyleComments, scores, 0, keywordType.WEAK, item);
-        scoreByKeyword(codeWithoutCStyleComments, scores, 1, keywordType.WEAK, item);
-    });
+        let score = 0.0;
+        for (let token of candidate["weak"]) {
+            score += scoreByKeyword(candidate["code"], token, keywordScore.WEAK);
+        }
+        for (let token of candidate["strong"]) {
+            score += scoreByKeyword(candidate["code"], token, keywordScore.STRONG);
+        }
+        for (let token of candidate["other"]) {
+            score += scoreByKeyword(candidate["code"], token, keywordScore.OTHER);
+        }
 
-    keywordsJava.forEach(function(item) {
-        scoreByKeyword(codeWithoutCStyleComments, scores, 1, keywordType.STRONG, item);
-    });
-
-    keywordsPython.forEach(function(item) {
-        scoreByKeyword(codeWithoutPyStyleComments, scores, 2, keywordType.STRONG, item);
-    });
-
-    keywordsPythonAndJava.forEach(function(item) {
-        scoreByKeyword(codeWithoutCStyleComments, scores, 1, keywordType.WEAK, item);
-        scoreByKeyword(codeWithoutPyStyleComments, scores, 2, keywordType.WEAK, item);
-    });
-
-    var cppScore    = scores[0];
-    var javaScore   = scores[1];
-    var pythonScore = scores[2];
-
-    cppScore    /= codeWithoutCStyleComments.length;  // cpp score
-    javaScore   /= codeWithoutCStyleComments.length;  // java score
-    pythonScore /= codeWithoutPyStyleComments.length; // python score
-
-    console.log("C++ score: " + cppScore)
-    console.log("Java score: " + javaScore)
-    console.log("Python score: " + pythonScore)
-
-    return (javaScore < cppScore) ? ((pythonScore < cppScore) ? "C++" : "Python") : ((javaScore < pythonScore) ? "Python" : "Java");
+        console.log("  >> language " + candidate["language"] + " got score: " + score);
+        if (bestScore < score) {
+            bestScore = score;
+            bestLanguage = candidate["language"];
+        }
+    }
+    return bestLanguage;
 }

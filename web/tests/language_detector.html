@@ -5,20 +5,19 @@
 
     <script>
         function evalFile(fileName, expected) {
-            var xhttp = new XMLHttpRequest();
+            let xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (xhttp.readyState == 4) {
                     if(xhttp.status == 200) {
                         // Detect language based on code
                         let code = xhttp.responseText;
-                        let detected = detectLanguage(code);
+                        let detected = detectLanguage(code, fileName.split('/')[1]);
 
                         // Print the result on the page
                         let el = document.createElement("div");
-                        let style = detected === expected ? "" : "color: red;";
                         let resultText = detected === expected ?
                             `<div>Detected correctly.</div>` :
-                            `<div style="color: red;">Expected ` + expected + `, got ` + detected + `!`;
+                            `<div style="color: #ff0000;">Expected ` + expected + `, got ` + detected + `!</div>`;
                         el.innerHTML = `
                             <div style="font-size: larger; font-weight: bold;">` + fileName + `</div>
                             ` + resultText + `
@@ -43,5 +42,9 @@
         evalFile("sources/problem57.py", "Python");
         evalFile("sources/NumberGuessing.cpp", "C++");
         evalFile("sources/Cars.cpp", "C++");
+        evalFile("sources/Snowfall.cpp", "C++");
+        evalFile("sources/Snowfall2.cpp", "C++");
+        evalFile("sources/IO.py", "Python");
+        evalFile("sources/Scanner.java", "Java");
     </script>
 </html>

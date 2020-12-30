@@ -139,3 +139,6 @@ RewriteRule    ^admin/messages/(\w+)$                           /code/admin/admi
 # DB tools
 RewriteRule    ^admin/init$                                     /code/db/init.php                                                                   [NC,L,QSA]
 RewriteRule    ^admin/migrate$                                  /code/db/migrate.php                                                                [NC,L,QSA]
+
+# Tests
+RewriteRule    ^tests/language-detector$                        /tests/language_detector.html                                                       [NC,L,QSA]
