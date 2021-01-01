@@ -1,50 +1,53 @@
-<html>
-    <body>
-    </body>
-    <script type="text/javascript" src="/scripts/language_detector.js"></script>
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <title>Language Detector Unit Tests</title>
+        <script type="text/javascript" src="/scripts/language_detector.js"></script>
+        <script>
+            function evalFile(fileName, expected) {
+                let xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (xhttp.readyState == 4) {
+                        if(xhttp.status == 200) {
+                            // Detect language based on code
+                            let code = xhttp.responseText;
+                            let detected = detectLanguage(code, fileName.split('/')[1]);
 
-    <script>
-        function evalFile(fileName, expected) {
-            let xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (xhttp.readyState == 4) {
-                    if(xhttp.status == 200) {
-                        // Detect language based on code
-                        let code = xhttp.responseText;
-                        let detected = detectLanguage(code, fileName.split('/')[1]);
-
-                        // Print the result on the page
-                        let el = document.createElement("div");
-                        let resultText = detected === expected ?
-                            `<div>Detected correctly.</div>` :
-                            `<div style="color: #ff0000;">Expected ` + expected + `, got ` + detected + `!</div>`;
-                        el.innerHTML = `
+                            // Print the result on the page
+                            let el = document.createElement("div");
+                            let resultText = detected === expected ?
+                                `<div>Detected correctly.</div>` :
+                                `<div style="color: #ff0000;">Expected ` + expected + `, got ` + detected + `!</div>`;
+                            el.innerHTML = `
                             <div style="font-size: larger; font-weight: bold;">` + fileName + `</div>
                             ` + resultText + `
                             <br>
                         `;
-                        document.body.appendChild(el);
-                    } else console.log('ERROR');
+                            document.body.appendChild(el);
+                        } else console.log('ERROR');
+                    }
                 }
+                xhttp.open('GET', fileName, true);
+                xhttp.send();
             }
-            xhttp.open('GET', fileName, true);
-            xhttp.send();
-        }
 
-        evalFile("sources/EllysBounceGame.java", "Java");
-        evalFile("sources/EllysXors.java", "Java");
-        evalFile("sources/IncludeWithSpace.cpp", "C++");
-        evalFile("sources/problem08.cpp", "C++");
-        evalFile("sources/problem09.cpp", "C++");
-        evalFile("sources/TrySail.cpp", "C++");
-        evalFile("sources/problem55.py", "Python");
-        evalFile("sources/problem56.py", "Python");
-        evalFile("sources/problem57.py", "Python");
-        evalFile("sources/NumberGuessing.cpp", "C++");
-        evalFile("sources/Cars.cpp", "C++");
-        evalFile("sources/Snowfall.cpp", "C++");
-        evalFile("sources/Snowfall2.cpp", "C++");
-        evalFile("sources/IO.py", "Python");
-        evalFile("sources/Scanner.java", "Java");
-    </script>
+            evalFile("/tests/sources/EllysBounceGame.java", "Java");
+            evalFile("/tests/sources/EllysXors.java", "Java");
+            evalFile("/tests/sources/IncludeWithSpace.cpp", "C++");
+            evalFile("/tests/sources/problem08.cpp", "C++");
+            evalFile("/tests/sources/problem09.cpp", "C++");
+            evalFile("/tests/sources/TrySail.cpp", "C++");
+            evalFile("/tests/sources/problem55.py", "Python");
+            evalFile("/tests/sources/problem56.py", "Python");
+            evalFile("/tests/sources/problem57.py", "Python");
+            evalFile("/tests/sources/NumberGuessing.cpp", "C++");
+            evalFile("/tests/sources/Cars.cpp", "C++");
+            evalFile("/tests/sources/Snowfall.cpp", "C++");
+            evalFile("/tests/sources/Snowfall2.cpp", "C++");
+            evalFile("/tests/sources/IO.py", "Python");
+            evalFile("/tests/sources/Scanner.java", "Java");
+        </script>
+    </head>
+    <body>
+    </body>
 </html>

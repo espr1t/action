@@ -111,7 +111,8 @@ RewriteRule    ^messages/(\w+)$                                 /code/main.php?p
 
 # Actions
 RewriteRule    ^actions/update$                                 /code/actions/grader_update.php                                                     [NC,L,QSA]
-RewriteRule    ^actions/data/(\w+)$                             /code/actions/data.php?type=$1                                                      [NC,L,QSA]
+RewriteRule    ^actions/data/users$                             /code/actions/data.php?type=users                                                   [NC,L,QSA]
+RewriteRule    ^actions/data/source/(\d+)$                      /code/actions/data.php?type=source&id=$1                                            [NC,L,QSA]
 RewriteRule    ^actions/(\w+)$                                  /code/actions/dispatch.php?action=$1                                                [NC,L,QSA]
 
 #Reset Password
@@ -136,9 +137,10 @@ RewriteRule    ^admin/history/(\d+)$                            /code/admin/admi
 RewriteRule    ^admin/messages$                                 /code/admin/admin.php?page=messages                                                 [NC,L,QSA]
 RewriteRule    ^admin/messages/(\w+)$                           /code/admin/admin.php?page=messages&messageKey=$1                                   [NC,L,QSA]
 
+# Tests
+RewriteRule    ^admin/tests/language-detector$                  /tests/language_detector.html                                                       [NC,L,QSA]
+RewriteRule    ^admin/tests/language-detector/(\d+)$            /code/admin/admin.php?page=tests&start=$1                                           [NC,L,QSA]
+
 # DB tools
 RewriteRule    ^admin/init$                                     /code/db/init.php                                                                   [NC,L,QSA]
 RewriteRule    ^admin/migrate$                                  /code/db/migrate.php                                                                [NC,L,QSA]
-
-# Tests
-RewriteRule    ^tests/language-detector$                        /tests/language_detector.html                                                       [NC,L,QSA]
