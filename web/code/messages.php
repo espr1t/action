@@ -16,7 +16,7 @@ class MessagesPage extends Page {
             $message = $messages[$i];
             $preview = $message['content'];
             if (strlen($preview) > 250) {
-                $preview = substr($preview, 0, 247) . '...';
+                $preview = mb_substr($preview, 0, 247) . '...';
             }
             $date = explode(' ', $message['sent'])[0];
             $time = explode(' ', $message['sent'])[1];
