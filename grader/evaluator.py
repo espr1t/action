@@ -176,11 +176,12 @@ class Evaluator:
             return False
         return True
 
-    def compile(self, language, path_source, path_executable):
+    def compile(self, language, path_source, path_executable, print_error=False):
         try:
             compile_status = Compiler.compile(language, path_source, path_executable)
             if compile_status != "":
-                logger.error("Submit {id} | Could not compile file {file_path}!".format(
+                error_log_func = logger.error if print_error else logger.info
+                error_log_func("Submit {id} | Could not compile file {file_path}!".format(
                         id=self.id, file_path=path_source))
             return compile_status
         except Exception as ex:
@@ -196,7 +197,7 @@ class Evaluator:
         # Otherwise do the compilation
         logger.info("Submit {id} |   >> compiling utility file {file_name}...".format(
                 id=self.id, file_name=os.path.basename(path_source)))
-        return self.compile(config.LANGUAGE_CPP, path_source, path_executable) == ""
+        return self.compile(config.LANGUAGE_CPP, path_source, path_executable, True) == ""
 
     def download_utility_file(self, download_url, destination):
         # If already downloaded, return directly
