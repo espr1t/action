@@ -46,10 +46,12 @@ class Runner:
             return "./{executable}".format(executable=executable)
         if language == config.LANGUAGE_JAVA:
             return "java -XX:+UseSerialGC -Xmx{max_memory_mb}m -Xss64m -jar {executable}".format(
-                max_memory_mb=(memory_limit + config.MEMORY_OFFSET_JAVA) // 2**20, executable=executable
+                max_memory_mb=memory_limit // 2**20, executable=executable
             )
         if language == config.LANGUAGE_PYTHON:
-            return "python3 {executable}".format(executable=executable)
+            return "PYPY_GC_MAX={max_memory_mb}MB pypy3 {executable}".format(
+                max_memory_mb=memory_limit // 2**20, executable=executable
+            )
         raise Exception("Unsupported language")
 
     @staticmethod

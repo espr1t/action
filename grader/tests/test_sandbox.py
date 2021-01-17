@@ -497,7 +497,7 @@ class TestSandbox(TestCase):
         self.sandbox = Sandbox()
         self.sandbox.put_file(os.path.join(self.PATH_FIXTURES, "factor.py"))
         stdout, stderr = self.sandbox_helper(
-            sandbox=self.sandbox, command="/usr/bin/time --format '%U %P' python3 factor.py")
+            sandbox=self.sandbox, command="/usr/bin/time --format '%U %P' pypy3 factor.py")
         self.assertIn("1000000000000037", stdout)
         self.assertEqual(len(stderr.splitlines()), 1)
         user_time = float(stderr.split()[0])
@@ -588,7 +588,7 @@ class TestSandbox(TestCase):
         stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="jar")
         self.assertIn("Usage: jar [OPTION...]", stderr)
 
-        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="python3 --version")
+        stdout, stderr = self.sandbox_helper(sandbox=Sandbox(), command="pypy3 --version")
         self.assertIn("Python 3.", stdout)
 
     def test_time_command_available(self):

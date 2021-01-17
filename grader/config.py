@@ -62,7 +62,8 @@ TIME_OFFSET_PYTHON = 0.02  # Seconds
 # Memory used by non-user code
 MEMORY_OFFSET_CPP = 2 * (1 << 20)  # Bytes = 2MB
 MEMORY_OFFSET_JAVA = 34 * (1 << 20)  # Bytes = 34MB
-MEMORY_OFFSET_PYTHON = 9 * (1 << 20)  # Bytes = 9MB
+MEMORY_OFFSET_PYTHON = 60 * (1 << 20)  # Bytes = 60MB (for PyPy/RPython)
+# MEMORY_OFFSET_PYTHON = 9 * (1 << 20)  # Bytes = 9MB (for Python/CPython)
 
 # Output Validation
 FLOAT_PRECISION = 1e-9

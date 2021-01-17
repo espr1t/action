@@ -5,7 +5,7 @@ Installation steps:
     >> sudo apt upgrade
     >> sudo apt full-upgrade
     >> sudo update-alternatives --config editor
-1. (optional) Install Python.
+1. (optional) Install Python andPypy.
     Similarly to other languages, if you are not satisfied with the current version installed with
     your distribution (or there is none), proceed with the steps below.
 1.1. Install latest version of Python and make it the default
@@ -23,6 +23,9 @@ Installation steps:
 1.4. Install PIP (python's package manager)
     >> sudo apt install python3-pip
     >> pip3 install --upgrade pip
+1.5. Install PyPy (used to actually run user's submissions written in Python):
+    >> sudo apt install pypy3
+    >> pypy3 -m pip install pyflakes
 2. (optional) Install latest version of GCC/G++.
     Similarly to other languages, if you are not satisfied with the current version installed with
     your distribution (or there is none), proceed with the steps below.
