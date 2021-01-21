@@ -213,7 +213,7 @@ class TestEvaluator(TestCase):
             evaluator=evaluator,
             language=config.LANGUAGE_PYTHON,
             source=os.path.join(self.PATH_FIXTURES, "ThreeSum/Solutions/ThreeSum.py"),
-            time_lb=0.1,
+            time_lb=0.01,
             memory_lb=1.0,
             expected_errors={}
         )
@@ -338,6 +338,19 @@ class TestEvaluator(TestCase):
             time_lb=0.0,
             memory_lb=0.0,
             expected_errors={"WRONG_ANSWER": 7}
+        )
+
+        evaluator = self.get_evaluator("games_interactive_ng.json", config.LANGUAGE_PYTHON)
+        evaluator.path_tester_source = os.path.join(self.PATH_FIXTURES, "NG/Tester/NumberGuessingTester.cpp")
+        evaluator.path_tester_executable = os.path.join(config.PATH_TESTERS, "NumberGuessingTester.o")
+
+        self.standard_problem_helper(
+            evaluator=evaluator,
+            language=config.LANGUAGE_PYTHON,
+            source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessing.py"),
+            time_lb=0.0,
+            memory_lb=0.0,
+            expected_errors={}
         )
 
     ########################################################
