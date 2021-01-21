@@ -90,6 +90,11 @@ def interact(tester_wrapped_cmd, player_one_wrapped_cmd, player_two_wrapped_cmd,
         ai_output = ai_process.stdout.read().strip().replace("\r", "").replace("\n", " ")
         sys.stderr.write("AI output: '{}'\n".format(ai_output))
 
+        # Apparently psutil.Popen file descriptors linger opened,
+        # thus close them explicitly so we don't run out of available ones
+        ai_process.stdout.close()
+        ai_process.stderr.close()
+
         # Check if the output contains at least one printable character
         ai_output_empty = not any(ch in printable for ch in ai_output)
 
