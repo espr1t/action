@@ -627,6 +627,27 @@ class Brain {
         return !$response ? null : self::getResult($response);
     }
 
+    public static function deleteUser(int $userId, string $username): bool {
+        $relatedTables = array(
+            "Credentials" => "userId",
+            "Notifications" => "userId",
+            "Sources" => "userId",
+            "Submits" => "userId",
+            "Achievements" => "user",
+            "Users" => "id",
+            "UsersInfo" => "id"
+        );
+        foreach ($relatedTables as $tableName => $targetColumn) {
+            if (!self::delete($tableName, "`{$targetColumn}` = {$userId}")) {
+                error_log("Could not delete user \"{$username}\" from `{$tableName}` table.");
+                return false;
+            }
+            error_log("Deleted user \"{$username}\" from `{$tableName}` table.");
+        }
+
+        return true;
+    }
+
     public static function getAllUsers(): ?array {
         $response = self::select(
             "Users",

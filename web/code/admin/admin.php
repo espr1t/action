@@ -46,6 +46,11 @@ switch ($_GET["page"]) {
         $page = new AdminMessagesPage($user);
         break;
 
+    case "delete_user":
+        require_once("delete_user.php");
+        $page = new AdminDeleteUserPage($user);
+        break;
+
     case "tests":
         require_once("../../tests/language_detector.php");
         $page = new LanguageDetectorPage($user);

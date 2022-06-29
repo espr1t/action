@@ -136,6 +136,7 @@ RewriteRule    ^admin/achievements/recalc$                      /code/admin/admi
 RewriteRule    ^admin/history/(\d+)$                            /code/admin/admin.php?page=history&submitId=$1                                      [NC,L,QSA]
 RewriteRule    ^admin/messages$                                 /code/admin/admin.php?page=messages                                                 [NC,L,QSA]
 RewriteRule    ^admin/messages/(\w+)$                           /code/admin/admin.php?page=messages&messageKey=$1                                   [NC,L,QSA]
+RewriteRule    ^admin/delete/user/(\d+)$                        /code/admin/admin.php?page=delete_user&userId=$1                                    [NC,L,QSA]
 
 # Tests
 RewriteRule    ^admin/tests/language-detector$                  /tests/language_detector.html                                                       [NC,L,QSA]
