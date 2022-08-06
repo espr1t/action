@@ -10,7 +10,7 @@ class HelpPage extends Page {
     public function getContent() {
         $version = '
             <div class="help-version">
-                Версия на системата: <a href="https://github.com/espr1t/action/commit/91f26db20657c199a1d33d667a9ae673a75c3d97" target="_blank">v.200907.91f26db</a>
+                Версия на системата: <a href="https://github.com/espr1t/action/commit/54aff3e95e98b1bf75d3eca3f217aff164252d12" target="_blank">v.220807.54aff3e</a>
             </div>
         ';
 
@@ -75,7 +75,7 @@ class HelpPage extends Page {
             <h2 id="compilation"><a href="#compilation">Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 9.3.0):</b> <pre>g++ -O2 -std=c++17 -Werror=return-type -s -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>C++ (GCC 10.3.0):</b> <pre>g++ -O2 -std=c++20 -Werror=return-type -s -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
                 <li><b>Java (OpenJDK 11.0.8):</b> <pre>javac -nowarn &lt;source&gt;.java</pre></li>
                 <li><b>Python (Python 3.8.5):</b> <pre>python3 -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
@@ -89,7 +89,7 @@ class HelpPage extends Page {
                 <li><b>Рам:</b> DDR3 32GB :: 2666MHz ECC</li>
                 <li><b>Харддиск:</b> Corsair Force SSD :: 520MB/s</li>
             </ul>
-            Ползваната операционна система на тестовата машина е Ubuntu 18.04.
+            Ползваната операционна система на тестовата машина е Ubuntu 20.04.
         ') . inBox('
             <h2 id="system-status"><a href="#system-status">Статус</a></h2>
             Чрез бутона "Статус" в главното меню можете да видите текущите решения, които системата все още не е
