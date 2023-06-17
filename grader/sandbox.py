@@ -116,7 +116,7 @@ class Sandbox:
         setrlimit(RLIMIT_CORE, (0, 0))
 
         # Deny writing to message queues
-        setrlimit(RLIMIT_MSGQUEUE, (0, 0))
+        # setrlimit(RLIMIT_MSGQUEUE, (0, 0))
 
         # A hard limit of 5 minutes for running anything in a sandbox
         # This is a very crude fail-safe mechanism if something really goes wrong
