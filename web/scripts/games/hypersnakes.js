@@ -496,7 +496,7 @@ function getHypersnakesContent(showReset) {
     return content;
 }
 
-function showHypersnakesReplay(playerOne, playerTwo, log, demo=false) {
+function showHypersnakesReplay(playerOne, playerTwo, gameLog, demo=false) {
     hypersnakesDemo = demo;
     hypersnakesPlayerOne = playerOne;
     hypersnakesPlayerTwo = playerTwo;
@@ -517,14 +517,14 @@ function showHypersnakesReplay(playerOne, playerTwo, log, demo=false) {
     var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
     showActionForm(content.outerHTML, gameUrl);
 
+    // Run the actual replay
     // Add action event listeners
     document.addEventListener('keydown', identifyHypersnakesReplayEvent, false);
-    document.getElementById('snakesBoard').addEventListener('mousedown', function() {
+    document.getElementById('snakesBoard').addEventListener('mousedown', function () {
         hypersnakesReplayRunning = !hypersnakesReplayRunning;
     }, true);
 
-    // Run the actual replay
-    runHypersnakesReplay(log);
+    runHypersnakesReplay(gameLog);
 }
 
 function showHypersnakesVisualizer(username) {

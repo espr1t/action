@@ -218,7 +218,7 @@ function updateTestTable() {
 
         var scoreCol = row.insertCell(-1);
         scoreCol.innerHTML = tests[i]['score'];
-        scoreCol.contentEditable = true;
+        scoreCol.contentEditable = 'true';
         scoreCol.addEventListener('input', (function(position, element) {
             for (var i = 0; i < tests.length; i++) {
                 if (tests[i]['position'] == position) {
@@ -256,10 +256,12 @@ function deleteTest(position) {
         var callback = function(response) {
             try {
                 response = JSON.parse(response);
-                if (response['status'] == 'OK') {
+                if (response.status == 'OK') {
                     tests.splice(index, 1);
                     updateTestTable();
                     showNotification('INFO', 'Тестът беше изтрит успешно.');
+                } else {
+                    showNotification('ERROR', response.message);
                 }
             } catch(ex) {
                 showNotification('ERROR', 'Тестът не беше изтрит успешно.');
@@ -598,6 +600,7 @@ function submitEditProblemForm() {
         if (id == 'new' && 'id' in response) {
             redirect('/admin/problems?action=success');
         }
+        showNotification(response.status == "OK" ? "INFO" : "ERROR", response.message);
     }
     ajaxCall('/actions/editProblem', data, callback);
 }

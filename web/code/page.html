@@ -3,121 +3,121 @@
     <head>
         <?php echo createHead($page); ?>
         <?php
-            $reportFormContent = '
+            $reportFormContent = "
                 <h2>Съобщение до админ</h2>
                 При всякакви проблеми, които сте забелязали, или просто коментари за системата.<br><br>
-                <div class="italic right" style="font-size: 0.8em;">
-                    На страница: http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '
+                <div class='italic right' style='font-size: 0.8em;'>
+                    На страница: https://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}
                 </div>
-                <textarea name="problem" class="report-problem" id="reportText"></textarea>
-                <div class="input-wrapper">
-                    <input type="submit" class="button button-color-red" onclick="return submitReportForm();" value="Изпрати">
+                <textarea name='problem' class='report-problem' id='reportText'></textarea>
+                <div class='input-wrapper'>
+                    <input type='submit' class='button button-color-red' onclick='return submitReportForm();' value='Изпрати'>
                 </div>
-            ';
+            ";
         ?>
 
         <script>
             function reportProblem() {
                 <?php
-                    if ($user->access < $GLOBALS['ACCESS_REPORT_PROBLEM']) {
-                        echo "showNotification('ERROR', 'Трябва да влезете в системата за да съобщите за проблем.');";
+                    if ($user->getAccess() < $GLOBALS["ACCESS_REPORT_PROBLEM"]) {
+                        echo "showNotification(`ERROR`, `Трябва да влезете в системата за да съобщите за проблем.`);";
                     } else {
-                        echo "showReportForm(`" . $reportFormContent . "`);";
+                        echo "showReportForm(`{$reportFormContent}`);";
                     }
                 ?>
             }
         </script>
     </head>
 
-    <body onload="<?php echo $page->onLoad() ?>">
+    <body onload='<?php echo $page->onLoad() ?>'>
         <?php if (!isset($isAdminPage)) include_once("analytics.php") ?>
-        <div class="wrapper" id="wrapper">
+        <div class='wrapper' id='wrapper'>
             <!-- Header with menu -->
-            <div class="header" id="head">
-                <div class="menu" id="menu">
-                    <table class="menu" id="menuTable">
+            <div class='header' id='head'>
+                <div class='menu' id='menu'>
+                    <table class='menu' id='menuTable'>
                         <tr>
-                            <td class="button">
-                                <a href="/problems">
-                                    <div class="button">
-                                        <div class="button-icon">
-                                            <i class="fas fa-lightbulb-on"></i>
+                            <td class='button'>
+                                <a href='/problems'>
+                                    <div class='button'>
+                                        <div class='button-icon'>
+                                            <i class='fas fa-lightbulb-on'></i>
                                         </div>
-                                        <div class="button-text">задачи</div>
+                                        <div class='button-text'>задачи</div>
                                     </div>
                                 </a>
                             </td>
-                            <td class="button">
-                                <a href="/training">
-                                    <div class="button">
-                                        <div class="button-icon">
-                                            <i class="fa fa-graduation-cap"></i>
+                            <td class='button'>
+                                <a href='/training'>
+                                    <div class='button'>
+                                        <div class='button-icon'>
+                                            <i class='fa fa-graduation-cap'></i>
                                         </div>
-                                        <div class="button-text">подготовка</div>
+                                        <div class='button-text'>подготовка</div>
                                     </div>
                                 </a>
                             </td>
-                            <td class="button">
-                                <a href="/games">
-                                    <div class="button">
-                                        <div class="button-icon">
-                                            <i class="fa fa-puzzle-piece"></i>
+                            <td class='button'>
+                                <a href='/games'>
+                                    <div class='button'>
+                                        <div class='button-icon'>
+                                            <i class='fa fa-puzzle-piece'></i>
                                         </div>
-                                        <div class="button-text">игри</div>
+                                        <div class='button-text'>игри</div>
                                     </div>
                                 </a>
                             </td>
-                            <td class="logo">
-                                <a href="/home">
-                                    <div class="logo noselect">
-                                        act!O<span style="font-size: 0.8em;">(</span>n<span style="font-size: 0.8em;">)</span>
+                            <td class='logo'>
+                                <a href='/home'>
+                                    <div class='logo noselect'>
+                                        act!O<span style='font-size: 0.8em;'>(</span>n<span style='font-size: 0.8em;'>)</span>
                                     </div>
                                 </a>
                             </td>
-                            <td class="button">
-                                <a href="/status">
-                                    <div class="button">
-                                        <div class="button-icon">
-                                            <i class="fa fa-heartbeat"></i>
+                            <td class='button'>
+                                <a href='/status'>
+                                    <div class='button'>
+                                        <div class='button-icon'>
+                                            <i class='fa fa-heartbeat'></i>
                                         </div>
-                                        <div class="button-text">статус</div>
+                                        <div class='button-text'>статус</div>
                                     </div>
                                 </a>
                             </td>
-                            <td class="button">
-                                <a href="/ranking">
-                                    <div class="button">
-                                        <div class="button-icon">
-                                            <i class="fa fa-trophy"></i>
+                            <td class='button'>
+                                <a href='/ranking'>
+                                    <div class='button'>
+                                        <div class='button-icon'>
+                                            <i class='fa fa-trophy'></i>
                                         </div>
-                                        <div class="button-text">класиране</div>
+                                        <div class='button-text'>класиране</div>
                                     </div>
                                 </a>
                             </td>
-                            <td class="button">
+                            <td class='button'>
                                 <?php
-                                        if ($user->id == -1) {
-                                            echo '
-                                            <a href="/login">
-                                                <div class="button">
-                                                    <div class="button-icon">
-                                                        <i class="fa fa-sign-in-alt"></i>
+                                        if ($user->getId() == -1) {
+                                            echo "
+                                            <a href='/login'>
+                                                <div class='button'>
+                                                    <div class='button-icon'>
+                                                        <i class='fa fa-sign-in-alt'></i>
                                                     </div>
-                                                    <div class="button-text">вход</div>
+                                                    <div class='button-text'>вход</div>
                                                 </div>
                                             </a>
-                                            ';
+                                            ";
                                         } else {
-                                            echo '
-                                            <a href="/logout">
-                                                <div class="button">
-                                                    <div class="button-icon">
-                                                        <i class="fa fa-sign-out-alt"></i>
+                                            echo "
+                                            <a href='/logout'>
+                                                <div class='button'>
+                                                    <div class='button-icon'>
+                                                        <i class='fa fa-sign-out-alt'></i>
                                                     </div>
-                                                    <div class="button-text">изход</div>
+                                                    <div class='button-text'>изход</div>
                                                 </div>
                                             </a>
-                                            ';
+                                            ";
                                         }
                                 ?>
                             </td>
@@ -127,8 +127,8 @@
             </div>
 
             <!-- Actual content -->
-            <div class="main" id="main">
-                <div class="container">
+            <div class='main' id='main'>
+                <div class='container'>
                     <?php
                         echo userInfo($user);
                         echo $content;
@@ -137,29 +137,26 @@
             </div>
 
             <!-- Footer with copyright info -->
-            <div class="footer" id="footer">
-                <div class="container">
-                    <div class="footer-left">
+            <div class='footer' id='footer'>
+                <div class='container'>
+                    <div class='footer-left'>
                     &nbsp;
                     </div>
-                    <div class="footer-middle">
-                        <a href="/help" class="white">помощ</a> |
-                        <a href="/about" class="white">за системата</a> |
-                        <a href="/stats" class="white">статистики</a>
+                    <div class='footer-middle'>
+                        <a href='/help' class='white'>помощ</a> |
+                        <a href='/about' class='white'>за системата</a> |
+                        <a href='/stats' class='white'>статистики</a>
                     </div>
-                    <div class="footer-right">
-                        <a class="white" href="https://www.facebook.com/informatika.bg/" target="_blank"><i class="fab fa-facebook-square fa-fw"></i></a>
-                        <a class="white" href="https://github.com/espr1t/action" target="_blank"><i class="fab fa-github fa-fw"></i></a>
-                        <i class="fab fa-html5 fa-fw"></i>
+                    <div class='footer-right'>
+                        <a class='white' href='https://www.facebook.com/informatika.bg/' target='_blank'><i class='fab fa-facebook-square fa-fw'></i></a>
+                        <a class='white' href='https://github.com/espr1t/action' target='_blank'><i class='fab fa-github fa-fw'></i></a>
+                        <i class='fab fa-html5 fa-fw'></i>
                     </div>
                 </div>
             </div>
 
             <!-- Feedback button -->
-            <div id="feedback" class="feedback" onclick="reportProblem();">Мрън!</div>
-
-            <!-- Extra code -->
-            <?php echo $page->getExtraCode(); ?>
+            <div id='feedback' class='feedback' onclick='reportProblem();'>Мрън!</div>
         </div>
 
         <!-- Achievements -->

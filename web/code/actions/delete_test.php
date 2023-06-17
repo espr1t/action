@@ -1,49 +1,44 @@
 <?php
-require_once(__DIR__ . '/../config.php');
-require_once(__DIR__ . '/../db/brain.php');
-require_once(__DIR__ . '/../entities/problem.php');
+require_once(__DIR__ . "/../config.php");
+require_once(__DIR__ . "/../db/brain.php");
+require_once(__DIR__ . "/../entities/problem.php");
 
 global $user;
 
 // User doesn't have access level needed for deleting testcases
-if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
+if ($user->getAccess() < $GLOBALS["ACCESS_EDIT_PROBLEM"]) {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Нямате права да премахвате тестове.'
+        "status" => "ERROR",
+        "message" => "Нямате права да премахвате тестове."
     ));
 }
 
-$problem = Problem::get($_POST['problemId']);
+$problem = Problem::get($_POST["problemId"]);
 if ($problem == null) {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Няма задача с ID "' . $_POST['problemId'] . '"!'
+        "status" => "ERROR",
+        "message" => "Няма задача с ID \"{$_POST['problemId']}\"!"
     ));
 }
 
 // Suppress warnings if file does not exist or cannot be erased.
 set_error_handler(function() { /* ignore errors */ });
-$inpFilePath = sprintf("%s/%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder,
-                                   $GLOBALS['PROBLEM_TESTS_FOLDER'], $_POST['inpFile']);
-unlink($inpFilePath);
-
-$solFilePath = sprintf("%s/%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder,
-                                   $GLOBALS['PROBLEM_TESTS_FOLDER'], $_POST['solFile']);
-unlink($solFilePath);
+unlink("{$problem->getTestsPath()}/{$_POST['inpFile']}");
+unlink("{$problem->getTestsPath()}/{$_POST['solFile']}");
 restore_error_handler();
 
 // Also delete from database
-if (Brain::deleteTest($problem->id, $_POST['position']) == null) {
+if (!Brain::deleteTest($problem->getId(), $_POST["position"])) {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Тестът не беше изтрит от базата.'
+        "status" => "ERROR",
+        "message" => "Възникна проблем при изтриването на теста!"
     ));
 }
 
 // Everything seems okay
 printAjaxResponse(array(
-    'status' => 'OK',
-    'message' => 'Тестът беше изтрит успешно.'
+    "status" => "OK",
+    "message" => "Тестът беше изтрит успешно."
 ));
 
 ?>

@@ -1,41 +1,38 @@
 <?php
-require_once(__DIR__ . '/../config.php');
-require_once(__DIR__ . '/../db/brain.php');
-require_once(__DIR__ . '/../entities/problem.php');
+require_once(__DIR__ . "/../config.php");
+require_once(__DIR__ . "/../entities/problem.php");
 
 global $user;
 
 // User doesn't have access level needed for adding testcases
-if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
+if ($user->getAccess() < $GLOBALS["ACCESS_EDIT_PROBLEM"]) {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Нямате права да променяте задачата.'
+        "status" => "ERROR",
+        "message" => "Нямате права да променяте задачата."
     ));
 }
 
-$problem = Problem::get($_POST['problemId']);
+$problem = Problem::get(getIntValue($_POST, "problemId"));
 if ($problem == null) {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Няма задача с ID "' . $_POST['problemId'] . '"!'
+        "status" => "ERROR",
+        "message" => "Няма задача с ID \"{$_POST['problemId']}\"!"
     ));
 }
 
-$checkerDir = sprintf("%s/%s/%s", $GLOBALS['PATH_PROBLEMS'], $problem->folder,
-                                  $GLOBALS['PROBLEM_CHECKER_FOLDER']);
+$checkerDir = dirname($problem->getCheckerPath());
 
 // Delete current checker if present
-if ($problem->checker != '') {
-    $oldChecker = sprintf("%s/%s", $checkerDir, $problem->checker);
-    unlink($oldChecker);
-    $problem->checker = '';
+if ($problem->getChecker() != "") {
+    unlink($problem->getCheckerPath());
+    $problem->setChecker("");
 }
 if (file_exists($checkerDir)) {
     rmdir($checkerDir);
 }
 
-if ($_POST['action'] == 'upload') {
-    $problem->checker = $_POST['checkerName'];
+if ($_POST["action"] == "upload") {
+    $problem->setChecker($_POST["checkerName"]);
 
     // Create the Checker directory if it doesn't already exist
     if (!file_exists($checkerDir)) {
@@ -43,17 +40,17 @@ if ($_POST['action'] == 'upload') {
     }
 
     // TODO: Maybe replace CRLF only if Linux is detected?
-    $checkerContent = base64_decode($_POST['checkerContent']);
-    $checkerContent = preg_replace('~\R~u', "\n", $checkerContent);
-    file_put_contents($checkerDir . '/' . $problem->checker, $checkerContent);
+    $checkerContent = base64_decode($_POST["checkerContent"]);
+    $checkerContent = preg_replace("~\R~u", "\n", $checkerContent);
+    file_put_contents($problem->getCheckerPath(), $checkerContent);
 }
 
-Brain::updateChecker($problem);
+$problem->updateChecker();
 
 // Everything seems okay
 printAjaxResponse(array(
-    'status' => 'OK',
-    'message' => 'Чекерът беше обновен успешно.'
+    "status" => "OK",
+    "message" => "Чекерът беше обновен успешно."
 ));
 
 ?>

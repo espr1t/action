@@ -1,55 +1,57 @@
 <?php
-require_once('db/brain.php');
-require_once('config.php');
-require_once('common.php');
-require_once('page.php');
+require_once("db/brain.php");
+require_once("config.php");
+require_once("common.php");
+require_once("page.php");
 
 class StatsPage extends Page {
-    public function getTitle() {
-        return 'O(N)::Stats';
+    private string $FIRST_DATE;
+
+    public function getTitle(): string {
+        return "O(N)::Stats";
     }
 
-    public function getExtraStyles() {
-        return array('/styles/tooltips.css');
+    public function getExtraStyles(): array {
+        return array("/styles/tooltips.css");
     }
 
-    public function getExtraScripts() {
+    public function getExtraScripts(): array {
         return array(
-            'https://www.gstatic.com/charts/loader.js',
-            '/scripts/d3.min.js',
-            '/scripts/d3.layout.cloud.js',
-            '/scripts/d3.layout.cloud.wrapper.js'
+            "https://www.gstatic.com/charts/loader.js",
+            "/scripts/d3.min.js",
+            "/scripts/d3.layout.cloud.js",
+            "/scripts/d3.layout.cloud.wrapper.js"
         );
     }
 
-    public function init() {
-        $this->FIRST_DATE = Brain::getUser(1)['registered'];
+    public function init(): void {
+        $this->FIRST_DATE = User::getById(1)->getRegistered();
     }
 
-    private function createWordCloud($wordCounts) {
+    private function createWordCloud(array $wordCounts): string {
         arsort($wordCounts);
         $words = array();
         foreach ($wordCounts as $word => $count) {
-            array_push($words, array('text' => $word, 'size' => $count));
+            array_push($words, array("text" => $word, "size" => $count));
         }
 
-        return '
-            <div id="wordcloud"></div>
+        return "
+            <div id='wordcloud'></div>
             <script>
-                var words = ' . json_encode($words) . ';
+                let words = " . json_encode($words) . ";
                 d3.wordcloud()
                     .size([780, 350])
-                    .font("Century Gothic")
-                    .selector("#wordcloud")
+                    .font('Century Gothic')
+                    .selector('#wordcloud')
                     .words(words)
-                    .scale("sqrt")
+                    .scale('sqrt')
                     .start();
-
             </script>
-        ';
+        ";
     }
 
-    public static function createChart($type, $id, $title, $labels, $values, $width, $height, $percWidth, $percHeight, $legend) {
+    public static function createChart(string $type, string $id, string $title, array $labels, array $values,
+                                       int $width, int $height, int $percWidth, int $percHeight, string $legend): string {
         $colors = ["#0099FF", "#DD4337", "#129D5A", "#FBCB43", "#8E44AD", "#E67E22", "#16A085", "#2C3E50",
                    "#78A8FC", "#E87467", "#34B67A", "#FCCC44", "#9B59B6", "#F39C12", "#1ABC9C", "#3D566E"];
 
@@ -58,87 +60,89 @@ class StatsPage extends Page {
         for ($i = 0; $i < count($labels); $i++) {
             array_push($data, array($labels[$i], $values[$i]));
         }
+        $jsonData = json_encode($data);
+        $jsonColors = json_encode($colors);
 
-        return '
-            <div id="' . $id . '" style="display: inline-block;"></div>
+        return "
+            <div id='{$id}' style='display: inline-block;'></div>
             <script>
-                google.charts.load("current", {"packages":["corechart"]});
+                google.charts.load('current', {'packages': ['corechart']});
                 google.charts.setOnLoadCallback(drawVisualization);
-
+                
                 function drawVisualization() {
-                    var wrapper = new google.visualization.ChartWrapper({
-                        chartType: "' . $type . '",
-                        dataTable: ' . json_encode($data) . ',
+                    let wrapper = new google.visualization.ChartWrapper({
+                        chartType: '{$type}',
+                        dataTable: {$jsonData},
                         options: {
-                            "title": "' . $title . '",
-                            "titleTextStyle": {
-                                "fontSize": 16
+                            'title': '{$title}',
+                            'titleTextStyle': {
+                                'fontSize': 16
                             },
-                            "labels": "name",
-                            "fontName": "\'Century Gothic\', \'Trebuchet MS\', \'Ubuntu\', sans-serif",
-                            "pieSliceText": "percentage",
-                            "width": ' . $width . ',
-                            "height": ' . $height . ',
-                            "chartArea": {
-                                "width": "' . $percWidth . '%",
-                                "height": "' . $percHeight . '%"
+                            'labels': 'name',
+                            'fontName': '\'Century Gothic\', \'Trebuchet MS\', \'Ubuntu\', sans-serif',
+                            'pieSliceText': 'percentage',
+                            'width': {$width},
+                            'height': {$height},
+                            'chartArea': {
+                                'width': '{$percWidth}%',
+                                'height': '{$percHeight}%',
                             },
-                            "legend": {
-                                "position": "'. $legend .'"
+                            'legend': {
+                                'position': '{$legend}'
                             },
-                            "colors": ' . json_encode($colors) . ',
-                            "pieHole": 0.5,
-                            "vAxis": {
-                                "format": "#",
-                                "viewWindowMode": "explicit",
-                                "viewWindow": {
+                            'colors': {$jsonColors},
+                            'pieHole': 0.5,
+                            'vAxis': {
+                                'format': '#',
+                                'viewWindowMode': 'explicit',
+                                'viewWindow': {
                                     min: 0
                                 }
                             },
-                            "hAxis": {
-                                "textStyle": {
-                                    "fontSize": 10
+                            'hAxis': {
+                                'textStyle': {
+                                    'fontSize': 10
                                 }
                             },
-                            "curveType": "function",
+                            'curveType': 'function',
                         },
-                        containerId: "' . $id . '"
+                        containerId: '{$id}'
                     });
                     wrapper.draw();
                 }
             </script>
-        ';
+        ";
     }
 
-    private function mainStats() {
-        $content = '
+    private function mainStats(): string {
+        $content = "
             <h1>Статистики</h1>
             Произволни статистики за системата и потребителите.
-        ';
+        ";
 
-        $problemStat = Brain::getAllProblemsCount();
-        $problemTitle = 'задачи';
-        $problemInfo = 'Брой задачи на системата.';
+        $problemStat = Brain::getAllTasksCount();
+        $problemTitle = "задачи";
+        $problemInfo = "Брой задачи на системата.";
 
         $gameStat = Brain::getAllGamesCount();
-        $gameTitle = 'игри';
-        $gameInfo = 'Брой игри на системата.';
+        $gameTitle = "игри";
+        $gameInfo = "Брой игри на системата.";
 
         $userStat = Brain::getAllUsersCount();
-        $userTitle = 'потребители';
-        $userInfo = 'Брой потребители на системата.';
+        $userTitle = "потребители";
+        $userInfo = "Брой потребители на системата.";
 
         $submitStat = Brain::getAllSubmitsCount();
-        $submitTitle = 'решения';
-        $submitInfo = 'Брой предадени решения.';
+        $submitTitle = "решения";
+        $submitInfo = "Брой предадени решения.";
 
         $actionStat = 0;
         foreach (Brain::getAllUsersInfo() as $info) {
-            $actionStat += $info['actions'];
+            $actionStat += $info["actions"];
         }
         $actionStat = sprintf("%dK", $actionStat / 1000);
-        $actionTitle = 'действия';
-        $actionInfo = 'Брой действия, направени от потребителите.';
+        $actionTitle = "действия";
+        $actionInfo = "Брой действия, направени от потребителите.";
 
         $problemStats = getPrimaryStatsCircle($problemStat, $problemTitle, $problemInfo);
         $gameStats = getPrimaryStatsCircle($gameStat, $gameTitle, $gameInfo);
@@ -146,72 +150,68 @@ class StatsPage extends Page {
         $submitStats = getPrimaryStatsCircle($submitStat, $submitTitle, $submitInfo);
         $actionStats = getPrimaryStatsCircle($actionStat, $actionTitle, $actionInfo);
 
-        $content .= '
-            <div class="profile-primary-stats">
-                ' . $problemStats . '
-                ' . $gameStats . '
-                ' . $userStats . '
-                ' . $submitStats . '
-                ' . $actionStats . '
+        $content .= "
+            <div class='profile-primary-stats'>
+                {$problemStats}
+                {$gameStats}
+                {$userStats}
+                {$submitStats}
+                {$actionStats}
             </div>
-        ';
+        ";
         return inBox($content);
     }
 
-    private function problemStats() {
-        $content = '
+    private function taskStats(): string {
+        $content = "
             <h2>Задачи</h2>
-        ';
+        ";
 
-        $problems = Brain::getAllProblems();
+        $problems = array_merge(Problem::getAllTasks(), Problem::getAllGames());
+
+        $cntDifficulties = array();
+        $cntTags = array();
+        foreach ($problems as $problem) {
+            $cntDifficulties[$problem->getDifficulty()] = ($cntDifficulties[$problem->getDifficulty()] ?? 0) + 1;
+            foreach ($problem->getTags() as $tag) {
+                $cntTags[$tag] = ($cntTags[$tag] ?? 0) + 1;
+            }
+        }
 
         // Pie chart by difficulty
-        $difficultyChartLabels = array('Сложност');
-        $difficultyChartValues = array('Брой');
-        foreach ($GLOBALS['PROBLEM_DIFFICULTIES'] as $difficulty => $name) {
-            $cnt = 0;
-            foreach ($problems as $problem) {
-                if ($problem['difficulty'] == $difficulty) {
-                    $cnt++;
-                }
-            }
+        $difficultyChartLabels = array("Сложност");
+        $difficultyChartValues = array("Брой");
+        foreach ($GLOBALS["PROBLEM_DIFFICULTIES"] as $difficulty => $name) {
             array_push($difficultyChartLabels, $name);
-            array_push($difficultyChartValues, $cnt);
+            array_push($difficultyChartValues, $cntDifficulties[$difficulty]);
         }
-        $content .= $this->createChart('PieChart', 'difficultiesPieChart', 'Задачи по сложност',
-                $difficultyChartLabels, $difficultyChartValues, 380, 300, 90, 85, 'right');
+        $content .= $this->createChart("PieChart", "difficultiesPieChart", "Задачи по сложност",
+                $difficultyChartLabels, $difficultyChartValues, 380, 300, 90, 85, "right");
 
         // Pie chart by tags
-        $tagsChartLabels = array('Вид');
-        $tagsChartValues = array('Брой');
-        foreach ($GLOBALS['PROBLEM_TAGS'] as $tag => $name) {
-            $cnt = 0;
-            foreach ($problems as $problem) {
-                $tags = explode(',', $problem['tags']);
-                if (in_array($tag, $tags)) {
-                    $cnt++;
-                }
-            }
+        $tagsChartLabels = array("Вид");
+        $tagsChartValues = array("Брой");
+        foreach ($GLOBALS["PROBLEM_TAGS"] as $tag => $name) {
             array_push($tagsChartLabels, $name);
-            array_push($tagsChartValues, $cnt);
+            array_push($tagsChartValues, $cntTags[$tag]);
         }
-        $content .= $this->createChart('PieChart', 'tagsPieChart', 'Задачи по вид',
-                $tagsChartLabels, $tagsChartValues, 380, 300, 90, 85, 'right');
+        $content .= $this->createChart("PieChart", "tagsPieChart", "Задачи по вид",
+                $tagsChartLabels, $tagsChartValues, 380, 300, 90, 85, "right");
 
         return inBox($content);
     }
 
-    private function submissionStats() {
-        $content = '
+    private function submissionStats(): string {
+        $content = "
             <h2>Решения</h2>
-        ';
+        ";
 
         $languages = array();
-        foreach ($GLOBALS['SUPPORTED_LANGUAGES'] as $lang => $name) {
+        foreach ($GLOBALS["SUPPORTED_LANGUAGES"] as $name) {
             $languages[$name] = 0;
         }
         $statuses = array();
-        foreach ($GLOBALS['STATUS_DISPLAY_NAME'] as $status => $name) {
+        foreach ($GLOBALS["STATUS_DISPLAY_NAME"] as $status => $name) {
             $statuses[$status] = 0;
         }
         $hourHistogram = array_fill(0, 24, 0);
@@ -221,56 +221,56 @@ class StatsPage extends Page {
         $numSubmits = count($submits);
 
         foreach ($submits as $submit) {
-            $languages[$submit['language']]++;
-            $statuses[$submit['status']]++;
-            $hourHistogram[intval(substr($submit['submitted'], 11, 2))]++;
-            $monthHistogram[intval(substr($submit['submitted'], 5, 2)) - 1]++;
+            $languages[$submit["language"]]++;
+            $statuses[$submit["status"]]++;
+            $hourHistogram[intval(substr($submit["submitted"], 11, 2))]++;
+            $monthHistogram[intval(substr($submit["submitted"], 5, 2)) - 1]++;
         }
 
         // Most used programming languages
-        $langsChartLabels = array('Език');
-        $langsChartValues = array('Решения');
-        foreach ($GLOBALS['SUPPORTED_LANGUAGES'] as $lang => $name) {
+        $langsChartLabels = array("Език");
+        $langsChartValues = array("Решения");
+        foreach ($GLOBALS["SUPPORTED_LANGUAGES"] as $name) {
             array_push($langsChartLabels, $name);
             array_push($langsChartValues, $languages[$name]);
         }
-        $content .= $this->createChart('ColumnChart', 'langsColumnChart', 'Решения по програмен език',
-                $langsChartLabels, $langsChartValues, 380, 300, 80, 80, 'none');
+        $content .= $this->createChart("ColumnChart", "langsColumnChart", "Решения по програмен език",
+                $langsChartLabels, $langsChartValues, 380, 300, 80, 80, "none");
 
         // Most common results statuses
-        $statusesChartLabels = array('Статус');
-        $statusesChartValues = array('Брой');
-        foreach ($GLOBALS['STATUS_DISPLAY_NAME'] as $status => $name) {
+        $statusesChartLabels = array("Статус");
+        $statusesChartValues = array("Брой");
+        foreach ($GLOBALS["STATUS_DISPLAY_NAME"] as $status => $name) {
             if ($statuses[$status] > 0) {
                 array_push($statusesChartLabels, $status);
                 array_push($statusesChartValues, $statuses[$status]);
             }
         }
-        $content .= $this->createChart('ColumnChart', 'statusesColumnChart', 'Резултати от решенията',
-                $statusesChartLabels, $statusesChartValues, 380, 300, 80, 80, 'none');
+        $content .= $this->createChart("ColumnChart", "statusesColumnChart", "Резултати от решенията",
+                $statusesChartLabels, $statusesChartValues, 380, 300, 80, 80, "none");
 
-        $content .= '<br>';
+        $content .= "<br>";
 
         // Per-hour activity histogram
-        $hourlyActivityHistogramLabels = array('Час');
-        $hourlyActivityHistogramValues = array('Брой');
+        $hourlyActivityHistogramLabels = array("Час");
+        $hourlyActivityHistogramValues = array("Брой");
         for ($i = 0; $i < 24; $i++) {
             array_push($hourlyActivityHistogramValues, $hourHistogram[$i]);
             array_push($hourlyActivityHistogramLabels, sprintf("%d:00", $i));
         }
-        $content .= $this->createChart('ColumnChart', 'hourlyActivityHistogram', 'Предадени решения по час в денонощието',
-                $hourlyActivityHistogramLabels, $hourlyActivityHistogramValues, 780, 300, 90, 70, 'none');
+        $content .= $this->createChart("ColumnChart", "hourlyActivityHistogram", "Предадени решения по час в денонощието",
+                $hourlyActivityHistogramLabels, $hourlyActivityHistogramValues, 780, 300, 90, 70, "none");
 
         // Per-month activity histogram
-        $months = array('Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни', 'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември');
-        $monthlyActivityHistogramLabels = array('Месец');
-        $monthlyActivityHistogramValues = array('Брой');
+        $months = array("Януари", "Февруари", "Март", "Април", "Май", "Юни", "Юли", "Август", "Септември", "Октомври", "Ноември", "Декември");
+        $monthlyActivityHistogramLabels = array("Месец");
+        $monthlyActivityHistogramValues = array("Брой");
         for ($i = 0; $i < 12; $i++) {
             array_push($monthlyActivityHistogramValues, $monthHistogram[$i]);
             array_push($monthlyActivityHistogramLabels, $months[$i]);
         }
-        $content .= $this->createChart('ColumnChart', 'monthlyActivityHistogram', 'Предадени решения по месец в годината',
-                $monthlyActivityHistogramLabels, $monthlyActivityHistogramValues, 780, 300, 90, 70, 'none');
+        $content .= $this->createChart("ColumnChart", "monthlyActivityHistogram", "Предадени решения по месец в годината",
+                $monthlyActivityHistogramLabels, $monthlyActivityHistogramValues, 780, 300, 90, 70, "none");
 
         // Activity over time line chart
         $NUM_TIME_POINTS = 15;
@@ -278,14 +278,14 @@ class StatsPage extends Page {
         $lastDate = time();
         $timeOffset = floor(($lastDate - $firstDate) / ($NUM_TIME_POINTS - 1));
 
-        $totalActivityChartLabels = array('Дата');
-        $totalActivityChartValues = array('Брой');
+        $totalActivityChartLabels = array("Дата");
+        $totalActivityChartValues = array("Брой");
         $index = 0;
         for ($i = 0; $i < $NUM_TIME_POINTS; $i++) {
             $lastIndex = $index;
-            $targetDate = gmdate('Y-m-d', $firstDate);
-            $shownDate = gmdate('M Y', $firstDate);
-            while ($index < $numSubmits && $submits[$index]['submitted'] <= $targetDate) {
+            $targetDate = gmdate("Y-m-d", $firstDate);
+            $shownDate = gmdate("M Y", $firstDate);
+            while ($index < $numSubmits && $submits[$index]["submitted"] <= $targetDate) {
                 $index++;
             }
             // The last point is the current number of users
@@ -296,72 +296,61 @@ class StatsPage extends Page {
             array_push($totalActivityChartValues, $index - $lastIndex);
             $firstDate += $timeOffset;
         }
-        $content .= $this->createChart('AreaChart', 'totalActivityAreaChart', 'Предадени решения през времето',
-                $totalActivityChartLabels, $totalActivityChartValues, 780, 300, 90, 70, 'none');
+        $content .= $this->createChart("AreaChart", "totalActivityAreaChart", "Предадени решения през времето",
+                $totalActivityChartLabels, $totalActivityChartValues, 780, 300, 90, 70, "none");
 
         return inBox($content);
     }
 
-    private $TOWN_ALIASES = array(
-        'Gorna Orqhovica' => 'Горна Оряховица',
-        'Belene' => 'Белене',
-        'Sofia' => 'София',
-        'Sofiq' => 'София',
-        'Plovdiv' => 'Пловдив',
-        'Ruse' => 'Русе',
-        'Rousse' => 'Русе',
-        'Varna' => 'Варна',
-        'Gabrovo' => 'Габрово',
-        'Yambol' => 'Ямбол',
-        'Belovo' => 'Белово',
-        'Kazanlak' => 'Казанлък',
-        'Burgas' => 'Бургас',
-        'Sliven' => 'Сливен',
-        'Vratsa' => 'Враца',
-        'Shumen' => 'Шумен',
-        'Veliko Tarnovo' => 'Велико Търново',
-        'Smolyan' => 'Смолян',
-        'Dobrich' => 'Добрич',
-        'Blagoevgrad' => 'Благоевград',
-        'Razgrad' => 'Разград',
-        'Montana' => 'Монтана',
-        'Pleven' => 'Плевен'
+    private array $TOWN_ALIASES = array(
+        "Gorna Orqhovica" => "Горна Оряховица",
+        "Belene" => "Белене",
+        "Sofia" => "София",
+        "Sofiq" => "София",
+        "Plovdiv" => "Пловдив",
+        "Ruse" => "Русе",
+        "Rousse" => "Русе",
+        "Varna" => "Варна",
+        "Gabrovo" => "Габрово",
+        "Yambol" => "Ямбол",
+        "Belovo" => "Белово",
+        "Kazanlak" => "Казанлък",
+        "Burgas" => "Бургас",
+        "Sliven" => "Сливен",
+        "Vratsa" => "Враца",
+        "Shumen" => "Шумен",
+        "Veliko Tarnovo" => "Велико Търново",
+        "Smolyan" => "Смолян",
+        "Dobrich" => "Добрич",
+        "Blagoevgrad" => "Благоевград",
+        "Razgrad" => "Разград",
+        "Montana" => "Монтана",
+        "Pleven" => "Плевен"
     );
 
-    private function userStats() {
-        $content = '
+    private function userStats(): string {
+        $content = "
             <h2>Потребители</h2>
-        ';
+        ";
 
-        $usersArr = Brain::getAllUsers();
-        $usersInfoArr = Brain::getAllUsersInfo();
-        $numUsers = count($usersArr);
-
-        $users = array();
-        for ($i = 0; $i < $numUsers; $i++) {
-            array_push($users, User::instanceFromArray($usersArr[$i], $usersInfoArr[$i]));
-        }
+        $users = User::getAllUsers();
 
         // Pie chart by gender
-        $genders = array('male' => 0, 'female' => 0, 'unknown' => 0);
+        $genders = array("male" => 0, "female" => 0, "unknown" => 0);
         foreach ($users as $user) {
-            if ($user->gender == '') {
-                $genders['unknown']++;
-            } else {
-                $genders[$user->gender]++;
-            }
+            $genders[$user->getGender() == "" ? "unknown" : $user->getGender()]++;
         }
 
-        $genderChartLabels = array('Пол', 'Мъж', 'Жена', 'Незададен');
-        $genderChartValues = array('Процент', $genders['male'], $genders['female'],  $genders['unknown']);
-        $content .= $this->createChart('PieChart', 'genderPieChart', 'Дял на потребителите по пол',
-                $genderChartLabels, $genderChartValues, 380, 300, 90, 85, 'right');
+        $genderChartLabels = array("Пол", "Мъж", "Жена", "Незададен");
+        $genderChartValues = array("Процент", $genders["male"], $genders["female"],  $genders["unknown"]);
+        $content .= $this->createChart("PieChart", "genderPieChart", "Дял на потребителите по пол",
+                $genderChartLabels, $genderChartValues, 380, 300, 90, 85, "right");
 
         // Pie chart by town
         $towns = array();
         foreach ($users as $user) {
             // Make the town in proper First Letter Uppercase style
-            $town = mb_convert_case(mb_strtolower($user->town), MB_CASE_TITLE, 'utf-8');
+            $town = mb_convert_case(mb_strtolower($user->getTown()), MB_CASE_TITLE, "utf-8");
             // Convert it to Cyrillic if a town in Bulgaria
             if (array_key_exists($town, $this->TOWN_ALIASES))
                 $town = $this->TOWN_ALIASES[$town];
@@ -375,11 +364,11 @@ class StatsPage extends Page {
         }
         arsort($towns);
 
-        $townChartLabels = array('Град');
-        $townChartValues = array('Потребители');
+        $townChartLabels = array("Град");
+        $townChartValues = array("Потребители");
         foreach ($towns as $key => $value) {
             // Do not show empty strings (for people who haven't entered it)
-            if ($key == '')
+            if ($key == "")
                 continue;
             // Show top 10 only
             if (count($townChartLabels) > 10)
@@ -387,8 +376,8 @@ class StatsPage extends Page {
             array_push($townChartLabels, $key);
             array_push($townChartValues, $value);
         }
-        $content .= $this->createChart('PieChart', 'townPieChart', 'Дял на потребителите по град',
-                $townChartLabels, $townChartValues, 380, 300, 90, 85, 'right');
+        $content .= $this->createChart("PieChart", "townPieChart", "Дял на потребителите по град",
+                $townChartLabels, $townChartValues, 380, 300, 90, 85, "right");
 
         // Line chart for number of users in time
         $NUM_TIME_POINTS = 15;
@@ -396,25 +385,25 @@ class StatsPage extends Page {
         $lastDate = time();
         $timeOffset = floor(($lastDate - $firstDate) / ($NUM_TIME_POINTS - 1));
 
-        $usersChartLabels = array('Дата');
-        $usersChartValues = array('Брой');
+        $usersChartLabels = array("Дата");
+        $usersChartValues = array("Брой");
         $index = 0;
         for ($i = 0; $i < $NUM_TIME_POINTS; $i++) {
-            $shownDate = gmdate('M Y', $firstDate);
-            $targetDate = gmdate('Y-m-d', $firstDate);
-            while ($index < $numUsers && $users[$index]->registered <= $targetDate) {
+            $shownDate = gmdate("M Y", $firstDate);
+            $targetDate = gmdate("Y-m-d", $firstDate);
+            while ($index < count($users) && $users[$index]->getRegistered() <= $targetDate) {
                 $index++;
             }
             // The last point is the current number of users
             if ($i == $NUM_TIME_POINTS - 1) {
-                $index = $numUsers;
+                $index = count($users);
             }
             array_push($usersChartLabels, $shownDate);
             array_push($usersChartValues, $index);
             $firstDate += $timeOffset;
         }
-        $content .= $this->createChart('AreaChart', 'usersAreaChart', 'Брой регистрирани потребители',
-                $usersChartLabels, $usersChartValues, 780, 300, 90, 70, 'none');
+        $content .= $this->createChart("AreaChart", "usersAreaChart", "Брой регистрирани потребители",
+                $usersChartLabels, $usersChartValues, 780, 300, 90, 70, "none");
 
         // Histogram of user's age
         // Instead of simply taking the current time and subtracting the birthday, we'll do
@@ -424,70 +413,70 @@ class StatsPage extends Page {
         // 16 year old (instead of 20, which he/she currently is).
         $ageHistogram = array_fill(0, 81, 0);
         foreach ($users as $user) {
-            if ($user->birthdate == '0000-00-00')
+            if ($user->getBirthdate() == "0000-00-00")
                 continue;
-            $lastAction = explode(' ', $user->lastSeen)[0];
+            $lastAction = explode(" ", $user->getLastSeen())[0];
             // Safe guard in case lastSeen is not populated for some reason
             // (it should be after http://espr1t.net/bugs/view.php?id=510 is done)
-            if ($lastAction == '0000-00-00')
-                $lastAction = $user->registered;
+            if ($lastAction == "0000-00-00")
+                $lastAction = $user->getRegistered();
             // User added birthdate in the future
-            if ($user->birthdate >= $lastAction)
+            if ($user->getBirthdate() >= $lastAction)
                 continue;
-            $age = floor((strtotime($lastAction) - strtotime($user->birthdate)) / (365 * 24 * 60 * 60));
+            $age = floor((strtotime($lastAction) - strtotime($user->getBirthdate())) / (365 * 24 * 60 * 60));
             if ($age <= 80) {
                 $ageHistogram[$age]++;
             }
         }
 
-        $ageHistogramLabels = array('Възраст');
-        $ageHistogramValues = array('Брой');
+        $ageHistogramLabels = array("Възраст");
+        $ageHistogramValues = array("Брой");
         for ($i = 0; $i <= 80; $i++) {
             array_push($ageHistogramValues, $ageHistogram[$i]);
             array_push($ageHistogramLabels, sprintf("%d", $i));
         }
-        $content .= $this->createChart('ColumnChart', 'ageHistogram', 'Брой потребители по възраст',
-                $ageHistogramLabels, $ageHistogramValues, 780, 300, 90, 70, 'none');
+        $content .= $this->createChart("ColumnChart", "ageHistogram", "Брой потребители по възраст",
+                $ageHistogramLabels, $ageHistogramValues, 780, 300, 90, 70, "none");
 
         return inBox($content);
     }
 
-    private function wordCloud() {
+    private function wordCloud(): string {
         $achievements = Brain::getAchievements();
 
         $keyCount = array();
         foreach ($achievements as $achievement) {
-            $key = $achievement['achievement'];
+            $key = $achievement["achievement"];
             if (!array_key_exists($key, $keyCount))
                 $keyCount[$key] = 0;
             $keyCount[$key] = $keyCount[$key] + 1;
         }
 
-        $achievementsFile = file_get_contents($GLOBALS['PATH_ACHIEVEMENTS'] . '/achievements.json');
+        $achievementsFile = file_get_contents("{$GLOBALS["PATH_DATA"]}/achievements/achievements.json");
         $achievementsData = json_decode($achievementsFile, true);
 
         $achievementCount = array();
         foreach ($achievementsData as $achievement) {
-            if (array_key_exists($achievement['key'], $keyCount)) {
-                $achievementCount[$achievement['title']] = $keyCount[$achievement['key']];
+            if (array_key_exists($achievement["key"], $keyCount)) {
+                $achievementCount[$achievement["title"]] = $keyCount[$achievement["key"]];
             }
         }
-        $content = '
+        $content = "
             <h2>Постижения</h2>
             <br>
-        ' . $this->createWordCloud($achievementCount);
+        " . $this->createWordCloud($achievementCount);
 
         return inBox($content);
     }
 
-    public function getContent() {
-        $content = '';
+    public function getContent(): string {
+        $content = "";
 
         // Main stats
         $content .= $this->mainStats();
 
         // Problem statistics
-        $content .= $this->problemStats();
+        $content .= $this->taskStats();
 
         // Submission statistics
         $content .= $this->submissionStats();

@@ -1,76 +1,72 @@
 <?php
-require_once(__DIR__ . '/../common.php');
-require_once(__DIR__ . '/../entities/user.php');
+require_once(__DIR__ . "/../common.php");
+require_once(__DIR__ . "/../entities/user.php");
 
 session_start();
 
-$user = isset($_SESSION['userId']) ? User::get($_SESSION['userId']) : null;
+$user = isset($_SESSION["userId"]) ? User::getById($_SESSION["userId"]) : null;
 if ($user == null) {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'reason' => 'Не сте влезли в системата.'
+        "status" => "ERROR",
+        "reason" => "Не сте влезли в системата."
     ));
 }
 
-switch ($_GET['action']) {
+switch ($_GET["action"]) {
 
-    case 'checkGrader':
-        require_once('check_grader.php');
+    case "checkGrader":
+        require_once("check_grader.php");
         break;
 
-    case 'reportProblem':
-        require_once('report_problem.php');
+    case "reportProblem":
+        require_once("report_problem.php");
         break;
 
-    case 'publishNews':
-        require_once('publish_news.php');
+    case "publishNews":
+        require_once("publish_news.php");
         break;
 
-    case 'sendMessage':
-        require_once('send_message.php');
+    case "sendMessage":
+        require_once("send_message.php");
         break;
 
-    case 'sendSubmission':
-        require_once('send_submission.php');
+    case "sendSubmission":
+        require_once("send_submission.php");
         break;
 
-    case 'editProblem':
-        require_once('edit_problem.php');
+    case "editProblem":
+        require_once("edit_problem.php");
         break;
 
-    case 'uploadTest':
-        require_once('upload_test.php');
+    case "uploadTest":
+        require_once("upload_test.php");
         break;
 
-    case 'deleteTest':
-        require_once('delete_test.php');
+    case "deleteTest":
+        require_once("delete_test.php");
         break;
 
-    case 'uploadSolution':
-        require_once('upload_solution.php');
+    case "uploadSolution":
+        require_once("upload_solution.php");
         break;
 
-    case 'deleteSolution':
-        require_once('delete_solution.php');
+    case "deleteSolution":
+        require_once("delete_solution.php");
         break;
 
-    case 'updateChecker':
-        require_once('update_checker.php');
+    case "updateChecker":
+        require_once("update_checker.php");
         break;
 
-    case 'updateTester':
-        require_once('update_tester.php');
-        break;
-
-    case 'getReplay':
-        require_once('get_replay.php');
+    case "updateTester":
+        require_once("update_tester.php");
         break;
 
     default:
-        error_log("ERROR: Invalid action type: '" . $_GET['action'] . "'!");
+        error_log("ERROR: Invalid action type: \"{$_GET['action']}\"!");
         printAjaxResponse(array(
-            'status' => 'ERROR',
-            'reason' => 'Невалидно действие!'
+            "status" => "ERROR",
+            "reason" => "Невалидно действие!"
         ));
 }
 

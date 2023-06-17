@@ -1,1 +1,36 @@
-﻿
+﻿[17-Jun-2023 22:49:05 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:11 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:11 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:12 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:12 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:13 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:13 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:14 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:15 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 22:49:15 Europe/Sofia] PHP Notice:  Undefined variable: showNotification in D:\WebSites\action\web\code\page.html on line 165
+[17-Jun-2023 23:16:27 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:16:27 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:17:33 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:17:33 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:17:40 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:17:40 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:20:35 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:20:35 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:20:36 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:20:36 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:21:33 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:21:33 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:21:36 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:21:36 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:21:42 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:21:42 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:21:46 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:21:46 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:23:58 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:23:58 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:24:15 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:24:15 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:25:00 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:25:00 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)
+[17-Jun-2023 23:25:01 Europe/Sofia] PHP Warning:  mysqli::__construct(): (HY000/1045): Access denied for user 'action'@'localhost' (using password: YES) in /home/espr1tn/public_html/action/code/db/db.php on line 16
+[17-Jun-2023 23:25:01 Europe/Sofia] ERROR: Could not connect to the DB: Access denied for user 'action'@'localhost' (using password: YES)

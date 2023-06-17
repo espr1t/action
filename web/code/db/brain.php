@@ -37,11 +37,11 @@ class Brain {
         return !$result ? null : $result;
     }
 
-    private static function convertKey(string $key) {
+    private static function convertKey(string $key): string {
         return "`$key`";
     }
 
-    private static function convertVal(string $val) {
+    private static function convertVal(string $val): string {
             if (is_string($val)) {
                 $val = DB::escape($val);
             }
@@ -143,12 +143,12 @@ class Brain {
     public static function updateNews(News $news): bool {
         return self::update(
             "News", [
-                "date" => $news->date,
-                "title" => $news->title,
-                "content" => $news->content,
-                "icon" => $news->icon,
-                "type" => $news->type
-            ], "id = {$news->id}"
+                "date" => $news->getDate(),
+                "title" => $news->getTitle(),
+                "content" => $news->getContent(),
+                "icon" => $news->getIcon(),
+                "type" => $news->getType()
+            ], "id = {$news->getId()}"
         );
     }
 
@@ -157,7 +157,6 @@ class Brain {
             "News",
             "",
             "`date` DESC",
-            20
         );
         return !$response ? null : self::getResults($response);
     }
@@ -178,8 +177,8 @@ class Brain {
     public static function addReport(int $userId, string $page, string $content): ?int {
         return self::insert(
             "Reports", [
-                "user" => $userId,
-                "date" => date('Y-m-d'),
+                "userId" => $userId,
+                "date" => date("Y-m-d"),
                 "page" => $page,
                 "content" => $content
             ]
@@ -189,7 +188,7 @@ class Brain {
     public static function getReports(int $userId = -1): ?array {
         $response = self::select(
             "Reports",
-            $userId == -1 ? "" : "`user` = {$userId}"
+            $userId == -1 ? "" : "`userId` = {$userId}"
         );
         return !$response ? null : self::getResults($response);
     }
@@ -209,38 +208,38 @@ class Brain {
     public static function updateProblem(Problem $problem): bool {
         return self::update(
             "Problems", [
-                "name" => $problem->name,
-                "author" => $problem->author,
-                "folder" => $problem->folder,
-                "timeLimit" => $problem->timeLimit,
-                "memoryLimit" => $problem->memoryLimit,
-                "type" => $problem->type,
-                "difficulty" => $problem->difficulty,
-                "statement" => $problem->statement,
-                "origin" => $problem->origin,
-                "checker" => $problem->checker,
-                "tester" => $problem->tester,
-                "floats" => $problem->floats ? 1 : 0,
-                "tags" => implode(',', $problem->tags),
-                "addedBy" => $problem->addedBy,
-                "visible" => $problem->visible ? 1 : 0
-            ], "`id` = {$problem->id}"
+                "name" => $problem->getName(),
+                "author" => $problem->getAuthor(),
+                "folder" => $problem->getFolder(),
+                "timeLimit" => $problem->getTimeLimit(),
+                "memoryLimit" => $problem->getMemoryLimit(),
+                "type" => $problem->getType(),
+                "difficulty" => $problem->getDifficulty(),
+                "statement" => $problem->getStatement(),
+                "origin" => $problem->getOrigin(),
+                "checker" => $problem->getChecker(),
+                "tester" => $problem->getTester(),
+                "floats" => $problem->getFloats() ? 1 : 0,
+                "tags" => implode(',', $problem->getTags()),
+                "addedBy" => $problem->getAddedBy(),
+                "visible" => $problem->getVisible() ? 1 : 0
+            ], "`id` = {$problem->getId()}"
         );
     }
 
     public static function updateChecker(Problem $problem): bool {
         return self::update(
             "Problems", [
-                "checker" => $problem->checker
-            ], "`id` = {$problem->id}"
+                "checker" => $problem->getChecker()
+            ], "`id` = {$problem->getId()}"
         );
     }
 
     public static function updateTester(Problem $problem): bool {
         return self::update(
             "Problems", [
-                "tester" => $problem->tester
-            ], "`id` = {$problem->id}"
+                "tester" => $problem->getTester()
+            ], "`id` = {$problem->getId()}"
         );
     }
 
@@ -252,7 +251,7 @@ class Brain {
         return !$response ? null : self::getResult($response);
     }
 
-    public static function getAllProblems(): ?array {
+    public static function getAllTasks(): ?array {
         $response = self::select(
             "Problems",
             "`type` NOT IN ('game', 'relative', 'interactive')",
@@ -261,7 +260,7 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function getAllProblemsCount(): ?int {
+    public static function getAllTasksCount(): ?int {
         $response = self::count(
             "Problems",
             "`type` NOT IN ('game', 'relative', 'interactive')"
@@ -297,14 +296,14 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function addSolution(int $problemId, string $name, int $submitId, string $source, string $language): ?int {
+    public static function addSolution(Solution $solution): ?int {
         return self::insert(
             "Solutions", [
-                "problemId" => $problemId,
-                "name" => $name,
-                "submitId" => $submitId,
-                "source" => $source,
-                "language" => $language
+                "problemId" => $solution->getProblemId(),
+                "name" => $solution->getName(),
+                "submitId" => $solution->getSubmitId(),
+                "source" => $solution->getSource(),
+                "language" => $solution->getLanguage()
             ]
         );
     }
@@ -322,7 +321,7 @@ class Brain {
     public static function getProblemTests(int $problemId): ?array {
         $response = self::select(
             "Tests",
-            "`problem` = {$problemId}",
+            "`problemId` = {$problemId}",
             "`position`"
         );
         return !$response ? null : self::getResults($response);
@@ -332,7 +331,7 @@ class Brain {
     public static function getTestId(int $problemId, int $position, bool $insertIfNotFound): ?int {
         $response = self::select(
             "Tests",
-            "`problem` = {$problemId} AND `position` = {$position}"
+            "`problemId` = {$problemId} AND `position` = {$position}"
         );
         $result = self::getResult($response);
 
@@ -344,7 +343,7 @@ class Brain {
         if ($insertIfNotFound) {
             return self::insert(
                 "Tests", [
-                    "problem" => $problemId,
+                    "problemId" => $problemId,
                     "position" => $position,
                     "score" => 10
                 ]
@@ -370,11 +369,11 @@ class Brain {
         if ($id === null) {
             return false;
         }
-        $extension = lastElement(explode('.', $name));
+        $extension = lastElement(explode(".", $name));
         return self::update(
             "Tests", [
-                (($extension == 'in' || $extension == 'inp') ? 'inpFile' : 'solFile') => $name,
-                (($extension == 'in' || $extension == 'inp') ? 'inpHash' : 'solHash') => $hash
+                (($extension == "in" || $extension == "inp") ? "inpFile" : "solFile") => $name,
+                (($extension == "in" || $extension == "inp") ? "inpHash" : "solHash") => $hash
             ], "`id` = {$id}"
         );
     }
@@ -382,7 +381,7 @@ class Brain {
     public static function deleteTest(int $problemId, int $position): bool {
         return self::delete(
             "Tests",
-            "`problem` = {$problemId} AND `position` = {$position}"
+            "`problemId` = {$problemId} AND `position` = {$position}"
         );
     }
 
@@ -392,23 +391,23 @@ class Brain {
     public static function addSubmit(Submit $submit): ?int {
         return self::insert(
             "Submits", [
-                "submitted" => $submit->submitted,
-                "gradingStart" => $submit->gradingStart,
-                "gradingFinish" => $submit->gradingFinish,
-                "userId" => $submit->userId,
-                "userName" => $submit->userName,
-                "problemId" => $submit->problemId,
-                "problemName" => $submit->problemName,
-                "language" => $submit->language,
-                "results" => implode(",", $submit->results),
-                "execTime" => implode(",", $submit->execTime),
-                "execMemory" => implode(",", $submit->execMemory),
-                "status" => $submit->status,
-                "message" => $submit->message,
-                "full" => $submit->full ? 1 : 0,
-                "ip" => $submit->ip,
-                "info" => $submit->info,
-                "replayId" => $submit->replayId
+                "submitted" => $submit->getSubmitted(),
+                "gradingStart" => $submit->getGradingStart(),
+                "gradingFinish" => $submit->getGradingFinish(),
+                "userId" => $submit->getUserId(),
+                "userName" => $submit->getUserName(),
+                "problemId" => $submit->getProblemId(),
+                "problemName" => $submit->getProblemName(),
+                "language" => $submit->getLanguage(),
+                "results" => implode(",", $submit->getResults()),
+                "execTime" => implode(",", $submit->getExecTime()),
+                "execMemory" => implode(",", $submit->getExecMemory()),
+                "status" => $submit->getStatus(),
+                "message" => $submit->getMessage(),
+                "full" => $submit->getFull() ? 1 : 0,
+                "ip" => $submit->getIp(),
+                "info" => $submit->getInfo(),
+                "replayKey" => $submit->getReplayKey()
             ]
         );
     }
@@ -416,17 +415,16 @@ class Brain {
     public static function updateSubmit(Submit $submit): bool {
         return self::update(
             "Submits", [
-            "gradingStart" => $submit->gradingStart,
-            "gradingFinish" => $submit->gradingFinish,
-            "results" => implode(',', $submit->results),
-            "execTime" => implode(',', $submit->execTime),
-            "execMemory" => implode(',', $submit->execMemory),
-            "status" => $submit->status,
-            "message" => $submit->message,
-            "info" => $submit->info,
-            "replayId" => $submit->replayId
-
-        ], "`id` = {$submit->id}"
+                "gradingStart" => $submit->getGradingStart(),
+                "gradingFinish" => $submit->getGradingFinish(),
+                "results" => implode(",", $submit->getResults()),
+                "execTime" => implode(",", $submit->getExecTime()),
+                "execMemory" => implode(",", $submit->getExecMemory()),
+                "status" => $submit->getStatus(),
+                "message" => $submit->getMessage(),
+                "info" => $submit->getInfo(),
+                "replayKey" => $submit->getReplayKey()
+            ], "`id` = {$submit->getId()}"
         );
     }
 
@@ -438,11 +436,25 @@ class Brain {
         return !$response ? null : self::getResult($response);
     }
 
-    public static function getAllSubmits(string $status="all"): ?array {
-        $response = self::select(
-            "Submits",
-            $status == "all" ? "" : "`status` = '{$status}'"
-        );
+    public static function getFirstACSubmits(): ?array {
+        $response = self::query("
+            SELECT * FROM (
+                SELECT *, ROW_NUMBER() OVER(PARTITION BY problemId ORDER BY id) AS rank
+                FROM `submits`
+                WHERE `status` = 'AC' AND `userId` > 2 -- exclude system user (0), espr1t (1) and ThinkCreative (2)
+            ) AS temp
+            WHERE rank = 1 
+        ");
+        return !$response ? null : self::getResults($response);
+    }
+
+    public static function getAllSubmits(int $userId=-1, int $problemId=-1, string $status="all"): ?array {
+        $whereClause = "";
+        if ($userId != -1) $whereClause .= ($whereClause == "" ? "" : " AND ") . "`userId` = {$userId}";
+        if ($problemId != -1) $whereClause .= ($whereClause == "" ? "" : " AND ") . "`problemId` = {$problemId}";
+        if ($status != "all") $whereClause .= ($whereClause == "" ? "" : " AND ") . "`status` = '{$status}'";
+
+        $response = self::select("Submits", $whereClause);
         return !$response ? null : self::getResults($response);
     }
 
@@ -486,38 +498,20 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function getProblemSubmits(int $problemId, string $status="all"): ?array {
-        $response = self::select(
-            "Submits",
-            "`problemId` = {$problemId}" . ($status == "all" ? "" : " AND `status` = '{$status}'"),
-            "`submitted`"
-        );
-        return !$response ? null : self::getResults($response);
-    }
-
     public static function getProblemStatusCounts(): ?array {
         $response = self::query("
-            SELECT `problemId`, `status`, COUNT(*) AS `count` FROM `Submits`
+            SELECT `problemId`, `status`, COUNT(*) AS `count`
+            FROM `Submits`
             WHERE `userId` > 1
             GROUP BY `problemId`, `status`
         ");
         return !$response ? null : self::getResults($response);
     }
 
-    public static function getUserSubmits(int $userId, int $problemId=-1, string $status="all"): ?array {
-        $response = self::select(
-            "Submits",
-            "`userId` = {$userId}" .
-                ($problemId == -1 ? "" : " AND `problemId` = {$problemId}") .
-                ($status == "all" ? "" : " AND `status` = '{$status}'"),
-            "`submitted`"
-        );
-        return !$response ? null : self::getResults($response);
-    }
-
     public static function getSolved(int $userId): ?array {
         $response = self::query("
-            SELECT DISTINCT `problemId` FROM `Submits`
+            SELECT DISTINCT `problemId`
+            FROM `Submits`
             WHERE `userId` = {$userId} AND `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
         ");
         return !$response ? null : self::getIntResults($response);
@@ -540,10 +534,10 @@ class Brain {
     public static function addSource(Submit $submit): ?int {
         return self::insert(
             "Sources", [
-                "submitId" => $submit->id,
-                "userId" => $submit->userId,
-                "problemId" => $submit->problemId,
-                "language" => $submit->language,
+                "submitId" => $submit->getId(),
+                "userId" => $submit->getUserId(),
+                "problemId" => $submit->getProblemId(),
+                "language" => $submit->getLanguage(),
                 "source" => $submit->getSource()
             ]
         );
@@ -557,20 +551,11 @@ class Brain {
         return !$response ? null : self::getResult($response);
     }
 
-    public static function getAllSources(): ?array {
-        $response = self::select(
-            "Sources"
-        );
-        return !$response ? null : self::getResults($response);
-    }
-
-    public static function getUserSources(int $userId, int $problemId=-1): ?array {
-        $response = self::select(
-            "Sources",
-            "`userId` = {$userId}" .
-                ($problemId == -1 ? "" : " AND `problemId` = {$problemId}"),
-            "`submitted`"
-        );
+    public static function getAllSources(int $userId=-1, int $problemId=-1): ?array {
+        $whereClause = "";
+        if ($userId != -1) $whereClause .= ($whereClause == "" ? "" : " AND ") . "`userId` = {$userId}";
+        if ($problemId != -1) $whereClause .= ($whereClause == "" ? "" : " AND ") . "`problemId` = {$problemId}";
+        $response = self::select("Sources", $whereClause);
         return !$response ? null : self::getResults($response);
     }
 
@@ -580,16 +565,16 @@ class Brain {
     public static function addUser(User $user): ?int {
         return self::insert(
             "Users", [
-                "access" => $user->access,
-                "registered" => $user->registered,
-                "username" => $user->username,
-                "name" => $user->name,
-                "email" => $user->email,
-                "town" => $user->town,
-                "country" => $user->country,
-                "gender" => $user->gender,
-                "birthdate" => $user->birthdate,
-                "avatar" => $user->avatar,
+                "access" => $user->getAccess(),
+                "registered" => $user->getRegistered(),
+                "username" => $user->getUsername(),
+                "name" => $user->getName(),
+                "email" => $user->getEmail(),
+                "town" => $user->getTown(),
+                "country" => $user->getCountry(),
+                "gender" => $user->getGender(),
+                "birthdate" => $user->getBirthdate(),
+                "avatar" => $user->getAvatar(),
             ]
         );
     }
@@ -597,24 +582,24 @@ class Brain {
     public static function updateUser(User $user): bool {
         return self::update(
             "Users", [
-                "access" => $user->access,
-                "registered" => $user->registered,
-                "username" => $user->username,
-                "name" => $user->name,
-                "email" => $user->email,
-                "town" => $user->town,
-                "country" => $user->country,
-                "gender" => $user->gender,
-                "birthdate" => $user->birthdate,
-                "avatar" => $user->avatar
-            ], "id = {$user->id}"
+                "access" => $user->getAccess(),
+                "registered" => $user->getRegistered(),
+                "username" => $user->getUsername(),
+                "name" => $user->getName(),
+                "email" => $user->getEmail(),
+                "town" => $user->getTown(),
+                "country" => $user->getCountry(),
+                "gender" => $user->getGender(),
+                "birthdate" => $user->getBirthdate(),
+                "avatar" => $user->getAvatar()
+            ], "id = {$user->getId()}"
         );
     }
 
-    public static function getUser(int $userId): ?array {
+    public static function getUserById(int $id): ?array {
         $response = self::select(
             "Users",
-            "`id` = {$userId}"
+            "`id` = {$id}"
         );
         return !$response ? null : self::getResult($response);
     }
@@ -633,7 +618,8 @@ class Brain {
             "Notifications" => "userId",
             "Sources" => "userId",
             "Submits" => "userId",
-            "Achievements" => "user",
+            "Achievements" => "userId",
+            "Reports" => "userId",
             "Users" => "id",
             "UsersInfo" => "id"
         );
@@ -668,15 +654,15 @@ class Brain {
     public static function addUserInfo(User $user): ?int {
         return self::insert(
             "UsersInfo", [
-                "id" => $user->id,
-                "username" => $user->username,
-                "actions" => $user->actions,
-                "totalTime" => $user->totalTime,
-                "lastSeen" => $user->lastSeen,
-                "profileViews" => $user->profileViews,
-                "lastViewers" => $user->lastViewers,
-                "loginCount" => $user->loginCount,
-                "lastIP" => $user->lastIP
+                "id" => $user->getId(),
+                "username" => $user->getUsername(),
+                "actions" => $user->getActions(),
+                "totalTime" => $user->getTotalTime(),
+                "lastSeen" => $user->getLastSeen(),
+                "profileViews" => $user->getProfileViews(),
+                "lastViewers" => implode(",", $user->getLastViewers()),
+                "loginCount" => $user->getLoginCount(),
+                "lastIP" => $user->getLastIP()
             ]
         );
     }
@@ -684,18 +670,18 @@ class Brain {
     public static function updateUserInfo(User $user): bool {
         return self::update(
             "UsersInfo", [
-                "actions" => $user->actions,
-                "totalTime" => $user->totalTime,
-                "lastSeen" => $user->lastSeen,
-                "profileViews" => $user->profileViews,
-                "lastViewers" => $user->lastViewers,
-                "loginCount" => $user->loginCount,
-                "lastIP" => $user->lastIP
-            ], "`id` = {$user->id}"
+                "actions" => $user->getActions(),
+                "totalTime" => $user->getTotalTime(),
+                "lastSeen" => $user->getLastSeen(),
+                "profileViews" => $user->getProfileViews(),
+                "lastViewers" => implode(",", $user->getLastViewers()),
+                "loginCount" => $user->getLoginCount(),
+                "lastIP" => $user->getLastIP()
+            ], "`id` = {$user->getId()}"
         );
     }
 
-    public static function getUserInfo(int $userId): ?array {
+    public static function getUserInfoById(int $userId): ?array {
         $response = self::select(
             "UsersInfo",
             "`id` = {$userId}"
@@ -738,11 +724,11 @@ class Brain {
     public static function updateCreds(array $creds): bool {
         return self::update(
             "Credentials", [
-                "password" => $creds['password'],
-                "loginKey" => $creds['loginKey'],
-                "resetKey" => $creds['resetKey'],
-                "resetTime" => $creds['resetTime'],
-                "lastReset" => $creds['lastReset']
+                "password" => $creds["password"],
+                "loginKey" => $creds["loginKey"],
+                "resetKey" => $creds["resetKey"],
+                "resetTime" => $creds["resetTime"],
+                "lastReset" => $creds["lastReset"]
             ], "`userId` = {$creds['userId']}"
         );
     }
@@ -777,7 +763,7 @@ class Brain {
     public static function getAchievements(int $userId = -1): ?array {
         $response = self::select(
             "Achievements",
-            $userId == -1 ? "" : "`user` = {$userId}",
+            $userId == -1 ? "" : "`userId` = {$userId}",
             "`date`, `id` ASC"
         );
         return !$response ? null : self::getResults($response);
@@ -786,11 +772,11 @@ class Brain {
     public static function addAchievement(int $userId, string $achievement, string $date): ?int {
         return self::insertOrUpdate(
             "Achievements", [
-                "user" => $userId,
+                "userId" => $userId,
                 "achievement" => $achievement,
                 "date" => $date
             ], [
-                "user" => $userId
+                "userId" => $userId
             ]
         );
     }
@@ -816,7 +802,7 @@ class Brain {
     public static function getSpamCounter(User $user, int $type): ?int {
         $response = self::count(
             "Spam",
-            "`user` = {$user->id} AND `type` = {$type}"
+            "`userId` = {$user->getId()} AND `type` = {$type}"
         );
         return !$response ? null : self::getIntResult($response);
     }
@@ -825,7 +811,7 @@ class Brain {
         return self::insert(
             "Spam", [
                 "type" => $type,
-                "user" => $user->id,
+                "userId" => $user->getId(),
                 "time" => $time
             ]
         );
@@ -853,7 +839,7 @@ class Brain {
     public static function getGameMatches(int $problemId, int $userId = -1): ?array {
         $response = self::select(
             "Matches",
-            "`problemId` = {$problemId}" . ($userId == -1 ? "" : "AND (`userOne` = {$userId} OR `userTwo` = {$userId})")
+            "`problemId` = {$problemId}" . ($userId == -1 ? "" : " AND (`userOne` = {$userId} OR `userTwo` = {$userId})")
         );
         return !$response ? null : self::getResults($response);
     }
@@ -861,23 +847,23 @@ class Brain {
     public static function updateMatch(Match $match): ?int {
         return self::insertOrUpdate(
             "Matches", [
-                "problemId" => $match->problemId,
-                "test" => $match->test,
-                "userOne" => $match->userOne,
-                "userTwo" => $match->userTwo,
-                "submitOne" => $match->submitOne,
-                "submitTwo" => $match->submitTwo,
-                "scoreOne" => $match->scoreOne,
-                "scoreTwo" => $match->scoreTwo,
-                "message" => $match->message,
-                "replayId" => $match->replayId,
+                "problemId" => $match->getProblemId(),
+                "test" => $match->getTest(),
+                "userOne" => $match->getUserOne(),
+                "userTwo" => $match->getUserTwo(),
+                "submitOne" => $match->getSubmitOne(),
+                "submitTwo" => $match->getSubmitTwo(),
+                "scoreOne" => $match->getScoreOne(),
+                "scoreTwo" => $match->getScoreTwo(),
+                "message" => $match->getMessage(),
+                "replayKey" => $match->getReplayKey(),
             ], [
-                "submitOne" => $match->submitOne,
-                "submitTwo" => $match->submitTwo,
-                "scoreOne" => $match->scoreOne,
-                "scoreTwo" => $match->scoreTwo,
-                "message" => $match->message,
-                "replayId" => $match->replayId
+                "submitOne" => $match->getSubmitOne(),
+                "submitTwo" => $match->getSubmitTwo(),
+                "scoreOne" => $match->getScoreOne(),
+                "scoreTwo" => $match->getScoreTwo(),
+                "message" => $match->getMessage(),
+                "replayKey" => $match->getReplayKey()
             ]
         );
     }
@@ -924,7 +910,6 @@ class Brain {
     /*
      * Regrading
      */
-    // TODO: Change the `id` column to `key`, as it is confusing.
     public static function getRegradeList(string $id): ?array {
         $response = self::select(
             "Regrades",
@@ -936,26 +921,26 @@ class Brain {
     public static function getRegradeSubmit(string $id, Submit $submit): ?array {
         $response = self::select(
             "Regrades",
-            "`id` = '{$id}' AND `submitId` = {$submit->id}"
+            "`id` = '{$id}' AND `submitId` = {$submit->getId()}"
         );
-        return !$response ? null : self::getResults($response);
+        return !$response ? null : self::getResult($response);
     }
 
     public static function addRegradeSubmit(string $id, Submit $submit): ?int {
         return self::insert(
             "Regrades", [
                 "id" => $id,
-                "submitId" => $submit->id,
-                "userName" => $submit->userName,
-                "problemName" => $submit->problemName,
-                "submitted" => $submit->submitted,
-                "regraded" => date('Y-m-d H:i:s'),
-                "oldTime" => max($submit->execTime),
+                "submitId" => $submit->getId(),
+                "userName" => $submit->getUserName(),
+                "problemName" => $submit->getProblemName(),
+                "submitted" => $submit->getSubmitted(),
+                "regraded" => date("Y-m-d H:i:s"),
+                "oldTime" => max($submit->getExecTime()),
                 "newTime" => -1.0,
-                "oldMemory" => max($submit->execMemory),
+                "oldMemory" => max($submit->getExecMemory()),
                 "newMemory" => -1.0,
-                "oldStatus" => $submit->status,
-                "newStatus" => $GLOBALS['STATUS_WAITING']
+                "oldStatus" => $submit->getStatus(),
+                "newStatus" => $GLOBALS["STATUS_WAITING"]
             ]
         );
     }
@@ -963,24 +948,23 @@ class Brain {
     public static function updateRegradeSubmit(string $id, Submit $submit): bool {
         return self::update(
             "Regrades", [
-                "newTime" => max($submit->execTime),
-                "newMemory" => max($submit->execMemory),
-                "newStatus" => $submit->status
-            ], "`id` = '{$id}' AND `submitId` = {$submit->id}"
+                "newTime" => max($submit->getExecTime()),
+                "newMemory" => max($submit->getExecMemory()),
+                "newStatus" => $submit->getStatus()
+            ], "`id` = '{$id}' AND `submitId` = {$submit->getId()}"
         );
     }
 
     /*
      * Notifications
      */
-    // TODO: Pass arrays and implode the arrays here.
-    public static function addNotifications(int $userId, string $userName, string $messages, string $seen): ?int {
+    public static function addNotifications(int $userId, string $userName, array $messages, array $seen): ?int {
         return self::insert(
             "Notifications", [
                 "userId" => $userId,
                 "username" => $userName,
-                "messages" => $messages,
-                "seen" => $seen
+                "messages" => implode(",", $messages),
+                "seen" => implode(",", $seen)
             ]
         );
     }
@@ -1048,15 +1032,15 @@ class Brain {
     public static function updateMessage(Message $message): bool {
         return self::update(
             "Messages", [
-                "key" => $message->key,
-                "sent" => $message->sent,
-                "authorId" => $message->authorId,
-                "authorName" => $message->authorName,
-                "title" => $message->title,
-                "content" => $message->content,
-                "userIds" => implode(",", $message->userIds),
-                "userNames" => implode(",", $message->userNames)
-            ], "`id` = {$message->id}"
+                "key" => $message->getKey(),
+                "sent" => $message->getSent(),
+                "authorId" => $message->getAuthorId(),
+                "authorName" => $message->getAuthorName(),
+                "title" => $message->getTitle(),
+                "content" => $message->getContent(),
+                "userIds" => implode(",", $message->getUserIds()),
+                "userNames" => implode(",", $message->getUserNames())
+            ], "`id` = {$message->getId()}"
         );
     }
 

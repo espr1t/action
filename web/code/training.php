@@ -1,110 +1,110 @@
 <?php
-require_once('config.php');
-require_once('common.php');
-require_once('page.php');
-require_once('problems.php');
-require_once('db/brain.php');
+require_once("config.php");
+require_once("common.php");
+require_once("page.php");
+require_once("problems.php");
+require_once("db/brain.php");
 
 class TrainingPage extends Page {
-    public function getTitle() {
-        return 'O(N)::Training';
+    public function getTitle(): string {
+        return "O(N)::Training";
     }
 
-    public function getExtraStyles() {
-        return array('/styles/tooltips.css');
+    public function getExtraStyles(): array {
+        return array("/styles/tooltips.css");
     }
 
-    private function initIMPL($position) {
-        $key = 'IMPL';
-        $link = 'implementation';
-        $title = 'Implementation';
-        $summary = '
+    private function initIMPL(int $position) {
+        $key = "IMPL";
+        $link = "implementation";
+        $title = "Implementation";
+        $summary = "
             Секцията покрива вход и изход от програма, работа с масиви и символни низове.
             Упражняват се лесни задачи, които изискват директна имплементация на описана процедура.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще се научите как да четете и пишете стрингове, цели числа, числа с плаваща запетая, като
             част от входа и изхода на програма. Ще упражните да манипулирате масиви и символни низове ползвайки
             основните конструкции в програмните езици (if/else, for, while), а както и функции.
             <br><br>
             Подходящи теми, които можете да прочетете, са
-            <a href="http://www.informatika.bg/lectures/io" target="_blank">Вход и изход от програма</a>,
-            <a href="http://www.informatika.bg/lectures/variables-structs-arrays" target="_blank">Променливи, масиви,
+            <a href='http://www.informatika.bg/lectures/io' target='_blank'>Вход и изход от програма</a>,
+            <a href='http://www.informatika.bg/lectures/variables-structs-arrays' target='_blank'>Променливи, масиви,
             и структури</a>, и
-            <a href="http://www.informatika.bg/lectures/search-and-iteration" target="_blank">Търсене и итерация</a>.
+            <a href='http://www.informatika.bg/lectures/search-and-iteration' target='_blank'>Търсене и итерация</a>.
             <br><br>
             За тренировка сме ви подготвили лесни задачи, в повечето от които е казано директно какво се иска от вас да
             имплементирате - тоест просто трябва да превърнете описаната процедура в код.
-        ';
-        $problems = '2,157,134,155,181,184,15,43,194,199,106,214,164,234,236,238,249';
+        ";
+        $problems = "2,157,134,155,181,184,15,43,194,199,106,214,164,234,236,238,249,275,276";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initCCAS($position) {
-        $key = 'CCAS';
-        $title = 'Corner Cases';
-        $link = 'corner-cases';
-        $summary = '
+    private function initCCAS(int $position) {
+        $key = "CCAS";
+        $title = "Corner Cases";
+        $link = "corner-cases";
+        $summary = "
             Секцията покрива задачи с относително лесно решение, в които обаче има някаква уловка,
             частни случаи, или нещо, което лесно може да се обърка при имплементацията.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме за какво да внимаваме, когато имплементираме дадена задача. Ще наблегнем на
             задачи с относително лесно решение, в които обаче има някакъв частен случай или уловка, който(ято) лесно
-            може да бъде пропуснат(а). Такива задачи могат да струват много "скъпо" на състезателите в състезания,
+            може да бъде пропуснат(а). Такива задачи могат да струват много \"скъпо\" на състезателите в състезания,
             където за да се мине задачата се изисква правилно справяне с всички тестове (като например
-            <a href="http://codeforces.com/" target="_blank">CodeForces</a>,
-            <a href="https://www.topcoder.com/tc" target="_blank">TopCoder</a>, и
-            <a href="https://icpc.baylor.edu/" target="_blank">ACM ICPC</a>).
+            <a href='http://codeforces.com/' target='_blank'>CodeForces</a>,
+            <a href='https://www.topcoder.com/tc' target='_blank'>TopCoder</a>, и
+            <a href='https://icpc.baylor.edu/' target='_blank'>ACM ICPC</a>).
             <br><br>
             Подходяща тема, която би ви помогнала да пишете по-чист код и така да избягвате потенциални проблеми е тази за
-            <a href="http://www.informatika.bg/lectures/coding-conventions" target="_blank">Конвенции за стил на кода</a>.
+            <a href='http://www.informatika.bg/lectures/coding-conventions' target='_blank'>Конвенции за стил на кода</a>.
             <br><br>
             Упражняват се лесни задачи, в които има частни случаи или нещо, което лесно може да се обърка при
             имплементацията. В темите по-нататък ще срещнете и други, по-сложни такива задачи.
-        ';
-        $problems = '119,195,144,171,191,95,251';
+        ";
+        $problems = "119,195,144,171,191,95,251";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initRECU($position) {
-        $key = 'RECU';
-        $link = 'recursion-and-backtrack';
-        $title = 'Recursion & Backtrack';
-        $summary = '
+    private function initRECU(int $position) {
+        $key = "RECU";
+        $link = "recursion-and-backtrack";
+        $title = "Recursion & Backtrack";
+        $summary = "
             Секцията покрива рекурсия и търсене с връщане, както и различни оптимизации, които могат да се приложат при
             тях (ред на извикване на под-задачите, рязане на рекурсията, и други).
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме как да решаваме задачи с изчерпване, ползвайки рекурсия и търсене с връщане
             (backtrack). За някои от задачите ще ви се наложи да измислите оптимизации, за да бъде достатъчно бързо
             решението ви - например в какъв ред да извиквате под-задачите, кои клони на рекурсията нямат смисъл да
-            бъдат обходени и могат да бъдат "изрязани" (наричано на Английски "pruning"), както и други.
+            бъдат обходени и могат да бъдат \"изрязани\" (наричано на Английски \"pruning\"), както и други.
             <br><br>
             Подходяща тема, която можете да прочетете е
-            <a href="http://www.informatika.bg/lectures/recursion" target="_blank">Рекурсия и търсене с връщане</a>.
+            <a href='http://www.informatika.bg/lectures/recursion' target='_blank'>Рекурсия и търсене с връщане</a>.
             <br><br>
             Упражняват се лесни до средно-трудни задачи, в които трябва да се имплементира рекурсивно решение.
-            Задачата <a href="/problems/138">Schedule</a> с дадените ограничения може да се реши с бектрек, макар че
+            Задачата <a href='/problems/138'>Schedule</a> с дадените ограничения може да се реши с бектрек, макар че
             има доста по-добро (полиномиално) решение, което ще разгледаме в секцията
-            <a href="/training/greedy">Greedy</a>. Задачата <a href="/problems/247">Ruler</a> е относително сложна
+            <a href='/training/greedy'>Greedy</a>. Задачата <a href='/problems/247'>Ruler</a> е относително сложна
             (нужни са няколко оптимизации, за да върви достатъчно бързо дори само да изчислим отговорите локално),
             като, за съжаление, отговорите могат много лесно да бъдат намерени в интернет.
-        ';
-        $problems = '66,179,63,90,145,102,138,248,247';
+        ";
+        $problems = "66,179,63,90,145,102,138,248,247";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initBRUT($position) {
-        $key = 'BRUT';
-        $link = 'bruteforce';
-        $title = 'Bruteforce';
-        $summary = '
-            Секцията покрива задачи, които се решават с "груба сила" - обикновено пълно изчерпване или поне изчерпване
+    private function initBRUT(int $position) {
+        $key = "BRUT";
+        $link = "bruteforce";
+        $title = "Bruteforce";
+        $summary = "
+            Секцията покрива задачи, които се решават с \"груба сила\" - обикновено пълно изчерпване или поне изчерпване
             на част от задачата за опростяване на остатъка от нея, както и генериране на малките отговори за стигане до
             наблюдение.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме задачи, които или се решават изцяло с пълно изчерпване (но не backtrack), или
             или се ползва изчерпване на някаква част от задачата за да се опрости остатъка от нея. В много задачи не е
             нужно да се ползва изчерпване - съществува ефективен алгоритъм, който ги решава - но той е или труден или
@@ -117,55 +117,55 @@ class TrainingPage extends Page {
             зависимост в отговорите: може да се окаже някаква редица или проста формула.
             <br><br>
             Последно, на състезания, в които нямаме feedback за изпратените от нас решения преди края (например
-            <a href="http://codeforces.com/" target="_blank">CodeForces</a>,
-            <a href="https://www.topcoder.com/tc" target="_blank">TopCoder</a>,
-            <a href="https://icpc.baylor.edu/" target="_blank">ACM ICPC</a>,
+            <a href='http://codeforces.com/' target='_blank'>CodeForces</a>,
+            <a href='https://www.topcoder.com/tc' target='_blank'>TopCoder</a>,
+            <a href='https://icpc.baylor.edu/' target='_blank'>ACM ICPC</a>,
             а също и някои задачи по ученически състезания), понякога е полезно да напишем bruteforce решение с което да
-            тестваме "умното" ни такова. Обикновено така се откриват бъгове, като плюсът е, че имаме и тест, с който да
+            тестваме 'умното' ни такова. Обикновено така се откриват бъгове, като плюсът е, че имаме и тест, с който да
             ги дебъгваме (знаем верния отговор за него от брутфорс решението).
-        ';
-        $problems = '166,200,229,153,220,203,4,175,217';
+        ";
+        $problems = "166,200,229,153,220,203,4,175,217,280,281,277";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initSORT($position) {
-        $key = 'SORT';
-        $link = 'sorting';
-        $title = 'Sorting';
-        $summary = '
-            Секцията покрива темата за сортиране - "бавни" (O(N<sup>2</sup>)) и "бързи" (O(N * log(N)) сортирания, както
-            и сортирания, които не са базирани на сравнения (например counting sort).
-        ';
-        $expanded = '
+    private function initSORT(int $position) {
+        $key = "SORT";
+        $link = "sorting";
+        $title = "Sorting";
+        $summary = "
+            Секцията покрива темата за сортиране - \"бавни\" (O(N<sup>2</sup>)) и \"бързи\" (O(N * log(N)) сортирания,
+            както и сортирания, които не са базирани на сравнения (например counting sort).
+        ";
+        $expanded = "
             В тази секция ще разгледаме една от популярните теми в програмирането - а именно какво е сортиране и
-            няколко стандартни алгоритми, които можем да ползваме. Ще разгледаме както "лесни" алгоритми със сложност
+            няколко стандартни алгоритми, които можем да ползваме. Ще разгледаме както \"лесни\" алгоритми със сложност
             O(N<sup>2</sup>), като например Bubble Sort, Selection Sort, Insertion Sort, така и ефективни
             такива (Quick Sort, Merge Sort, Heap Sort) със сложност O(N*log(N)). Ще видим и начини, по които можем да
             сортираме и за по-бързо (линейно) време, ползвайки Counting Sort.
             <br><br>
             Подходящи теми, които можете да прочетете, са тези за
-            <a href="http://www.informatika.bg/lectures/sorting" target="_blank">Сортиране</a>,
-            <a href="http://www.informatika.bg/lectures/fast-sorting-algorithms" target="_blank">Бързи сортирания</a>,
-            а донякъде полезна тук би ви била и <a href="http://www.informatika.bg/lectures/STL" target="_blank">STL</a>.
-            За да разберете как разделяме алгоритмите на "бавни" и "бързи" е много полезна и темата за
-            <a href="http://www.informatika.bg/lectures/complexity" target="_blank">Сложност на алгоритми</a>.
+            <a href='http://www.informatika.bg/lectures/sorting' target='_blank'>Сортиране</a>,
+            <a href='http://www.informatika.bg/lectures/fast-sorting-algorithms' target='_blank'>Бързи сортирания</a>,
+            а донякъде полезна тук би ви била и <a href='http://www.informatika.bg/lectures/STL' target='_blank'>STL</a>.
+            За да разберете как разделяме алгоритмите на \"бавни\" и \"бързи\" е много полезна и темата за
+            <a href='http://www.informatika.bg/lectures/complexity' target='_blank'>Сложност на алгоритми</a>.
             <br><br>
             Макар и да има лесно за ползване ефективно сортиране в STL, част от задачите в секцията са такива, че да
             трябва сами да имплементирате логиката на някои от сортиращите алгоритми.
-        ';
-        $problems = '123,127,215,132,221,45,182,222,128,256';
+        ";
+        $problems = "123,285,127,215,132,221,45,182,222,128,256,283";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initGRDY($position) {
-        $key = 'GRDY';
-        $link = 'greedy';
-        $title = 'Greedy';
-        $summary = '
+    private function initGRDY(int $position) {
+        $key = "GRDY";
+        $link = "greedy";
+        $title = "Greedy";
+        $summary = "
             Секцията покрива задачи, които могат да бъдат решени ползвайки алчна стратегия. Тук няма много теория, а
-            по-скоро практика за да почнете да "надушвате" кога може да бъде подходено по този начин.
-        ';
-        $expanded = '
+            по-скоро практика за да почнете да \"надушвате\" кога може да бъде подходено по този начин.
+        ";
+        $expanded = "
             В тази секция ще разгледаме как алчни стратегии понякога могат да бъдат приложени в състезателни задачи.
             Ще видим няколко популярни задачи, чието решение е базирано на greedy, и няколко по-оригинални, в които
             то е ключът към решението. За този тип задачи няма много теория, която може да ви помогне - основното е
@@ -175,29 +175,29 @@ class TrainingPage extends Page {
             малко по-късно.
             <br><br>
             Подходяща тема, която можете да разгледате, е тази за
-            <a href="http://www.informatika.bg/lectures/greedy" target="_blank">Алчни стратегии</a>.
+            <a href='http://www.informatika.bg/lectures/greedy' target='_blank'>Алчни стратегии</a>.
             <br><br>
             Една от известните задачи, базирани на алчна стратегия, вече разгледахме в секцията за сортиране - това
-            беше задачата <a href="/problems/182">MaxNumber</a>.
-            Друга доста "стандартна" е <a href="/problems/138">Schedule</a>, която с дадените ограничения може да бъде
+            беше задачата <a href='/problems/182'>MaxNumber</a>.
+            Друга доста \"стандартна\" е <a href='/problems/138'>Schedule</a>, която с дадените ограничения може да бъде
             решена и с bruteforce, но съществува много по-ефективно алчно решение за нея. Донякъде известна задача от
-            интервюта е <a href="/problems/55">Codes</a>. Останалите варират по сложност на алчното наблюдение, което
+            интервюта е <a href='/problems/55'>Codes</a>. Останалите варират по сложност на алчното наблюдение, което
             трябва да направите - в някои то е много очевидно, докато в други съвсем не е!
-        ';
-        $problems = '143,165,206,170,72,58,178,190,230,138,81,112,120,218,223,67,208,55';
+        ";
+        $problems = "143,165,206,170,72,58,178,190,230,138,81,112,120,218,223,67,208,55,282,291";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initMATH($position) {
-        $key = 'MATH';
-        $link = 'math';
-        $title = 'Math';
-        $summary = '
+    private function initMATH(int $position) {
+        $key = "MATH";
+        $link = "math";
+        $title = "Math";
+        $summary = "
             Секцията покрива относително прости математически похвати, които се срещат често в състезателни задачи.
             Голяма част от тях се учат в училище и са на ниво 5-6 клас. Покрита е и малко по-сложна математика, която
             е нужна за алгоритми, които ще разгледаме по-нататък.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме относително проста теория по математика, като например какво е просто число,
             как ефективно да проверяваме дали число е просто, как бързо да намираме простите числа в интервал (решето
             на Ератостен). Накратко са покриват неща като елементарна комбинаторика, какво са факториел и пермутация,
@@ -210,76 +210,76 @@ class TrainingPage extends Page {
             като например комбинаторика и вероятности.
             <br><br>
             Подходящи теми, които можете да прочетете, са
-            <a href="http://www.informatika.bg/lectures/primes" target="_blank">Прости числа и факторизация</a>,
-            <a href="http://www.informatika.bg/lectures/bitwise-operations" target="_blank">Побитови операции</a>,
-            <a href="http://www.informatika.bg/lectures/modular-arithmetic" target="_blank">Модулна аритметика</a>,
-            <a href="http://www.informatika.bg/lectures/fast-exponentiation" target="_blank">Бързо степенуване</a>,
-            <a href="http://www.informatika.bg/lectures/gcd-and-lcm"
-            target="_blank">Най-голям общ делител и най-малко общо кратно</a>,
-            <a href="http://www.informatika.bg/lectures/long-numbers" target="_blank">Дълги числа</a>,
+            <a href='http://www.informatika.bg/lectures/primes' target='_blank'>Прости числа и факторизация</a>,
+            <a href='http://www.informatika.bg/lectures/bitwise-operations' target='_blank'>Побитови операции</a>,
+            <a href='http://www.informatika.bg/lectures/modular-arithmetic' target='_blank'>Модулна аритметика</a>,
+            <a href='http://www.informatika.bg/lectures/fast-exponentiation' target='_blank'>Бързо степенуване</a>,
+            <a href='http://www.informatika.bg/lectures/gcd-and-lcm'
+            target='_blank'>Най-голям общ делител и най-малко общо кратно</a>,
+            <a href='http://www.informatika.bg/lectures/long-numbers' target='_blank'>Дълги числа</a>,
             <br><br>
             Повечето задачи в секцията се решават с елементарна математика. Изключение правят
-            <a href="/problems/92">Euleonora Pt.1</a> и <a href="/problems/93">Euleonora Pt.2</a>, които изискват да
-            знаете какво е <a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" target="_blank">функция
-            на Ойлер</a>. Една от задачите (<a href="/problems/4">8-Bit</a>) вече разгледахме в секцията за bruteforce,
+            <a href='/problems/92'>Euleonora Pt.1</a> и <a href='/problems/93'>Euleonora Pt.2</a>, които изискват да
+            знаете какво е <a href='https://en.wikipedia.org/wiki/Euler%27s_totient_function' target='_blank'>функция
+            на Ойлер</a>. Една от задачите (<a href='/problems/4'>8-Bit</a>) вече разгледахме в секцията за bruteforce,
             като тук можете да пробвате да напишете значително по-ефективното (но малко по-сложно) решение, базирано на
             комбинаторика.
-        ';
-        $problems = '225,24,228,187,201,140,156,192,92,93,4,172';
+        ";
+        $problems = '225,24,228,187,201,140,156,192,92,93,4,172,274';
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initSIDS($position) {
-        $key = 'SIDS';
-        $link = 'simple-data-structures';
-        $title = 'Simple Data Structures';
-        $summary = '
+    private function initSIDS(int $position) {
+        $key = "SIDS";
+        $link = "simple-data-structures";
+        $title = "Simple Data Structures";
+        $summary = "
             Секцията покрива най-основните структури данни: префиксен масив, динамичен масив, опашка, стек, свързан
             списък, и приоритетна опашка. Задачите тук изискват да се приложи умно една от тези стуктури за се постигне
             достатъчно ефективно решение.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме какво е структура данни и най-основните от тях: префиксен масив, динамичен
-            масив (също наричан "vector"), стек, опашка, свързан списък, и приоритетна опашка. В повечето случаи няма
+            масив (също наричан \"vector\"), стек, опашка, свързан списък, и приоритетна опашка. В повечето случаи няма
             да се налага да си ги пишете сами (тъй като са имплементирани в стандартните библиотеки на повечето езици).
             Все пак е хубаво да знаете как те са имплементирани и работят, както и какви са сложностите на операциите
-            им, от една страна да не ги ползвате като "черна кутия", а от друга - защото в някои задачи се ползва само
+            им, от една страна да не ги ползвате като \"черна кутия\", а от друга - защото в някои задачи се ползва само
             част от идеята им. Префиксният масив е значително по-рядко срещан в практическото програмиране, в следствие
             на което не е включен в стандартната библиотека. За сметка на това, както ще видим, има доста състезателни
             задачи, в които се ползва. Повечето от тези структури ще ползваме като част от алгоритми, които ще
             разгледаме по-нататък (например опашка при търсене в ширина и приоритетна опашка в алгиритъма на Дейкстра).
             <br><br>
             Подходящи теми, които можете да видите, са
-            <a href="http://www.informatika.bg/lectures/data-structures" target="_blank">Структури данни</a>,
-            <a href="http://www.informatika.bg/lectures/prefix-array" target="_blank">Префиксен масив</a>,
-            <a href="http://www.informatika.bg/lectures/vector" target="_blank">Динамичен масив</a>,
-            <a href="http://www.informatika.bg/lectures/list" target="_blank">Списък</a>,
-            <a href="http://www.informatika.bg/lectures/queue" target="_blank">Опашка</a>,
-            <a href="http://www.informatika.bg/lectures/stack" target="_blank">Стек</a>,
-            <a href="http://www.informatika.bg/lectures/priority-queue" target="_blank">Приоритетна опашка</a>.
+            <a href='http://www.informatika.bg/lectures/data-structures' target='_blank'>Структури данни</a>,
+            <a href='http://www.informatika.bg/lectures/prefix-array' target='_blank'>Префиксен масив</a>,
+            <a href='http://www.informatika.bg/lectures/vector' target='_blank'>Динамичен масив</a>,
+            <a href='http://www.informatika.bg/lectures/list' target='_blank'>Списък</a>,
+            <a href='http://www.informatika.bg/lectures/queue' target='_blank'>Опашка</a>,
+            <a href='http://www.informatika.bg/lectures/stack' target='_blank'>Стек</a>,
+            <a href='http://www.informatika.bg/lectures/priority-queue' target='_blank'>Приоритетна опашка</a>.
             Разбира се, за да не се налага да ги пишете всеки път, ще ви е полезно и да знаете как да ги ползвате
-            от <a href="http://www.informatika.bg/lectures/STL" target="_blank">стандартната библиотека</a>.
+            от <a href='http://www.informatika.bg/lectures/STL' target='_blank'>стандартната библиотека</a>.
             <br><br>
             Задачите в секцията са такива, че да не можете да ползвате наготово вградените в STL имплементации.
             В повечето се ползва само идея от някоя от структурите, или операция, която стандартно не се поддържа.
-            В задачата <a href="/problems/129">Sum of Primes</a> ще можете да упражните Решето на Ератостен, което
-            трябва да сте разгледали в предходната тема. В задачата <a href="/problems/245">Road Signs</a> пък
+            В задачата <a href='/problems/129'>Sum of Primes</a> ще можете да упражните Решето на Ератостен, което
+            трябва да сте разгледали в предходната тема. В задачата <a href='/problems/245'>Road Signs</a> пък
             трябва да ползвате няколко масива, в които да пазите различна информация, така че да можете достатъчно
             ефективно да пресмятате отговора.
-        ';
-        $problems = '125,129,20,40,124,245';
+        ";
+        $problems = "125,129,20,40,124,245";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initGRF1($position) {
-        $key = 'GRF1';
-        $link = 'simple-graphs';
-        $title = 'Simple Graphs';
-        $summary = '
+    private function initGRF1(int $position) {
+        $key = "GRF1";
+        $link = "simple-graphs";
+        $title = "Simple Graphs";
+        $summary = "
             Секцията покрива графи и базови алгоритми в графи: търсене в дълбочина и ширина, Дeйкстра, минимално
             покриващо дърво, непресичащи се множества, топологично сортиране, и разширяване на графа.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме може би най-фундаменталната тема в състезателното програмиране - а именно
             теория на графите. Ще научим как да представяме графи в паметта по няколко различни начина. Ще разгледаме
             основните алгоритми за обхождане и търсене в графи: търсене в ширина, търсене в дълбочина, и алгоритъма
@@ -287,30 +287,30 @@ class TrainingPage extends Page {
             Ще видим и една техника, която помага не само в графови задачи: разширяване на графа.
             <br><br>
             Темите, които биха ви били полезни за тази секция са
-            <a href="http://www.informatika.bg/lectures/graphs" target="_blank">Графи и представяне на графи</a>,
-            <a href="http://www.informatika.bg/lectures/depth-first-search" target="_blank">Търсене в дълбочина</a>,
-            <a href="http://www.informatika.bg/lectures/breadth-first-search" target="_blank">Търсене в ширина</a>, и
-            <a href="http://www.informatika.bg/lectures/dijkstra" target="_blank">Алгоритъм на Дейкстра</a>,
+            <a href='http://www.informatika.bg/lectures/graphs' target='_blank'>Графи и представяне на графи</a>,
+            <a href='http://www.informatika.bg/lectures/depth-first-search' target='_blank'>Търсене в дълбочина</a>,
+            <a href='http://www.informatika.bg/lectures/breadth-first-search' target='_blank'>Търсене в ширина</a>, и
+            <a href='http://www.informatika.bg/lectures/dijkstra' target='_blank'>Алгоритъм на Дейкстра</a>,
             <br><br>
             Откъм задачи това е една от най-дългите секции, като повечето алгоритми са покрити от поне две задачи
             (а по-основните - дори от повече). В повечето задачи се изисква директна имплементация или съвсем дребна
             модификация.
-        ';
-        $problems = '114,122,115,147,151,158,177,180,12,27,99,100,104,83,87,78,121,133';
+        ";
+        $problems = "114,122,115,147,151,158,177,180,12,27,99,100,104,83,87,78,121,133,266";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initBSTS($position) {
-        $key = 'BSTS';
-        $link = 'binary-search';
-        $title = 'Binary & Ternary Search';
-        $summary = '
-            Секцията покрива най-популярната форма на "Разделяй и Владей": двоично търсене, а както и неговата
+    private function initBSTS(int $position) {
+        $key = "BSTS";
+        $link = "binary-search";
+        $title = "Binary & Ternary Search";
+        $summary = "
+            Секцията покрива най-популярната форма на \"Разделяй и Владей\": двоично търсене, а както и неговата
             модификация - троично търсене - което решава проблема с намирането на екстремум на изпъкнала функция.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме един от най-фундаменталните и изучавани алгоритми: двоично търсене. Ще видим
-            и какво представлява неговата малка модификация "троично търсене", която ни позволява да намерим максимума
+            и какво представлява неговата малка модификация \"троично търсене\", която ни позволява да намерим максимума
             на функция, която първо нараства, след което достига търсения максимум, и после намалява (или обратно -
             да намерим минимума на функция, която първо намалява, стига до него, и после нараства). Макар и относително
             прости, те са едни от най-често грешените алгоритми, тъй като при невнимание често може да се стигне до
@@ -319,64 +319,64 @@ class TrainingPage extends Page {
             <br><br>
             Тъй като двоичното и троичното търсене сами по себе си са относително прости, най-често в състезателни
             задачи те биват комбинирани с някакъв друг алгоритъм. В следствие на това можете да ги срещнете както в
-            много прости, така и в много сложни задачи - сложността ще се определя именно от този "допълнителен"
+            много прости, така и в много сложни задачи - сложността ще се определя именно от този \"допълнителен\"
             алгоритъм, който трябва да се приложи.
             <br><br>
             Темата, която ще ви е безкрайно полезна тук е
-            <a href="http://www.informatika.bg/lectures/binary-search" target="_blank">Двоично търсене</a>,
+            <a href='http://www.informatika.bg/lectures/binary-search' target='_blank'>Двоично търсене</a>,
             но преди нея можете да погледнете и
-            <a href="http://www.informatika.bg/lectures/divide-and-conquer" target="_blank">Разделяй и Владей</a>.
+            <a href='http://www.informatika.bg/lectures/divide-and-conquer' target='_blank'>Разделяй и Владей</a>.
             <br><br>
             В тази секция задачите ще комбинират двоично търсене с някои от алгоритмите, които вече разгледахме -
             например итерация, алчен алгоритъм, графов алгоритъм, или проста структура данни. В секциите по-нататък ще
             видим задачи, в които двоичното търсене е комбинирано с по-сложни алгоритми (като например сложни структури
             данни, потоци, 2-SAT, хеширане, и други).
-        ';
-        $problems = '117,130,141,168,226,118,28,30,60,76,185,209,22,250';
+        ";
+        $problems = "117,130,141,168,226,118,28,30,60,76,185,209,22,250,267,290";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initDPDP($position) {
-        $key = 'DPDP';
-        $link = 'dynamic-programming';
-        $title = 'Dynamic Programming';
-        $summary = '
+    private function initDPDP(int $position) {
+        $key = "DPDP";
+        $link = "dynamic-programming";
+        $title = "Dynamic Programming";
+        $summary = "
             Секцията покрива една от най-фундаменталните теми в състезателното програмиране - а именно, динамично
             оптимиране. Тук са включени само стандартни динамични (едномерни, двумерни, и многомерни), без различни
             специфични разновидности, които ще разгледаме по-нататък.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме друга много основна тема от състезателното програмиране - динамичното
-            оптимиране. Ще видим как изглежда то в най-базовия му вид - без специфични "чупки" на стейта, които
+            оптимиране. Ще видим как изглежда то в най-базовия му вид - без специфични \"чупки\" на стейта, които
             сме покрили по-нататък. Динамичното е начинът да се сведат експоненциални решения до полиномиални такива,
             без особена промяна в кода. Поради елегантността си те са лесни както за писане от състезател, така и за
             създаване. В следствие на това те са ужасно често срещани по състезания (може би покриват над 20% от
             задачите).
             <br><br>
             Една (относително дълга) тема, която ще ви е нужна за тази секция е
-            <a href="http://www.informatika.bg/lectures/dynamic-programming-part1" target="_blank">Динамично оптимиране,
+            <a href='http://www.informatika.bg/lectures/dynamic-programming-part1' target='_blank'>Динамично оптимиране,
             част I</a>. Допълнително четиво, което също би ви било полезно тук е
-            <a href="http://www.informatika.bg/lectures/dynamic-programming-tips-and-tricks" target="_blank">Трикове
+            <a href='http://www.informatika.bg/lectures/dynamic-programming-tips-and-tricks' target='_blank'>Трикове
             в динамичното оптимиране</a>.
             <br><br>
             Задачите в секцията включват едномерно, двумерно, и многомерно динамично. По-сложни динамични задачи с
             по-разчупен стейт (например битова маска) или по-сложни оптимизации (например със структури данни) ще бъдат
             разгледани в секциите по-нататък.
-        ';
-        $problems = '113,116,243,142,167,174,50,33,61,85,196,198,39,212,213,224,235';
+        ";
+        $problems = "113,116,243,142,167,174,50,33,61,85,196,198,39,212,213,224,235,286,284,279";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initBUCK($position) {
-        $key = 'BUCK';
-        $link = 'bucketing';
-        $title = 'Bucketing';
-        $summary = '
+    private function initBUCK(int $position) {
+        $key = "BUCK";
+        $link = "bucketing";
+        $title = "Bucketing";
+        $summary = "
             Секцията покрива задачи, които се решават чрез разделяне на данните в определен брой купчини (наричани
-            "buckets"). В състезателни задачи можете да срещнете тази техника както за съставяне на ефективен
+            \"buckets\"). В състезателни задачи можете да срещнете тази техника както за съставяне на ефективен
             алгоритъм, така и за структура данни.
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме една не толкова честа (в сравнение с предните две), но пък хитра техника за
             разделяне на данните, която би могла да бъде ползвана както за ускоряване на алгоритми, така и за създаване
             на структура данни за специфични проблеми. Най-чистата версия вече трябва да сте срещнали в секцията за
@@ -385,24 +385,24 @@ class TrainingPage extends Page {
             <br><br>
             Включените задачи в секцията са относително малко, но всяка от тях изисква важно наблюдение как точно да
             се разделят елементите в бъкети (какви да бъдат бъкетите, колко големи да бъдат и т.н.). За задачата
-            <a href="/problems/150">Popcounts</a> пробвайте да измислите сами решение с константна сложност (за питане)
+            <a href='/problems/150'>Popcounts</a> пробвайте да измислите сами решение с константна сложност (за питане)
             вместо да ползвате вградената в езика функция (която ползва процесорна инструкция за това).
             <br><br>
-        ';
-        $problems = '150,162,105,68';
+        ";
+        $problems = "150,162,105,68";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
-    private function initITDP($position) {
-        $key = 'ITDP';
-        $link = 'iterative-dynamic-programming';
-        $title = 'Iterative Dynamic Programming';
-        $summary = '
+    private function initITDP(int $position) {
+        $key = "ITDP";
+        $link = "iterative-dynamic-programming";
+        $title = "Iterative Dynamic Programming";
+        $summary = "
             Секцията покрива малко по-сложни динамични задачи, в които решението трябва да се направи итеративно. Така
             може да се спести паметта от някое от измеренията, което е един от специфичните видове динамично оптимиране
             (с оптимизация на паметта).
-        ';
-        $expanded = '
+        ";
+        $expanded = "
             В тази секция ще разгледаме още задачи, решавани с динамично оптимиране. За разлика от миналата секция, в
             която разгледахме неговите най-базови варианти, тук задачите ще са малко по-специфични - освен да измислите
             стейта ще трябва да видите и как точно да попълните динамичната таблица, така че да не се налага да я
@@ -413,11 +413,11 @@ class TrainingPage extends Page {
             <code>dyn[N][M][K]</code> на таблица <code>dyn[2][M][K]</code>.
             <br><br>
             Подходяща тема, която можете да разгледате, е
-            <a href="http://www.informatika.bg/lectures/dynamic-programming-part2" target="_blank">Динамично оптимиране, част II</a>.
+            <a href='http://www.informatika.bg/lectures/dynamic-programming-part2' target='_blank'>Динамично оптимиране, част II</a>.
             <br><br>
             Задачите в секцията изискват оптимизация на паметта, ползвайки итеративно динамично.
-        ';
-        $problems = '6,148,71,19,101,189';
+        ";
+        $problems = "6,148,71,19,101,189,271";
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -476,7 +476,7 @@ class TrainingPage extends Page {
             Задачите в секцията се решават с динамично оптимиране, като едно (или повече) от измеренията са битови маски
             или числа в троична/четвъртична бройна система.
         ';
-        $problems = '57,183,51,75,223,47,202,54,233';
+        $problems = '57,183,51,75,223,47,202,54,233,278,273,265';
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -607,7 +607,7 @@ class TrainingPage extends Page {
             задачи, които включват останалите, като например
             <a href="/problems/73">Spectre</a>, <a href="/problems/8">Towers</a>, или <a href="/problems/205">Deathstars</a>.
         ';
-        $problems = '10,161,154,14';
+        $problems = '10,161,154,14,261';
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -665,7 +665,7 @@ class TrainingPage extends Page {
             Всички задачи в темата ползват под един или друг вид meet-in-the-middle подхода, като ползват различни
             структури данни за "комбиниране" на двете части.
         ';
-        $problems = '80,207,79,3,11,257';
+        $problems = '80,207,79,3,11,257,264,268';
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -789,7 +789,7 @@ class TrainingPage extends Page {
             по-простите функции на
             <a href="http://www.informatika.bg/lectures/long-numbers" target="_blank">дълги числа</a>).
         ';
-        $problems = '231,152,159,23,17,31,44,103,241';
+        $problems = '231,152,159,23,17,31,44,103,241,263';
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -822,7 +822,7 @@ class TrainingPage extends Page {
             Голяма част от задачите в секцията се решават с мачинг или поток, но има и няколко, които са с някои
             от другите.
         ';
-        $problems = '139,88,7,18,126,29,35,8,205,160,219,169,176,70';
+        $problems = '287,139,88,7,18,126,29,35,8,205,160,219,169,176,70';
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -844,7 +844,7 @@ class TrainingPage extends Page {
             нужно. Макар и да могат да бъдат решени от алгоритмите, които мимикрират, имплементацията им на състезание
             би ви загубили много ценно време.
         ';
-        $problems = '42,242,111,173,186,108,197,77,96,86,64,237,253';
+        $problems = '42,242,111,173,186,108,197,77,96,86,64,237,253,272,270,258,269';
         Brain::addTopic($position, $key, $link, $title, $summary, $expanded, $problems);
     }
 
@@ -891,14 +891,14 @@ class TrainingPage extends Page {
 
         $sectionInfo = inBox('<h1>' . $topic['title'] . '</h1>' . $topic['expanded']);
         $problemsPage = new ProblemsPage($this->user);
-        $sectionProblems = $problemsPage->getProblems($problemIds);
+        $sectionProblems = $problemsPage->getTasks($problemIds);
 
         return $sectionInfo . $sectionProblems;
     }
 
     private function getTopicStats($topic) {
         $problems = explode(',', $topic['problems']);
-        $solved = Brain::getSolved($this->user->id);
+        $solved = Brain::getSolved($this->user->getId());
         $accepted = array_filter($solved, function($el) use ($problems) {return in_array($el, $problems);});
         $parentId = 'topic-stats-' . $topic['key'];
         return '<script>circularProgress(\'' . $parentId . '\', ' . count($accepted) . ', ' . count($problems) . ');</script>';
@@ -986,8 +986,8 @@ class TrainingPage extends Page {
         ');
     }
 
-    public function getContent() {
-        // $this->initTraining();
+    public function getContent(): string {
+        $this->initTraining();
 
         $content = '';
         if (!isset($_GET['section'])) {

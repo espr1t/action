@@ -1,21 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang='bg-bg'>
     <head>
         <?php echo createHead($page); ?>
     </head>
 
-    <body onload="<?php echo $page->onLoad() ?>" style="background: none;">
+    <body onload='<?php echo $page->onLoad() ?>' style='background: none;'>
         <?php if (!isset($isAdminPage)) include_once("analytics.php") ?>
-        <div class="wrapper" id="wrapper">
+        <div class='wrapper' id='wrapper'>
             <!-- Actual content -->
-            <div class="container">
+            <div class='container'>
                 <?php
                     echo $content;
                 ?>
             </div>
-
-            <!-- Extra code -->
-            <?php echo $page->getExtraCode(); ?>
         </div>
     </body>
 </html>

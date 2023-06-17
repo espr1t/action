@@ -104,26 +104,16 @@ function getImagescannerContent(playerName) {
     var queryInfo = document.createElement('div');
     queryInfo.id = 'queryInfo';
     queryInfo.style = 'vertical-align: middle;';
-    queryInfo.innerHTML += '<div style="text-align: middle; font-weight: bold; font-size: 1.5rem;" id="curQuery">0/10000</div>';
+    queryInfo.innerHTML += '<div style="text-align: center; font-weight: bold; font-size: 1.5rem;" id="curQuery">0/10000</div>';
     content.appendChild(queryInfo);
 
     return content;
 }
 
-function showImagescannerReplay(userName, replayId) {
-    ajaxCall('/actions/getReplay', {'replayId': replayId}, function(response) {
-        var content = getImagescannerContent(userName);
-        // Make pressing escape return back to the game
-        var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
-        showActionForm(content.outerHTML, gameUrl);
-
-        if (response.length > 0 && response[0] >= '0' && response[0] <= '9') {
-            drawImage(response);
-        } else {
-            var imagePlaceholderEl = document.getElementById('imagePlaceholder');
-            imagePlaceholderEl.outerHTML = '<div>No data available for this test.</div>';
-            var queryInfoEl = document.getElementById('queryInfo');
-            queryInfoEl.outerHTML = '<div></div>';
-        }
-    });
+function showImagescannerReplay(userName, replayLog) {
+    var content = getImagescannerContent(userName);
+    // Make pressing escape return back to the game
+    var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
+    showActionForm(content.outerHTML, gameUrl);
+    drawImage(replayLog);
 }

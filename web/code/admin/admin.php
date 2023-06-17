@@ -6,9 +6,8 @@ require_once(__DIR__ . "/../entities/user.php");
 session_start();
 
 $user = getCurrentUser();
-if ($user == null || $user->access < $GLOBALS["ACCESS_ADMIN_PAGES"]) {
-    header("Location: /forbidden");
-    exit();
+if ($user == null || $user->getAccess() < $GLOBALS["ACCESS_ADMIN_PAGES"]) {
+    redirect("/forbidden", "ERROR", "Нямате права да достъпите тази страница.");
 }
 
 # Show notifications (set in $_SESSION from server or $_POST from client)
@@ -51,19 +50,20 @@ switch ($_GET["page"]) {
         $page = new AdminDeleteUserPage($user);
         break;
 
-    case "tests":
+        case "tests":
         require_once("../../tests/language_detector.php");
         $page = new LanguageDetectorPage($user);
         break;
 
     default:
-        header("Location: /error");
+        redirect("/error", "ERROR", "Невалидна страница.");
         exit();
 }
-$content = $page->getContent();
-$achievementsContent = "";
 
 $isAdminPage = true;
+$achievementsContent = "";
+$content = $page->getContent();
+
 require("../page.html");
 
 ?>

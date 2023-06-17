@@ -1,53 +1,59 @@
 <?php
-require_once('actions/print_pdf.php');
-require_once('db/brain.php');
-require_once('entities/problem.php');
-require_once('entities/submit.php');
-require_once('config.php');
-require_once('common.php');
-require_once('page.php');
-require_once('events.php');
+require_once("actions/print_pdf.php");
+require_once("db/brain.php");
+require_once("entities/problem.php");
+require_once("entities/submit.php");
+require_once("config.php");
+require_once("common.php");
+require_once("page.php");
+require_once("events.php");
 
 class GamesPage extends Page {
 
-    public function getTitle() {
-        return 'O(N)::Games';
+    public function getTitle(): string {
+        return "O(N)::Games";
     }
 
-    public function getExtraScripts() {
+    /** @return string[] */
+    public function getExtraScripts(): array {
         return array(
-            '/scripts/language_detector.js',
-            '/scripts/games/snakes.js',
-            '/scripts/games/uttt.js',
-            '/scripts/games/hypersnakes.js',
-            '/scripts/games/tetris.js',
-            '/scripts/games/connect.js',
-            '/scripts/games/imagescanner.js',
-            '/scripts/jquery-3.3.1.min.js',
-            '/scripts/jquery-jvectormap-2.0.3.min.js',
-            '/scripts/jquery-jvectormap-world-mill.js'
+            "/scripts/language_detector.js",
+            "/scripts/games/snakes.js",
+            "/scripts/games/uttt.js",
+            "/scripts/games/hypersnakes.js",
+            "/scripts/games/tetris.js",
+            "/scripts/games/connect.js",
+            "/scripts/games/imagescanner.js",
+            "/scripts/jquery-3.3.1.min.js",
+            "/scripts/jquery-jvectormap-2.0.3.min.js",
+            "/scripts/jquery-jvectormap-world-mill.js"
         );
     }
 
-    public function getExtraStyles() {
-        return array('/styles/tooltips.css', '/styles/games.css', '/styles/jquery-jvectormap-2.0.3.css');
+    /** @return string[] */
+    public function getExtraStyles(): array {
+        return array(
+            "/styles/tooltips.css",
+            "/styles/games.css",
+            "/styles/jquery-jvectormap-2.0.3.css"
+        );
     }
 
-    public function onLoad() {
-        return 'addPreTags()';
+    public function onLoad(): string {
+        return "addPreTags()";
     }
 
-    public static function getGameRanking($problem) {
+    public static function getGameRanking(Problem $problem): array {
         // Returns a sorted array of data:
         // {
-        //     'user': <integer>,
-        //     'submit': <integer>,
-        //     'score': <float>
+        //     "userId": <int>,
+        //     "submitId": <int>,
+        //     "score": <float>
         // }
         // The array is sorted from best to worst.
         // A user is ranked better than another user, if he/she has more points or has submitted earlier.
 
-        $matches = Brain::getGameMatches($problem->id);
+        $matches = Match::getGameMatches($problem->getId());
 
         $submit = array();
         $playerScore = array();
@@ -56,10 +62,10 @@ class GamesPage extends Page {
         // Initialize all arrays with zeroes
         foreach ($matches as $match) {
             // If one of the users is negative, this means this is a partial submission match.
-            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
+            if ($match->getUserOne() < 0 || $match->getUserTwo() < 0)
                 continue;
             for ($player = 0; $player < 2; $player += 1) {
-                $userKey = ($player == 0 ? 'User_' . $match['userOne'] : 'User_' . $match['userTwo']);
+                $userKey = $player == 0 ? "User_{$match->getUserOne()}" : "User_{$match->getUserTwo()}";
                 $submit[$userKey] = $playerScore[$userKey] = $opponentScore[$userKey] = 0;
             }
         }
@@ -67,29 +73,29 @@ class GamesPage extends Page {
         // Get the scores, wins, draws, and losses for each player
         foreach ($matches as $match) {
             // If one of the users is negative, this means this is a partial submission match.
-            if (intval($match['userOne']) < 0 || intval($match['userTwo']) < 0)
+            if ($match->getUserOne() < 0 || $match->getUserTwo() < 0)
                 continue;
 
             // Don't even get me started on why we must prepend with "User_"...
-            $userOneKey = 'User_' . $match['userOne'];
-            $userTwoKey = 'User_' . $match['userTwo'];
+            $userOneKey = "User_{$match->getUserOne()}";
+            $userTwoKey = "User_{$match->getUserTwo()}";
 
-            $scoreUserOne = floatval($match['scoreOne']);
-            $scoreUserTwo = floatval($match['scoreTwo']);
+            $scoreUserOne = $match->getScoreOne();
+            $scoreUserTwo = $match->getScoreTwo();
 
             // TODO: Fix this in a better way (add scoreWin and scoreTie to each game)
-            if ($problem->name == "Ultimate TTT") {
+            if ($problem->getName() == "Ultimate TTT") {
                 if ($scoreUserOne > $scoreUserTwo) $scoreUserOne = 3;
                 if ($scoreUserTwo > $scoreUserOne) $scoreUserTwo = 3;
             }
 
             // Player one scores
-            $submit[$userOneKey] = intval($match['submitOne']);
+            $submit[$userOneKey] = $match->getSubmitOne();
             $playerScore[$userOneKey] += $scoreUserOne;
             $opponentScore[$userOneKey] += $scoreUserTwo;
 
             // Player two scores
-            $submit[$userTwoKey] = intval($match['submitTwo']);
+            $submit[$userTwoKey] = $match->getSubmitTwo();
             $playerScore[$userTwoKey] += $scoreUserTwo;
             $opponentScore[$userTwoKey] += $scoreUserOne;
         }
@@ -97,7 +103,7 @@ class GamesPage extends Page {
         $ranking = array();
         $numPlayers = count($playerScore);
         for ($pos = 0; $pos < $numPlayers; $pos++) {
-            $bestUser = '';
+            $bestUser = "";
             $maxPlayerScore = -1;
             $minOpponentScore = 1e100;
 
@@ -113,47 +119,50 @@ class GamesPage extends Page {
             }
 
             array_push($ranking, array(
-                'user' => intval(substr($bestUser, 5)),
-                'score' => $playerScore[$bestUser],
-                'submit' => $submit[$bestUser]
+                "userId" => intval(substr($bestUser, 5)),
+                "submitId" => $submit[$bestUser],
+                "score" => $playerScore[$bestUser],
             ));
             unset($playerScore[$bestUser]);
         }
         return $ranking;
     }
 
-    private static function populateRelativePoints($problem, &$bestScores, &$userSubmits) {
-        $submits = Submit::getProblemSubmits($problem->id);
+    private static function populateRelativePoints(Problem $problem, array &$bestScores, array &$userSubmits): void {
+        $submits = Submit::getProblemSubmits($problem->getId());
         // Take into account only the latest submission of each user
         $submits = array_reverse($submits);
 
         foreach ($submits as $submit) {
             // Skip system submits
-            if ($submit->userId == 0) {
+            if ($submit->getUserId() == 0) {
                 continue;
             }
-            $userKey = 'User_' . $submit->userId;
+            $userKey = "User_{$submit->getUserId()}";
             if (array_key_exists($userKey, $userSubmits)) {
                 continue;
             }
             $userSubmits[$userKey] = $submit;
 
-            for ($i = 0; $i < count($submit->results); $i++) {
+            // TODO: Refactor the code below to use a Problem property which is min/max
+            //       (whether the goal is to minimize or maximize the score)
+            for ($i = 0; $i < count($submit->getResults()); $i++) {
                 if (count($bestScores) <= $i) {
-                    if ($problem->name == 'ImageScanner') {
+                    if ($problem->getName() == "ImageScanner") {
                         array_push($bestScores, 1e100);
                     } else {
                         array_push($bestScores, 0.0);
                     }
                 }
-                if (is_numeric($submit->results[$i])) {
-                    if ($problem->name == 'ImageScanner') {
-                        if ($bestScores[$i] > floatval($submit->results[$i])) {
-                            $bestScores[$i] = floatval($submit->results[$i]);
+                $curScore = $submit->getResults()[$i];
+                if (is_numeric($curScore)) {
+                    if ($problem->getName() == "ImageScanner") {
+                        if ($bestScores[$i] > $curScore) {
+                            $bestScores[$i] = $curScore;
                         }
                     } else {
-                        if ($bestScores[$i] < floatval($submit->results[$i])) {
-                            $bestScores[$i] = floatval($submit->results[$i]);
+                        if ($bestScores[$i] < $curScore) {
+                            $bestScores[$i] = $curScore;
                         }
                     }
                 }
@@ -161,19 +170,33 @@ class GamesPage extends Page {
         }
 
         // Hack to make Airports use the grader's score
-        // This, in fact, makes the task just a standard problem, but, oh well, I need it to be a game.
-        if ($problem->name == 'Airports') {
+        // This, in fact, makes the task just a standard problem, but, oh well, I needed it to be a game.
+        // This will be fixed once we have a "scoring" field in the Problem structure.
+        if ($problem->getName() == "Airports") {
             for ($i = 0; $i < count($bestScores); $i++)
                 $bestScores[$i] = 1.0;
         }
     }
 
-    public static function getRelativeRanking($problem) {
+    private static function getPartialScore(string $problemName, string $testScore, float $bestScore, float $scoringPower): float {
+        $fraction = 0.0;
+        if (is_numeric($testScore)) {
+            $testScore = toFloat($testScore);
+            if ($problemName == "ImageScanner") {
+                $fraction = $testScore <= $bestScore ? 1.0 : pow($bestScore / $testScore, $scoringPower);
+            } else {
+                $fraction = $testScore >= $bestScore ? 1.0 : pow($testScore / $bestScore, $scoringPower);
+            }
+        }
+        return $fraction;
+    }
+
+    public static function getRelativeRanking(Problem $problem): array {
         // Returns a sorted array of data:
         // {
-        //     'user': <integer>,
-        //     'submit': <integer>,
-        //     'score': <float>
+        //     "userId": <int>,
+        //     "submitId": <int>,
+        //     "score": <float>
         // }
         // The array is sorted from best to worst.
         // A user is ranked better than another user, if he/she has more points or has submitted earlier.
@@ -186,386 +209,285 @@ class GamesPage extends Page {
 
         // TODO: Make the formula be configurable per problem
         $scoringPower = 1.0;
-        if ($problem->name == 'HyperWords')
+        if ($problem->getName() == "HyperWords")
             $scoringPower = 2.0;
 
         $ranking = array();
         foreach ($userSubmits as $userKey => $submit) {
+            /* @type Submit $submit */
             $score = 0.0;
-            for ($i = 1; $i < count($submit->results); $i += 1) {
-                if (is_numeric($submit->results[$i])) {
-                    $fraction = 0.0;
-                    if ($problem->name == 'ImageScanner') {
-                        $fraction = $submit->results[$i] <= $bestScores[$i] ? 1.0 : pow($bestScores[$i] / $submit->results[$i], $scoringPower);
-                    } else {
-                        $fraction = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], $scoringPower);
-                    }
-                    $score += $fraction * $testScore;
-                }
+            for ($i = 1; $i < count($submit->getResults()); $i++) {
+                $fraction = GamesPage::getPartialScore($problem->getName(), $submit->getResults()[$i], $bestScores[$i], $scoringPower);
+                $score += $fraction * $testScore;
             }
-            array_push($ranking, array(
-                'user' => intval(substr($userKey, 5)),
-                'score' => $score,
-                'submit' => $submit->id
-            ));
+            $ranking[] = array(
+                "userId" => intval(substr($userKey, 5)),
+                "submitId" => $submit->getId(),
+                "score" => $score,
+            );
         }
 
         usort($ranking, function($user1, $user2) {
-            if ($user1['score'] != $user2['score']) {
-                return $user1['score'] < $user2['score'] ? +1 : -1;
+            if ($user1["score"] != $user2["score"]) {
+                return $user1["score"] < $user2["score"] ? +1 : -1;
             } else {
-                return $user1['submit'] < $user2['submit'] ? -1 : +1;
+                return $user1["submitId"] < $user2["submitId"] ? -1 : +1;
             }
         });
         return $ranking;
     }
 
-    private function getAllGames() {
-        $games = Brain::getAllGames();
+    private function getGamesList(): string {
+        $problems = Problem::getAllGames();
         // Show newest games first
-        $games = array_reverse($games);
+        $problems = array_reverse($problems);
 
-        $gameList = '';
+        $gameList = "";
         // Calculate statistics (position and points) for each game for this user
-        foreach ($games as $game) {
-            $problem = Problem::instanceFromArray($game);
-
+        foreach ($problems as $problem) {
             // Don't show hidden games
-            if (!canSeeProblem($this->user, $problem->visible))
+            if (!canSeeProblem($this->user, $problem->getVisible()))
                 continue;
 
-            $ranking = array();
-            if ($problem->type == 'game') {
-                $ranking = $this->getGameRanking($problem);
-            } else {
-                $ranking = $this->getRelativeRanking($problem);
-            }
+            $ranking = $problem->getType() == "game" ? $this->getGameRanking($problem) :
+                                                       $this->getRelativeRanking($problem);
 
             $position = 0;
             for (; $position < count($ranking); $position += 1)
-                if ($ranking[$position]['user'] == $this->user->id)
+                if ($ranking[$position]["userId"] == $this->user->getId())
                     break;
-            $scoreStr = $positionStr = 'N/A';
+            $scoreStr = $positionStr = "N/A";
             if ($position < count($ranking)) {
                 $scoreStr = sprintf("%.2f (best is %.2f)",
-                    $ranking[$position]['score'], $ranking[0]['score']);
+                    $ranking[$position]["score"], $ranking[0]["score"]);
                 $positionStr = sprintf("%d (out of %d)", $position + 1, count($ranking));
             }
 
-            $stats = '
-                <i class="fa fa-trophy"></i> Position: ' . $positionStr . '
+            $stats = "
+                <i class='fa fa-trophy'></i> Position: {$positionStr}
                 &nbsp;&nbsp;
-                <i class="fa fa-star"></i> Score: ' . $scoreStr . '
-            ';
+                <i class='fa fa-star'></i> Score: {$scoreStr}
+            ";
 
-            $gameBox = '
-                <a href="/games/' . getGameUrlName($game['name']) . '" class="decorated">
-                    <div class="box narrow boxlink">
-                        <div class="game-info">
-                            <div class="game-name">' . $game['name'] . '</div>
-                            <div class="game-stats">' . $stats . '</div>
-                            <div class="game-description">' . $game['description'] . '</div>
+            $gameBox = "
+                <a href='/games/" . getGameUrlName($problem->getName()) . "' class='decorated'>
+                    <div class='box narrow boxlink'>
+                        <div class='game-info'>
+                            <div class='game-name'>{$problem->getName()}</div>
+                            <div class='game-stats'>{$stats}</div>
+                            <div class='game-description'>{$problem->getDescription()}</div>
                         </div>
-                        <div class="game-image"><img class="game-image" src="' . $game['logo'] . '"></div>
+                        <div class='game-image'><img alt='Game Image' class='game-image' src='{$problem->getLogo()}'></div>
                     </div>
                 </a>
-            ';
+            ";
             // Make hidden games grayed out (actually visible only to admins).
-            if ($game['visible'] == '0') {
-                $gameBox = '
-                    <div style="opacity: 0.5;">
-                    ' . $gameBox . '
-                    </div>
-                ';
+            if (!$problem->getVisible()) {
+                $gameBox = "<div style='opacity: 0.5;'>{$gameBox}</div>";
             }
-
             $gameList .= $gameBox;
         }
         return $gameList;
     }
 
-    private function getMainPage() {
-        $text = '
+    private function getMainPage(): string {
+        $header = inBox("
             <h1>Игри</h1>
             Тук можете да намерите няколко игри, за които трябва да напишете изкуствен интелект.
-        ';
-        $header = inBox($text);
-        $gamesList = $this->getAllGames();
-        return $header . $gamesList;
+        ");
+        return $header . $this->getGamesList();
     }
 
-    private function getGameStatement($problem) {
-        $statementFile = sprintf('%s/%s/%s',
-            $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-        $statement = file_get_contents($statementFile);
+    private function getVisualizerButton(Problem $problem): ?string {
+        if (in_array($problem->getName(), ["HyperWords", "Airports", "ImageScanner", "NumberGuessing"]))
+            return null;
 
-        $partialSubmitInfo = "Частичното решение се тества срещу няколко авторски решения с различна сложност и не се запазва като финално.";
-        if ($problem->waitPartial > 0) {
-            $partialSubmitInfo .= "
-Можете да предавате такова решение веднъж на всеки " . $problem->waitPartial . " минути.";
+        $url = getGameUrl($problem->getName()) . "/visualizer";
+        return "
+            <a href='{$url}'>
+                <input type='submit' value='Визуализатор' class='button button-color-blue button-large' title='Визуализатор на играта'>
+            </a>
+        ";
+    }
+
+    private function getScoreboardButton(Problem $problem): ?string {
+        if (in_array($problem->getName(), ["NumberGuessing", "OtherNonRelativeGames"]))
+            return null;
+
+        $url = getGameUrl($problem->getName()) . "/scoreboard";
+        return "
+            <a href='{$url}'>
+                <input type='submit' value='Класиране' class='button button-color-blue button-small' title='Класиране на всички участници'>
+            </a>
+        ";
+    }
+
+    private function getSeeSubmissionsLink(Problem $problem): ?string {
+        if ($this->user->getAccess() < $GLOBALS["ACCESS_SUBMIT_SOLUTION"])
+            return null;
+
+        $url = getGameUrl($problem->getName()) . "/submits";
+        return "
+            <a style='font-size: smaller;' href='{$url}'>Предадени решения</a>
+        ";
+    }
+
+    private function getSubmitButton(string $buttonText, string $buttonTooltip, string $buttonFormName, string $buttonFormContent, int $buttonTimeout): string {
+        if ($this->user->getAccess() >= $GLOBALS["ACCESS_SUBMIT_SOLUTION"]) {
+            if ($buttonTimeout <= 0) {
+                return "
+                    <script>function {$buttonFormName}() {showSubmitForm(`{$buttonFormContent}`);}</script>
+                    <input type='submit' class='button button-large button-color-blue' value='{$buttonText}'
+                           title='{$buttonTooltip}' onclick='{$buttonFormName}();'>
+                ";
+            } else {
+                return "
+                    <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'
+                           title='Ще можете да предадете отново след {$buttonTimeout} секунди.'>
+                ";
+            }
+        } else {
+            return "
+                <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'
+                       title='Трябва да влезете в системата за да можете да предавате решения.'>
+            ";
         }
+    }
+
+    private function getSubmitFormContent(Problem $problem, string $formTitle, string $formText, bool $isFull): string {
+        $isFullText = $isFull ? "true" : "false";
+        return "
+            <h2><span class='blue'>{$problem->getName()}</span> :: {$formTitle}</h2>
+            <div class='center'>{$formText}</div>
+            <br>
+            <div class='center'>
+                <textarea name='source' class='submit-source' cols=80 rows=24 maxlength=50000 id='source'></textarea>
+            </div>
+            <div class='italic right' style='font-size: 0.8em;'>Detected language: <span id='language'>?</span></div>
+            <div class='center'><input type='submit' value='Изпрати' onclick='submitSubmitForm({$problem->getId()}, {$isFullText});' class='button button-color-red'></div>
+        ";
+    }
+
+    private function getStatementBox(Problem $problem, ?string $partSubmitButton, ?string $fullSubmitButton): string {
+        $statement = file_get_contents($problem->getStatementPath());
+
+        $visualizerButton = $this->getVisualizerButton($problem);
+        $scoreboardButton = $this->getScoreboardButton($problem);
+        $seeSubmissionsLink = $this->getSeeSubmissionsLink($problem);
+
+        $buttons = "";
+        if ($partSubmitButton) $buttons .= $partSubmitButton;
+        if ($visualizerButton) $buttons .= $visualizerButton;
+        if ($fullSubmitButton) $buttons .= $fullSubmitButton;
+        if ($seeSubmissionsLink) $buttons .= "<br>" . $seeSubmissionsLink;
+        if ($scoreboardButton) $buttons .= "<br>" . $scoreboardButton;
+
+
+        $visibilityRestriction = $problem->getVisible() ? "" : "<div class='tooltip--bottom' data-tooltip='Задачата е скрита.'><i class='fa fa-eye-slash'></i></div>";
+        return "
+            <div class='box box-problem'>
+                <div class='problem-visibility'>{$visibilityRestriction}</div>
+                <div class='problem-title' id='problem-title'>{$problem->getName()}</div>
+                <div class='problem-origin'>{$problem->getOrigin()}</div>
+                <div class='problem-resources'><b>Time Limit:</b> {$problem->getTimeLimit()}s, <b>Memory Limit:</b> {$problem->getMemoryLimit()}MiB</div>
+                <div class='separator'></div>
+                <div class='problem-statement'>
+                    {$statement}
+                </div>
+                <div class='center'>
+                    {$buttons}
+                </div>
+                <div class='box-footer'>
+                    <a href='" . getGameUrl($problem->getName()) . "/pdf' style='color: #333333;' target='_blank'>
+                        <div class='tooltip--top' data-tooltip='PDF'>
+                            <i class='fas fa-file-pdf'></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        ";
+    }
+
+    private function getPrintStatement(Problem $problem): string {
+        $statement = file_get_contents($problem->getStatementPath());
+        return "
+            <div class='problem-title' id='problem-title'>{$problem->getName()}</div>
+            <div class='problem-origin'>{$problem->getOrigin()}</div>
+            <div class='problem-resources'><b>Time Limit:</b> {$problem->getTimeLimit()}s, <b>Memory Limit:</b> {$problem->getMemoryLimit()}MiB</div>
+            <div class='separator'></div>
+            <div class='problem-statement'>
+                {$statement}
+            </div>
+        ";
+    }
+
+    private function getGameStatement(Problem $problem): string {
+        $partSubmitText = "Частично решение";
+        $partSubmitInfo = "Частичното решение се тества срещу няколко авторски решения с различна сложност и не се запазва като финално.";
+        if ($problem->getWaitPartial() > 0) {
+            $partSubmitInfo .= "
+Можете да предавате такова решение веднъж на всеки {$problem->getWaitPartial()} минути.";
+        }
+        $fullSubmitText = "Пълно решение";
         $fullSubmitInfo = "Пълното решение се тества срещу всички решения и се запазва като финално (дори да сте предали по-добро по-рано).";
-        if ($problem->waitFull > 0) {
+        if ($problem->getWaitFull() > 0) {
             $fullSubmitInfo .= "
-Можете да предавате такова решение веднъж на всеки " . $problem->waitFull . " минути.";
+Можете да предавате такова решение веднъж на всеки {$problem->getWaitFull()} минути.";
         }
 
-        $submitFormContent = '
-            <h2><span class="blue">' . $problem->name . '</span> :: %s</h2>
-            <div class="center">%s</div>
-            <br>
-            <div class="center">
-                <textarea name="source" class="submit-source" cols=80 rows=24 maxlength=50000 id="source"></textarea>
-            </div>
-            <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
-            <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ', %s);" class="button button-color-red"></div>
-        ';
-        $partialSubmitFormContent = sprintf($submitFormContent, 'Частично Решение', $partialSubmitInfo, 'false');
-        $fullSubmitFormContent = sprintf($submitFormContent, 'Пълно Решение', $fullSubmitInfo, 'true');
-
-        $partSubmitButton = '';
-        $fullSubmitButton = '';
-        $seeSubmissionsLink = '';
-        $visualizerButton = '
-                    <a href="' . getGameUrl($problem->name) . '/visualizer">
-                        <input type="submit" value="Визуализатор" class="button button-color-blue button-large" title="Визуализатор на играта">
-                    </a>
-        ';
-        $scoreboardButton = '
-                    <br>
-                    <a href="' . getGameUrl($problem->name) . '/scoreboard">
-                        <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на всички участници">
-                    </a>
-        ';
-
-        if ($this->user->access >= $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
-            $remainPartial = 0;
-            $remainFull = 0;
-            getWaitingTimes($this->user, $problem, $remainPartial, $remainFull);
-
-            // Partial submit button
-            if ($remainPartial <= 0) {
-                $partSubmitButton = '
-                        <script>function showPartialForm() {showSubmitForm(`' . $partialSubmitFormContent . '`);}</script>
-                        <input type="submit" onclick="showPartialForm();" value="Частично решение" class="button button-large button-color-blue"
-                                title="' . $partialSubmitInfo . '">
-                ';
-            } else {
-                $partSubmitButton = '
-                        <input type="submit" value="Частично решение" class="button button-large button-color-gray"
-                                title="Ще можете да предадете отново след ' . $remainPartial . ' секунди.">
-                ';
-            }
-            // Full submit button
-            if ($remainFull <= 0) {
-                $fullSubmitButton = '
-                        <script>function showFullForm() {showSubmitForm(`' . $fullSubmitFormContent . '`);}</script>
-                        <input type="submit" onclick="showFullForm();" value="Пълно решение" class="button button-large button-color-blue"
-                                title="' . $fullSubmitInfo . '">
-                ';
-            } else {
-                $fullSubmitButton = '
-                        <input type="submit" value="Пълно решение" class="button button-large button-color-gray"
-                                title="Ще можете да предадете отново след ' . $remainFull . ' секунди.">
-                ';
-            }
-
-            // See previous submissions link
-            $seeSubmissionsLink = '
-                    <br>
-                    <a style="font-size: smaller;" href="' . getGameUrl($problem->name) . '/submits">Предадени решения</a>
-            ';
-        } else {
-            $partSubmitButton = '
-                <input type="submit" value="Частично решение" class="button button-large button-color-gray"
-                        title="Трябва да влезете в системата за да можете да предавате решения.">
-            ';
-            $fullSubmitButton = '
-                <input type="submit" value="Пълно решение" class="button button-large button-color-gray"
-                        title="Трябва да влезете в системата за да можете да предавате решения.">
-            ';
-        }
-
-        $controlButtons = '
-                <div class="center">
-                    ' . $partSubmitButton . '
-                    ' . $visualizerButton . '
-                    ' . $fullSubmitButton . '
-                    ' . $seeSubmissionsLink . '
-                    ' . $scoreboardButton . '
-                </div>
-        ';
-
-        $visibilityRestriction = $problem->visible ? '' : '<div class="tooltip--bottom" data-tooltip="Задачата е скрита."><i class="fa fa-eye-slash"></i></div>';
-        return '
-            <div class="box box-problem">
-                <div class="problem-visibility">' . $visibilityRestriction . '</div>
-                <div class="problem-title" id="problem-title">' . $problem->name . '</div>
-                <div class="problem-origin">' . $problem->origin . '</div>
-                <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
-                <div class="separator"></div>
-                <div class="problem-statement">' . $statement . '</div>
-                ' . $controlButtons . '
-                <div class="box-footer">
-                    <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank">
-                        <div class="tooltip--top" data-tooltip="PDF">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        ';
+        $partTimeout = 0; $fullTimeout = 0;
+        getWaitingTimes($this->user, $problem, $partTimeout, $fullTimeout);
+        $partSubmitContent = $this->getSubmitFormContent($problem, $partSubmitText, $partSubmitInfo, false);
+        $partSubmitButton = $this->getSubmitButton($partSubmitText, $partSubmitInfo, "showPartForm", $partSubmitContent, $partTimeout);
+        $fullSubmitContent = $this->getSubmitFormContent($problem, $fullSubmitText, $fullSubmitInfo, true);
+        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $fullTimeout);
+        return $this->getStatementBox($problem, $partSubmitButton, $fullSubmitButton);
     }
 
-    private function getRelativeStatement($problem) {
-        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-        $statement = file_get_contents($statementFile);
+    private function getRelativeStatement(Problem $problem): string {
+        $fullSubmitText = "Изпрати решение";
+        $fullSubmitInfo = "Решението ще получи пропорционални точки спрямо авторското решение, или това на най-добрия друг участник.";
 
-        $submitFormContent = '
-            <h2><span class="blue">' . $problem->name . '</span> :: Изпращане на Решение</h2>
-            <div class="center">Решението ще получи пропорционални точки спрямо авторското решение, или това на най-добрия друг участник.</div>
-            <br>
-            <div class="center">
-                <textarea name="source" class="submit-source" cols=80 rows=24 maxlength=50000 id="source"></textarea>
-            </div>
-            <div class="italic right" style="font-size: 0.8em;">Detected language: <span id="language">?</span></div>
-            <div class="center"><input type="submit" value="Изпрати" onclick="submitSubmitForm(' . $problem->id . ');" class="button button-color-red"></div>
-        ';
-
-        $submitButton = '';
-        $seeSubmissionsLink = '';
-        $visualizerButton = '
-                    <a href="' . getGameUrl($problem->name) . '/visualizer">
-                        <input type="submit" value="Визуализатор" class="button button-color-blue button-large">
-                    </a>
-        ';
-        $scoreboardButton = '
-                    <br>
-                    <a href="' . getGameUrl($problem->name) . '/scoreboard">
-                        <input type="submit" value="Класиране" class="button button-color-blue button-small" title="Класиране на участниците.">
-                    </a>
-        ';
-
-        if ($this->user->access >= $GLOBALS['ACCESS_SUBMIT_SOLUTION']) {
-            $remainPartial = 0;
-            $remainFull = 0;
-            getWaitingTimes($this->user, $problem, $remainPartial, $remainFull);
-
-            // Submit button
-            if ($remainFull <= 0) {
-                $submitButton = '
-                        <script>function showFullForm() {showSubmitForm(`' . $submitFormContent . '`);}</script>
-                        <input type="submit" onclick="showFullForm();" value="Изпрати Решение" class="button button-large button-color-blue">
-                ';
-            } else {
-                $submitButton = '
-                        <input type="submit" value="Изпрати Решение" class="button button-large button-color-gray"
-                                title="Ще можете да предадете отново след ' . $remainFull . ' секунди.">
-                ';
-            }
-
-            // See previous submissions link
-            $seeSubmissionsLink = '
-                    <br>
-                    <a style="font-size: smaller;" href="' . getGameUrl($problem->name) . '/submits">Предадени решения</a>
-            ';
-        } else {
-            $submitButton = '
-                <input type="submit" value="Изпрати Решение" class="button button-large button-color-gray"
-                        title="Трябва да влезете в системата за да можете да предавате решения.">
-            ';
-        }
-
-        $withoutVisualizer = [
-            'HyperWords',
-            'Airports',
-            'ImageScanner',
-            'NumberGuessing'
-        ];
-        if (in_array($problem->name, $withoutVisualizer)) {
-            $visualizerButton = '';
-        }
-
-        $withoutScoreboard = [
-            'NumberGuessing'
-        ];
-        if (in_array($problem->name, $withoutScoreboard)) {
-            $scoreboardButton = '';
-        }
-
-        $controlButtons = '
-                <div class="center">
-                    ' . $submitButton . '
-                    ' . $visualizerButton . '
-                    ' . $seeSubmissionsLink . '
-                    ' . $scoreboardButton . '
-                </div>
-        ';
-
-        $visibilityRestriction = $problem->visible ? '' : '<div class="tooltip--bottom" data-tooltip="Задачата е скрита."><i class="fa fa-eye-slash"></i></div>';
-        return '
-            <div class="box box-problem">
-                <div class="problem-visibility">' . $visibilityRestriction . '</div>
-                <div class="problem-title" id="problem-title">' . $problem->name . '</div>
-                <div class="problem-origin">' . $problem->origin . '</div>
-                <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
-                <div class="separator"></div>
-                <div class="problem-statement">' . $statement . '</div>
-                ' . $controlButtons . '
-                <div class="box-footer">
-                    <a href="' . getGameUrl($problem->name) . '/pdf" style="color: #333333;" target="_blank">
-                        <div class="tooltip--top" data-tooltip="PDF">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        ';
+        $partTimeout = 0; $fullTimeout = 0;
+        getWaitingTimes($this->user, $problem, $partTimeout, $fullTimeout);
+        $fullSubmitContent = $this->getSubmitFormContent($problem, $fullSubmitText, $fullSubmitInfo, true);
+        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $fullTimeout);
+        return $this->getStatementBox($problem, null, $fullSubmitButton);
     }
 
-    private function getPrintStatement($problem) {
-        $statementFile = sprintf('%s/%s/%s', $GLOBALS['PATH_PROBLEMS'], $problem->folder, $GLOBALS['PROBLEM_STATEMENT_FILENAME']);
-        $statement = file_get_contents($statementFile);
-        return '
-            <div class="problem-title" id="problem-title">' . $problem->name . '</div>
-            <div class="problem-origin">' . $problem->origin . '</div>
-            <div class="problem-resources"><b>Time Limit:</b> ' . $problem->timeLimit . 's, <b>Memory Limit:</b> ' . $problem->memoryLimit . 'MiB</div>
-            <div class="separator"></div>
-            <div class="problem-statement">' . $statement . '</div>
-        ';
-    }
-
-    private function getGameStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents) {
+    private function getGameStatusTable(Submit $submit, string $status, bool $found, float $totalScoreUser, float $totalScoreOpponents): string {
         $color = getStatusColor($status);
         // An old submit, no score for it
-        if ($color == 'green' && $found == false)
-            $color = 'gray';
+        if ($color == "green" && $found == false)
+            $color = "gray";
 
         if ($found) {
-            $score = sprintf('<span>%.0f:%.0f</span>', $totalScoreUser, $totalScoreOpponents);
+            $score = sprintf("<span>%.0f:%.0f</span>", $totalScoreUser, $totalScoreOpponents);
         } else {
-            $score = sprintf('<span title="Точки се изчисляват само за последното изпратено решение.">-</span>');
+            $score = "<span title='Точки се изчисляват само за последното изпратено решение.'>-</span>";
         }
 
-        return '
-            <table class="default ' . $color . '">
+        $maxExecTime = sprintf("%.2fs", max($submit->getExecTime()));
+        $maxExecMemory = sprintf("%.2f MiB", max($submit->getExecMemory()));
+        return "
+            <table class='default {$color}'>
                 <tr>
                     <th>Статус на задачата</th>
-                    <th style="width: 100px;">Време</th>
-                    <th style="width: 100px;">Памет</th>
-                    <th style="width: 100px;">Резултат</th>
+                    <th style='width: 6.125rem;'>Време</th>
+                    <th style='width: 6.125rem;'>Памет</th>
+                    <th style='width: 6.125rem;'>Резултат</th>
                 </tr>
                 <tr>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$status] . '</td>
-                    <td>' . sprintf("%.2fs", max($submit->execTime)) . '</td>
-                    <td>' . sprintf("%.2f MiB", max($submit->execMemory)) . '</td>
-                    <td>' . $score . '</td>
+                    <td>{$GLOBALS['STATUS_DISPLAY_NAME'][$status]}</td>
+                    <td>{$maxExecTime}</td>
+                    <td>{$maxExecMemory}</td>
+                    <td>{$score}</td>
                 </tr>
             </table>
-        ';
+        ";
     }
 
-    private function getGameDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame) {
+    private function getGameDetailsTable(Problem $problem, Submit $submit, string $status, bool $found, array $games, int $matchesPerGame): string {
         // If compilation error, pretty-print it and return instead of the per-match circles
         if ($status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
             return prettyPrintCompilationErrors($submit);
@@ -574,137 +496,161 @@ class GamesPage extends Page {
         // If there is no information about this submission, then there is a newer submitted solution
         // Let the user know that only the latest submissions are being kept as official
         if (!$found) {
-            return '
-                <div class="centered italic">
+            return "
+                <div class='centered italic'>
                     Имате по-ново предадено решение.<br>
                     Точки се изчисляват само за последното изпратено такова.
                 </div>
-            ';
+            ";
         }
 
-        $matchColumns = '';
-        for ($i = 1; $i <= $matchesPerGame; $i += 1) {
-            $matchColumns .= '
-                    <th style="width: 5%;">' . $i . '</th>
-            ';
+        $matchColumns = "";
+        for ($i = 1; $i <= $matchesPerGame; $i++) {
+            $matchColumns .= "
+                    <th style='width: 5%;'>{$i}</th>
+            ";
         }
-        $detailsTable = '
-            <table class="default blue">
-                <tr>
-                    <th style="width: 28%;">Опонент</th>
-                    <th style="width: 12%;">Резултат</th>'
-                    . $matchColumns . '
-                </tr>
-        ';
-
+        $details = "";
         ksort($games);
         foreach($games as $opponentKey => $results) {
-            $opponentId = intval(explode('_', $opponentKey)[1]);
-            $opponentName = '';
+            $opponentId = intval(explode("_", $opponentKey)[1]);
+            $opponentLink = "";
             if ($opponentId < 0) {
-                $opponentName = sprintf('Author%d', -$opponentId);
+                $opponentLink = sprintf("Author%d", -$opponentId);
             } else {
-                $opponent = User::get($opponentId);
-                $opponentName = getUserLink($opponent->username);
+                $opponent = User::getById($opponentId);
+                $opponentLink = getUserLink($opponent->getUsername());
             }
 
             $scoreUser = 0;
             $scoreOpponent = 0;
-            $perTestStatus = '';
+            $perTestStatus = "";
             foreach ($results as $result) {
-                $scoreUser += $result['scoreUser'];
-                $scoreOpponent += $result['scoreOpponent'];
-                $message = $result['message'];
-                $log = $result['log'];
+                $scoreUser += $result["scoreUser"];
+                $scoreOpponent += $result["scoreOpponent"];
+                $message = htmlspecialchars($result["message"], ENT_QUOTES);
                 $showLink = true;
 
-                if ($result['scoreUser'] > $result['scoreOpponent']) {
+                if ($result["scoreUser"] > $result["scoreOpponent"]) {
                     // Win
-                    $classes = 'far fa-check-circle green';
-                } else if ($result['scoreUser'] < $result['scoreOpponent']) {
+                    $classes = "far fa-check-circle green";
+                } else if ($result["scoreUser"] < $result["scoreOpponent"]) {
                     // Loss
-                    $classes = 'far fa-times-circle red';
+                    $classes = "far fa-times-circle red";
                 } else {
-                    if ($result['scoreUser'] == 0 && $result['scoreOpponent'] == 0) {
+                    if ($result["scoreUser"] == 0 && $result["scoreOpponent"] == 0) {
                         // Not played
-                        $classes = 'far fa-question-circle gray';
-                        $message = 'Мачът още не е изигран.';
+                        $classes = "far fa-question-circle gray";
+                        $message = "Мачът още не е изигран.";
                         $showLink = false;
                     } else {
                         // Draw
-                        $classes = 'far fa-pause-circle yellow';
+                        $classes = "far fa-pause-circle yellow";
                     }
                 }
-                $perTestStatus .= '
-                    <td>
-                        ' . ($showLink ? '<a href="' . getGameUrl($problem->name) . '/submits/' . $submit->id . '/replays/' . $result['id'] .'">' : '') . '
-                            <i class="' . $classes . '" title="' . $message . '"></i>
-                        ' . ($showLink ? '</a>' : '') . '
-                    </td>
-                ';
+                $testStatus = "<i class='{$classes}' title='{$message}'></i>";
+                if ($showLink) {
+                    $testStatus = "
+                        <a href='" . getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$result['id']}'>
+                            {$testStatus}
+                        </a>
+                    ";
+                }
+                $perTestStatus .= "
+                    <td>{$testStatus}</td>
+                ";
             }
-            $detailsTable .= '
+            $scoreResults = sprintf("%.0f:%.0f", $scoreUser, $scoreOpponent);
+            $details .= "
                 <tr>
-                    <td>' . $opponentName . '</td>
-                    <td>' . sprintf('%.0f:%.0f', $scoreUser, $scoreOpponent) . '</td>
-                    ' . $perTestStatus . '
+                    <td>{$opponentLink}</td>
+                    <td>{$scoreResults}</td>
+                    {$perTestStatus}
                 </tr>
-            ';
+            ";
         }
 
-        $detailsTable .= '
+        return "
+            <table class='default blue'>
+                <tr>
+                    <th style='width: 28%;'>Опонент</th>
+                    <th style='width: 12%;'>Резултат</th>
+                    {$matchColumns}
+                </tr>
+                {$details}
             </table>
-        ';
-        return $detailsTable;
+        ";
     }
 
-    private function getGameSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
+    private function getSubmitInfoBoxContent(Problem $problem, Submit $submit, string $statusTable, string $detailsTable): string {
+        $author = "";
+        if ($this->user->getId() != $submit->getUserId()) {
+            $author = "({$submit->getUserName()})";
+        }
+
+        $source = getSourceSection($problem, $submit);
+        $submitDate = explode(" ", $submit->getSubmitted())[0];
+        $submitTime = explode(" ", $submit->getSubmitted())[1];
+
+        return "
+            <h2><span class='blue'>{$problem->getName()}</span> :: Статус на решение {$author}</h2>
+            <div class='right' style='font-size: smaller'>{$submitDate} | {$submitTime}</div>
+            <br>
+            {$statusTable}
+            <br>
+            {$detailsTable}
+            <br>
+            {$source}
+        ";
+    }
+
+    private function getGameSubmitInfoBoxContent(Problem $problem, int $submitId, string $redirectUrl): string {
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
         $status = $submit->calcStatus();
 
-        $matches = Brain::getGameMatches($problem->id, $submit->userId);
+        $matches = Match::getGameMatches($problem->getId(), $submit->getUserId());
 
-        $matchesPerGame = count($submit->results) * 2;
+        $matchesPerGame = count($submit->getResults()) * 2;
 
         $found = false;
         $games = array();
         $totalScoreUser = 0;
         $totalScoreOpponents = 0;
         foreach ($matches as $match) {
-            $opponentId = $submit->userId == intval($match['userOne']) ? intval($match['userTwo']) : intval($match['userOne']);
+            $opponentId = $submit->getUserId() == $match->getUserOne() ? $match->getUserTwo() : $match->getUserOne();
             // If submit is full we care only about matches against actual users
             // If submit is partial we care only about matches against author's solutions
-            if (($submit->full && $opponentId < 0) || (!$submit->full && $opponentId > 0))
+            if (($submit->getFull() && $opponentId < 0) || (!$submit->getFull() && $opponentId > 0))
                 continue;
 
-            $lastSubmit = $submit->userId == intval($match['userOne']) ? intval($match['submitOne']) : intval($match['submitTwo']);
-            // If not latest submit, skip it
-            if ($submit->id != $lastSubmit)
+            $userSubmit = $submit->getUserId() == $match->getUserOne() ? $match->getSubmitOne() : $match->getSubmitTwo();
+            // If not the target submit, skip it
+            if ($userSubmit != $submit->getId())
                 continue;
 
             $found = true;
-            $opponentKey = 'User_' . $opponentId;
+            $opponentKey = "User_{$opponentId}";
             if (!array_key_exists($opponentKey, $games))
                 $games[$opponentKey] = array();
 
-            $scoreUser = $submit->userId == intval($match['userOne']) ? floatval($match['scoreOne']) : floatval($match['scoreTwo']);
-            $scoreOpponent = $submit->userId == intval($match['userOne']) ? floatval($match['scoreTwo']) : floatval($match['scoreOne']);
+            $scoreUser = $submit->getUserId() == $match->getUserOne() ? $match->getScoreOne() : $match->getScoreTwo();
+            $scoreOpponent = $submit->getUserId() == $match->getUserOne() ? $match->getScoreTwo() : $match->getScoreOne();
 
             // TODO: Fix this in a better way (add scoreWin and scoreTie to each game)
-            if ($problem->name == "Ultimate TTT") {
+            if ($problem->getName() == "Ultimate TTT") {
                 if ($scoreUser > $scoreOpponent) $scoreUser = 3;
                 if ($scoreOpponent > $scoreUser) $scoreOpponent = 3;
             }
 
-            if (intval($match['test']) >= 0) {
+            if ($match->getTest() >= 0) {
                 $totalScoreUser += $scoreUser;
                 $totalScoreOpponents += $scoreOpponent;
                 array_push($games[$opponentKey], array(
-                    'id' => $match['id'],
-                    'scoreUser' => $scoreUser,
-                    'scoreOpponent' => $scoreOpponent,
-                    'message' => $match['message'],
-                    'log' => $match['replayId']
+                    "id" => $match->getId(),
+                    "scoreUser" => $scoreUser,
+                    "scoreOpponent" => $scoreOpponent,
+                    "message" => $match->getMessage(),
+                    "replayKey" => $match->getReplayKey()
                 ));
             }
         }
@@ -712,119 +658,110 @@ class GamesPage extends Page {
         $statusTable = $this->getGameStatusTable($submit, $status, $found, $totalScoreUser, $totalScoreOpponents);
         $detailsTable = $this->getGameDetailsTable($problem, $submit, $status, $found, $games, $matchesPerGame);
 
-        $author = '';
-        if ($this->user->id != $submit->userId) {
-            $author = '(' . $submit->userName . ')';
-        }
-
-        $source = getSourceSection($problem, $submit);
-
-        return '
-            <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
-            <div class="right" style="font-size: smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
-            <br>
-            ' . $statusTable . '
-            <br>
-            ' . $detailsTable . '
-            <br>
-            ' . $source . '
-        ';
+        return $this->getSubmitInfoBoxContent($problem, $submit, $statusTable, $detailsTable);
     }
 
-    private function getRelativeStatusTable($submit, $points) {
-        $color = getStatusColor($submit->status);
-        return '
-            <table class="default ' . $color . '">
+    private function getRelativeStatusTable(Submit $submit, array $points): string {
+        $color = getStatusColor($submit->getStatus());
+        $maxExecTime = sprintf("%.2fs", max($submit->getExecTime()));
+        $maxExecMemory = sprintf("%.2f MiB", max($submit->getExecMemory()));
+        $score = sprintf("%.3f", array_sum($points) - $points[0]);
+        return "
+            <table class='default {$color}'>
                 <tr>
                     <th>Статус на задачата</th>
-                    <th style="width: 100px;">Време</th>
-                    <th style="width: 100px;">Памет</th>
-                    <th style="width: 100px;">Точки</th>
+                    <th style='width: 100px;'>Време</th>
+                    <th style='width: 100px;'>Памет</th>
+                    <th style='width: 100px;'>Точки</th>
                 </tr>
                 <tr>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->status] . '</td>
-                    <td>' . sprintf("%.2fs", max($submit->execTime)) . '</td>
-                    <td>' . sprintf("%.2f MiB", max($submit->execMemory)) . '</td>
-                    <td>' . sprintf("%.3f", array_sum($points) - $points[0]) . '</td>
+                    <td>{$GLOBALS['STATUS_DISPLAY_NAME'][$submit->getStatus()]}</td>
+                    <td>{$maxExecTime}</td>
+                    <td>{$maxExecMemory}</td>
+                    <td>{$score}</td>
                 </tr>
             </table>
-        ';
+        ";
     }
 
-    private function getRelativeDetailsTable($problem, $submit, $points) {
+    private function getRelativeDetailsTable(Problem $problem, Submit $submit, array $points): string {
         // If compilation error, pretty-print it and return instead of the per-test circles
-        if ($submit->status == $GLOBALS['STATUS_COMPILATION_ERROR']) {
+        if ($submit->getStatus() == $GLOBALS["STATUS_COMPILATION_ERROR"]) {
             return prettyPrintCompilationErrors($submit);
         }
 
-        if ($submit->problemName == 'Airports') {
-            if ($submit->status == $GLOBALS['STATUS_ACCEPTED']) {
-                return '<div id="world-map" style="width: 43rem; height: 20rem;"></div>';
+        if ($submit->getProblemName() == "Airports") {
+            if ($submit->getStatus() == $GLOBALS["STATUS_ACCEPTED"]) {
+                return "<div id='world-map' style='width: 43rem; height: 20rem;'></div>";
             }
         }
 
         // Otherwise get information for each test and print it as a colored circle with
         // additional roll-over information
-        $detailsTable = '<div class="centered">';
-        for ($i = 1; $i < count($points); $i = $i + 1) {
+        $testResults = "";
+        for ($i = 1; $i < count($points); $i++) {
             if ($i > 1 && $i % 10 == 1) {
-                $detailsTable .= '<br>';
+                $testResults .= "<br>";
             }
-            $result = $submit->results[$i];
+            $result = $submit->getResults()[$i];
             $tooltip =
-                'Тест ' . $i . PHP_EOL .
-                'Статус: ' . (is_numeric($result) ? 'OK' : $result) . PHP_EOL .
-                'Точки: ' . sprintf('%.1f', $points[$i]) . ' (' . $result . ')' . PHP_EOL .
-                'Време: ' . sprintf('%.2fs', $submit->execTime[$i]) . PHP_EOL .
-                'Памет: ' . sprintf('%.2f MiB', $submit->execMemory[$i])
+                "Тест " . $i . PHP_EOL .
+                "Статус: " . (is_numeric($result) ? "OK" : $result) . PHP_EOL .
+                "Точки: " . sprintf("%.1f", $points[$i]) . " ({$result})" . PHP_EOL .
+                "Време: " . sprintf("%.2fs", $submit->getExecTime()[$i]) . PHP_EOL .
+                "Памет: " . sprintf("%.2f MiB", $submit->getExecMemory()[$i])
             ;
 
-            $icon = 'WTF?';
-            $background = '';
+            $icon = "WTF?";
+            $background = "";
             if (is_numeric($result)) {
                 $maxPoints = 100.0 / (count($points) - 1);
-                $background = (abs($points[$i] - $maxPoints) < 0.001 ? 'dull-green' : 'dull-teal');
-                $icon = '<i class="fa fa-check"></i>';
-            } else if ($result == $GLOBALS['STATUS_WAITING'] || $result == $GLOBALS['STATUS_PREPARING'] || $result == $GLOBALS['STATUS_COMPILING']) {
-                $background = 'dull-gray';
-                $icon = '<i class="fas fa-hourglass-start"></i>';
-            } else if ($result == $GLOBALS['STATUS_TESTING']) {
-                $background = 'dull-gray';
-                $icon = '<i class="fa fa-spinner fa-pulse"></i>';
-            } else if ($result == $GLOBALS['STATUS_WRONG_ANSWER']) {
-                $background = 'dull-red';
-                $icon = '<i class="fa fa-times"></i>';
-            } else if ($result == $GLOBALS['STATUS_TIME_LIMIT']) {
-                $background = 'dull-red';
-                $icon = '<i class="fa fa-clock"></i>';
-            } else if ($result == $GLOBALS['STATUS_MEMORY_LIMIT']) {
-                $background = 'dull-red';
-                $icon = '<i class="fa fa-database"></i>';
-            } else if ($result == $GLOBALS['STATUS_RUNTIME_ERROR']) {
-                $background = 'dull-red';
-                $icon = '<i class="fa fa-bug"></i>';
-            } else if ($result == $GLOBALS['STATUS_COMPILATION_ERROR']) {
-                $background = 'dull-red';
-                $icon = '<i class="fa fa-code"></i>';
-            } else if ($result == $GLOBALS['STATUS_INTERNAL_ERROR']) {
-                $background = 'dull-black';
-                $icon = '<i class="fas fa-exclamation"></i>';
+                $background = (abs($points[$i] - $maxPoints) < 0.001 ? "dull-green" : "dull-teal");
+                $icon = "<i class='fa fa-check'></i>";
+            } else if ($result == $GLOBALS["STATUS_WAITING"] || $result == $GLOBALS["STATUS_PREPARING"] || $result == $GLOBALS["STATUS_COMPILING"]) {
+                $background = "dull-gray";
+                $icon = "<i class='fas fa-hourglass-start'></i>";
+            } else if ($result == $GLOBALS["STATUS_TESTING"]) {
+                $background = "dull-gray";
+                $icon = "<i class='fa fa-spinner fa-pulse'></i>";
+            } else if ($result == $GLOBALS["STATUS_WRONG_ANSWER"]) {
+                $background = "dull-red";
+                $icon = "<i class='fa fa-times'></i>";
+            } else if ($result == $GLOBALS["STATUS_TIME_LIMIT"]) {
+                $background = "dull-red";
+                $icon = "<i class='fa fa-clock'></i>";
+            } else if ($result == $GLOBALS["STATUS_MEMORY_LIMIT"]) {
+                $background = "dull-red";
+                $icon = "<i class='fa fa-database'></i>";
+            } else if ($result == $GLOBALS["STATUS_RUNTIME_ERROR"]) {
+                $background = "dull-red";
+                $icon = "<i class='fa fa-bug'></i>";
+            } else if ($result == $GLOBALS["STATUS_COMPILATION_ERROR"]) {
+                $background = "dull-red";
+                $icon = "<i class='fa fa-code'></i>";
+            } else if ($result == $GLOBALS["STATUS_INTERNAL_ERROR"]) {
+                $background = "dull-black";
+                $icon = "<i class='fas fa-exclamation'></i>";
             }
 
-            $testCircle = '<div class="test-result tooltip--top background-' . $background . '" data-tooltip="' . $tooltip . '">' . $icon . '</div>';
-            if ($problem->name == 'ImageScanner') {
-                $testCircle = str_replace('test-result', 'test-result test-result-link', $testCircle);
-                $testCircle = '<a href="' . getGameUrl($problem->name) . '/submits/' . $submit->id . '/replays/' . $i . '">' . $testCircle . '</a>';
+            $testCircle = "<div class='test-result tooltip--top background-{$background}' data-tooltip='{$tooltip}'>{$icon}</div>";
+            if ($problem->getName() == "ImageScanner") {
+                $testCircle = str_replace("test-result", "test-result test-result-link", $testCircle);
+                $testResultUrl = getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$i}";
+                $testCircle = "<a href='{$testResultUrl}'>{$testCircle}</a>";
             }
-            $detailsTable .= $testCircle;
+            $testResults .= $testCircle;
         }
-        $detailsTable .= '</div>';
-        $detailsTable = '<div class="test-result-wrapper">' . $detailsTable . '</div>';
-
-        return $detailsTable;
+        return "
+            <div class='test-result-wrapper'>
+                <div class='centered'>
+                    {$testResults}
+                </div>
+            </div>
+        ";
     }
 
-    function getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl) {
+    function getRelativeSubmitInfoBoxContent(Problem $problem, int $submitId, string $redirectUrl): string {
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
 
         $bestScores = array();
@@ -833,68 +770,43 @@ class GamesPage extends Page {
 
         // TODO: Make the formula to be configurable per problem
         $scoringPower = 1.0;
-        if ($problem->name == 'HyperWords')
+        if ($problem->getName() == "HyperWords")
             $scoringPower = 2.0;
 
         $points = array();
         $testWeight = 100.0 / (count($bestScores) - 1);
-        // TODO: This logic is duplicated above. Take it out in a single place.
         for ($i = 0; $i < count($bestScores); $i++) {
-            if (!is_numeric($submit->results[$i])) {
-                array_push($points, 0.0);
-            } else {
-                if ($problem->name == 'ImageScanner') {
-                    $score = $submit->results[$i] <= $bestScores[$i] ? 1.0 : pow($bestScores[$i] / $submit->results[$i], $scoringPower);
-                } else {
-                    $score = $submit->results[$i] >= $bestScores[$i] ? 1.0 : pow($submit->results[$i] / $bestScores[$i], $scoringPower);
-                }
-                array_push($points, $score * $testWeight);
-            }
+            $fraction = GamesPage::getPartialScore($problem->getName(), $submit->getResults()[$i], $bestScores[$i], $scoringPower);
+            array_push($points, $fraction * $testWeight);
         }
 
         $statusTable = $this->getRelativeStatusTable($submit, $points);
         $detailsTable = $this->getRelativeDetailsTable($problem, $submit, $points);
 
-        $author = '';
-        if ($this->user->id != $submit->userId) {
-            $author = '(' . $submit->userName . ')';
-        }
-
-        $source = getSourceSection($problem, $submit);
-
-        return '
-            <h2><span class="blue">' . $problem->name . '</span> :: Статус на решение ' . $author . '</h2>
-            <div class="right" style="font-size: smaller">' . explode(' ', $submit->submitted)[0] . ' | ' . explode(' ', $submit->submitted)[1] . '</div>
-            <br>
-            ' . $statusTable . '
-            <br>
-            ' . $detailsTable . '
-            <br>
-            ' . $source . '
-        ';
+        return $this->getSubmitInfoBoxContent($problem, $submit, $statusTable, $detailsTable);
     }
 
-    private function getSubmitUpdates($problem, $submitId) {
+    private function getSubmitUpdates(Problem $problem, int $submitId): void {
         $UPDATE_DELAY = 500000; // 0.5s (in microseconds)
         $MAX_UPDATES = 180 * 1000000 / $UPDATE_DELAY; // 180 seconds
 
-        $lastContent = '';
+        $lastContent = "";
         for ($updateId = 0; $updateId < $MAX_UPDATES; $updateId++) {
-            $content = '';
-            if ($problem->type == 'game') {
-                $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, '');
-            } else if ($problem->type == 'relative' || $problem->type == 'interactive') {
-                $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, '');
+            $content = "";
+            if ($problem->getType() == "game") {
+                $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, "");
+            } else if ($problem->getType() == "relative" || $problem->getType() == "interactive") {
+                $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, "");
             }
 
             if (strcmp($content, $lastContent) != 0) {
-                sendServerEventData('content', $content);
+                sendServerEventData("content", $content);
                 $lastContent = $content;
             }
             // If nothing to wait for, stop the updates
-            $allTested = strpos($content, 'fa-hourglass-start') === false &&
-                         strpos($content, 'fa-spinner') === false &&
-                         strpos($content, 'fa-question-circle') == false;
+            $allTested = strpos($content, "fa-hourglass-start") === false &&
+                         strpos($content, "fa-spinner") === false &&
+                         strpos($content, "fa-question-circle") == false;
             if ($allTested) {
                 terminateServerEventStream();
                 exit();
@@ -908,135 +820,140 @@ class GamesPage extends Page {
         }
     }
 
-    private function getAirportsScript($problem, $submitId, $redirectUrl) {
-        $airportData = explode("\n", trim(file_get_contents($GLOBALS['PATH_PROBLEMS'] . '/Games.Airports/Misc/AirportData.csv')));
+    private function getAirportsScript(Problem $problem, int $submitId, string $redirectUrl): string {
+        $airportData = explode("\n", trim(
+            file_get_contents("{$GLOBALS["PATH_DATA"]}/problems/Games.Airports/Misc/AirportData.csv"))
+        );
         $airportInfo = array();
-        for ($i = 1; $i < count($airportData); $i += 1) {
-            $line = explode(',', trim($airportData[$i]));
+        for ($i = 1; $i < count($airportData); $i++) {
+            $line = explode(",", trim($airportData[$i]));
             $airportInfo[$line[0]] = array($line[1], $line[2]);
         }
 
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
-        $content = '';
-        $airports = explode(',', trim($submit->info));
-        $content .= 'var data = [';
+        $airports = explode(",", trim($submit->getInfo()));
+        $content = "var data = [";
         foreach ($airports as $airport) {
-            $content .= '{name: "' . $airport . '", latLng:[' . $airportInfo[$airport][0] . ',' . $airportInfo[$airport][1] . ']},';
+            $content .= "{name: '{$airport}', latLng:[{$airportInfo[$airport][0]}, {$airportInfo[$airport][1]}]},";
         }
         $content .= '];' . PHP_EOL;
-        $content .= '      $(function() {
-            $("#world-map").vectorMap({
-                map: "world_mill",
-                backgroundColor: "white",
+        $content .= "      $(function() {
+            $('#world-map').vectorMap({
+                map: 'world_mill',
+                backgroundColor: 'white',
                 zoomMin: 1,
                 zoomMax: 1,
                 regionStyle: {
                     initial: {
-                        fill: "#9A9A9A",
-                        "fill-opacity": 1,
-                        stroke: "none",
-                        "stroke-width": 0,
-                        "stroke-opacity": 1
+                        fill: '#9A9A9A',
+                        'fill-opacity': 1,
+                        stroke: 'none',
+                        'stroke-width': 0,
+                        'stroke-opacity': 1
                     },
                     hover: {
-                        "fill-opacity": 0.8,
-                        cursor: "pointer"
+                        'fill-opacity': 0.8,
+                        cursor: 'pointer'
                     },
                 },
                 markerStyle: {
                     initial: {
-                        fill: "#129D5A",
-                        stroke: "#505050",
-                        "fill-opacity": 1,
-                        "stroke-width": 1,
-                        "stroke-opacity": 1,
+                        fill: '#129D5A',
+                        stroke: '#505050',
+                        'fill-opacity': 1,
+                        'stroke-width': 1,
+                        'stroke-opacity': 1,
                         r: 5
                     },
                     hover: {
-                        stroke: "#333333",
-                        "stroke-width": 2,
-                        cursor: "pointer"
+                        stroke: '#333333',
+                        'stroke-width': 2,
+                        cursor: 'pointer'
                     }
                 },
                 markers: data
             });
-        });';
+        });";
         return $content;
     }
 
-    private function getSource($problem, $submitId) {
-        $redirectUrl = getGameUrl($problem->name) . '/submits';
+    private function getSource(Problem $problem, int $submitId): void {
+        $redirectUrl = getGameUrl($problem->getName()) . "/submits";
         $submit = getSubmitWithChecks($this->user, $submitId, $problem, $redirectUrl);
-        echo '<plaintext>' . $submit->getSource();
+        echo "<plaintext>{$submit->getSource()}";
         exit(0);
     }
 
-    private function getSubmitInfoBox($problem, $submitId) {
-        $redirectUrl = getGameUrl($problem->name) . '/submits';
-        if (isset($_SESSION['statusShortcut']))
-            $redirectUrl = '/status';
+    private function getSubmitInfoBox(Problem $problem, int $submitId): string {
+        $redirectUrl = getGameUrl($problem->getName()) . "/submits";
+        if (isset($_SESSION["statusShortcut"]))
+            $redirectUrl = "/status";
 
-        $content = '';
-        if ($problem->type == 'game') {
+        if ($problem->getType() == "game") {
             $content = $this->getGameSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
-            return '
+            return "
                 <script>
-                    showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
+                    showActionForm(`{$content}`, `{$redirectUrl}`);
                 </script>
-            ';
-        } else if ($problem->type == 'relative' || $problem->type == 'interactive') {
+            ";
+        } else if ($problem->getType() == "relative" || $problem->getType() == "interactive") {
             $content = $this->getRelativeSubmitInfoBoxContent($problem, $submitId, $redirectUrl);
-            if ($problem->name != 'Airports') {
-                $updatesUrl = getGameUrl($problem->name) . '/submits/' . $submitId . '/updates';
-                return '
+            if ($problem->getName() != "Airports") {
+                $updatesUrl = getGameUrl($problem->getName()) . "/submits/{$submitId}/updates";
+                return "
                     <script>
-                        showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
-                        subscribeForUpdates(\'' . $updatesUrl . '\', \'action-form-content\');
+                        showActionForm(`{$content}`, `{$redirectUrl}`);
+                        subscribeForUpdates(`{$updatesUrl}`, `action-form-content`);
                     </script>
-                ';
+                ";
             } else {
-                return '
+                return "
                     <script>
-                        showActionForm(`' . $content . '`, \'' . $redirectUrl . '\');
-                        ' . $this->getAirportsScript($problem, $submitId, $redirectUrl) . '
+                        showActionForm(`{$content}`, `{$redirectUrl}`);
+                        " . $this->getAirportsScript($problem, $submitId, $redirectUrl) . "
                     </script>
-                ';
+                ";
             }
         } else {
             error_log("ERROR: In games, but problem is neither 'game' nor 'relative'!");
-            return '';
         }
+        return "";
     }
 
-    private function getAllSubmitsBox($problem) {
-        $submits = Submit::getUserSubmits($this->user->id, $problem->id);
+    private function getAllSubmitsBox(Problem $problem): string {
+        $gameUrl = getGameUrl($problem->getName());
+        $submits = Submit::getAllSubmits($this->user->getId(), $problem->getId());
 
         $finalFull = -1;
         foreach ($submits as $submit) {
-            if ($submit->full && $submit->id > $finalFull)
-                $finalFull = $submit->id;
+            if ($submit->getFull()) {
+                $finalFull = max($finalFull, $submit->getId());
+            }
         }
 
-        $submitList = '';
-        for ($i = 0; $i < count($submits); $i = $i + 1) {
-            $submit = $submits[$i];
-            $submitLink = '<a href="' . getGameUrl($problem->name) . '/submits/' . $submit->id . '">' . $submit->id . '</a>';
-            $submitList .= '
+        $submitList = "";
+        for ($i = 1; $i <= count($submits); $i++) {
+            $submit = $submits[$i - 1];
+            $submitLink = "<a href='{$gameUrl}/submits/{$submit->getId()}'>{$submit->getId()}</a>";
+            $submitDate = explode(" ", $submit->getSubmitted())[0];
+            $submitTime = explode(" ", $submit->getSubmitted())[1];
+            $finalSubmitIcon = ($finalFull == $submit->getId() ? "<i class='fa fa-check green'></i>" : "");
+            $submitList .= "
                 <tr>
-                    <td>' . ($i + 1) . '</td>
-                    <td>' . $submitLink . '</td>
-                    <td>' . explode(' ', $submit->submitted)[0] . '</td>
-                    <td>' . explode(' ', $submit->submitted)[1] . '</td>
-                    <td>' . $submit->language . '</td>
-                    <td>' . $GLOBALS['STATUS_DISPLAY_NAME'][$submit->calcStatus()] . '</td>
-                    <td>' . ($finalFull == $submit->id ? '<i class="fa fa-check green"></i>' : '') . '</td>
+                    <td>{$i}</td>
+                    <td>{$submitLink}</td>
+                    <td>{$submitDate}</td>
+                    <td>{$submitTime}</td>
+                    <td>{$submit->getLanguage()}</td>
+                    <td>{$GLOBALS['STATUS_DISPLAY_NAME'][$submit->calcStatus()]}</td>
+                    <td>{$finalSubmitIcon}</td>
                 </tr>
-            ';
+            ";
         }
 
-        $content = '
-            <h2><span class="blue">' . $problem->name . '</span> :: Ваши решения</h2>
-            <table class="default">
+        $content = "
+            <h2><span class='blue'>{$problem->getName()}</span> :: Ваши решения</h2>
+            <table class='default'>
                 <tr>
                     <th>#</th>
                     <th>ID</th>
@@ -1046,139 +963,158 @@ class GamesPage extends Page {
                     <th>Статус</th>
                     <th>Финално</th>
                 </tr>
-                ' . $submitList . '
+                {$submitList}
             </table>
-        ';
+        ";
 
-        $returnUrl = getGameUrl($problem->name);
-
-        return '
+        return "
             <script>
-                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
+                showActionForm(`{$content}`, `{$gameUrl}`);
             </script>
-        ';
+        ";
     }
 
-    private function getReplayFunction($gameName) {
-        if ($gameName == 'snakes') return 'showSnakesReplay';
-        if ($gameName == 'ultimate-ttt') return 'showUtttReplay';
-        if ($gameName == 'hypersnakes') return 'showHypersnakesReplay';
-        if ($gameName == 'connect') return 'showConnectReplay';
-        if ($gameName == 'imagescanner') return 'showImagescannerReplay';
-        return 'undefinedFunction';
+    private function getReplayFunction(string $gameName): string {
+        if ($gameName == "snakes") return "showSnakesReplay";
+        if ($gameName == "ultimate-ttt") return "showUtttReplay";
+        if ($gameName == "hypersnakes") return "showHypersnakesReplay";
+        if ($gameName == "connect") return "showConnectReplay";
+        if ($gameName == "imagescanner") return "showImagescannerReplay";
+        return "undefinedFunction";
     }
 
-    private function getGameReplay($problem, $submitId, $matchId) {
-        $returnUrl = getGameUrl($problem->name) . '/submits/' . $submitId;
-
+    private function getGameReplay(Problem $problem, int $submitId, int $matchId): string {
+        $returnUrl = getGameUrl($problem->getName()) . "/submits/{$submitId}";
         $match = Match::getById($matchId);
 
         // Check if this is a valid match ID
         if ($match == null) {
-            redirect($returnUrl, 'ERROR', 'Изисканият мач не съществува!');
+            redirect($returnUrl, "ERROR", "Изисканият мач не съществува!");
         }
         // Check if the replay is part of the same problem
-        if ($match->problemId != $problem->id) {
-            redirect($returnUrl, 'ERROR', 'Изисканият мач не е от тази задача!');
+        if ($match->getProblemId() != $problem->getId()) {
+            redirect($returnUrl, "ERROR", "Изисканият мач не е от тази задача!");
         }
         // Finally, check permissions
-        if ($this->user->access < $GLOBALS['ACCESS_SEE_REPLAYS']) {
-            if ($this->user->id != $match->userOne && $this->user->id != $match->userTwo) {
-                redirect($returnUrl, 'ERROR', 'Нямате права да видите този мач!');
+        if ($this->user->getAccess() < $GLOBALS["ACCESS_SEE_REPLAYS"]) {
+            if ($this->user->getId() != $match->getUserOne() && $this->user->getId() != $match->getUserTwo()) {
+                redirect($returnUrl, "ERROR", "Нямате права да видите този мач!");
             }
         }
 
-        $playerOne = User::get($match->userOne);
-        $playerOne = $playerOne != null ? $playerOne->username : sprintf('Author%d', -$match->userOne);
-        $playerTwo = User::get($match->userTwo);
-        $playerTwo = $playerTwo != null ? $playerTwo->username : sprintf('Author%d', -$match->userTwo);
+        $replayLog = Grader::get_replay($match->getReplayKey());
+        if (!$replayLog) {
+            // Try running the match on the grader and getting the replay then
+            if ($match->replay()) {
+                // Poll for 30 seconds if the match has completed
+                for ($iter = 0; $iter < 30; $iter++) {
+                    sleep(1);
+                    $match = Match::getById($matchId);
+                    if ($match->getReplayKey() != "")
+                        break;
+                }
+                $replayLog = Grader::get_replay($match->getReplayKey());
+            }
+            if (!$replayLog) {
+                redirect($returnUrl, "ERROR", "Системата няма наличен лог за този мач!");
+            }
+        }
 
-        return '
+        $playerOne = User::getById($match->getUserOne());
+        $playerOne = $playerOne != null ? $playerOne->getUsername() : sprintf("Author%d", -$match->getUserOne());
+        $playerTwo = User::getById($match->getUserTwo());
+        $playerTwo = $playerTwo != null ? $playerTwo->getUsername() : sprintf("Author%d", -$match->getUserTwo());
+        $replayFunctionName = $this->getReplayFunction($_GET["game"]);
+
+        return "
             <script>
-                ' . $this->getReplayFunction($_GET['game']) . '("'. $playerOne . '", "' . $playerTwo .'", "' . $match->replayId . '");
+                {$replayFunctionName}(`{$playerOne}`, `{$playerTwo}`, `{$replayLog}`);
             </script>
-        ';
+        ";
     }
 
-    private function getOtherReplay($problem, $submitId, $testId) {
-        $returnUrl = getGameUrl($problem->name) . '/submits/' . $submitId;
+    private function getOtherReplay(Problem $problem, int $submitId, int $testId): string {
+        $returnUrl = getGameUrl($problem->getName()) . "/submits/{$submitId}";
 
         $submit = Submit::get($submitId);
 
         // Check if this is a valid match ID
         if ($submit == null) {
-            redirect($returnUrl, 'ERROR', 'Изисканият събмит не съществува!');
+            redirect($returnUrl, "ERROR", "Изисканият събмит не съществува!");
         }
         // Check if the replay is part of the same problem
-        if ($submit->problemId != $problem->id) {
-            redirect($returnUrl, 'ERROR', 'Изисканият събмит не е от тази задача!');
+        if ($submit->getProblemId() != $problem->getId()) {
+            redirect($returnUrl, "ERROR", "Изисканият събмит не е от тази задача!");
         }
         // Finally, check permissions
-        if ($this->user->access < $GLOBALS['ACCESS_SEE_REPLAYS']) {
-            if ($this->user->id != $submit->userId) {
-                redirect($returnUrl, 'ERROR', 'Нямате права да видите този събмит!');
+        if ($this->user->getAccess() < $GLOBALS["ACCESS_SEE_REPLAYS"]) {
+            if ($this->user->getId() != $submit->getUserId()) {
+                redirect($returnUrl, "ERROR", "Нямате права да видите този събмит!");
             }
         }
 
-        $replayId = '';
-        $replayIds = explode(',', $submit->replayId);
-        if (count($replayIds) == count($submit->results)) {
-            if ($testId >= 0 && $testId < count($replayIds))
-                $replayId = $replayIds[$testId];
+        $replayKey = "";
+        $replayKeys = explode(",", $submit->getReplayKey());
+        if (count($replayKeys) == count($submit->getResults())) {
+            if ($testId >= 0 && $testId < count($replayKeys))
+                $replayKey = $replayKeys[$testId];
         }
-        if ($replayId == '') {
-            redirect($returnUrl, 'ERROR', 'Този събмит няма визуализация!');
+        $replayLog = $replayKey ? Grader::get_replay($replayKey) : "";
+
+        // Try re-running the submit, so we get a replay log for it
+        if (!$replayLog) {
+            $submit->regrade();
+            redirect($returnUrl, "ERROR", "Системата няма наличен лог за този събмит!");
         }
 
         $ranking = $this->getRelativeRanking($problem);
-        $position = 0;
-        for (; $position < count($ranking); $position += 1)
-            if ($ranking[$position]['user'] == $submit->userId)
+        $position = 1;
+        for (; $position <= count($ranking); $position++)
+            if ($ranking[$position - 1]["userId"] == $submit->getUserId())
                 break;
-        $suffix = ['st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th'];
-        $rank = '' . ($position + 1) . '-' . $suffix[$position % 10];
-        $userName = $submit->userName . ' (ranked ' . $rank . ' out of ' . count($ranking) . ')';
+        $suffix = ["st", "nd", "rd", "th", "th", "th", "th", "th", "th", "th"];
+        $rank = "{$position}-{$suffix[($position - 1) % 10]}";
+        $userName = $submit->getUserName() . " (ranked {$rank} out of " . count($ranking) . ")";
+        $replayFunctionName = $this->getReplayFunction($_GET["game"]);
 
-        return '
+        return "
             <script>
-                ' . $this->getReplayFunction($_GET['game']) . '("' . $userName . '", "'. $replayId . '");
+                {$replayFunctionName}(`{$userName}`, `{$replayLog}`);
             </script>
-        ';
+        ";
     }
 
-    private function getReplay($problem, $submitId, $matchId) {
-        if ($problem->type == 'game') {
+    private function getReplay(Problem $problem, int $submitId, int $matchId): string {
+        if ($problem->getType() == "game") {
             return $this->getGameReplay($problem, $submitId, $matchId);
         } else {
             return $this->getOtherReplay($problem, $submitId, $matchId);
         }
     }
 
-    private function getUnofficial($problem) {
-        switch ($problem->name) {
-            case 'Snakes':
-                return array('espr1t', 'ThinkCreative');
-            case 'Ultimate TTT':
-                return array('espr1t', 'ThinkCreative');
-            case 'HyperSnakes':
-                return array('espr1t', 'ThinkCreative', 'IvayloS', 'stuno', 'ov32m1nd', 'peterlevi');
-            case 'Connect':
-                return array('espr1t', 'ThinkCreative');
-            case 'Tetris':
-                return array('espr1t', 'ThinkCreative');
-            case 'HyperWords':
-                return array('espr1t', 'ThinkCreative', 'IvayloS', 'stuno');
-            case 'Airports':
-                return array('espr1t', 'kiv');
-            case 'ImageScanner':
-                return array('espr1t', 'kopche', 'emazing', 'ThinkCreative', 'peterkazakov');
+    // TODO: Make this part of the problem
+    private function getUnofficial(Problem $problem): array {
+        switch ($problem->getName()) {
+            case "Snakes":
+            case "Ultimate TTT":
+            case "Connect":
+            case "Tetris":
+                return ["espr1t", "ThinkCreative"];
+            case "HyperSnakes":
+                return ["espr1t", "ThinkCreative", "IvayloS", "stuno", "ov32m1nd", "peterlevi"];
+            case "HyperWords":
+                return ["espr1t", "ThinkCreative", "IvayloS", "stuno"];
+            case "ImageScanner":
+                return ["espr1t", "ThinkCreative", "kopche", "emazing", "peterkazakov"];
+            case "Airports":
+                return ["espr1t", "kiv"];
         }
-        return array();
+        return [];
     }
 
-    private function getScoreboard($problem) {
-        $ranking = array();
-        if ($problem->type == 'game') {
+    private function getScoreboard(Problem $problem): string {
+        $gameUrl = getGameUrl($problem->getName());
+        if ($problem->getType() == "game") {
             $ranking = $this->getGameRanking($problem);
         } else {
             $ranking = $this->getRelativeRanking($problem);
@@ -1187,35 +1123,35 @@ class GamesPage extends Page {
 
         $scoreIsFloat = false;
         for ($i = 0; $i < count($ranking); $i += 1) {
-            if (abs($ranking[$i]['score'] - round($ranking[$i]['score']) > 0.001))
+            if (abs($ranking[$i]["score"] - round($ranking[$i]["score"]) > 0.001))
                 $scoreIsFloat = true;
         }
 
-        $rankingTable = '';
-        for ($pos = 0; $pos < count($ranking); $pos += 1) {
-            $user = User::get($ranking[$pos]['user']);
-            $submitId = $ranking[$pos]['submit'];
-            if ($user->id == $this->user->id || $this->user->access >= $GLOBALS['ACCESS_SEE_SUBMITS']) {
-                $submitId = '<a href="' . getGameUrl($problem->name) . '/submits/' . $ranking[$pos]['submit'] . '">' . $ranking[$pos]['submit'] . '</a>';
+        $rankingTable = "";
+        for ($pos = 0; $pos < count($ranking); $pos++) {
+            $user = User::getById($ranking[$pos]["userId"]);
+            $submitId = $ranking[$pos]["submitId"];
+            if ($user->getId() == $this->user->getId() || $this->user->getAccess() >= $GLOBALS["ACCESS_SEE_SUBMITS"]) {
+                $submitId = "<a href='{$gameUrl}/submits/{$ranking[$pos]['submitId']}'>{$ranking[$pos]['submitId']}</a>";
             }
 
-            $shownTitle = $scoreIsFloat ? sprintf('%.9f', $ranking[$pos]['score']) : '';
-            $shownScore = $scoreIsFloat ? sprintf('%.3f', $ranking[$pos]['score']) : $ranking[$pos]['score'];
+            $shownTitle = $scoreIsFloat ? sprintf("%.9f", $ranking[$pos]["score"]) : "";
+            $shownScore = $scoreIsFloat ? sprintf("%.3f", $ranking[$pos]["score"]) : $ranking[$pos]["score"];
 
-            $rankingTable .= '
+            $rankingTable .= "
                 <tr>
-                    <td>' . ($pos + 1) . '</td>
-                    <td>' . getUserLink($user->username, $unofficial) . '</td>
-                    <td>' . $user->name . '</td>
-                    <td>' . $submitId . '</td>
-                    <td title="' . $shownTitle . '">' . $shownScore . '</td>
+                    <td>" . ($pos + 1) . "</td>
+                    <td>" . getUserLink($user->getUsername(), $unofficial) . "</td>
+                    <td>{$user->getName()}</td>
+                    <td>{$submitId}</td>
+                    <td title='{$shownTitle}'>{$shownScore}</td>
                 </tr>
-            ';
+            ";
         }
 
-        $content = '
-            <h2><span class="blue">' . $problem->name . '</span> :: Класиране</h2>
-            <table class="default">
+        $content = "
+            <h2><span class='blue'>{$problem->getName()}</span> :: Класиране</h2>
+            <table class='default'>
                 <tr>
                     <th>#</th>
                     <th>Потребител</th>
@@ -1223,127 +1159,132 @@ class GamesPage extends Page {
                     <th>Събмит</th>
                     <th>Точки</th>
                 </tr>
-                ' . $rankingTable . '
+                {$rankingTable}
             </table>
-            <div class="centered italic" style="font-size: smaller;">
+            <div class='centered italic' style='font-size: smaller;'>
                 Състезателите, отбелязани със звездичка (*), не участват в официалното класиране.
             </div>
-        ';
+        ";
 
-        $returnUrl = getGameUrl($problem->name);
-        return '
+        return "
             <script>
-                showActionForm(`' . $content . '`, \'' . $returnUrl . '\');
+                showActionForm(`{$content}`, `{$gameUrl}`);
             </script>
-        ';
+        ";
     }
 
-    private function getDemo($problem) {
-        // Show the standings for 10 seconds, then play 3 random replays
+    // TODO: This may not be using the newest logic for match->log vs. match->replayKey
+    //       Instead, we should call the back-end to get the actual replay using the replayKey
+    private function getGameDemo(Problem $problem): string {
+        $matches = Match::getGameMatches($problem->getId());
+        $idx = rand() % count($matches);
+        while ($matches[$idx]->getUserOne() < 0 || $matches[$idx]->getUserTwo() < 0 || $matches[$idx]->getReplayKey() == "")
+            $idx = rand() % count($matches);
 
-        $scoreboard = $this->getScoreboard($problem);
+        $playerOne = User::getById($matches[$idx]->getUserOne());
+        $playerTwo = User::getById($matches[$idx]->getUserTwo());
+        $replayFunctionName = $this->getReplayFunction($_GET["game"]);
+        $replay = "{$replayFunctionName}(`{$playerOne->getUsername()}`, `{$playerTwo->getUsername()}`, `{$matches[$idx]->getReplayKey()}`, true);";
+        return $replay;
+    }
 
-        $allSubmits = Brain::getProblemSubmits($problem->id, $GLOBALS['STATUS_ACCEPTED']);
+    private function getInteractiveDemo(Problem $problem): string {
+        $allSubmits = Submit::getAllSubmits(-1, $problem->getId(), $GLOBALS["STATUS_ACCEPTED"]);
         $users = array();
         $submits = array();
         for ($i = count($allSubmits) - 1; $i >= 0; $i--) {
-            if ($allSubmits[$i]['userName'] != 'system') {
-                if (!in_array($allSubmits[$i]['userName'], $users)) {
-                    array_push($users, $allSubmits[$i]['userName']);
-                    array_push($submits, $allSubmits[$i]['id']);
+            if ($allSubmits[$i]->getUserName() != "system") {
+                if (!array_key_exists($allSubmits[$i]->getUserName(), $users)) {
+                    $users[$allSubmits[$i]->getUserName()] = true;
+                    array_push($submits, $allSubmits[$i]->getId());
                 }
             }
         }
 
+        // TODO: Make based on the number of tests the problem has.
+        $testId = rand(0, 10);
         $submitId = $submits[rand(0, count($submits) - 1)];
-        $test = rand(0, 10);
+        $replay = $this->getReplay($problem, $submitId, $testId);
+        $replay = str_replace("<script>", "", $replay);
+        $replay = str_replace("</script>", "", $replay);
+        return $replay;
+    }
 
-        $replay = $this->getReplay($problem, $submitId, $test);
-        $replay = str_replace('<script>', '', $replay);
-        $replay = str_replace('</script>', '', $replay);
+    // Show the standings for a few seconds, then play a random replay
+    private function getDemo(Problem $problem): string {
+        $scoreboard = $this->getScoreboard($problem);
+        $replay = $this->getInteractiveDemo($problem);
+        // $replay = $this->getGameDemo($problem);
 
-        /*
-        $matches = Brain::getGameMatches($problem->id);
-        $idx = rand() % count($matches);
-        while ($matches[$idx]['userOne'] < 0 || $matches[$idx]['userTwo'] < 0 || $matches[$idx]['replayId'] == '')
-            $idx = rand() % count($matches);
-
-        $playerOne = User::get($matches[$idx]['userOne']);
-        $playerTwo = User::get($matches[$idx]['userTwo']);
-        // TODO: This may not be using the newest logic for match->log vs. match->replayId
-        $replay = $this->getReplayFunction($_GET['game']) . '("'. $playerOne->username . '", "' . $playerTwo->username .'", "' . $matches[$idx]['replayId'] . '", true);';
-        */
-
-        $demoActions = '
+        $demoActions = "
             <script>
                 setTimeout(function() {
-                    ' . $replay . '
+                    {$replay}
                 }, 5000);
             </script>
-        ';
+        ";
         return $scoreboard . $demoActions;
     }
 
-    public function getContent() {
+    public function getContent(): string {
         $statusShortcut = false;
-        if (isset($_SESSION['statusShortcut'])) {
+        if (isset($_SESSION["statusShortcut"])) {
             $statusShortcut = true;
-            unset($_SESSION['statusShortcut']);
+            unset($_SESSION["statusShortcut"]);
         }
 
-        if (isset($_GET['game'])) {
-            $problem = getGameByName($_GET['game']);
+        if (isset($_GET["game"])) {
+            $problem = Problem::getGameByName($_GET["game"]);
             if ($problem == null) {
                 return $this->getMainPage();
             }
-            if (!canSeeProblem($this->user, $problem->visible)) {
-                redirect('/games', 'ERROR', 'Нямате права да видите тази игра.');
+            if (!canSeeProblem($this->user, $problem->getVisible())) {
+                redirect("/games", "ERROR", "Нямате права да видите тази игра.");
             }
 
-            if ($problem->type == 'game') {
+            $content = "";
+            if ($problem->getType() == "game") {
                 $content = $this->getGameStatement($problem);
-            } else if ($problem->type == 'relative' || $problem->type == 'interactive') {
+            } else if ($problem->getType() == "relative" || $problem->getType() == "interactive") {
                 $content = $this->getRelativeStatement($problem);
             }
-            if (isset($_GET['visualizer'])) {
-                if ($_GET['game'] == 'snakes') {
-                    $content .= '<script>showSnakesVisualizer("'. $this->user->username . '");</script>';
-                } else if ($_GET['game'] == 'hypersnakes') {
-                    $content .= '<script>showHypersnakesVisualizer("'. $this->user->username . '");</script>';
-                } else if ($_GET['game'] == 'ultimate-ttt') {
-                    $content .= '<script>showUtttVisualizer("'. $this->user->username . '");</script>';
-                } else if ($_GET['game'] == 'tetris') {
-                    $content .= '<script>showTetrisVisualizer("'. $this->user->username . '");</script>';
-                } else if ($_GET['game'] == 'connect') {
-                    $content .= '<script>showConnectVisualizer("'. $this->user->username . '");</script>';
-                }
-            } else if (isset($_GET['scoreboard'])) {
+            if (isset($_GET["visualizer"])) {
+                $visualizerFunctionNames = array(
+                    "snakes" => "showSnakesVisualizer",
+                    "hypersnakes" => "showHypersnakesVisualizer",
+                    "ultimate-ttt" => "showUtttVisualizer",
+                    "tetris" => "showTetrisVisualizer",
+                    "connect" => "showConnectVisualizer"
+                );
+                // Adds "<script>showGameVisualizer("espr1t");</script>" block
+                $content .= "<script>{$visualizerFunctionNames[$_GET["game"]]}(`{$this->user->getUsername()}`);</script>";
+            } else if (isset($_GET["scoreboard"])) {
                 $content .= $this->getScoreboard($problem);
-            } else if (isset($_GET['submits'])) {
-                if ($this->user->id == -1) {
-                    redirect(getGameUrl($problem->name), 'ERROR', 'Трябва да влезете в профила си за да видите тази страница.');
-                } else if (!isset($_GET['submitId'])) {
+            } else if (isset($_GET["submits"])) {
+                if ($this->user->getId() == -1) {
+                    redirect(getGameUrl($problem->getName()), "ERROR", "Трябва да влезете в профила си за да видите тази страница.");
+                } else if (!isset($_GET["submitId"])) {
                     $content .= $this->getAllSubmitsBox($problem);
                 } else {
-                    if (isset($_GET['source'])) {
-                        $this->getSource($problem, $_GET['submitId']);
-                    } else if (isset($_GET['updates'])) {
-                        $this->getSubmitUpdates($problem, $_GET['submitId']);
+                    if (isset($_GET["source"])) {
+                        $this->getSource($problem, $_GET["submitId"]);
+                    } else if (isset($_GET["updates"])) {
+                        $this->getSubmitUpdates($problem, $_GET["submitId"]);
                     } else {
                         if ($statusShortcut)
-                            $_SESSION['statusShortcut'] = true;
-                        if (!isset($_GET['matchId'])) {
-                            $content .= $this->getSubmitInfoBox($problem, $_GET['submitId']);
+                            $_SESSION["statusShortcut"] = true;
+                        if (!isset($_GET["matchId"])) {
+                            $content .= $this->getSubmitInfoBox($problem, $_GET["submitId"]);
                         } else {
-                            $content .= $this->getReplay($problem, $_GET['submitId'], $_GET['matchId']);
+                            $content .= $this->getReplay($problem, $_GET["submitId"], $_GET["matchId"]);
                         }
                     }
                 }
-            } else if (isset($_GET['demo'])) {
+            } else if (isset($_GET["demo"])) {
                 $content = $this->getDemo($problem);
-            } else if (isset($_GET['print'])) {
+            } else if (isset($_GET["print"])) {
                 $content = $this->getPrintStatement($problem);
-            } else if (isset($_GET['pdf'])) {
+            } else if (isset($_GET["pdf"])) {
                 return_pdf_file($problem);
             }
             return $content;

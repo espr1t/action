@@ -1,10 +1,10 @@
 <?php
-require_once(__DIR__ . '/db.php');
+require_once(__DIR__ . "/db.php");
 
 $db = new DB();
 
 function output($message) {
-    echo $message . '<br>';
+    echo "{$message}<br>";
 }
 
 function createTableIndexes($table, $indexes) {
@@ -15,7 +15,7 @@ function createTableIndexes($table, $indexes) {
             $result = $db->query("
                 CREATE INDEX `{$indexName}` ON `{$table}`(`$indexColumn`);
             ");
-            output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+            output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
         }
     }
 }
@@ -40,11 +40,11 @@ Table::Users
     "lastSeen": "2016-05-23T21:29:13"
 }
 */
-output('');
-output('Creating table Users...');
+output("");
+output("Creating table `Users`...");
 
-if ($db->tableExists('Users')) {
-    output('  >> already exists.');
+if ($db->tableExists("Users")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Users`(
@@ -62,7 +62,7 @@ if ($db->tableExists('Users')) {
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 createTableIndexes("Users", [
@@ -84,11 +84,11 @@ Table::UsersInfo
     "lastIP": "192.168.1.123"
 }
 */
-output('');
-output('Creating table UsersInfo...');
+output("");
+output("Creating table `UsersInfo`...");
 
-if ($db->tableExists('UsersInfo')) {
-    output('  >> already exists.');
+if ($db->tableExists("UsersInfo")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `UsersInfo`(
@@ -104,7 +104,7 @@ if ($db->tableExists('UsersInfo')) {
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -120,11 +120,11 @@ Table::Credentials
     "lastReset": "2017-12-29T01:48:19"
 }
 */
-output('');
-output('Creating table Credentials...');
+output("");
+output("Creating table `Credentials`...");
 
-if ($db->tableExists('Credentials')) {
-    output('  >> already exists.');
+if ($db->tableExists("Credentials")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Credentials`(
@@ -138,7 +138,7 @@ if ($db->tableExists('Credentials')) {
             PRIMARY KEY (userId)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -167,11 +167,11 @@ Table::Problems
     "visible": "0"
 }
 */
-output('');
-output('Creating table Problems...');
+output("");
+output("Creating table `Problems`...");
 
-if ($db->tableExists('Problems')) {
-    output('  >> already exists.');
+if ($db->tableExists("Problems")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Problems`(
@@ -198,7 +198,7 @@ if ($db->tableExists('Problems')) {
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -206,7 +206,7 @@ Table::Tests
 ============
 {
     "id": 42,
-    "problem": 1,
+    "problemId": 1,
     "position": 3,
     "inpFile": "InputOutput.in",
     "inpHash": "189342e2ed9d23bb9a02ecbf8ed06762",
@@ -215,16 +215,16 @@ Table::Tests
     "score": 100
 }
 */
-output('');
-output('Creating table Tests...');
+output("");
+output("Creating table `Tests`...");
 
-if ($db->tableExists('Tests')) {
-    output('  >> already exists.');
+if ($db->tableExists("Tests")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Tests`(
             id INT NOT NULL AUTO_INCREMENT,
-            problem INT NOT NULL,
+            problemId INT NOT NULL,
             position INT NOT NULL,
             inpFile VARCHAR(32) NOT NULL,
             inpHash VARCHAR(32) NOT NULL,
@@ -234,7 +234,7 @@ if ($db->tableExists('Tests')) {
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -251,14 +251,14 @@ Table::Matches
     "scoreOne": 7.2,
     "scoreTwo": 9.3,
     "message": "Player One's solution timed out.",
-    "replayId": "6a841f45308534a24199b263ec465b32"
+    "replayKey": "6a841f45308534a24199b263ec465b32"
 }
 */
-output('');
-output('Creating table Matches...');
+output("");
+output("Creating table `Matches`...");
 
-if ($db->tableExists('Matches')) {
-    output('  >> already exists.');
+if ($db->tableExists("Matches")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Matches`(
@@ -272,12 +272,12 @@ if ($db->tableExists('Matches')) {
             scoreOne FLOAT NOT NULL,
             scoreTwo FLOAT NOT NULL,
             message TINYTEXT NOT NULL,
-            replayId TEXT NOT NULL,
+            replayKey TEXT NOT NULL,
             PRIMARY KEY (problemId, test, userOne, userTwo),
             KEY `id` (`id`)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -291,11 +291,11 @@ Table::Solutions
     "language": "C++",
 }
 */
-output('');
-output('Creating table Solutions...');
+output("");
+output("Creating table `Solutions`...");
 
-if ($db->tableExists('Solutions')) {
-    output('  >> already exists.');
+if ($db->tableExists("Solutions")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Solutions`(
@@ -307,7 +307,7 @@ if ($db->tableExists('Solutions')) {
             PRIMARY KEY (problemId, name)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -331,14 +331,14 @@ Table::Submits
     "full": true,
     "ip": "2001:db8:0:0:0:ff00:42:8329",
     "info": "Either log or some info about the execution.",
-    "replayId": "A comma-separated list of replay IDs (if a problem with tester)."
+    "replayKey": "A comma-separated list of replay IDs (if a problem with tester)."
 }
 */
-output('');
-output('Creating table Submits...');
+output("");
+output("Creating table `Submits`...");
 
-if ($db->tableExists('Submits')) {
-    output('  >> already exists.');
+if ($db->tableExists("Submits")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Submits`(
@@ -359,11 +359,11 @@ if ($db->tableExists('Submits')) {
             full BOOLEAN NOT NULL DEFAULT FALSE,
             ip VARCHAR(40) NOT NULL,
             info TEXT NOT NULL,
-            replayId TEXT NOT NULL,
+            replayKey TEXT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 createTableIndexes("Submits", [
@@ -384,11 +384,11 @@ Table::Sources
     "source": "#include <cstdio>..."
 }
 */
-output('');
-output('Creating table Sources...');
+output("");
+output("Creating table `Sources`...");
 
-if ($db->tableExists('Sources')) {
-    output('  >> already exists.');
+if ($db->tableExists("Sources")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Sources`(
@@ -400,8 +400,13 @@ if ($db->tableExists('Sources')) {
             PRIMARY KEY (submitId)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
+
+createTableIndexes("Sources", [
+    "SourcesUserId" => "userId",
+    "SourcesProblemId" => "problemId"
+]);
 
 /*
 Table::Regrade
@@ -421,11 +426,11 @@ Table::Regrade
     "newStatus": "TL"
 }
 */
-output('');
-output('Creating table Regrades...');
+output("");
+output("Creating table `Regrades`...");
 
-if ($db->tableExists('Regrades')) {
-    output('  >> already exists.');
+if ($db->tableExists("Regrades")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Regrades`(
@@ -444,7 +449,7 @@ if ($db->tableExists('Regrades')) {
             PRIMARY KEY (id, submitId)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -459,11 +464,11 @@ Table::News
     "type": "Improvement"
 }
 */
-output('');
-output('Creating table News...');
+output("");
+output("Creating table `News`...");
 
-if ($db->tableExists('News')) {
-    output('  >> already exists.');
+if ($db->tableExists("News")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `News`(
@@ -476,7 +481,7 @@ if ($db->tableExists('News')) {
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -484,29 +489,29 @@ Table::Reports
 ===========
 {
     "id": 1,
+    "userId": 42,
     "page": "http://action.informatika.bg/status",
     "content": "Reports are currently not saved in the DB!",
-    "user": 42,
     "date": 2016-08-19
 }
 */
-output('');
-output('Creating table Reports...');
+output("");
+output("Creating table `Reports`...");
 
-if ($db->tableExists('Reports')) {
-    output('  >> already exists.');
+if ($db->tableExists("Reports")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Reports`(
             id INT NOT NULL AUTO_INCREMENT,
-            user INT NOT NULL,
+            userId INT NOT NULL,
             date DATE NOT NULL,
             page TEXT NOT NULL,
             content TEXT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -514,57 +519,58 @@ Table::Achievements
 ===================
 {
     "id": 1,
-    "user": 1,
+    "userId": 42,
     "achievement": "RGSTRD",
     "date": 2016-07-23,
     "seen": true
 }
 */
-output('');
-output('Creating table Achievements...');
+output("");
+output("Creating table `Achievements`...");
 
-if ($db->tableExists('Achievements')) {
-    output('  >> already exists.');
+if ($db->tableExists("Achievements")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Achievements`(
             id INT NOT NULL AUTO_INCREMENT,
-            user INT NOT NULL,
+            userId INT NOT NULL,
             achievement VARCHAR(8) NOT NULL,
             date DATE NOT NULL,
             seen BOOLEAN NOT NULL DEFAULT FALSE,
             PRIMARY KEY (id), UNIQUE(user, achievement)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
 Table::Spam
 ===================
 {
+    "id": 1,
+    "userId": 42,
     "type": 0,
-    "user": 2,
     "time": 1472937844
 }
 */
 
-output('');
-output('Creating table Spam...');
+output("");
+output("Creating table `Spam`...");
 
-if ($db->tableExists('Spam')) {
-    output('  >> already exists.');
+if ($db->tableExists("Spam")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Spam`(
             id INT NOT NULL AUTO_INCREMENT,
+            userId INT NOT NULL,
             type INT NOT NULL,
-            user INT NOT NULL,
             time INT NOT NULL,
             PRIMARY KEY (id)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -580,11 +586,11 @@ Table::Training
     "problems": "1,2,3,5,8,13,21,34,55,89,144,233"
 }
 */
-output('');
-output('Creating table Training...');
+output("");
+output("Creating table `Training`...");
 
-if ($db->tableExists('Training')) {
-    output('  >> already exists.');
+if ($db->tableExists("Training")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Training`(
@@ -598,7 +604,7 @@ if ($db->tableExists('Training')) {
             PRIMARY KEY (`id`, `key`)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -611,11 +617,11 @@ Table::History
     "time05": "0.01,0.00,0.02,0.11,0.19,0.49,0.49,0.72,0.90,0.53,0.77"
 }
 */
-output('');
-output('Creating table History...');
+output("");
+output("Creating table `History`...");
 
-if ($db->tableExists('History')) {
-    output('  >> already exists.');
+if ($db->tableExists("History")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `History`(
@@ -628,7 +634,7 @@ if ($db->tableExists('History')) {
             PRIMARY KEY (`submitId`)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -642,11 +648,11 @@ Table::Notifications
 }
 Note that messages sent to all users are not listed in messages (thus can be in seen[] but not messages[])
 */
-output('');
-output('Creating table Notifications...');
+output("");
+output("Creating table `Notifications`...");
 
-if ($db->tableExists('Notifications')) {
-    output('  >> already exists.');
+if ($db->tableExists("Notifications")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Notifications`(
@@ -657,7 +663,7 @@ if ($db->tableExists('Notifications')) {
             PRIMARY KEY (`userId`)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
 
 /*
@@ -675,11 +681,11 @@ Table::Messages
     "userNames": "ThinkCreative,goshko,pesho,kopche"
 }
 */
-output('');
-output('Creating table Messages...');
+output("");
+output("Creating table `Messages`...");
 
-if ($db->tableExists('Messages')) {
-    output('  >> already exists.');
+if ($db->tableExists("Messages")) {
+    output("  >> already exists.");
 } else {
     $result = $db->query("
         CREATE TABLE `Messages`(
@@ -695,13 +701,13 @@ if ($db->tableExists('Messages')) {
             PRIMARY KEY (`id`)
         ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
     ");
-    output('  >> ' . ($result !== false ? 'succeeded' : 'failed') . '!');
+    output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
     if ($result !== false) {
         $result = $db->query("
             INSERT INTO `Messages` (`key`, `sent`, `authorId`, `authorName`, `title`, `content`, `userIds`, `userNames`)
             VALUES ('welcome', NOW(), 0, 'system', 'Здравейте!', 'Добре дошли на системата!', '-1', '<all_users>')
         ");
-        output('  >> ' . ($result !== false ? 'inserted welcome message' : 'failed to insert welcome message') . '!');
+        output("  >> " . ($result !== false ? "inserted welcome message" : "failed to insert welcome message") . "!");
     }
 }
 

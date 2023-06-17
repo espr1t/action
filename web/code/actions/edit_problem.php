@@ -1,59 +1,46 @@
 <?php
-require_once(__DIR__ . '/../config.php');
-require_once(__DIR__ . '/../db/brain.php');
-require_once(__DIR__ . '/../entities/problem.php');
+require_once(__DIR__ . "/../config.php");
+require_once(__DIR__ . "/../db/brain.php");
+require_once(__DIR__ . "/../entities/problem.php");
 
 global $user;
 
 // User doesn't have access level needed for editing a problem
-if ($user->access < $GLOBALS['ACCESS_EDIT_PROBLEM']) {
+if ($user->getAccess() < $GLOBALS["ACCESS_EDIT_PROBLEM"]) {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => 'Нямате права да променяте задачи.'
+        "status" => "ERROR",
+        "message" => "Нямате права да променяте задачи."
     ));
 }
 
-$problem = new Problem();
-$problem->name = $_POST['name'];
-$problem->author = $_POST['author'];
-$problem->folder = $_POST['folder'];
-$problem->origin = $_POST['origin'];
-$problem->timeLimit = $_POST['timeLimit'];
-$problem->memoryLimit = $_POST['memoryLimit'];
-$problem->type = $_POST['type'];
-$problem->difficulty = $_POST['difficulty'];
-$problem->statement = $_POST['statement'];
-$problem->checker = $_POST['checker'];
-$problem->tester = $_POST['tester'];
-$problem->floats = $_POST['floats'] == 'true';
-$problem->tags = ($_POST['tags'] == '' ? array() : explode(',', $_POST['tags']));
-$problem->addedBy = $user->username;
-$problem->visible = $_POST['visible'] == 'true';
+# Deduce the author by the user who is doing the POST
+$_POST["addedBy"] = $user->getUsername();
 
-$errorMessage = validateProblem($problem);
-if ($errorMessage != '') {
+# Some of the fields are not populated by the Admin page (they cannot be set there and should be set in the DB directly)
+# These are for the games specifically - I haven't gotten to creating a different flow for creating/editing games yet as
+# they are few enough to do by updating the DB directly.
+$problem = Problem::instanceFromArray($_POST, ["description", "logo", "waitPartial", "waitFull"]);
+
+$errorMessage = $problem->validate();
+if ($errorMessage != "") {
     printAjaxResponse(array(
-        'status' => 'ERROR',
-        'message' => $errorMessage
+        "status" => "ERROR",
+        "message" => $errorMessage
     ));
 }
 
-// New problem
-if ($_POST['id'] == 'new') {
+if ($_POST["id"] == "new") { // New problem
     if (!$problem->create()) {
         printAjaxResponse(array(
-            'status' => 'ERROR',
-            'message' => 'Възникна проблем при създаването на задачата.'
+            "status" => "ERROR",
+            "message" => "Възникна проблем при създаването на задачата."
         ));
     }
-}
-// Updating existing problem
-else {
-    $problem->id = intval($_POST['id']);
+} else { // Updating existing problem
     if (!$problem->update()) {
         printAjaxResponse(array(
-            'status' => 'ERROR',
-            'message' => 'Възникна проблем при промяната на задачата.'
+            "status" => "ERROR",
+            "message" => "Възникна проблем при промяната на задачата."
         ));
     }
 }
@@ -62,51 +49,16 @@ else {
 for ($i = 0; $i <= 1000; $i++) {
     $key = sprintf("test_%d", $i);
     if (isset($_POST[$key])) {
-        Brain::updateTestScore($problem->id, $i, $_POST[$key]);
+        Brain::updateTestScore($problem->getId(), $i, $_POST[$key]);
     }
 }
 
 // Everything seems okay
 printAjaxResponse(array(
-    'id' => $problem->id,
-    'status' => 'OK',
-    'message' => 'Задачата беше запазена успешно.'
+    "id" => $problem->getId(),
+    "status" => "OK",
+    "message" => "Задачата беше запазена успешно."
 ));
 
-
-function validateProblem($problem) {
-    if (!preg_match('/(*UTF8)^([0-9A-Za-zА-Яа-я.,!*\/ -]){1,32}$/', $problem->name))
-        return 'Въведеното име на задача е невалидно!';
-
-    if (!preg_match('/(*UTF8)^([A-Za-zА-Яа-я -]){1,32}$/', $problem->author))
-        return 'Въведеното име на автор е невалидно!';
-
-    if (!preg_match('/([0-9A-Za-z_-]){1,32}$/', $problem->folder))
-        return 'Въведената папка е невалидна!';
-
-    if (!preg_match('/(*UTF8)^([0-9A-Za-zА-Яа-я.,:! -]){1,128}$/', $problem->origin))
-        return 'Въведеният източник е невалиден!';
-
-    if (!floatval($problem->timeLimit))
-        return 'Въведеното ограничение по време е невалидно!';
-    $problem->timeLimit = floatval($problem->timeLimit);
-
-    if (!floatval($problem->memoryLimit))
-        return 'Въведеното ограничение по памет е невалидно!';
-    $problem->memoryLimit = floatval($problem->memoryLimit);
-
-    if (!array_key_exists($problem->type, $GLOBALS['PROBLEM_TYPES']))
-        return 'Въведеният тип е невалиден!';
-
-    if (!array_key_exists($problem->difficulty, $GLOBALS['PROBLEM_DIFFICULTIES']))
-        return 'Въведената сложност ' . $problem->difficulty . ' е невалидна!';
-
-    foreach ($problem->tags as $tag) {
-        if (!array_key_exists($tag, $GLOBALS['PROBLEM_TAGS'])) {
-            return 'Въведеният таг ' . $tag . ' е невалиден!';
-        }
-    }
-    return '';
-}
 
 ?>

@@ -1,17 +1,17 @@
 <?php
-require_once(__DIR__ . '/brain.php');
-require_once(__DIR__ . '/../common.php');
-require_once(__DIR__ . '/../entities/user.php');
+require_once(__DIR__ . "/brain.php");
+require_once(__DIR__ . "/../common.php");
+require_once(__DIR__ . "/../entities/user.php");
 
 session_start();
 
 function output($message) {
-    echo $message . '<br>';
+    echo "{$message}<br>";
 }
 
 $user = getCurrentUser();
-if ($user == null || $user->access < $GLOBALS['ADMIN_USER_ACCESS']) {
-    output('You don\'t have permissions to do this action.');
+if ($user === null || $user->getAccess() < $GLOBALS["ADMIN_USER_ACCESS"]) {
+    output("You don't have permissions to do this action.");
     exit(0);
 }
 
@@ -20,7 +20,7 @@ if ($user == null || $user->access < $GLOBALS['ADMIN_USER_ACCESS']) {
 output('Migrating user notifications...');
 $users = Brain::getAllUsers();
 foreach ($users as $user) {
-    if (Brain::addNotifications($user['id'], $user['username'], '', '1') !== null) {
+    if (Brain::addNotifications($user['id'], $user['username'], [], [1]) !== null) {
         output('  >> added notifications for user "' . $user['username'] . '"');
     } else {
         output('ERROR: cannot add notifications for user "' . $user['username'] . '"');

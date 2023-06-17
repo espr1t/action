@@ -1,38 +1,38 @@
 <?php
-require_once('common.php');
-require_once('page.php');
+require_once("common.php");
+require_once("page.php");
 
 class AboutPage extends Page {
-    public function getTitle() {
-        return 'O(N)::About';
+    public function getTitle(): string {
+        return "O(N)::About";
     }
 
-    public function getContent() {
-        $content = inBox('
+    public function getContent(): string {
+        $content = inBox("
             <h1>За системата</h1>
-            Тази система е част от <a href="http://www.informatika.bg" target="_blank">informatika.bg</a>, като
+            Тази система е част от <a href='http://www.informatika.bg' target='_blank'>informatika.bg</a>, като
             предоставя възможност потребителите на сайта да тренират наученото от темите върху задачи, давани на
             състезания. Тя е безплатна и свободна за ползване - кодът е достъпен като
-            <a href="https://github.com/espr1t/action" target="_blank">GitHub проект</a>.
+            <a href='https://github.com/espr1t/action' target='_blank'>GitHub проект</a>.
 
             <h3>Задачи</h3>
             Системата съдържа архив със задачи, давани от мен на различни състезания (национални и международни
             състезания, лагер-школи, курсове в университета, TopCoder, и други) в секцията
-            <a href="/problems">Задачи</a>.
+            <a href='/problems'>Задачи</a>.
 
             <h3>Подготовка</h3>
             Системата също така предоставя възможност за структурирана подготовка в секцията
-            <a href="/training">Подготовка</a>, фокусираща се върху различни части от състезателната информатика.
-            Като идея е донякъде сходна с <a href="http://train.usaco.org/usacogate" target="_blank">USACO</a>
+            <a href='/training'>Подготовка</a>, фокусираща се върху различни части от състезателната информатика.
+            Като идея е донякъде сходна с <a href='http://train.usaco.org/usacogate' target='_blank'>USACO</a>
             трейнинга, с няколко основни разлики, една от които е, че няма ограничения задачи от кои теми можете да
             решавате (не е нужно да сте решили всички задачи от дадена секция, за да достъпвате следващите).
             Подготовката може да е безкрайно полезна за по-неопитни състезатели, тъй като темите са подредени в
             нарастваща сложност и следват логически една след друга.
 
             <h3>Игри</h3>
-            За разлика от много други системи, тази поддържа <a href="/games">Игри</a> за двама или повече души, като
+            За разлика от много други системи, тази поддържа <a href='/games'>Игри</a> за двама или повече души, като
             всеки играч трябва да напише изкуствен интелект, който да се състезава вместо него. Пример за такава игра
-            е <a href="/games/snakes">Snakes</a>, в която две змии играят на една и съща дъска с ябълки, като се стремят
+            е <a href='/games/snakes'>Snakes</a>, в която две змии играят на една и съща дъска с ябълки, като се стремят
             да изядат възможно най-много, без да се блъснат в стена, в себе си, или в другата змия.
 
             <h3>Състезания</h3>
@@ -41,16 +41,16 @@ class AboutPage extends Page {
 
             <h3>За контакти</h3>
             Системата се разработва и поддържа от
-            <a href="http://espr1t.net/me.html" target="_blank">Александър Георгиев</a>.
+            <a href='http://espr1t.net/me.html' target='_blank'>Александър Георгиев</a>.
             <br><br>
-            Ако забележите проблеми или имате предложения за подобрения, моля използвайте ликна "Мрън!" отляво.
+            Ако забележите проблеми или имате предложения за подобрения, моля използвайте ликна \"Мрън!\" отляво.
             За други неща можете да се свържете с мен на
-            <a href="mailto:thinkcreative@outlook.com" target="_self">thinkcreative@outlook.com</a>.
+            <a href='mailto:thinkcreative@outlook.com' target='_self'>thinkcreative@outlook.com</a>.
             <br><br>
             Последно, за да се свържете с други потребители на системата или за да покажете, че системата Ви харесва,
             можете да харесате
-            <a href="https://www.facebook.com/informatika.bg/" target="_blank">страницата на informatika.bg</a> във Facebook.
-        ');
+            <a href='https://www.facebook.com/informatika.bg/' target='_blank'>страницата на informatika.bg</a> във Facebook.
+        ");
         return $content;
     }
 

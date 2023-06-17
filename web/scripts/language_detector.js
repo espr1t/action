@@ -253,7 +253,7 @@ function detectLanguage(code, name="SourceName") {
     let keywordsJava = [
         "abstract", "boolean", "byte", "extends", "final", "finally", "implements", "instanceof", "interface", "native",
         "package", "super", "throws", "transient", "java", "String", "System.out.println", "System.out.printf",
-        "public(\\s)+static", "public(\\s)+class"
+        "public(\\s)+static", "public(\\s)+class", "Scanner", "System.in"
     ];
 
     let keywordsPython = [

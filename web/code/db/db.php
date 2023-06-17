@@ -1,28 +1,30 @@
 <?php
-require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . "/../config.php");
 
 DB::init();
 
 class DB {
     private static mysqli $db;
 
-    public static function init() {
+    public static function init(): void {
         // Create connection
         self::$db = new mysqli(
-            $GLOBALS['DB_SERVER'],
-            $GLOBALS['DB_USERNAME'],
-            $GLOBALS['DB_PASSWORD'],
-            $GLOBALS['DB_DATABASE'],
-            $GLOBALS['DB_PORT']
+            $GLOBALS["DB_SERVER"],
+            $GLOBALS["DB_USERNAME"],
+            $GLOBALS["DB_PASSWORD"],
+            $GLOBALS["DB_DATABASE"],
+            $GLOBALS["DB_PORT"]
         );
 
         // Check connection
         if (self::$db->connect_error) {
-            die('Connection failed: ' . self::$db->connect_error);
+            $error = self::$db->connect_error;
+            error_log("ERROR: Could not connect to the DB: {$error}");
+            die("Could not connect to the DB: {$error}");
         }
 
         // Set connection character encoding to UTF-8 (in case server is not configured properly)
-        self::$db->set_charset('utf8');
+        self::$db->set_charset("utf8");
     }
 
     function __destruct() {

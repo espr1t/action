@@ -19,7 +19,7 @@ class LanguageDetectorPage extends Page {
     }
 
     public function getContent(): string {
-        if ($this->user->access < $GLOBALS["ACCESS_ADMIN_PAGES"]) {
+        if ($this->user->getAccess() < $GLOBALS["ACCESS_ADMIN_PAGES"]) {
             return inBox("<h1>Language Detector Test</h1><br>
                 Дадената функционалност изисква администраторски права.
             ");
