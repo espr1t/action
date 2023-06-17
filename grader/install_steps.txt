@@ -24,8 +24,15 @@ Installation steps:
     >> sudo apt install python3-pip
     >> pip3 install --upgrade pip
 1.5. Install PyPy (used to actually run user's submissions written in Python):
-    >> sudo apt install pypy3
-    >> pypy3 -m pip install pyflakes
+    (Note that newest pypy may be different; check here: https://www.pypy.org/download.html)
+    >> wget https://downloads.python.org/pypy/pypy3.7-v7.3.3-linux64.tar.bz2
+    >> tar xf pypy3.7-v7.3.3-linux64.tar.bz2
+    >> rm pypy3.7-v7.3.3-linux64.tar.bz2
+    >> sudo mv pypy3.7-v7.3.3-linux64 /usr/local/lib/
+    >> sudo ln -s /usr/local/lib/pypy3.7-v7.3.3-linux64/bin/pypy /usr/bin/pypy
+    >> pypy -m ensurepip
+    >> pypy -m pip install --upgrade pip wheel
+    >> pypy -m pip install .
 2. (optional) Install latest version of GCC/G++.
     Similarly to other languages, if you are not satisfied with the current version installed with
     your distribution (or there is none), proceed with the steps below.

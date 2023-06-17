@@ -21,7 +21,7 @@ class RunResult:
     output: bytes = None
     info: str = ""
     error: str = ""
-    replay_id: str = ""
+    replay_key: str = ""
 
 
 @dataclass
@@ -49,7 +49,7 @@ class Runner:
                 max_memory_mb=memory_limit // 2**20, executable=executable
             )
         if language == config.LANGUAGE_PYTHON:
-            return "PYPY_GC_MAX={max_memory_mb}MB pypy3 {executable}".format(
+            return "PYPY_GC_MAX={max_memory_mb}MB pypy {executable}".format(
                 max_memory_mb=memory_limit // 2**20, executable=executable
             )
         raise Exception("Unsupported language")

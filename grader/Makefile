@@ -1,3 +1,5 @@
+# Use "--preserve-env=PATH env" after sudo in case you depend on local user paths (e.g. pyenv)
+
 clean:
 	sudo --preserve-env=PATH env python initializer.py clean
 	sudo rm -rf Action.egg-info
@@ -16,6 +18,7 @@ start run:
 	sudo --preserve-env=PATH env python server.py
 
 test:
-#	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/test_evaluator.py
-# 	sudo env RUNNING_TESTS=true python3 -m pytest -rA --full-trace tests/test_evaluator.py
-	sudo env RUNNING_TESTS=true python3 -m pytest -rA tests/
+	sudo --preserve-env=PATH env RUNNING_TESTS=true python3 -m pytest -rA tests/
+#	sudo --preserve-env=PATH env RUNNING_TESTS=true python3 -m pytest -rA --full-trace tests/test_evaluator.py
+#	sudo --preserve-env=PATH env RUNNING_TESTS=true python3 -m pytest -rA --full-trace tests/test_compiler.py
+#	sudo --preserve-env=PATH env RUNNING_TESTS=true python3 -m pytest -rA --full-trace tests/test_sandbox.py

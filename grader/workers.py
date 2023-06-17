@@ -186,7 +186,7 @@ class Workers:
             if config.MAX_PARALLEL_WORKERS > psutil.cpu_count(logical=True):
                 logger.fatal("MAX_PARALLEL_WORKERS set to {}, but max CPU threads are {}.".format(
                     config.MAX_PARALLEL_WORKERS, psutil.cpu_count(logical=True)))
-                exit(0)
+                exit(-1)
             if config.MAX_PARALLEL_WORKERS > psutil.cpu_count(logical=False):
                 logger.warning("MAX_PARALLEL_WORKERS set to {}, but physical CPU cores are {}.".format(
                     config.MAX_PARALLEL_WORKERS, psutil.cpu_count(logical=False)))
@@ -195,9 +195,11 @@ class Workers:
             # If this prints any errors, see the info on top of limiter.py or comment the line below
             limiter.set_rdt_limits()
 
-            # Create a system group for managing sudo and other permissions
-            if os.system("sudo groupadd workers") != 0:
-                logger.error("Could not create system group \"workers\"!")
+            # Create a system group for managing sudo and other permissions if not already present
+            if os.system("sudo tail /etc/group | grep workers") != 0:
+                if os.system("sudo groupadd workers") != 0:
+                    logger.fatal("Could not create system group \"workers\"!")
+                    exit(-1)
 
             # Create the user and sandbox (chroot) directory for each worker
             for i in range(config.MAX_PARALLEL_WORKERS):

@@ -16,13 +16,14 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        "Flask~=1.1.1",
-        "urllib3==1.26.5",
-        "requests==2.31.0",
-        "vcrpy~=4.0.2",
-        "pyflakes~=2.2.0",
-        "psutil~=5.7.0",
-        "pytest~=5.4.0",
-        "numpy~=1.18",
+        "Flask~=2.3.2",
+        "urllib3~=2.0.2",
+        "requests~=2.31.0",
+        "vcrpy~=4.3.1",
+        "pyflakes~=3.0.1",
+        "psutil~=5.9.5",
+        "pytest~=7.3.1",
+        "numpy~=1.24.3",
+        "markupsafe~=2.1.2",
     ],
 )

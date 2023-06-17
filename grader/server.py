@@ -63,7 +63,7 @@ def evaluate():
     return network.create_response(200, "Submission received.")
 
 
-@app.route("/print-pdf", methods=["POST"])
+@app.route("/print", methods=["POST"])
 @network.requires_auth
 def print_pdf():
     """ Used for printing a document to PDF """
@@ -86,12 +86,12 @@ def print_pdf():
 def replay():
     """ Used for returning a replay log to the front-end """
     data = json.loads(flask.request.form["data"])
-    logger.info("Getting replay: {}".format(data["id"]))
+    logger.info("Getting replay: {}".format(data["key"]))
 
-    path = os.path.abspath(os.path.join(config.PATH_REPLAYS, data["id"]))
+    path = os.path.abspath(os.path.join(config.PATH_REPLAYS, data["key"]))
     if not os.path.isfile(path):
-        logger.error("No replay with ID {}.".format(data["id"]))
-        return network.create_response(404, "No replay with ID {}.".format(data["id"]))
+        logger.error("No replay with ID {}.".format(data["key"]))
+        return network.create_response(404, "No replay with ID {}.".format(data["key"]))
     return flask.send_from_directory(os.path.dirname(path), os.path.basename(path))
 
 

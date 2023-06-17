@@ -38,11 +38,11 @@ class TestConcurrency(TestCase):
         cls.patch_sandbox.stop()
 
     @staticmethod
-    def concurrent_helper(path_input, path_executable):
+    def concurrent_helper(path_input, path_executable, memory_limit=2**27, timeout=10.0):
         with open(path_input, "rb") as inp:
             input_bytes = inp.read()
         return Runner.run_program(sandbox=Sandbox(), executable_path=path_executable,
-                                  memory_limit=128 * 2**20, timeout=10.0, input_bytes=input_bytes)
+                                  memory_limit=memory_limit, timeout=timeout, input_bytes=input_bytes)
 
     @staticmethod
     def get_num_runs(minimum_runs):
@@ -167,6 +167,32 @@ class TestConcurrency(TestCase):
             self.assertEqual(int(run_result.output.decode().strip()), 772983032)
             times[i] = round(run_result.exec_time, 2)
         input_file.close()
+
+        print(times)
+        print("TIME: {:.3f}s vs {:.3f}s".format(min(times), max(times)))
+
+        # Best time should be almost identical to the worst time in order to consider the results consistent
+        # (at most 10% difference or 0.05s, whichever larger)
+        self.assertLessEqual(max(times), max(min(times) + 0.05, min(times) * 1.1))
+
+    def test_run_program_concurrent_cpu_access_java(self):
+        path_source = os.path.join(self.PATH_FIXTURES, "Sheep.java")
+        path_executable = os.path.join(config.PATH_SANDBOX, "Sheep.jar")
+        status = Compiler.compile(config.LANGUAGE_JAVA, path_source, path_executable)
+        self.assertEqual(status, "")
+
+        num_runs = self.get_num_runs(20)
+        input_file = os.path.join(self.PATH_FIXTURES, "Sheep.in")
+
+        # Run the same thing over and over again as quickly as possible to see if there is any inconsistency
+        times = [1e100] * num_runs
+        pool = ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_WORKERS)
+        futures = [pool.submit(self.concurrent_helper, input_file, path_executable) for _ in range(num_runs)]
+        for i in range(len(futures)):
+            run_result = futures[i].result()
+            self.assertEqual(run_result.exit_code, 0)
+            self.assertEqual(int(run_result.output.decode().strip()), 3800)
+            times[i] = round(run_result.exec_time, 2)
 
         print(times)
         print("TIME: {:.3f}s vs {:.3f}s".format(min(times), max(times)))

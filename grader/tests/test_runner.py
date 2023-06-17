@@ -157,7 +157,7 @@ class TestRunner(TestCase):
         sandbox.put_file(os.path.join(self.PATH_FIXTURES, "handle_sigterm.py"))
 
         # With enough time the program completes successfully
-        command = "pypy3 handle_sigterm.py"
+        command = "pypy handle_sigterm.py"
         stdout_bytes, stderr_bytes = Runner.run(
             sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.4)
         )
@@ -168,7 +168,7 @@ class TestRunner(TestCase):
         self.assertTrue(2**20 <= exec_memory <= 2**25)  # Takes between 1MB and 32MB
 
         # If it runs longer than the timeout, it gets killed before printing anything
-        command = "pypy3 handle_sigterm.py"
+        command = "pypy handle_sigterm.py"
         stdout_bytes, stderr_bytes = Runner.run(
             sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.2)
         )
@@ -179,7 +179,7 @@ class TestRunner(TestCase):
         self.assertTrue(2**20 <= exec_memory <= 2**25)  # Takes between 1MB and 32MB
 
         # Catching SIGTERM signal doesn't help
-        command = "pypy3 handle_sigterm.py --handle"
+        command = "pypy handle_sigterm.py --handle"
         stdout_bytes, stderr_bytes = Runner.run(
             sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.2)
         )
