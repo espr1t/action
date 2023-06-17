@@ -17,7 +17,7 @@ setup(
 
     install_requires=[
         "Flask~=2.3.2",
-        "urllib3~=2.0.2",
+        "urllib3~=1.26.16",
         "requests~=2.31.0",
         "vcrpy~=4.3.1",
         "pyflakes~=3.0.1",
