@@ -1022,8 +1022,8 @@ class AdminAchievementsPage extends Page {
         if (isset($_GET["recalc"]) && $_GET["recalc"] == "true") {
             $startTime = microtime(true);
             $this->recalcAll();
-            // TODO: Do a redirect to /achivements (without /recalc) and print it as info message
-            $elapsed = sprintf("<p>Calculated in %.3f seconds.</p>", microtime(true) - $startTime);
+            $elapsed = sprintf("Calculated in %.3f seconds.", microtime(true) - $startTime);
+            redirect("/admin/achievements", "INFO", $elapsed);
         }
         $allAchievements = $this->getAchievementsList($achievementsData);
         return inBox("
