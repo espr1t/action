@@ -440,7 +440,7 @@ class Brain {
         $response = self::query("
             SELECT * FROM (
                 SELECT *, ROW_NUMBER() OVER(PARTITION BY problemId ORDER BY id) AS rank
-                FROM `submits`
+                FROM `Submits`
                 WHERE `status` = 'AC' AND `userId` > 2 -- exclude system user (0), espr1t (1) and ThinkCreative (2)
             ) AS temp
             WHERE rank = 1 
