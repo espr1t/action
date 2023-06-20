@@ -24,7 +24,8 @@ if ($okay) {
         $mailStatus = sendEmail(
             $GLOBALS["ADMIN_EMAIL"], // Address
             "Grader Back to Normal", // Subject
-            "Grader became accessible again at {$atTime}" // Message
+            "Grader became accessible again at {$atTime}", // Message
+            "plain" // Content is plain text
         );
         if ($mailStatus) {
             error_log("INFO: Sent mail about grader status successfully.");
@@ -48,7 +49,8 @@ if ($okay) {
     $mailStatus = sendEmail(
         $GLOBALS["ADMIN_EMAIL"], // Address
         "Grader Unavailable", // Subject
-        "Grader became unavailable at {$atTime}" // Message
+        "Grader became unavailable at {$atTime}", // Message
+        "plain" // Content is plain text
     );
     if ($mailStatus) {
         error_log("INFO: Sent mail about grader status successfully.");

@@ -293,7 +293,13 @@ function submitReportForm() {
     };
 
     var callback = function(response) {
-        parseActionResponse(response);
+        response = parseActionResponse(response);
+        if (response) {
+            showNotification(
+                response.status == "OK" ? "INFO" : "ERROR",
+                response.message
+            );
+        }
     }
     ajaxCall('/actions/reportProblem', data, callback);
 }

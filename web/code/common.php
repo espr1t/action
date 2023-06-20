@@ -538,10 +538,12 @@ function getCurrentUser(): ?User {
     return null;
 }
 
-function sendEmail(string $address, string $subject, string $content): bool {
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: action@informatika.bg\r\n";
+function sendEmail(string $address, string $subject, string $content, string $content_type="plain"): bool {
+    $headers = array(
+        "MIME-Version" => "1.0",
+        "Content-Type" => "text/$content_type; charset=utf-8",
+        "From" => "action@informatika.bg"
+    );
     return mail($address, $subject, $content, $headers);
 }
 

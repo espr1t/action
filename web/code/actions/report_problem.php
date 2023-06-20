@@ -23,14 +23,17 @@ if (!passSpamProtection($user, $GLOBALS["SPAM_EMAIL_ID"], $GLOBALS["SPAM_EMAIL_L
 
 Brain::addReport($user->getId(), $_POST["link"], $_POST["problem"]);
 
-
 $address = $GLOBALS["ADMIN_EMAIL"];
 $subject = "Problem report from {$user->getUsername()}";
 $content = "
+    <!DOCTYPE html>
     <html>
+        <head>
+          <title>$subject</title>
+        </head>
         <body>
-            <b>User:</b>{$user->getUsername()}<br>
-            <b>Link:</b>{$_POST['link']}<br>
+            <b>User:</b> {$user->getUsername()}<br>
+            <b>Link:</b> {$_POST['link']}<br>
             <b>Problem Description:</b><br>
             ==================================================<br>
             " . nl2br($_POST['problem']) . "
@@ -38,7 +41,7 @@ $content = "
     </html>
 ";
 
-if (sendEmail($address, $subject, $content)) {
+if (sendEmail($address, $subject, $content, "html")) {
     error_log("INFO: User {$user->getUsername()} reported a problem.");
     printAjaxResponse(array(
         "status" => "OK",
