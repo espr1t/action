@@ -14,7 +14,7 @@ class MessagesPage extends Page {
      * @param int[] $seen
      * @return string
      */
-    public static function getMessageList(array $messages, array $seen=array()): string {
+    public static function getMessageList(array $messages, ?array $seen): string {
         $baseUrl = explode("/messages", getCurrentUrl())[0] . "/messages/";
         $messageList = "";
         foreach ($messages as $message) {

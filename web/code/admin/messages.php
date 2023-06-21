@@ -57,9 +57,7 @@ class AdminMessagesPage extends Page {
                 <input type='submit' value='Ново съобщение' onclick='redirect(\"messages/new\");' class='button button-color-blue button-large'>
             </div>
         ");
-
-        $messages = Message::getAll();
-        $content .= MessagesPage::getMessageList($messages, null);
+        $content .= MessagesPage::getMessageList(Message::getAll(), null);
 
         // Specific message is open
         if (isset($_GET["messageKey"])) {
