@@ -145,10 +145,12 @@ class ProblemsPage extends Page {
 
         $problemTried = array();
         $problemSolved = array();
-        foreach (Submit::getUserSubmits($this->user->getId()) as $submit) {
-            $problemTried[$submit->getProblemId()] = true;
-            if ($submit->getStatus() == $GLOBALS["STATUS_ACCEPTED"])
-                $problemSolved[$submit->getProblemId()] = true;
+        if ($this->user->getId() != -1) {
+            foreach (Submit::getUserSubmits($this->user->getId()) as $submit) {
+                $problemTried[$submit->getProblemId()] = true;
+                if ($submit->getStatus() == $GLOBALS["STATUS_ACCEPTED"])
+                    $problemSolved[$submit->getProblemId()] = true;
+            }
         }
 
         for ($i = 0; $i < count($tasksInfo); $i++) {
