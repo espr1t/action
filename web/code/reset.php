@@ -102,7 +102,7 @@ class ResetPage extends Page {
             </html>
         ";
 
-        if (!sendEmail($address, $subject, $content)) {
+        if (!sendEmail($address, $subject, $content, "html")) {
             return "Възникна проблем при изпращането на e-mail-а.";
         }
         return "";
