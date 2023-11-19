@@ -9,7 +9,7 @@ ini_set("log_errors", true);
 date_default_timezone_set("Europe/Sofia");
 
 // Settings
-$MAINTENANCE_MODE = True;
+$MAINTENANCE_MODE = False;
 
 // Database
 $DB_SERVER = "localhost";

@@ -84,6 +84,7 @@ class Submit {
         $submit->status = getStringValue($info, "status");
         $submit->message = getStringValue($info, "message");
         $submit->full = getBoolValue($info, "full");
+        $submit->ip = getStringValue($info, "ip");
         $submit->info = getStringValue($info, "info");
         $submit->replayKey = getStringValue($info, "replayKey");
         return $submit;

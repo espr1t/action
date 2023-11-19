@@ -64,7 +64,7 @@ class AdminMessagesPage extends Page {
             if ($_GET["messageKey"] == "new") {
                 $message = new Message();
             } else {
-                $message = Message::get($_GET["messageKey"]);
+                $message = Message::getByKey($_GET["messageKey"]);
             }
             if ($message == null) {
                 redirect("/admin/messages", "ERROR", "Не съществува съобщение с този идентификатор!");

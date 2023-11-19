@@ -24,7 +24,7 @@ class GamesPage extends Page {
             "/scripts/games/tetris.js",
             "/scripts/games/connect.js",
             "/scripts/games/imagescanner.js",
-            "/scripts/jquery-3.3.1.min.js",
+            "/scripts/jquery-3.7.1.min.js",
             "/scripts/jquery-jvectormap-2.0.3.min.js",
             "/scripts/jquery-jvectormap-world-mill.js"
         );
