@@ -736,5 +736,11 @@
     "title": "Married Sasho",
     "description": "Голяма грешка.",
     "icon": "far fa-gem"
+  },
+  {
+    "key": "WLCMBK",
+    "title": "Welcome Back",
+    "description": "Предадено решение след повече от година пауза.",
+    "icon": "fas fa-pause-circle"
   }
 ]

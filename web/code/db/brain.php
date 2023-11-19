@@ -453,8 +453,7 @@ class Brain {
         if ($userId != -1) $whereClause .= ($whereClause == "" ? "" : " AND ") . "`userId` = {$userId}";
         if ($problemId != -1) $whereClause .= ($whereClause == "" ? "" : " AND ") . "`problemId` = {$problemId}";
         if ($status != "all") $whereClause .= ($whereClause == "" ? "" : " AND ") . "`status` = '{$status}'";
-
-        $response = self::select("Submits", $whereClause);
+        $response = self::select("Submits", $whereClause, "id");
         return !$response ? null : self::getResults($response);
     }
 
@@ -764,7 +763,7 @@ class Brain {
         $response = self::select(
             "Achievements",
             $userId == -1 ? "" : "`userId` = {$userId}",
-            "`date`, `id` ASC"
+            "`date`, `userId`, `achievement` ASC"
         );
         return !$response ? null : self::getResults($response);
     }

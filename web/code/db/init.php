@@ -518,7 +518,6 @@ if ($db->tableExists("Reports")) {
 Table::Achievements
 ===================
 {
-    "id": 1,
     "userId": 42,
     "achievement": "RGSTRD",
     "date": 2016-07-23,
@@ -533,7 +532,6 @@ if ($db->tableExists("Achievements")) {
 } else {
     $result = $db->query("
         CREATE TABLE `Achievements`(
-            id INT NOT NULL AUTO_INCREMENT,
             userId INT NOT NULL,
             achievement VARCHAR(8) NOT NULL,
             date DATE NOT NULL,

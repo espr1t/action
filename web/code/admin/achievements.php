@@ -494,6 +494,24 @@ class AdminAchievementsPage extends Page {
         }
     }
 
+    // Sent a submission year or more after the latest submission
+    /** @param Submit[] $userSubmits */
+    public function achievementWelcomeBack(User $user, array &$achieved, string $key, array $userSubmits): void {
+        if (!array_key_exists($key, $achieved)) {
+            $lastSubmit = null;
+            foreach ($userSubmits as $submit) {
+                $currSubmit = new DateTime($submit->getSubmitted());
+                if ($lastSubmit != null) {
+                    if ($currSubmit->diff($lastSubmit)->format("%y") > "00") {
+                        $this->addAchievement($user, $achieved, $key, $submit->getSubmitted());
+                        return;
+                    }
+                }
+                $lastSubmit = $currSubmit;
+            }
+        }
+    }
+
     // Filled all profile information
     public function achievementProfile(User $user, array &$achieved, string $key) {
         if (!array_key_exists($key, $achieved)) {
@@ -522,8 +540,8 @@ class AdminAchievementsPage extends Page {
     }
 
     private function isOffByOne(string $str1, string $str2): bool {
-        $str1 = preg_replace("/\s/", "", $str1);
-        $str2 = preg_replace("/\s/", "", $str2);
+//        $str1 = preg_replace("/\s/", "", $str1);
+//        $str2 = preg_replace("/\s/", "", $str2);
         if ($str1 == $str2)
             return false;
 
@@ -537,16 +555,22 @@ class AdminAchievementsPage extends Page {
             $idx1++;
             $idx2++;
         }
-        if ($idx1 >= $len1 || $idx2 >= $len2)
+        if ($idx1 >= $len1 && $idx2 + 1 == $len2)
             return true;
-        if ($len1 > $len2) {
+        if ($idx2 >= $len2 && $idx1 + 1 == $len1)
+            return true;
+        if ($idx1 >= $len1 || $idx2 >= $len2)
+            return false;
+
+        if ($len1 == $len2) {
             $idx1++;
-        } else if ($len2 > $len1) {
             $idx2++;
-        } else {
+        } else if ($len1 > $len2) {
             $idx1++;
+        } else {
             $idx2++;
         }
+
         while ($idx1 < $len1 && $idx2 < $len2 && $str1[$idx1] == $str2[$idx2]) {
             $idx1++;
             $idx2++;
@@ -796,6 +820,7 @@ class AdminAchievementsPage extends Page {
         $this->achievementReimplemented($user, $achieved, "ACCAGN", $userACSubmits);
         $this->achievementOffByOne($user, $achieved, "OFFBY1", $userSubmits);
         $this->achievementDifferentLocations($user, $achieved, "3DIFIP", $userSubmits);
+        $this->achievementWelcomeBack($user, $achieved, "WLCMBK", $userSubmits);
 
         // Problem-specific achievements
         $problemIds = array();
@@ -904,7 +929,7 @@ class AdminAchievementsPage extends Page {
         $this->initVariables();
 
         // TODO: Test if not requesting the sources improves things.
-        $submits = Submit::getAllSubmits(-1, -1, true);
+        $submits = Submit::getAllSubmits(-1, -1, "all", true);
         // Consider only user submits (exclude system and admin ones)
         $submits = array_filter($submits, function($submit) {return $submit->getUserId() > 1;});
 
