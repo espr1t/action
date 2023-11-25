@@ -3,6 +3,7 @@ Miscellaneous functions and classes
 """
 
 import os
+import sys
 import logging
 from enum import Enum
 from dataclasses import dataclass, field
@@ -59,7 +60,7 @@ def get_logger(name):
         os.chmod(config.PATH_LOG_FILE, 0o664)
 
     formatter = logging.Formatter(fmt="%(asctime)s | %(name)s | %(levelname)s | %(message)s")
-    logging_level = logging.INFO if "RUNNING_TESTS" not in os.environ else logging.FATAL
+    logging_level = logging.INFO if "pytest" in sys.modules else logging.FATAL
 
     file_output = logging.FileHandler(filename=config.PATH_LOG_FILE)
     file_output.setLevel(logging_level)
