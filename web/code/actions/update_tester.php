@@ -20,23 +20,23 @@ if ($problem == null) {
     ));
 }
 
-$testerDir = dirname($problem->getTesterPath());
-
 // Delete current tester if present
 if ($problem->getTester() != "") {
-    unlink($problem->getTesterPath());
+    if (file_exists($problem->getTesterPath())) {
+        unlink($problem->getTesterPath());
+    }
+    if (file_exists($problem->getTesterDir())) {
+        rmdir($problem->getTesterDir());
+    }
     $problem->setTester("");
-}
-if (file_exists($testerDir)) {
-    rmdir($testerDir);
 }
 
 if ($_POST["action"] == "upload") {
     $problem->setTester($_POST["testerName"]);
 
     // Create the Tester directory if it doesn't already exist
-    if (!file_exists($testerDir)) {
-        mkdir($testerDir, 0777, true);
+    if (!file_exists($problem->getTesterDir())) {
+        mkdir($problem->getTesterDir(), 0777, true);
     }
 
     // TODO: Maybe replace CRLF only if Linux is detected?
@@ -44,8 +44,6 @@ if ($_POST["action"] == "upload") {
     $testerContent = preg_replace("~\R~u", "\n", $testerContent);
     file_put_contents($problem->getTesterPath(), $testerContent);
 }
-
-$problem->updateTester();
 
 // Everything seems okay
 printAjaxResponse(array(

@@ -20,23 +20,23 @@ if ($problem == null) {
     ));
 }
 
-$checkerDir = dirname($problem->getCheckerPath());
-
 // Delete current checker if present
 if ($problem->getChecker() != "") {
-    unlink($problem->getCheckerPath());
+    if (file_exists($problem->getCheckerPath())) {
+        unlink($problem->getCheckerPath());
+    }
+    if (file_exists($problem->getCheckerDir())) {
+        rmdir($problem->getCheckerDir());
+    }
     $problem->setChecker("");
-}
-if (file_exists($checkerDir)) {
-    rmdir($checkerDir);
 }
 
 if ($_POST["action"] == "upload") {
     $problem->setChecker($_POST["checkerName"]);
 
     // Create the Checker directory if it doesn't already exist
-    if (!file_exists($checkerDir)) {
-        mkdir($checkerDir, 0777, true);
+    if (!file_exists($problem->getCheckerDir())) {
+        mkdir($problem->getCheckerDir(), 0777, true);
     }
 
     // TODO: Maybe replace CRLF only if Linux is detected?
@@ -44,8 +44,6 @@ if ($_POST["action"] == "upload") {
     $checkerContent = preg_replace("~\R~u", "\n", $checkerContent);
     file_put_contents($problem->getCheckerPath(), $checkerContent);
 }
-
-$problem->updateChecker();
 
 // Everything seems okay
 printAjaxResponse(array(

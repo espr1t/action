@@ -67,12 +67,20 @@ class Problem {
         return "{$this->getPath()}/Tests";
     }
 
+    function getCheckerDir(): string {
+        return "{$this->getTestsPath()}/Checker";
+    }
+
     function getCheckerPath(): string {
-        return "{$this->getTestsPath()}/Checker/{$this->getChecker()}";
+        return "{$this->getCheckerDir()}/{$this->getChecker()}";
+    }
+
+    function getTesterDir(): string {
+        return "{$this->getTestsPath()}/Tester";
     }
 
     function getTesterPath(): string {
-        return "{$this->getTestsPath()}/Tester/{$this->getTester()}";
+        return "{$this->getTesterDir()}/{$this->getTester()}";
     }
 
     function getUpdateEndpoint(): string {
@@ -91,8 +99,14 @@ class Problem {
         return "{$this->getTestsEndpoint()}/Tester/{$this->getTester()}";
     }
 
-    public function setChecker(string $checker): void {$this->checker = $checker;}
-    public function setTester(string $tester): void {$this->tester = $tester;}
+    public function setChecker(string $checker): void {
+        $this->checker = $checker;
+        Brain::updateChecker($this);
+    }
+    public function setTester(string $tester): void {
+        $this->tester = $tester;
+        Brain::updateTester($this);
+    }
 
 
     public function __construct() {
@@ -241,14 +255,6 @@ class Problem {
             return false;
         }
         return Brain::updateProblem($this);
-    }
-
-    public function updateChecker(): bool {
-        return Brain::updateChecker($this);
-    }
-
-    public function updateTester(): bool {
-        return Brain::updateTester($this);
     }
 
     public function create(): bool {
