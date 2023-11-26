@@ -154,7 +154,7 @@ class Validator:
         verdict = "WA" if output_lines[0].upper().startswith("WA") else verdict
 
         # Maybe in wrong order (score -> line1, verdict -> line2)?
-        # A small hack to support old checkers, live is too short to fix them all
+        # A small hack to support old checkers, life's too short to fix them all
         if verdict == "":
             # Swap them and try again
             output_lines[0], output_lines[1] = output_lines[1], output_lines[0]
