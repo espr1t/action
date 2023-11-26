@@ -159,8 +159,8 @@ class Evaluator:
         # Download only if the file doesn't already exist
         if not os.path.exists(file_path):
             logger.info("Submit {id} | Downloading file {file_name} with hash {file_hash} from URL: {url}".format(
-                    id=self.id, file_name=file_name, file_hash=file_hash, url=self.tests_url + file_name))
-            network.download_file(self.tests_url + file_name, file_path)
+                    id=self.id, file_name=file_name, file_hash=file_hash, url=self.tests_url + "/" + file_name))
+            network.download_file(self.tests_url + "/" + file_name, file_path)
 
     def download_tests(self):
         # In case the directory for the tests does not exist, create it
