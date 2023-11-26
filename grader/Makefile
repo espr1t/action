@@ -18,7 +18,7 @@ start run:
 	sudo --preserve-env=PATH env python server.py
 
 test:
-	# sudo --preserve-env=PATH env python -m pytest -rA tests/
+	sudo --preserve-env=PATH env python -m pytest -rA tests/
 	# sudo --preserve-env=PATH env python -m pytest -rA --full-trace tests/test_evaluator.py
-	sudo --preserve-env=PATH env python -m pytest -rA --full-trace tests/test_compiler.py
+	# sudo --preserve-env=PATH env python -m pytest -rA --full-trace tests/test_compiler.py
 	# sudo --preserve-env=PATH env python -m pytest -rA --full-trace tests/test_sandbox.py
