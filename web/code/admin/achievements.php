@@ -928,8 +928,7 @@ class AdminAchievementsPage extends Page {
     private function recalcAll(): void {
         $this->initVariables();
 
-        // TODO: Test if not requesting the sources improves things.
-        $submits = Submit::getAllSubmits(-1, -1, "all", true);
+        $submits = Submit::getAllSubmits(-1, -1, "all", false);
         // Consider only user submits (exclude system and admin ones)
         $submits = array_filter($submits, function($submit) {return $submit->getUserId() > 1;});
 
