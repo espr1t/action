@@ -348,8 +348,12 @@ class ProfilePage extends Page {
         foreach ($achievements as $achievement) {
             for ($i = 0; $i < count($achInfo); $i++) {
                 if ($achInfo[$i]["key"] == $achievement["achievement"]) {
+                    # For some reason htmlspecialchars() doesn't work, so do it manually :shrug:
+                    $achInfo[$i]['title'] = str_replace("'", "&apos;", $achInfo[$i]['title']);
+                    $achInfo[$i]['description'] = str_replace("'", "&apos;", $achInfo[$i]['description']);
+
                     $achievementsList .= "
-                        <div class='achievement' onclick='showAchievement(`" . addslashes($achInfo[$i]['title']) . "`, `" .  addslashes($achInfo[$i]['description']) . "`, 0, 1, true);'>
+                        <div class='achievement' onclick='showAchievement(`{$achInfo[$i]['title']}`, `{$achInfo[$i]['description']}`, 0, 1, true);'>
                             <i class='{$achInfo[$i]['icon']} fa-fw'></i>
                             <span style='font-weight: bold'>{$achInfo[$i]['title']} | {$achievement['date']}</span>
                         </div>
