@@ -163,7 +163,11 @@ class Problem {
     public static function instanceFromArray(array $info, array $ignoredFields=array()): Problem {
         $problem = new Problem();
         if (!in_array("id", $ignoredFields))
-            $problem->id = getIntValue($info, "id");
+            if ($info["id"] == "new") {
+                $problem->id = -1;
+            } else {
+                $problem->id = getIntValue($info, "id");
+            }
         if (!in_array("name", $ignoredFields))
             $problem->name = getStringValue($info, "name");
         if (!in_array("author", $ignoredFields))

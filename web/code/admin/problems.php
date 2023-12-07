@@ -200,11 +200,12 @@ class AdminProblemsPage extends Page {
         while (current($tags)) {
             $tagsTableContent .= "<tr>";
             for ($i = 0; $i < 3 && $tag = current($tags); $i++) {
+                $hasTag = $problem->getTags() != null && in_array(key($tags), $problem->getTags());
                 $tagsTableContent .= "
                     <td>
                         <label class='checkbox-label'>
                             <input type='checkbox' name='problemTags' value='" . key($tags) . "' " .
-                                (in_array(key($tags), $problem->getTags()) ? "checked" : "") . "> {$tag}
+                                ($hasTag ? "checked" : "") . "> {$tag}
                         </label>
                     </td>";
                 next($tags);

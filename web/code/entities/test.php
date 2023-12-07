@@ -48,7 +48,11 @@ class Test {
     }
 
     /** @return Test[] */
-    public static function getProblemTests(int $problemId): array {
+    public static function getProblemTests(?int $problemId): array {
+        # In case it is a new problem the ID will be null, thus simply return an empty list
+        if ($problemId == null) {
+            return array();
+        }
         return array_map(
             function ($entry) {
                 return Test::instanceFromArray($entry);
