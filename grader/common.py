@@ -60,7 +60,7 @@ def get_logger(name):
         os.chmod(config.PATH_LOG_FILE, 0o664)
 
     formatter = logging.Formatter(fmt="%(asctime)s | %(name)s | %(levelname)s | %(message)s")
-    logging_level = logging.INFO if "pytest" in sys.modules else logging.FATAL
+    logging_level = logging.FATAL if "pytest" in sys.modules else logging.INFO
 
     file_output = logging.FileHandler(filename=config.PATH_LOG_FILE)
     file_output.setLevel(logging_level)
