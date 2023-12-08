@@ -24,6 +24,7 @@ class GamesPage extends Page {
             "/scripts/games/tetris.js",
             "/scripts/games/connect.js",
             "/scripts/games/imagescanner.js",
+            "/scripts/games/reconstruct.js",
             "/scripts/jquery-3.7.1.min.js",
             "/scripts/jquery-jvectormap-2.0.3.min.js",
             "/scripts/jquery-jvectormap-world-mill.js"
@@ -211,6 +212,8 @@ class GamesPage extends Page {
         $scoringPower = 1.0;
         if ($problem->getName() == "HyperWords")
             $scoringPower = 2.0;
+        if ($problem->getName() == "Reconstruct")
+            $scoringPower = 3.0;
 
         $ranking = array();
         foreach ($userSubmits as $userKey => $submit) {
@@ -299,7 +302,7 @@ class GamesPage extends Page {
     }
 
     private function getVisualizerButton(Problem $problem): ?string {
-        if (in_array($problem->getName(), ["HyperWords", "Airports", "ImageScanner", "NumberGuessing"]))
+        if (in_array($problem->getName(), ["HyperWords", "Airports", "ImageScanner", "NumberGuessing", "Reconstruct"]))
             return null;
 
         $url = getGameUrl($problem->getName()) . "/visualizer";
@@ -704,6 +707,10 @@ class GamesPage extends Page {
                 $testResults .= "<br>";
             }
             $result = $submit->getResults()[$i];
+            // Round the result for better displaying if the score is apparently an integer
+            if (abs($result - round($result)) < 0.000001) {
+                $result = round($result);
+            }
             $tooltip =
                 "Тест " . $i . PHP_EOL .
                 "Статус: " . (is_numeric($result) ? "OK" : $result) . PHP_EOL .
@@ -745,7 +752,7 @@ class GamesPage extends Page {
             }
 
             $testCircle = "<div class='test-result tooltip--top background-{$background}' data-tooltip='{$tooltip}'>{$icon}</div>";
-            if ($problem->getName() == "ImageScanner") {
+            if ($problem->getName() == "ImageScanner" || $problem->getName() == "Reconstruct") {
                 $testCircle = str_replace("test-result", "test-result test-result-link", $testCircle);
                 $testResultUrl = getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$i}";
                 $testCircle = "<a href='{$testResultUrl}'>{$testCircle}</a>";
@@ -980,6 +987,7 @@ class GamesPage extends Page {
         if ($gameName == "hypersnakes") return "showHypersnakesReplay";
         if ($gameName == "connect") return "showConnectReplay";
         if ($gameName == "imagescanner") return "showImagescannerReplay";
+        if ($gameName == "reconstruct") return "showReconstructReplay";
         return "undefinedFunction";
     }
 
@@ -1108,6 +1116,8 @@ class GamesPage extends Page {
                 return ["espr1t", "ThinkCreative", "kopche", "emazing", "peterkazakov"];
             case "Airports":
                 return ["espr1t", "kiv"];
+            case "Reconstruct":
+                return ["espr1t"];
         }
         return [];
     }
