@@ -1,4 +1,4 @@
-async function drawImage(replayLog) {
+async function drawImageScannerVisualisation(replayLog) {
     const data = Array.from(replayLog.split(/\s+/).map(item => Number(item)));
 
     var idx = 0;
@@ -115,5 +115,5 @@ function showImagescannerReplay(userName, replayLog) {
     // Make pressing escape return back to the game
     var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
     showActionForm(content.outerHTML, gameUrl);
-    drawImage(replayLog);
+    drawImageScannerVisualisation(replayLog);
 }

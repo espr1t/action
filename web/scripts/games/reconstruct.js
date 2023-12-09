@@ -1,4 +1,4 @@
-async function drawImage(replayLog) {
+async function drawReconstructVisualisation(replayLog) {
     const data = replayLog.split("\n");
 
     let numRows = Number(data[0].split(" ")[0]);
@@ -134,5 +134,5 @@ function showReconstructReplay(userName, replayLog) {
     // Make pressing escape return back to the game
     var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
     showActionForm(content.outerHTML, gameUrl);
-    drawImage(replayLog);
+    drawReconstructVisualisation(replayLog);
 }
