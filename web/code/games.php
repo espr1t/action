@@ -708,7 +708,7 @@ class GamesPage extends Page {
             }
             $result = $submit->getResults()[$i];
             // Round the result for better displaying if the score is apparently an integer
-            if (abs($result - round($result)) < 0.000001) {
+            if (is_numeric($result) && abs($result - round($result)) < 0.000001) {
                 $result = round($result);
             }
             $tooltip =
@@ -753,9 +753,11 @@ class GamesPage extends Page {
 
             $testCircle = "<div class='test-result tooltip--top background-{$background}' data-tooltip='{$tooltip}'>{$icon}</div>";
             if ($problem->getName() == "ImageScanner" || $problem->getName() == "Reconstruct") {
-                $testCircle = str_replace("test-result", "test-result test-result-link", $testCircle);
-                $testResultUrl = getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$i}";
-                $testCircle = "<a href='{$testResultUrl}'>{$testCircle}</a>";
+                if (is_numeric($result)) {
+                    $testCircle = str_replace("test-result", "test-result test-result-link", $testCircle);
+                    $testResultUrl = getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$i}";
+                    $testCircle = "<a href='{$testResultUrl}'>{$testCircle}</a>";
+                }
             }
             $testResults .= $testCircle;
         }
