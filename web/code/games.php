@@ -781,6 +781,8 @@ class GamesPage extends Page {
         $scoringPower = 1.0;
         if ($problem->getName() == "HyperWords")
             $scoringPower = 2.0;
+        if ($problem->getName() == "Reconstruct")
+            $scoringPower = 3.0;
 
         $points = array();
         $testWeight = 100.0 / (count($bestScores) - 1);
