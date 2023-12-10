@@ -544,3 +544,18 @@ function addPreTags() {
         }
     }
 }
+
+/*
+ * Update button tooltip for remaining time until next submit.
+ */
+function setSubmitTimeoutTimer(elementId, waitSeconds) {
+    let message = 'Ще може да предадете отново след ' +
+        waitSeconds + (waitSeconds === 1 ? ' секунда.' : ' секунди.');
+    if (waitSeconds <= 0) {
+        message = 'Рефрешнете страницата за да предадете решение.';
+    }
+    document.getElementById(elementId).setAttribute('data-tooltip', message);
+    if (waitSeconds > 0) {
+        setTimeout(setSubmitTimeoutTimer, 1000, elementId, waitSeconds - 1);
+    }
+}

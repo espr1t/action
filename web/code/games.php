@@ -345,8 +345,10 @@ class GamesPage extends Page {
                 ";
             } else {
                 return "
-                    <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'
-                           title='Ще можете да предадете отново след {$buttonTimeout} секунди.'>
+                    <span id='submitButtonTooltip' class='tooltip--top' data-tooltip=''>
+                        <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'>
+                    </span>
+                    <script>setSubmitTimeoutTimer('submitButtonTooltip', $buttonTimeout)</script>
                 ";
             }
         } else {
