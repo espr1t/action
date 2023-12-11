@@ -945,7 +945,7 @@ class GamesPage extends Page {
         }
 
         $submitList = "";
-        for ($i = 1; $i <= count($submits); $i++) {
+        for ($i = count($submits); $i >= 1 ; $i--) {
             $submit = $submits[$i - 1];
             $submitLink = "<a href='{$gameUrl}/submits/{$submit->getId()}'>{$submit->getId()}</a>";
             $submitDate = explode(" ", $submit->getSubmitted())[0];
