@@ -14,6 +14,14 @@ if ($user->getAccess() < $GLOBALS["ACCESS_SUBMIT_SOLUTION"]) {
     ));
 }
 
+// User is trying to circumvent the exponential back-off for submitting
+if ($user->getSubmitTimeout() > 0) {
+    printAjaxResponse(array(
+        "status" => "ERROR",
+        "message" => "Трябва да изчакате още {$user->getSubmitTimeout()} секунди."
+    ));
+}
+
 // User has sent too many submissions on that day
 if (!passSpamProtection($user, $GLOBALS["SPAM_SUBMIT_ID"], $GLOBALS["SPAM_SUBMIT_LIMIT"])) {
     printAjaxResponse(array(

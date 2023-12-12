@@ -234,6 +234,7 @@ function parseActionResponse(response, hideOnSuccess=true) {
     }
     if (type == 'ERROR') {
         console.error(message);
+        showNotification('ERROR', message);
     }
     return response;
 }
