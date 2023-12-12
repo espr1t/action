@@ -2,6 +2,7 @@
 require_once(__DIR__ . '/../config.php');
 require_once(__DIR__ . '/../common.php');
 require_once(__DIR__ . '/../db/brain.php');
+require_once(__DIR__ . '/submit.php');
 
 class User {
     private ?int $id = null;
@@ -252,6 +253,30 @@ class User {
         redirect("/login", "INFO", "Успешно излязохте от системата.");
     }
 
+    public function getSubmitTimeout(): int {
+        /*
+         * The submit timeout is with exponential back-off. In particular, we allow:
+         *     >> No more than 1 submit in 10 seconds;
+         *     >> No more than 2 submits in 30 seconds;
+         *     >> No more than 3 submits in 60 seconds (1 minute);
+         *     >> No more than 4 submits in 120 seconds (2 minutes);
+         *     >> No more than 5 submits in 300 seconds (5 minutes);
+         *     >> No more than 5 + X submits in 300 + X * 180 seconds (every 3 minutes).
+         */
+        $SUBMIT_TIMEOUTS = array(10, 30, 60, 120, 300);
+        $submitInfo = Brain::getLatestUserSubmitTimeInfo($this->id);
+        $currentTime = strtotime(date("Y-m-d H:i:s"));
+        $waitTime = 0;
+        for ($i = 0; $i < count($submitInfo); $i++) {
+            if ($i < count($SUBMIT_TIMEOUTS)) {
+                $timeout = $SUBMIT_TIMEOUTS[$i];
+            } else {
+                $timeout = 300 + ($i - count($SUBMIT_TIMEOUTS) + 1) * 180;
+            }
+            $waitTime = max(array($waitTime, $timeout - ($currentTime - strtotime($submitInfo[$i]["submitted"]))));
+        }
+        return $waitTime;
+    }
 }
 
 ?>

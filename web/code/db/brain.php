@@ -497,6 +497,20 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
+    public static function getLatestUserSubmitTimeInfo(int $userId): ?array {
+        $response = self::query("
+            SELECT
+                submitted
+            FROM `Submits`
+            WHERE
+                `userId` = {$userId}
+                AND `status` != '{$GLOBALS['STATUS_COMPILATION_ERROR']}'
+            ORDER BY `id` DESC
+            LIMIT 20
+        ");
+        return !$response ? null : self::getResults($response);
+    }
+
     public static function getProblemStatusCounts(): ?array {
         $response = self::query("
             SELECT `problemId`, `status`, COUNT(*) AS `count`

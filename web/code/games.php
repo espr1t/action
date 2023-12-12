@@ -453,10 +453,9 @@ class GamesPage extends Page {
         $fullSubmitText = "Изпрати решение";
         $fullSubmitInfo = "Решението ще получи пропорционални точки спрямо авторското решение, или това на най-добрия друг участник.";
 
-        $partTimeout = 0; $fullTimeout = 0;
-        getWaitingTimes($this->user, $problem, $partTimeout, $fullTimeout);
+        $submitTimeout = $this->user->getSubmitTimeout();
         $fullSubmitContent = $this->getSubmitFormContent($problem, $fullSubmitText, $fullSubmitInfo, true);
-        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $fullTimeout);
+        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $submitTimeout);
         return $this->getStatementBox($problem, null, $fullSubmitButton);
     }
 

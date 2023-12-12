@@ -378,18 +378,32 @@ class ProblemsPage extends Page {
         ";
 
         if ($this->user->getAccess() >= $GLOBALS["ACCESS_SUBMIT_SOLUTION"]) {
-            $submitButtons = "
-                <script>
-                    function showForm() {
-                        showSubmitForm(`{$submitFormContent}`);
-                    }
-                </script>
-                <div class='center'>
-                    <input type='submit' value='Предай решение' onclick='showForm();' class='button button-color-blue button-large'>
-                    <br>
-                    <a style='font-size: smaller;' href='/problems/{$problem->getId()}/submits'>Предадени решения</a>
-                </div>
-            ";
+            $submitTimeout = $this->user->getSubmitTimeout();
+            if ($submitTimeout <= 0) {
+                $submitButtons = "
+                    <script>
+                        function showForm() {
+                            showSubmitForm(`{$submitFormContent}`);
+                        }
+                    </script>
+                    <div class='center'>
+                        <input type='submit' value='Предай решение' onclick='showForm();' class='button button-large button-color-blue'>
+                       <br>
+                        <a style='font-size: smaller;' href='/problems/{$problem->getId()}/submits'>Предадени решения</a>
+                    </div>
+                ";
+            } else {
+                $submitButtons = "
+                    <div class='center'>
+                        <span id='submitButtonTooltip' class='tooltip--top' data-tooltip=''>
+                            <input type='submit' value='Предай решение' class='button button-large button-color-gray'>
+                        </span>
+                        <script>setSubmitTimeoutTimer('submitButtonTooltip', $submitTimeout)</script>
+                        <br>
+                        <a style='font-size: smaller;' href='/problems/{$problem->getId()}/submits'>Предадени решения</a>
+                    </div>
+                ";
+            }
         } else {
             $submitButtons = "
                 <div class='center'>
