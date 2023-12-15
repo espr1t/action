@@ -703,6 +703,10 @@ class GamesPage extends Page {
         // Otherwise get information for each test and print it as a colored circle with
         // additional roll-over information
         $testResults = "";
+        $testInfo = explode(",", $submit->getInfo());
+        if (count($testInfo) != count($points)) {
+            $testInfo = null;
+        }
         for ($i = 1; $i < count($points); $i++) {
             if ($i > 1 && $i % 10 == 1) {
                 $testResults .= "<br>";
@@ -717,7 +721,8 @@ class GamesPage extends Page {
                 "Статус: " . (is_numeric($result) ? "OK" : $result) . PHP_EOL .
                 "Точки: " . sprintf("%.1f", $points[$i]) . " ({$result})" . PHP_EOL .
                 "Време: " . sprintf("%.2fs", $submit->getExecTime()[$i]) . PHP_EOL .
-                "Памет: " . sprintf("%.2f MiB", $submit->getExecMemory()[$i])
+                "Памет: " . sprintf("%.2f MiB", $submit->getExecMemory()[$i]) . PHP_EOL .
+                ($testInfo == null ? "" : $testInfo[$i])
             ;
 
             $icon = "WTF?";
