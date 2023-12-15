@@ -1,3 +1,44 @@
+function bresenham(tokens, ctx, fill) {
+    let hitRow = Number(tokens[4]);
+    let hitCol = Number(tokens[5]);
+    let row1 = Number(tokens[0]);
+    let col1 = Number(tokens[1]);
+    let row2 = hitRow === -1 ? Number(tokens[2]) : hitRow;
+    let col2 = hitCol === -1 ? Number(tokens[3]) : hitCol;
+
+    let deltaRow = Math.abs(row2 - row1);
+    let signRow = row1 < row2 ? +1 : -1;
+    let deltaCol = -Math.abs(col2 - col1);
+    let signCol = col1 < col2 ? +1 : -1;
+    let error = deltaRow + deltaCol;
+
+    ctx.fillStyle = fill;
+    while (true) {
+        ctx.fillRect(col1, row1, 1, 1);
+        if (row1 === row2 && col1 === col2) {
+            break;
+        }
+        let doubleError = 2 * error;
+        if (doubleError >= deltaCol) {
+            if (row1 === row2)
+                break;
+            error += deltaCol;
+            row1 += signRow;
+        }
+        if (doubleError <= deltaRow) {
+            if (col1 === col2)
+                break;
+            error += deltaRow;
+            col1 += signCol;
+        }
+    }
+
+    if (hitRow !== -1 && hitCol !== -1) {
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(hitCol, hitRow, 1, 1);
+    }
+}
+
 async function drawReconstructVisualisation(replayLog) {
     const data = replayLog.split("\n");
 
@@ -8,27 +49,50 @@ async function drawReconstructVisualisation(replayLog) {
 
     let canvas = document.getElementById('imageCanvas');
     let ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgb(238, 238, 238)';
+    ctx.fillRect(0, 0, 512, 512);
 
-    // Total update should take 3 seconds
-    const updateInterval = 100; // milliseconds
-    const updateEvery = Math.round(usedQueries / (3000 / updateInterval));
+    // Total update should take 10 seconds
+    const updateInterval = 40; // milliseconds
+    const updateEvery = Math.round(usedQueries / (8000 / updateInterval));
 
     let dataIdx = 2;
     let curQueryEl = document.getElementById('curQuery');
-    for (let i = 1; i <= usedQueries; i++) {
-        let tokens = data[dataIdx++].split(" ");
-        let hitRow = Number(tokens[4]);
-        let hitCol = Number(tokens[5]);
-        if (hitRow !== -1 && hitCol !== -1) {
-            ctx.fillStyle = 'rgb(0, 0, 0)';
-            ctx.fillRect(hitCol, hitRow, 1, 1);
+    let previous = [];
+    const TRAIL = 100;
+    for (let i = 1; i <= usedQueries + TRAIL; i++) {
+        if (i <= usedQueries) {
+            let tokens = data[dataIdx++].split(" ");
+            bresenham(tokens, ctx, 'rgba(0, 138, 255, 0.5)');
+            previous.push(tokens);
         }
+        for (let ii = i - 1; ii >= Math.max(0, i - TRAIL); ii -= TRAIL / 20) {
+            if (ii < previous.length) {
+                let alpha = Math.pow((i - ii) / TRAIL, 2) / 2.0;
+                let fill = 'rgba(255, 255, 255, ' + alpha + ')';
+                bresenham(previous[ii], ctx, fill);
+            }
+        }
+        if (i - TRAIL >= 0 && i - TRAIL < previous.length) {
+            bresenham(previous[i - TRAIL], ctx, 'rgb(255, 255, 255)');
+        }
+
         if (i % updateEvery === 0) {
-            curQueryEl.innerHTML = '' + i + '/' + maxQueries;
+            if (i <= usedQueries) {
+                curQueryEl.innerHTML = '' + i + '/' + maxQueries;
+            } else {
+                curQueryEl.innerHTML = '' + usedQueries + '/' + maxQueries;
+            }
             await sleep(updateInterval);
         }
     }
-    curQueryEl.innerHTML = '' + usedQueries + '/' + maxQueries;
+
+    await sleep(2000);
+
+    for (let i = 200; i >= 5; i--) {
+        canvas.style.opacity = String(i / 200.0);
+        await sleep(10);
+    }
 
     let imageData = ctx.getImageData(0, 0, numCols, numRows);
     let imageDataIdx = 0;
@@ -42,6 +106,11 @@ async function drawReconstructVisualisation(replayLog) {
         }
     }
     ctx.putImageData(imageData, 0, 0);
+
+    for (let i = 5; i <= 200; i++) {
+        canvas.style.opacity = String(i / 200.0);
+        await sleep(10);
+    }
 
     await sleep(2000);
 
