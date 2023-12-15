@@ -26,7 +26,6 @@ class ValidatorResult:
 
 
 class Validator:
-
     @staticmethod
     def determine_status(submit_id, test: TestInfo, run_config: RunConfig, run_result: RunResult) -> ValidatorResult:
         """
@@ -41,6 +40,15 @@ class Validator:
             logger.error("Submit {id} | Got error while executing test {test_name}: \"{error}\"".format(
                 id=submit_id, test_name=test.inpFile, error=run_result.error))
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, info=info, error=run_result.error)
+
+        # Note that for problems with testers it is a valid scenario for the solution to exited with non-zero code,
+        # but the status to still be WA. For example, if a solution makes invalid action, the tester prints a WA status,
+        # then exists, closing the input PIPE to the solution. If the solution tries reading more input (quite normal),
+        # it crashes with Broken Pipe. However, the true result that should be returned to the user is "WA", not "RE".
+        if run_config.checker_path is not None or run_config.tester_path is not None:
+            validator_result = Validator.validate_output_from_checker_or_tester(submit_id, run_result.output)
+            if validator_result.status != TestStatus.INTERNAL_ERROR:
+                return validator_result
 
         # ML (Memory Limit)
         if run_result.exec_memory > run_config.memory_limit:
@@ -152,6 +160,7 @@ class Validator:
         verdict = "OK" if output_lines[0].upper().startswith("OK") else verdict
         verdict = "IE" if output_lines[0].upper().startswith("IE") else verdict
         verdict = "WA" if output_lines[0].upper().startswith("WA") else verdict
+        verdict = "RE" if output_lines[0].upper().startswith("RE") else verdict
 
         # Maybe in wrong order (score -> line1, verdict -> line2)?
         # A small hack to support old checkers, life's too short to fix them all
@@ -161,8 +170,9 @@ class Validator:
             verdict = "OK" if output_lines[0].upper().startswith("OK") else verdict
             verdict = "IE" if output_lines[0].upper().startswith("IE") else verdict
             verdict = "WA" if output_lines[0].upper().startswith("WA") else verdict
+            verdict = "RE" if output_lines[0].upper().startswith("RE") else verdict
 
-            # Nah, still wrong. Return the supposedly verdict line (now output_lines[1]) as erroneous.
+            # Nah, still wrong. Return the assumed verdict line (now output_lines[1]) as erroneous.
             if verdict == "":
                 message = "Checker or tester's verdict line seems invalid (value = '{}')!".format(output_lines[1])
                 logger.error("[Submission {id}] Internal Error: {error}".format(id=submit_id, error=message))
@@ -183,6 +193,8 @@ class Validator:
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, info=message)
         if verdict == "WA":
             return ValidatorResult(status=TestStatus.WRONG_ANSWER, score=0.0, info=message)
+        if verdict == "RE":
+            return ValidatorResult(status=TestStatus.RUNTIME_ERROR, score=0.0, info=message)
 
         # This code should be unreachable.
         logger.error("[Submission {id}] Internal Error: Shouldn't be here.".format(id=submit_id))

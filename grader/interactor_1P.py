@@ -29,7 +29,7 @@ def parse_info(tester_stderr, solution_stderr, tester_timeout, solution_timeout,
             info["tester_exit_code"] = 0
             info["tester_exec_time"] = 0.0
             info["tester_exec_memory"] = 0
-            info["tester_message"] = "WA\n0.0\nSolution exited unexpectedly."
+            info["tester_message"] = "RE\n0.0\nSolution exited unexpectedly."
 
     # Sanity checking
     info["internal_error"] = False
