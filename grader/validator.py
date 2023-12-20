@@ -41,6 +41,14 @@ class Validator:
                 id=submit_id, test_name=test.inpFile, error=run_result.error))
             return ValidatorResult(status=TestStatus.INTERNAL_ERROR, score=0.0, info=info, error=run_result.error)
 
+        # ML (Memory Limit)
+        if run_result.exec_memory > run_config.memory_limit:
+            return ValidatorResult(status=TestStatus.MEMORY_LIMIT, score=0.0, info=info)
+
+        # TL (Time Limit)
+        if run_result.exec_time > run_config.time_limit:
+            return ValidatorResult(status=TestStatus.TIME_LIMIT, score=0.0, info=info)
+
         # Note that for problems with testers it is a valid scenario for the solution to exited with non-zero code,
         # but the status to still be WA. For example, if a solution makes invalid action, the tester prints a WA status,
         # then exists, closing the input PIPE to the solution. If the solution tries reading more input (quite normal),
@@ -49,14 +57,6 @@ class Validator:
             validator_result = Validator.validate_output_from_checker_or_tester(submit_id, run_result.output)
             if validator_result.status != TestStatus.INTERNAL_ERROR:
                 return validator_result
-
-        # ML (Memory Limit)
-        if run_result.exec_memory > run_config.memory_limit:
-            return ValidatorResult(status=TestStatus.MEMORY_LIMIT, score=0.0, info=info)
-
-        # TL (Time Limit)
-        if run_result.exec_time > run_config.time_limit:
-            return ValidatorResult(status=TestStatus.TIME_LIMIT, score=0.0, info=info)
 
         # RE (Runtime Error)
         if run_result.exit_code != 0:
