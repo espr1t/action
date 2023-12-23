@@ -191,4 +191,8 @@ $LOG_GRADER = "grader.log";
 // Miscellaneous
 $NOTIFICATION_DISPLAY_TIME = 3000; // Milliseconds
 
+// Don't ask...
+$VISIBLE_SUBMITS = array(35599, 35374, 35574, 35957, 35959, 35955, 35938, 35833, 34977, 35774);
+
+
 ?>

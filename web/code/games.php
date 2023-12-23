@@ -320,7 +320,9 @@ class GamesPage extends Page {
         $url = getGameUrl($problem->getName()) . "/scoreboard";
         return "
             <a href='{$url}'>
-                <input type='submit' value='Класиране' class='button button-color-blue button-small' title='Класиране на всички участници'>
+                <span class='tooltip--top' data-tooltip='Класиране на всички участници'>
+                    <input type='submit' value='Класиране' class='button button-color-blue button-small'>
+                </span>
             </a>
         ";
     }
@@ -335,26 +337,35 @@ class GamesPage extends Page {
         ";
     }
 
-    private function getSubmitButton(string $buttonText, string $buttonTooltip, string $buttonFormName, string $buttonFormContent, int $buttonTimeout): string {
+    private function getSubmitButton(string $buttonText, string $buttonTooltip, string $buttonFormName, string $buttonFormContent, int $buttonTimeout, bool $disabled=false): string {
         if ($this->user->getAccess() >= $GLOBALS["ACCESS_SUBMIT_SOLUTION"]) {
-            if ($buttonTimeout <= 0) {
+            if ($disabled) {
                 return "
-                    <script>function {$buttonFormName}() {showSubmitForm(`{$buttonFormContent}`);}</script>
-                    <input type='submit' class='button button-large button-color-blue' value='{$buttonText}'
-                           title='{$buttonTooltip}' onclick='{$buttonFormName}();'>
+                    <span class='tooltip--top' data-tooltip='Предаването по задачата е временно неактивно.'>
+                        <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'>
+                    </span>
                 ";
-            } else {
+            } else if ($buttonTimeout > 0) {
                 return "
                     <span id='submitButtonTooltip' class='tooltip--top' data-tooltip=''>
                         <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'>
                     </span>
                     <script>setSubmitTimeoutTimer('submitButtonTooltip', $buttonTimeout)</script>
                 ";
+            } else {
+                return "
+                    <script>function {$buttonFormName}() {showSubmitForm(`{$buttonFormContent}`);}</script>
+                    <span class='tooltip--top' data-tooltip='{$buttonTooltip}'>
+                        <input type='submit' class='button button-large button-color-blue'
+                               value='{$buttonText}' onclick='{$buttonFormName}();'>
+                    </span>
+                ";
             }
         } else {
             return "
-                <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'
-                       title='Трябва да влезете в системата за да можете да предавате решения.'>
+                <span class='tooltip--top' data-tooltip='Трябва да влезете в системата за да можете да предавате решения.'>
+                    <input type='submit' class='button button-large button-color-gray' value='{$buttonText}'>
+                </span>
             ";
         }
     }
@@ -452,10 +463,12 @@ class GamesPage extends Page {
     private function getRelativeStatement(Problem $problem): string {
         $fullSubmitText = "Изпрати решение";
         $fullSubmitInfo = "Решението ще получи пропорционални точки спрямо авторското решение, или това на най-добрия друг участник.";
+        //$disabled = $problem->getName() == "Reconstruct";
+        $disabled = false;
 
         $submitTimeout = $this->user->getSubmitTimeout();
         $fullSubmitContent = $this->getSubmitFormContent($problem, $fullSubmitText, $fullSubmitInfo, true);
-        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $submitTimeout);
+        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $submitTimeout, $disabled);
         return $this->getStatementBox($problem, null, $fullSubmitButton);
     }
 
@@ -595,6 +608,10 @@ class GamesPage extends Page {
         $source = getSourceSection($problem, $submit);
         $submitDate = explode(" ", $submit->getSubmitted())[0];
         $submitTime = explode(" ", $submit->getSubmitted())[1];
+
+        if ($this->user->getUsername() != $submit->getUserName() && $this->user->getAccess() < $GLOBALS["ACCESS_SEE_SUBMITS"]) {
+            $source = "";
+        }
 
         return "
             <h2><span class='blue'>{$problem->getName()}</span> :: Статус на решение {$author}</h2>
@@ -1066,7 +1083,7 @@ class GamesPage extends Page {
         }
         // Finally, check permissions
         if ($this->user->getAccess() < $GLOBALS["ACCESS_SEE_REPLAYS"]) {
-            if ($this->user->getId() != $submit->getUserId()) {
+            if ($this->user->getId() != $submit->getUserId() && !in_array($submitId, $GLOBALS["VISIBLE_SUBMITS"])) {
                 redirect($returnUrl, "ERROR", "Нямате права да видите този събмит!");
             }
         }
@@ -1151,7 +1168,7 @@ class GamesPage extends Page {
         for ($pos = 0; $pos < count($ranking); $pos++) {
             $user = User::getById($ranking[$pos]["userId"]);
             $submitId = $ranking[$pos]["submitId"];
-            if ($user->getId() == $this->user->getId() || $this->user->getAccess() >= $GLOBALS["ACCESS_SEE_SUBMITS"]) {
+            if ($user->getId() == $this->user->getId() || $this->user->getAccess() >= $GLOBALS["ACCESS_SEE_SUBMITS"] || in_array($submitId, $GLOBALS["VISIBLE_SUBMITS"])) {
                 $submitId = "<a href='{$gameUrl}/submits/{$ranking[$pos]['submitId']}'>{$ranking[$pos]['submitId']}</a>";
             }
 
