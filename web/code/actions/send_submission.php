@@ -22,14 +22,6 @@ if ($user->getSubmitTimeout() > 0) {
     ));
 }
 
-// User has sent too many submissions on that day
-if (!passSpamProtection($user, $GLOBALS["SPAM_SUBMIT_ID"], $GLOBALS["SPAM_SUBMIT_LIMIT"])) {
-    printAjaxResponse(array(
-        "status" => "ERROR",
-        "message" => "Превишили сте лимита си за деня."
-    ));
-}
-
 // Transform data from strings to proper types
 $problemId = getIntValue($_POST, "problemId");
 $language = getStringValue($_POST, "language");
@@ -57,6 +49,14 @@ if ($problem->getWaitFull() == 0 && $remainFull >= -5) {
     printAjaxResponse(array(
         "status" => "NONE",
         "message" => "Действието е пропуснато умишлено."
+    ));
+}
+
+// User has sent too many submissions on that day
+if (!passSpamProtection($user, $GLOBALS["SPAM_SUBMIT_ID"], $GLOBALS["SPAM_SUBMIT_LIMIT"])) {
+    printAjaxResponse(array(
+        "status" => "ERROR",
+        "message" => "Превишили сте лимита си за деня."
     ));
 }
 
