@@ -609,10 +609,6 @@ class GamesPage extends Page {
         $submitDate = explode(" ", $submit->getSubmitted())[0];
         $submitTime = explode(" ", $submit->getSubmitted())[1];
 
-        if ($this->user->getUsername() != $submit->getUserName() && $this->user->getAccess() < $GLOBALS["ACCESS_SEE_SUBMITS"]) {
-            $source = "";
-        }
-
         return "
             <h2><span class='blue'>{$problem->getName()}</span> :: Статус на решение {$author}</h2>
             <div class='right' style='font-size: smaller'>{$submitDate} | {$submitTime}</div>
@@ -1083,7 +1079,7 @@ class GamesPage extends Page {
         }
         // Finally, check permissions
         if ($this->user->getAccess() < $GLOBALS["ACCESS_SEE_REPLAYS"]) {
-            if ($this->user->getId() != $submit->getUserId() && !in_array($submitId, $GLOBALS["VISIBLE_SUBMITS"])) {
+            if ($this->user->getId() != $submit->getUserId()) {
                 redirect($returnUrl, "ERROR", "Нямате права да видите този събмит!");
             }
         }
@@ -1168,7 +1164,7 @@ class GamesPage extends Page {
         for ($pos = 0; $pos < count($ranking); $pos++) {
             $user = User::getById($ranking[$pos]["userId"]);
             $submitId = $ranking[$pos]["submitId"];
-            if ($user->getId() == $this->user->getId() || $this->user->getAccess() >= $GLOBALS["ACCESS_SEE_SUBMITS"] || in_array($submitId, $GLOBALS["VISIBLE_SUBMITS"])) {
+            if ($user->getId() == $this->user->getId() || $this->user->getAccess() >= $GLOBALS["ACCESS_SEE_SUBMITS"]) {
                 $submitId = "<a href='{$gameUrl}/submits/{$ranking[$pos]['submitId']}'>{$ranking[$pos]['submitId']}</a>";
             }
 

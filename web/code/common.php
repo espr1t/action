@@ -485,9 +485,7 @@ function getSubmitWithChecks(User $user, int $submitId, Problem $problem, string
     }
     if ($user->getAccess() < $GLOBALS["ACCESS_SEE_SUBMITS"]) {
         if ($submit->getUserId() != $user->getId()) {
-            if (strpos(getCurrentUrl(), "source") !== false || !in_array($submitId, $GLOBALS["VISIBLE_SUBMITS"])) {
-                redirect($redirectUrl, "ERROR", "Нямате достъп до това решение!");
-            }
+            redirect($redirectUrl, "ERROR", "Нямате достъп до това решение!");
         }
         if ($submit->getProblemId() != $problem->getId()) {
             redirect($redirectUrl, "ERROR", "Решението не е по поисканата задача!");
