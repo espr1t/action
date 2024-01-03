@@ -472,12 +472,13 @@ function circularProgress(parentId, done, total) {
 
     // Container to hold and offset
     var container = document.createElement('div');
+    container.className = 'tooltip--left';
+    container.setAttribute('data-tooltip', done + ' от ' + total);
     container.style.height = container.style.width = '5rem';
     container.style.position = 'absolute';
     container.style.right = '0';
     container.style.top = '50%';
     container.style.marginTop = '-2rem';
-    container.title = done + ' out of ' + total;
     container.style.cursor = 'help';
     container.appendChild(unfinished);
     container.appendChild(cover);
