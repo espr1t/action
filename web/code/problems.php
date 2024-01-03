@@ -386,41 +386,36 @@ class ProblemsPage extends Page {
                             showSubmitForm(`{$submitFormContent}`);
                         }
                     </script>
-                    <div class='center'>
-                        <input type='submit' value='Предай решение' onclick='showForm();' class='button button-large button-color-blue'>
-                       <br>
-                        <a style='font-size: smaller;' href='/problems/{$problem->getId()}/submits'>Предадени решения</a>
-                    </div>
+                    <input type='submit' value='Предай решение' onclick='showForm();' class='button button-large button-color-blue'>
+                    <br>
+                    <a style='font-size: smaller;' href='/problems/{$problem->getId()}/submits'>Предадени решения</a>
                 ";
             } else {
                 $submitButtons = "
-                    <div class='center'>
-                        <span id='submitButtonTooltip' class='tooltip--top' data-tooltip=''>
-                            <input type='submit' value='Предай решение' class='button button-large button-color-gray'>
-                        </span>
-                        <script>setSubmitTimeoutTimer('submitButtonTooltip', $submitTimeout)</script>
-                        <br>
-                        <a style='font-size: smaller;' href='/problems/{$problem->getId()}/submits'>Предадени решения</a>
-                    </div>
+                    <span id='submitButtonTooltip' class='tooltip--top' data-tooltip=''>
+                        <input type='submit' value='Предай решение' class='button button-large button-color-gray'>
+                    </span>
+                    <script>setSubmitTimeoutTimer('submitButtonTooltip', $submitTimeout)</script>
+                    <br>
+                    <a style='font-size: smaller;' href='/problems/{$problem->getId()}/submits'>Предадени решения</a>
                 ";
             }
         } else {
             $submitButtons = "
-                <div class='center'>
-                    <input type='submit' value='Предай решение' class='button button-color-gray button-large'
-                        title='Трябва да влезете в системата за да можете да предавате решения.'>
-                </div>
+                <span class='tooltip--top' data-tooltip='Трябва да влезете в системата за да можете да предавате решения.'>
+                    <input type='submit' value='Предай решение' class='button button-large button-color-gray'>
+                </span>
             ";
         }
 
-        $visibilityRestriction = $problem->getVisible() ? "" : "<div class='tooltip--bottom' data-tooltip='Задачата е скрита.'><i class='fa fa-eye-slash'></i></div>";
-        $statsButton = "<a href='/problems/{$problem->getId()}/stats' style='color: #333333;'><div class='tooltip--top' data-tooltip='информация'><i class='fa fa-info-circle'></i></div></a>";
-        $usersButton = "<a href='/problems/{$problem->getId()}/users' style='color: #333333;'><div class='tooltip--top' data-tooltip='потребители'><i class='fa fa-users'></i></div></a>";
-        $tagsButton = "<a href='/problems/{$problem->getId()}/tags' style='color: #333333;'><div class='tooltip--top' data-tooltip='тагове'><i class='fa fa-tags'></i></div></a>";
-        $pdfButton = "<a href='/problems/{$problem->getId()}/pdf' style='color: #333333;' target='_blank'><div class='tooltip--top' data-tooltip='PDF'><i class='fas fa-file-pdf'></i></div></a>";
+        $visibilityRestriction = $problem->getVisible() ? "" : "<span class='tooltip--bottom' data-tooltip='Задачата е скрита.'><i class='fa fa-eye-slash'></i></span>";
+        $statsButton = "<a href='/problems/{$problem->getId()}/stats' style='color: #333333;'><span class='tooltip--top' data-tooltip='информация'><i class='fa fa-info-circle'></i></span></a>";
+        $usersButton = "<a href='/problems/{$problem->getId()}/users' style='color: #333333;'><span class='tooltip--top' data-tooltip='потребители'><i class='fa fa-users'></i></span></a>";
+        $tagsButton = "<a href='/problems/{$problem->getId()}/tags' style='color: #333333;'><span class='tooltip--top' data-tooltip='тагове'><i class='fa fa-tags'></i></span></a>";
+        $pdfButton = "<a href='/problems/{$problem->getId()}/pdf' style='color: #333333;' target='_blank'><span class='tooltip--top' data-tooltip='Изтеглете условието като PDF'><i class='fas fa-file-pdf'></i></span></a>";
         // Remove PDF link for logged-out users (bots tend to click on it and generate PDFs for all problems)
         if ($this->user->getAccess() < $GLOBALS["ACCESS_DOWNLOAD_AS_PDF"]) {
-            $pdfButton = "<div class='tooltip--top' data-tooltip='PDF' title='Трябва да влезете в системата за да изтеглите условието като PDF.'><i class='fas fa-file-pdf' style='opacity: 0.5;'></i></div>";
+            $pdfButton = "<span class='tooltip--top' data-tooltip='Трябва да влезете в системата за да изтеглите условието като PDF.'><i class='fas fa-file-pdf' style='opacity: 0.5;'></i></span>";
         }
         return "
             <div class='box box-problem'>
@@ -430,7 +425,7 @@ class ProblemsPage extends Page {
                 <div class='problem-resources'><b>Time Limit:</b> {$problem->getTimeLimit()}s, <b>Memory Limit:</b> {$problem->getMemoryLimit()}MiB</div>
                 <div class='separator'></div>
                 <div class='problem-statement'>{$statement}</div>
-                {$submitButtons}
+                <div class='center'>{$submitButtons}</div>
                 <div class='box-footer'>
                     {$statsButton}
                     &nbsp;

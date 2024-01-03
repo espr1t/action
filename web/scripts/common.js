@@ -318,14 +318,15 @@ function updateGraderStatus() {
         }
 
         if (response != null) {
-            var statusEl = document.getElementById('graderStatus');
+            var statusIconEl = document.getElementById('graderStatusIcon');
+            var statusTooltipEl = document.getElementById('graderStatusTooltip');
             if ('status' in response) {
-                if (response['status'] == 'OK') {
-                    statusEl.className = 'fa fa-check-circle green';
-                    statusEl.title = 'Грейдърът е достъпен за ' + response['message'] + 's.';
+                if (response['status'] === 'OK') {
+                    statusIconEl.className = 'fa fa-check-circle green';
+                    statusTooltipEl.setAttribute('data-tooltip', 'Грейдърът е достъпен за ' + response['message'] + 's.');
                 } else {
-                    statusEl.className = 'fa fa-exclamation-circle red';
-                    statusEl.title = 'Грейдърът се прави на недостъпен.';
+                    statusIconEl.className = 'fa fa-exclamation-circle red';
+                    statusTooltipEl.setAttribute('data-tooltip', 'Грейдърът се прави на недостъпен.');
                 }
             }
         }

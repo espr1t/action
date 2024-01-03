@@ -81,9 +81,11 @@ class StatusPage extends Page {
             if ($this->user->getAccess() >= $GLOBALS["ACCESS_REGRADE_SUBMITS"]) {
                 $regradeSubmission = "
                     <td style='width: 16px;'>
-                        <a onclick='regradeSubmission({$submit->getId()});' title='Regrade submission {$submit->getId()}'>
-                           <i class='fa fa-sync-alt'></i>
-                        </a>
+                        <span class='tooltip--left' data-tooltip='Regrade submission {$submit->getId()}'>
+                            <a onclick='regradeSubmission({$submit->getId()});'>
+                               <i class='fa fa-sync-alt'></i>
+                            </a>
+                        </span>
                     </td>
                 ";
             }
@@ -94,7 +96,7 @@ class StatusPage extends Page {
                     <td>{$submitEl}</td>
                     <td>{$userEl}</td>
                     <td>{$problemEl}</td>
-                    <td title='{$submit->getSubmitted()}'>" . explode(" ", $submit->getSubmitted())[1] . "</td>
+                    <td><span class='tooltip--top' data-tooltip='{$submit->getSubmitted()}'>" . explode(" ", $submit->getSubmitted())[1] . "</span></td>
                     <td>{$submit->getLanguage()}</td>
                     <td>" . intval($submit->calcProgress() * 100) . "%</td>
                     <td>{$GLOBALS['STATUS_DISPLAY_NAME'][$submit->getStatus()]}</td>
@@ -117,7 +119,7 @@ class StatusPage extends Page {
         ");
 
         if ($this->user->getId() != -1) {
-            $graderStatus = " | <i id='graderStatus' class='fa fa-question-circle yellow' title='Проверка на грейдъра...'></i>";
+            $graderStatus = " | <span id='graderStatusTooltip' class='tooltip--left' data-tooltip='Проверка на грейдъра...' style='font-style: normal'><i id='graderStatusIcon' class='fa fa-question-circle yellow'></i></span>";
             $invokeGraderCheck = "<script>updateGraderStatus();</script>";
         } else {
             $graderStatus = "";

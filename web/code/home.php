@@ -18,7 +18,9 @@ class HomePage extends Page {
             $news .= inBox("
                  <div class='news-content'>
                     <div class='news-icon'>
-                        <i class='fa fa-{$entry['icon']}' title='{$entry['type']}'></i>
+                        <span class='tooltip--left' data-tooltip='{$entry['type']}'>
+                            <i class='fa fa-{$entry['icon']}'></i>
+                        </span>
                     </div>
                     <div class='news-title'>{$entry['title']}</div>
                     {$entry['content']}

@@ -50,45 +50,45 @@ class RegisterPage extends Page {
                             <tr>
                                 <td class='left'><b>Име:</b></td>
                                 <td class='right'>
-                                    <input type='text' name='name' placeholder='First Name' class='text' minlength=1 maxlength=32 required
-                                        title='Names must be between 1 and 32 characters long and can contain only Cyrillic or Lattin letters and dashes.'
-                                        onkeyup='validateName(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='Names must be between 1 and 32 characters long\n and can contain only Cyrillic or Lattin letters and dashes.'>
+                                        <input type='text' name='name' placeholder='First Name' class='text' minlength=1 maxlength=32 required onkeyup='validateName(`register`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconName'></i>
                                 </td>
                             </tr>
                             <tr>
                                 <td class='left'><b>Фамилия:</b></td>
                                 <td class='right'>
-                                    <input type='text' name='surname' placeholder='Last Name' class='text' minlength=1 maxlength=32 required
-                                        title='Names must be between 1 and 32 characters long and can contain only Cyrillic or Lattin letters and dashes.'
-                                        onkeyup='validateSurname(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='Names must be between 1 and 32 characters long\n and can contain only Cyrillic or Lattin letters and dashes.'>
+                                        <input type='text' name='surname' placeholder='Last Name' class='text' minlength=1 maxlength=32 required onkeyup='validateSurname(`register`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconSurname'></i>
                                 </td>
                             </tr>
                             <tr>
                                 <td class='left'><b>Потребителско Име:</b></td>
                                 <td class='right'>
-                                    <input type='text' name='username' placeholder='Username' class='text' minlength=2 maxlength=16 required
-                                        title='Username must be between 2 and 16 characters long and can contain only Lattin letters, digits, dots, and underscores. It cannot start with a dot.'
-                                        onkeyup='validateUsername(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='Username must be between 2 and 16 characters long and can contain\n only Lattin letters, digits, dots, and underscores. It cannot start with a dot.'>
+                                        <input type='text' name='username' placeholder='Username' class='text' minlength=2 maxlength=16 required onkeyup='validateUsername(`register`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconUsername'></i>
                                 </td>
                             </tr>
                             <tr>
                                 <td class='left'><b>Парола:</b></td>
                                 <td class='right'>
-                                    <input type='password' name='password1' placeholder='Password' class='text' minlength=1 maxlength=32 required
-                                        title='Password must be between 1 and 32 characters long.'
-                                        onkeyup='validatePassword1(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='Password must be between 1 and 32 characters long.'>
+                                        <input type='password' name='password1' placeholder='Password' class='text' minlength=1 maxlength=32 required onkeyup='validatePassword1(`register`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconPassword1'></i>
                                 </td>
                             </tr>
                             <tr>
                                 <td class='left'><b>Повторно Парола:</b></td>
                                 <td class='right'>
-                                    <input type='password' name='password2' placeholder='Repeat Password' class='text' minlength=1 maxlength=32 required
-                                        title='Password must be between 1 and 32 characters long.'
-                                        onkeyup='validatePassword2(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='Password must be between 1 and 32 characters long.'>
+                                        <input type='password' name='password2' placeholder='Repeat Password' class='text' minlength=1 maxlength=32 required onkeyup='validatePassword2(`register`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconPassword2'></i>
                                 </td>
                             </tr>
@@ -96,37 +96,37 @@ class RegisterPage extends Page {
                             <tr>
                                 <td class='left'>Поща:</td>
                                 <td class='right'>
-                                    <input type='email' name='email' placeholder='example@mail.com' class='text' minlength=0 maxlength=32
-                                        title='E-mail must look like a valid e-mail address.'
-                                        onkeyup='validateEmail(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='E-mail must look like a valid e-mail address.'>
+                                        <input type='email' name='email' placeholder='example@mail.com' class='text' minlength=0 maxlength=32 onkeyup='validateEmail(`register`)'>
+                                    </span>
                                     <i class='fa fa-check-square' style='color: #53A93F;' id='validationIconEmail'></i>
                                 </td>
                             </tr>
                             <tr>
                                 <td class='left'>Дата на Раждане:</td>
                                 <td class='right'>
-                                    <input type='text' name='birthdate' placeholder='YYYY-MM-DD' class='text' minlength=0 maxlength=32
-                                        title='The date of birth should follow the ISO format: YYYY-MM-DD.'
-                                        onkeyup='validateBirthdate(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='The date of birth should follow the ISO format: YYYY-MM-DD.'>
+                                        <input type='text' name='birthdate' placeholder='YYYY-MM-DD' class='text' minlength=0 maxlength=32 onkeyup='validateBirthdate(`register`)'>
+                                    </span>
                                     <i class='fa fa-check-square' style='color: #53A93F;' id='validationIconBirthdate'></i>
                                 </td>
                             </tr>
                             <tr>
                                 <td class='left'>Град:</td>
                                 <td class='right'>
-                                    <input type='text' name='town' placeholder='Town' class='text' minlength=0 maxlength=32
-                                        title='Town must be between 1 and 32 characters long and can contain only Cyrillic or Latin letters and spaces.'
-                                        onkeyup='validateTown(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='Town must be between 1 and 32 characters long\n and can contain only Cyrillic or Latin letters and spaces.'>
+                                        <input type='text' name='town' placeholder='Town' class='text' minlength=0 maxlength=32 onkeyup='validateTown(`register`)'>
+                                    </span>
                                     <i class='fa fa-check-square' style='color: #53A93F;' id='validationIconTown'></i>
                                 </td>
                             </tr>
                             <tr>
                                 <td class='left'>Държава:</td>
                                 <td class='right'>
-                                    <input type='text' name='country' placeholder='Country' class='text' minlength=0 maxlength=32
-                                        title='Country must be between 1 and 32 characters long and can contain only Cyrillic or Latin letters and spaces.'
-                                        onkeyup='validateCountry(`register`)'>
-                                    <i class='a fa-check-square' style='color: #53A93F;' id='validationIconCountry'></i>
+                                    <span class='tooltip--top' data-tooltip='Country must be between 1 and 32 characters long\n and can contain only Cyrillic or Latin letters and spaces.'>
+                                        <input type='text' name='country' placeholder='Country' class='text' minlength=0 maxlength=32 onkeyup='validateCountry(`register`)'>
+                                    </span>
+                                    <i class='fa fa-check-square' style='color: #53A93F;' id='validationIconCountry'></i>
                                 </td>
                             </tr>
                             <tr>
@@ -138,11 +138,15 @@ class RegisterPage extends Page {
                             </tr>
                             <tr><td>&nbsp;</td></tr>
                             <tr>
-                                <td class='left' title='Например за \"cveLho\" трябва да въведете \"Lovech\".'><b>Разшифровай града \"{$captcha}\":</b></td>
+                                <td class='left'>
+                                    <span class='tooltip--top' data-tooltip='Например за \"cveLho\" трябва да въведете \"Lovech\".'>
+                                        <b>Разшифровай града \"{$captcha}\":</b>
+                                    </span>
+                                </td>
                                 <td class='right'>
-                                    <input type='text' name='captcha' class='text' required
-                                         title='Например за \"cveLho\" трябва да въведете \"Lovech\".'
-                                         onkeyup='validateCaptcha(`register`)'>
+                                    <span class='tooltip--top' data-tooltip='Например за \"cveLho\" трябва да въведете \"Lovech\".'>
+                                        <input type='text' name='captcha' class='text' required onkeyup='validateCaptcha(`register`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconCaptcha'></i>
                                     <input type='hidden' name='expected' value='{$expected}'>
                                 </td>

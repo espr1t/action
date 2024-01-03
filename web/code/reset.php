@@ -181,9 +181,9 @@ class ResetPage extends Page {
                             <tr>
                                 <td class='left'><b>Парола:</b></td>
                                 <td class='right'>
-                                    <input type='password' name='password1' placeholder='Password' class='text' minlength=1 maxlength=33 required
-                                        title='Password must be between 1 and 32 characters long.'
-                                        onkeyup='validatePassword1(`reset`)'>
+                                    <span class='tooltip--top' data-tooltip='Password must be between 1 and 32 characters long.'>
+                                        <input type='password' name='password1' placeholder='Password' class='text' minlength=1 maxlength=32 required onkeyup='validatePassword1(`reset`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconPassword1'></i>
                                 </td>
                             </tr>
@@ -191,9 +191,9 @@ class ResetPage extends Page {
                             <tr>
                                 <td class='left'><b>Повторно Парола:</b></td>
                                 <td class='right'>
-                                    <input type='password' name='password2' placeholder='Repeat Password' class='text' minlength=1 maxlength=32 required
-                                        title='Password must be between 1 and 32 characters long.'
-                                        onkeyup='validatePassword2(`reset`)'>
+                                    <span class='tooltip--top' data-tooltip='Password must be between 1 and 32 characters long.'>
+                                        <input type='password' name='password2' placeholder='Repeat Password' class='text' minlength=1 maxlength=32 required onkeyup='validatePassword2(`reset`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconPassword2'></i>
                                 </td>
                             </tr>
@@ -277,9 +277,10 @@ class ResetPage extends Page {
                             <tr>
                                 <td class='left'><b>Потребител:</b></td>
                                 <td class='right'>
-                                    <input type='text' name='username' placeholder='Username' class='text' minlength=2 maxlength=16 required
-                                        title='Must be a valid username of a registered user.'
-                                        onkeyup='checkUsername(`reset`); updateEmailSuggestion(`reset`);'>
+                                    <span class='tooltip--top' data-tooltip='Must be a valid username of a registered user.'>
+                                        <input type='text' name='username' placeholder='Username' class='text' minlength=2 maxlength=16 required
+                                            onkeyup='checkUsername(`reset`); updateEmailSuggestion(`reset`);'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconUsername'></i>
                                 </td>
                             </tr>
@@ -287,19 +288,24 @@ class ResetPage extends Page {
                             <tr>
                                 <td class='left'><b>E-mail на потребителя:</b></td>
                                 <td class='right'>
-                                    <input type='email' name='email' placeholder='example@mail.com' class='text' minlength=1 maxlength=32
-                                        title='E-mail must look like a valid e-mail address.'
-                                        onkeyup='validateEmail(`reset`, false)' id='emailInputField'>
+                                    <span class='tooltip--top' data-tooltip='E-mail must look like a valid e-mail address.'>
+                                        <input type='email' name='email' placeholder='example@mail.com' class='text' minlength=1 maxlength=32
+                                            onkeyup='validateEmail(`reset`, false)' id='emailInputField'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconEmail'></i>
                                 </td>
                             </tr>
 
                             <tr>
-                                <td class='left' title='Например за \"cveLho\" трябва да въведете \"Lovech\".'><b>Разшифровайте града \"{$captcha}\":</b></td>
+                                <td class='left'>
+                                    <span class='tooltip--top' data-tooltip='Например за \"cveLho\" трябва да въведете \"Lovech\".'>
+                                        <b>Разшифровайте града \"{$captcha}\":</b>
+                                    </span>
+                                </td>
                                 <td class='right'>
-                                    <input type='text' name='captcha' class='text' required
-                                         title='Например за \"cveLho\" трябва да въведете \"Lovech\".'
-                                         onkeyup='validateCaptcha(`reset`)'>
+                                    <span class='tooltip--top' data-tooltip='Например за \"cveLho\" трябва да въведете \"Lovech\".'>
+                                        <input type='text' name='captcha' class='text' required onkeyup='validateCaptcha(`reset`)'>
+                                    </span>
                                     <i class='fa fa-minus-square' style='color: #D84A38;' id='validationIconCaptcha'></i>
                                     <input type='hidden' name='expected' value='{$expected}'>
                                 </td>

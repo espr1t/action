@@ -19,7 +19,9 @@ class AdminNewsPage extends Page {
                 <div class='box boxlink' onclick='redirect(`/admin/news/{$news->getId()}`);'>
                  <div class='news-content'>
                     <div class='news-icon'>
-                        <i class='fa fa-{$news->getIcon()}' title='{$news->getType()}'></i>
+                        <span class='tooltip--left' data-tooltip='{$news->getType()}'>
+                            <i class='fa fa-{$news->getIcon()}'></i>
+                        </span>
                     </div>
                     <div class='news-title'>
                         {$news->getTitle()}

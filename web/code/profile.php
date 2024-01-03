@@ -142,7 +142,7 @@ class ProfilePage extends Page {
                 default:
                     $color = "gray";
             }
-            $dots .= "<div class='profile-dot background-{$color}' title='{$submit->getStatus()}'></div>";
+            $dots .= "<span class='tooltip--top' data-tooltip='{$submit->getStatus()}'><div class='profile-dot background-{$color}'></div></span>";
         }
 
         return "

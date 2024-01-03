@@ -308,7 +308,9 @@ class GamesPage extends Page {
         $url = getGameUrl($problem->getName()) . "/visualizer";
         return "
             <a href='{$url}'>
-                <input type='submit' value='Визуализатор' class='button button-color-blue button-large' title='Визуализатор на играта'>
+                <span class='tooltip--top' data-tooltip='Визуализатор на играта'>
+                    <input type='submit' value='Визуализатор' class='button button-color-blue button-large'>
+                </span>
             </a>
         ";
     }
@@ -463,12 +465,10 @@ class GamesPage extends Page {
     private function getRelativeStatement(Problem $problem): string {
         $fullSubmitText = "Изпрати решение";
         $fullSubmitInfo = "Решението ще получи пропорционални точки спрямо авторското решение, или това на най-добрия друг участник.";
-        //$disabled = $problem->getName() == "Reconstruct";
-        $disabled = false;
 
         $submitTimeout = $this->user->getSubmitTimeout();
         $fullSubmitContent = $this->getSubmitFormContent($problem, $fullSubmitText, $fullSubmitInfo, true);
-        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $submitTimeout, $disabled);
+        $fullSubmitButton = $this->getSubmitButton($fullSubmitText, $fullSubmitInfo, "showFullForm", $fullSubmitContent, $submitTimeout);
         return $this->getStatementBox($problem, null, $fullSubmitButton);
     }
 
@@ -481,7 +481,7 @@ class GamesPage extends Page {
         if ($found) {
             $score = sprintf("<span>%.0f:%.0f</span>", $totalScoreUser, $totalScoreOpponents);
         } else {
-            $score = "<span title='Точки се изчисляват само за последното изпратено решение.'>-</span>";
+            $score = "<span class='tooltip--top' data-tooltip='Точки се изчисляват само за последното изпратено решение.'>-</span>";
         }
 
         $maxExecTime = sprintf("%.2fs", max($submit->getExecTime()));
@@ -565,7 +565,7 @@ class GamesPage extends Page {
                         $classes = "far fa-pause-circle yellow";
                     }
                 }
-                $testStatus = "<i class='{$classes}' title='{$message}'></i>";
+                $testStatus = "<span class='tooltip--top' data-tooltip='{$message}'><i class='{$classes}'></i></span>";
                 if ($showLink) {
                     $testStatus = "
                         <a href='" . getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$result['id']}'>
@@ -1181,7 +1181,7 @@ class GamesPage extends Page {
                     <td>" . getUserLink($user->getUsername(), $unofficial) . "</td>
                     <td>{$user->getName()}</td>
                     <td>{$submitId}</td>
-                    <td title='{$shownTitle}'>{$shownScore}</td>
+                    <td><span class='tooltip--top' data-tooltip='{$shownTitle}'>{$shownScore}</span></td>
                 </tr>
             ";
         }

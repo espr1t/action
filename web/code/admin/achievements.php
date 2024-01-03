@@ -1000,10 +1000,12 @@ class AdminAchievementsPage extends Page {
             }
             $info = $achievement["description"] . PHP_EOL . $users;
             $achievementInfo .= "
-                <div class='achievement' title='{$info}'>
-                    <i class='{$achievement['icon']} fa-fw'></i>
-                    <span>{$achievement['title']} | {$achievementCount}</span>
-                </div>
+                <span class='tooltip--top' data-tooltip='{$info}'>
+                    <div class='achievement'>
+                        <i class='{$achievement['icon']} fa-fw'></i>
+                        <span>{$achievement['title']} | {$achievementCount}</span>
+                    </div>
+                </span>
             ";
         }
         return "
