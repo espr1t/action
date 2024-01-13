@@ -118,29 +118,23 @@ class ProblemsPage extends Page {
             }
         }
 
+        $solvedBy = array();
+        foreach (Brain::getSolvedPerProblem() as $solvedPerProblem)
+            $solvedBy[$solvedPerProblem["problemId"]] = $solvedPerProblem["count"];
+        $acSubmits = array();
+        foreach (Brain::getACSubmitsPerProblem() as $acPerProblem)
+            $acSubmits[$acPerProblem["problemId"]] = $acPerProblem["count"];
         $totalSubmits = array();
-        $successfulSubmits = array();
-        foreach ($tasksInfo as $task) {
-            $totalSubmits[$task->getId()] = 0;
-            $successfulSubmits[$task->getId()] = 0;
-        }
-
-        foreach (Brain::getProblemStatusCounts() as $statusCnt) {
-            $problemId = $statusCnt["problemId"];
-            if (array_key_exists($problemId, $totalSubmits)) {
-                $totalSubmits[$problemId] += $statusCnt["count"];
-                if ($statusCnt["status"] == $GLOBALS["STATUS_ACCEPTED"])
-                    $successfulSubmits[$problemId] += $statusCnt["count"];
-            }
-        }
+        foreach (Brain::getTotalSubmitsPerProblem() as $totalPerProblem)
+            $totalSubmits[$totalPerProblem["problemId"]] = $totalPerProblem["count"];
 
         // Calculate number of solutions and success rate
         for ($i = 0; $i < count($tasksInfo); $i++) {
             // `numSolutions` and `successRate` are not parts of Problem originally
             // Add them here (kinda ugly) so we can use them in getProblemBox().
-            $tasksInfo[$i]->numSolutions = $successfulSubmits[$tasksInfo[$i]->getId()];
-            $tasksInfo[$i]->successRate = $totalSubmits[$tasksInfo[$i]->getId()] == 0 ? 0.0 :
-                round(100.0 * $successfulSubmits[$tasksInfo[$i]->getId()] / $totalSubmits[$tasksInfo[$i]->getId()]);
+            $tasksInfo[$i]->numSolutions = $solvedBy[$tasksInfo[$i]->getId()] ?? 0;
+            $tasksInfo[$i]->successRate = !isset($totalSubmits[$tasksInfo[$i]->getId()]) ? 0.0 :
+                round(100.0 * $acSubmits[$tasksInfo[$i]->getId()] / $totalSubmits[$tasksInfo[$i]->getId()]);
         }
 
         $problemTried = array();

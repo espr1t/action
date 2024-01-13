@@ -511,16 +511,6 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
-    public static function getProblemStatusCounts(): ?array {
-        $response = self::query("
-            SELECT `problemId`, `status`, COUNT(*) AS `count`
-            FROM `Submits`
-            WHERE `userId` > 1
-            GROUP BY `problemId`, `status`
-        ");
-        return !$response ? null : self::getResults($response);
-    }
-
     public static function getSolved(int $userId): ?array {
         $response = self::query("
             SELECT DISTINCT `problemId`
@@ -532,11 +522,40 @@ class Brain {
 
     public static function getSolvedPerUser(): ?array {
         $response = self::query("
-            SELECT `userId`, COUNT(*) AS `count` FROM (
-                SELECT `userId`, `problemId` FROM `Submits`
-                WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
-                GROUP BY `userId`, `problemId`
-            ) AS tmp GROUP BY `userId`
+            SELECT `userId`, COUNT(DISTINCT `problemId`) AS `count`
+            FROM `Submits`
+            WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
+            GROUP BY `userId`
+        ");
+        return !$response ? null : self::getResults($response);
+    }
+
+    public static function getSolvedPerProblem(): ?array {
+        $response = self::query("
+            SELECT `problemId`, COUNT(DISTINCT `userId`) AS `count`
+            FROM `Submits`
+            WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}' AND `userId` > 1 -- Exclude service account and admin
+            GROUP BY `problemId`
+        ");
+        return !$response ? null : self::getResults($response);
+    }
+
+    public static function getACSubmitsPerProblem(): ?array {
+        $response = self::query("
+            SELECT `problemId`, COUNT(*) AS `count`
+            FROM `Submits`
+            WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}' AND `userId` > 1 -- Exclude service account and admin
+            GROUP BY `problemId`
+        ");
+        return !$response ? null : self::getResults($response);
+    }
+
+    public static function getTotalSubmitsPerProblem(): ?array {
+        $response = self::query("
+            SELECT `problemId`, COUNT(*) AS `count`
+            FROM `Submits`
+            WHERE `userId` > 1 -- Exclude service account and admin
+            GROUP BY `problemId`
         ");
         return !$response ? null : self::getResults($response);
     }
