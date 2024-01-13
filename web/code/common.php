@@ -446,6 +446,7 @@ function prettyPrintCompilationErrors(Submit $submit): string {
         foreach (explode("source.cpp", $errors) as $error) {
             $error = ltrim($error, ":");
             if (strlen($error) > 1) {
+                $error = str_replace('`', "'", $error);
                 $error = str_replace('"', "'", $error);
                 $error = str_replace("\\", "\\\\", $error);
                 $error = htmlspecialchars(trim($error));
