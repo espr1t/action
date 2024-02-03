@@ -855,6 +855,7 @@ class AdminAchievementsPage extends Page {
     }
 
     private function initVariables(): void {
+        $this->getAchievementsData();
         $this->initSpecialNumbers();
         $this->initTrickyProblems();
 
@@ -911,7 +912,6 @@ class AdminAchievementsPage extends Page {
         }
    }
 
-    // TODO: Invoke on major user actions (e.g., submit, or action % 100 == 0)
     public function recalcUser(User $user): void {
         // Skip service user and admin
         if ($user->getId() <= 1)
@@ -973,7 +973,8 @@ class AdminAchievementsPage extends Page {
         }
     }
 
-    private function getAchievementsList(array $achievementsData): string {
+    private function getAchievementsList(): string {
+        $achievementsData = $this->getAchievementsData();
         // NOTE: achievementData is the data stored in the achievements.json
         //       The main difference is that the "achievement" field is called "key" there.
         $userName = array();
@@ -1036,14 +1037,17 @@ class AdminAchievementsPage extends Page {
         return $unseen;
     }
 
-    public function getContent(): string {
+    private function getAchievementsData(): array {
         // First load the achievement data
         $achievementsFile = file_get_contents("{$GLOBALS['PATH_DATA']}/achievements/achievements.json");
         $achievementsData = json_decode($achievementsFile, true);
         foreach ($achievementsData as $achievement) {
             $this->achievementTitle[$achievement["key"]] = $achievement["title"];
         }
+        return $achievementsData;
+    }
 
+    public function getContent(): string {
         $elapsed = "";
         if (isset($_GET["recalc"]) && $_GET["recalc"] == "true") {
             $startTime = microtime(true);
@@ -1051,12 +1055,11 @@ class AdminAchievementsPage extends Page {
             $elapsed = sprintf("Calculated in %.3f seconds.", microtime(true) - $startTime);
             redirect("/admin/achievements", "INFO", $elapsed);
         }
-        $allAchievements = $this->getAchievementsList($achievementsData);
         return inBox("
             <h1>Админ::Постижения</h1>
             {$elapsed}
             <br>
-            {$allAchievements}
+            {$this->getAchievementsList()}
             <div class='centered'>
                 <a href='/admin/achievements/recalc'>
                     <input type='submit' id='recalc-button' value='Преизчисли' class='button button-color-blue button-large'>

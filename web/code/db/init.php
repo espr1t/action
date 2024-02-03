@@ -78,6 +78,7 @@ Table::UsersInfo
     "actions": 1337,
     "totalTime": 42666, // Seconds
     "lastSeen": "2016-05-23T21:29:13",
+    "lastAchievement": "2016-05-23T21:23:15",
     "profileViews": 666,
     "lastViewers": "espr1t,ThinkCreative,kopche",
     "loginCount": 123,
@@ -97,6 +98,7 @@ if ($db->tableExists("UsersInfo")) {
             actions INT NOT NULL,
             totalTime INT NOT NULL,
             lastSeen DATETIME NOT NULL,
+            lastAchievement DATETIME NOT NULL,
             profileViews INT NOT NULL,
             lastViewers TEXT NOT NULL,
             loginCount INT NOT NULL,

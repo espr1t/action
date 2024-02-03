@@ -383,6 +383,11 @@ class Submit {
         return Submit::createSubmitObjects(Brain::getLatestSubmits());
     }
 
+    public static function getLastUserSubmit(int $userId): ?Submit {
+        $data = Brain::getLastUserSubmit($userId);
+        return $data ? Submit::instanceFromArray($data) : null;
+    }
+
     public function calcStatus(): string {
         // Handle the case where there are no results (i.e. no tests)
         // This is an exceptional scenario and shouldn't happen, so return INTERNAL_ERROR

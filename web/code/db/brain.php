@@ -511,6 +511,15 @@ class Brain {
         return !$response ? null : self::getResults($response);
     }
 
+    public static function getLastUserSubmit(int $userId): ?array {
+        $response = self::select(
+            "Submits",
+            "`userId` = {$userId}",
+            "`id` DESC",
+            1
+        );
+        return !$response ? null : self::getResult($response);
+    }
     public static function getSolved(int $userId): ?array {
         $response = self::query("
             SELECT DISTINCT `problemId`
@@ -691,6 +700,7 @@ class Brain {
                 "actions" => $user->getActions(),
                 "totalTime" => $user->getTotalTime(),
                 "lastSeen" => $user->getLastSeen(),
+                "lastAchievement" => $user->getLastAchievement(),
                 "profileViews" => $user->getProfileViews(),
                 "lastViewers" => implode(",", $user->getLastViewers()),
                 "loginCount" => $user->getLoginCount(),
@@ -705,6 +715,7 @@ class Brain {
                 "actions" => $user->getActions(),
                 "totalTime" => $user->getTotalTime(),
                 "lastSeen" => $user->getLastSeen(),
+                "lastAchievement" => $user->getLastAchievement(),
                 "profileViews" => $user->getProfileViews(),
                 "lastViewers" => implode(",", $user->getLastViewers()),
                 "loginCount" => $user->getLoginCount(),

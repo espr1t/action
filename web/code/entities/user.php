@@ -19,6 +19,7 @@ class User {
     private ?int $actions = null;
     private ?int $totalTime = null;
     private ?string $lastSeen = null;
+    private ?string $lastAchievement = null;
     private ?int $profileViews = null;
     private ?array $lastViewers = null;
     private ?int $loginCount = null;
@@ -38,6 +39,7 @@ class User {
     public function getActions(): int {return $this->actions;}
     public function getTotalTime(): int {return $this->totalTime;}
     public function getLastSeen(): string {return $this->lastSeen;}
+    public function getLastAchievement(): string {return $this->lastAchievement;}
     public function getProfileViews(): int {return $this->profileViews;}
     public function getLastViewers(): array {return $this->lastViewers;}
     public function getLoginCount(): int {return $this->loginCount;}
@@ -58,6 +60,7 @@ class User {
         $this->actions = 0;
         $this->totalTime = 0;
         $this->lastSeen = "2017-01-01 00:00:00";
+        $this->lastAchievement = "2017-01-01 00:00:00";
         $this->profileViews = 0;
         $this->lastViewers = array();
         $this->loginCount = 0;
@@ -84,6 +87,7 @@ class User {
         $user->actions = getIntValue($info, "actions");
         $user->totalTime = getIntValue($info, "totalTime");
         $user->lastSeen = getStringValue($info, "lastSeen");
+        $user->lastAchievement = getStringValue($info, "lastAchievement");
         $user->profileViews = getIntValue($info, "profileViews");
         $user->lastViewers = getStringArray($info, "lastViewers");
         $user->loginCount = getIntValue($info, "loginCount");
@@ -123,15 +127,51 @@ class User {
         return Brain::updateUser($this) && Brain::updateUserInfo($this);
     }
 
+    private function updateAchievements(): void {
+        $shouldRecalc = false;
+
+        # Update achievements on every 100 actions
+        if ($this->actions % 100 == 0) {
+            $shouldRecalc = true;
+        }
+
+        # Update achievements once every hour
+        # (or whenever the user logs in after more than an hour of inactivity)
+        $timeDifference = time() - strtotime($this->getLastAchievement());
+        if ($timeDifference > 60 * 60) {  // Update every hour
+            $shouldRecalc = true;
+        } else {
+            $submit = Submit::getLastUserSubmit($this->getId());
+            if ($submit) {
+                # If we haven't recalculated since the last submit was graded
+                if (strtotime($this->getLastAchievement()) < $submit->getGradingFinish()) {
+                    # If the submit was with status AC, recalculate always.
+                    # Otherwise, recalculate only if more than 5 minutes have passed since last recalculation
+                    if ($submit->getStatus() == $GLOBALS["STATUS_ACCEPTED"] || $timeDifference > 5 * 60) {
+                        $shouldRecalc = true;
+                    }
+                }
+            }
+        }
+
+        if ($shouldRecalc) {
+            $achievementsPage = new AdminAchievementsPage($this);
+            $achievementsPage->recalcUser($this);
+            $this->lastAchievement = date("Y-m-d H:i:s", time());
+            Brain::updateUserInfo($this);
+        }
+    }
+
     public function updateStats(): bool {
         if ($this->getId() >= 1) {
-            $this->actions += 1;
+            $this->updateAchievements();
 
             // If last seen more than 5 minutes ago, count 5 minutes of
             // activity, otherwise add the difference between now and then.
-            $this->totalTime += min(array(time() - strtotime($this->lastSeen), 5 * 60));
+            $this->totalTime += min(array(time() - strtotime($this->getLastSeen()), 5 * 60));
             $this->lastSeen = date("Y-m-d H:i:s", time());
             $this->lastIP = getUserIP();
+            $this->actions += 1;
             return Brain::updateUserInfo($this);
         }
         return true;
