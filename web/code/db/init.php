@@ -9,11 +9,15 @@ function output($message) {
 
 function createTableIndexes($table, $indexes) {
     global $db;
-    foreach ($indexes as $indexName => $indexColumn) {
+    foreach ($indexes as $indexName => $indexColumns) {
         if (!$db->indexExists($indexName)) {
+            if (gettype($indexColumns) == "string") {
+                $indexColumns = array($indexColumns);
+            }
+            $columns = "`" . join("`, `", $indexColumns) . "`";
             output("  >> creating index '{$indexName}'...");
             $result = $db->query("
-                CREATE INDEX `{$indexName}` ON `{$table}`(`$indexColumn`);
+                CREATE INDEX `{$indexName}` ON `{$table}`({$columns});
             ");
             output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
         }
@@ -281,6 +285,9 @@ if ($db->tableExists("Matches")) {
     ");
     output("  >> " . ($result !== false ? "succeeded" : "failed") . "!");
 }
+createTableIndexes("Matches", [
+    "MatchesProblemId" => "problemId",
+]);
 
 /*
 Table::Solutions
@@ -371,7 +378,9 @@ if ($db->tableExists("Submits")) {
 createTableIndexes("Submits", [
     "SubmitsUserId" => "userId",
     "SubmitsProblemId" => "problemId",
-    "SubmitsStatus" => "status"
+    "SubmitsStatus" => "status",
+    "SubmitsStatusUser" => array("status", "userId"),
+    "SubmitsStatusUserProblem" => array("status", "userId", "problemId"),
 ]);
 
 

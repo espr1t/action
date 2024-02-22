@@ -29,7 +29,7 @@ class AdminHistoryPage extends Page {
             if ($history[sprintf("time%02d", $run)] != "") {
                 $times = explode(",", $history[sprintf("time%02d", $run)]);
                 if (count($times) != count($tests)) {
-                    echo("Different number of tests and results!");
+                    echo("WARNING: Different number of tests and results!");
                 }
                 for ($i = 0; $i < count($tests); $i++) {
                     $runInfo[$tests[$i]["inpFile"]][$run - 1] = sprintf("%.2f", floatval($times[$i]));

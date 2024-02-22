@@ -438,12 +438,13 @@ class Brain {
 
     public static function getFirstACSubmits(): ?array {
         $response = self::query("
-            SELECT * FROM (
-                SELECT *, ROW_NUMBER() OVER(PARTITION BY problemId ORDER BY id) AS rank
-                FROM `Submits`
-                WHERE `status` = 'AC' AND `userId` > 2 -- exclude system user (0), espr1t (1) and ThinkCreative (2)
-            ) AS temp
-            WHERE rank = 1 
+            SELECT * FROM `Submits`
+            WHERE `id` IN (
+                SELECT MIN(id) FROM `Submits`
+                WHERE `status` = '{$GLOBALS['STATUS_ACCEPTED']}'
+                    AND `userId` > 2 -- exclude system user (0), espr1t (1) and ThinkCreative (2)
+                GROUP BY `problemId`
+            )
         ");
         return !$response ? null : self::getResults($response);
     }
