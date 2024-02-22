@@ -4,12 +4,12 @@ require_once(__DIR__ . '/../page.php');
 
 
 class AdminDeleteUserPage extends Page {
-    public function getTitle() {
+    public function getTitle(): string {
         return 'O(N)::Admin - Delete User';
     }
 
 
-    public function getContent() {
+    public function getContent(): string {
         $user = Brain::getUser($_GET['userId']);
         if ($user != null) {
             if (Brain::deleteUser($user['id'], $user['username'])) {

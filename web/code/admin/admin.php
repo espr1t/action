@@ -50,7 +50,7 @@ switch ($_GET["page"]) {
         $page = new AdminDeleteUserPage($user);
         break;
 
-        case "tests":
+    case "tests":
         require_once("../../tests/language_detector.php");
         $page = new LanguageDetectorPage($user);
         break;

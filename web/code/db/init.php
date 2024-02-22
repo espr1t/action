@@ -1,6 +1,9 @@
 <?php
 require_once(__DIR__ . "/db.php");
 
+# Remove when you need to execute this script
+exit();
+
 $db = new DB();
 
 function output($message) {
