@@ -476,6 +476,10 @@ class ProblemsPage extends Page {
         // additional roll-over information
         $points = $submit->calcScores();
         $detailsTable = "";
+        $testInfo = explode(",", $submit->getInfo());
+        if (count($testInfo) != count($points)) {
+            $testInfo = null;
+        }
         for ($i = 1; $i < count($points); $i++) {
             if ($i > 1 && $i % 10 == 1) {
                 $detailsTable .= "<br>";
@@ -486,7 +490,8 @@ class ProblemsPage extends Page {
                 "Статус: " . (is_numeric($result) ? "OK" : $result) . PHP_EOL .
                 "Точки: " . sprintf("%.1f", $points[$i]) . PHP_EOL .
                 "Време: " . sprintf("%.2fs", $submit->getExecTime()[$i]) . PHP_EOL .
-                "Памет: " . sprintf('%.2f MiB', $submit->getExecMemory()[$i])
+                "Памет: " . sprintf('%.2f MiB', $submit->getExecMemory()[$i]) . PHP_EOL .
+                (($testInfo == null || $result != $GLOBALS["STATUS_RUNTIME_ERROR"]) ? "" : $testInfo[$i])
             ;
             $icon = "WTF?";
             $background = "";
