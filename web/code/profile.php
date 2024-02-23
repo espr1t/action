@@ -479,8 +479,12 @@ class ProfilePage extends Page {
 
         // User information
         // ====================================================================
+        // Fix the minimum profile info height, so it's large enough that the
+        // stats are down enough to not interfere with the floating radar chart.
+        $content .= "<div style='min-height: 16rem;'>";
         $content .= $this->generalInformation();
         $content .= $this->additionalInformation();
+        $content .= "</div>";
 
         // Training progress
         // ====================================================================
