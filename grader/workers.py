@@ -69,16 +69,11 @@ class Workers:
         return int(user_info.split()[0].split("=")[1].split("(")[0])
 
     @staticmethod
-    def _create_user(username):
+    def _create_user(username: str):
         if os.system("useradd --shell /bin/bash -G workers -M {}".format(username)):
             logger.fatal("Cannot create user '{}'!".format(username))
             exit(-1)
         return Workers._get_user_id(username)
-
-    @staticmethod
-    def _disable_network_access(username):
-        if os.system("iptables -A OUTPUT -p all -m owner --uid-owner {} -j DROP".format(username)):
-            logger.warning("Cannot disable network access for user '{}'!".format(username))
 
     @staticmethod
     def _umount_and_delete_recursive(path, base_dir=False):
@@ -184,21 +179,28 @@ class Workers:
 
             # Check if MAX_PARALLEL_WORKERS is set properly
             if config.MAX_PARALLEL_WORKERS > psutil.cpu_count(logical=True):
-                logger.fatal("MAX_PARALLEL_WORKERS set to {}, but max CPU threads are {}.".format(
-                    config.MAX_PARALLEL_WORKERS, psutil.cpu_count(logical=True)))
+                logger.fatal(
+                    "MAX_PARALLEL_WORKERS set to {}, but max CPU threads are {}.".format(
+                        config.MAX_PARALLEL_WORKERS, psutil.cpu_count(logical=True)
+                    )
+                )
                 exit(-1)
             if config.MAX_PARALLEL_WORKERS > psutil.cpu_count(logical=False):
-                logger.warning("MAX_PARALLEL_WORKERS set to {}, but physical CPU cores are {}.".format(
-                    config.MAX_PARALLEL_WORKERS, psutil.cpu_count(logical=False)))
+                logger.warning(
+                    "MAX_PARALLEL_WORKERS set to {}, but physical CPU cores are {}.".format(
+                        config.MAX_PARALLEL_WORKERS, psutil.cpu_count(logical=False)
+                    )
+                )
 
             # Limit the single core memory bandwidth and L3 cache access (new Intel Xeon processors only)
             # If this prints any errors, see the info on top of limiter.py or comment the line below
             limiter.set_rdt_limits()
 
             # Create a system group for managing sudo and other permissions if not already present
-            if os.system("sudo tail /etc/group | grep workers") != 0:
+            # We only care about the exit code of the grep, not the actual result, so disregard it.
+            if os.system("sudo tail /etc/group | grep workers > /dev/null") != 0:
                 if os.system("sudo groupadd workers") != 0:
-                    logger.fatal("Could not create system group \"workers\"!")
+                    logger.fatal('Could not create system group "workers"!')
                     exit(-1)
 
             # Create the user and sandbox (chroot) directory for each worker
@@ -211,9 +213,6 @@ class Workers:
                 if worker.user == -1:
                     logger.info("  >> creating user...")
                     worker.user = Workers._create_user(worker.name)
-
-                # Disable the user's access to the internet
-                Workers._disable_network_access(worker.name)
 
                 # Clean the worker's sandbox directory (sandbox/workerXX) if it exists
                 if os.path.exists(worker.path):
@@ -236,10 +235,9 @@ class Workers:
             if Workers._have_been_queued:
                 return
 
-            # In order to avoid workers set on the same physical core (due to hyper-threading)
-            # and to distribute them better on different physical CPUs (in systems with more than one),
-            # set the affinity of each worker appropriately
-            # NOTE: This is currently determined manually based on `lscpu` output (NUMA nodeX CPU(s))
+            # In order to avoid workers set on the same physical core (due to hyper-threading) and
+            # to distribute them better on different physical CPUs (in systems with more than one),
+            # set the affinity of each worker appropriately.
             affinity = list(range(0, psutil.cpu_count()))
 
             # Create a queue which allows at most MAX_PARALLEL_WORKERS workers
@@ -247,7 +245,9 @@ class Workers:
             for i in range(config.MAX_PARALLEL_WORKERS):
                 name = "worker{:02d}".format(i + 1)
                 Workers._available.put(
-                    Worker(cpu=affinity[i % len(affinity)], user=Workers._get_user_id(name), name=name)
+                    Worker(
+                        cpu=affinity[i % len(affinity)], user=Workers._get_user_id(name), name=name
+                    )
                 )
 
             logger.info("Workers queued successfully.")

@@ -1,4 +1,5 @@
 import os
+import pytest
 import unittest
 import config
 from common import TestInfo, TestStatus
@@ -8,18 +9,21 @@ from validator import Validator
 class TestValidator(unittest.TestCase):
     PATH_FIXTURES = os.path.abspath("tests/fixtures/validation")
 
+    @pytest.mark.order(8000)
     def test_line_iterator(self):
         text = "This is \r  a line \r\n test \n\rto see\n\n\n\r\nif\r \nthis is working\n."
         expected = ['This is ', '  a line ', ' test ', 'to see', 'if', ' ', 'this is working', '.']
         text_lines = Validator.line_iterator(text)
         self.assertListEqual(list(text_lines), expected)
 
+    @pytest.mark.order(8001)
     def test_token_iterator(self):
         text = "    Some\tweird       0  _42  text with_var_whitespace \ \\ \r\n  other <tokens> . "
         expected = ['Some', 'weird', '0', '_42', 'text', 'with_var_whitespace', '\\', '\\', 'other', '<tokens>', '.']
         text_tokens = Validator.token_iterator(text)
         self.assertListEqual(list(text_tokens), expected)
 
+    @pytest.mark.order(8002)
     def test_abs_relative_float_check(self):
         eps = config.FLOAT_PRECISION
 
@@ -84,6 +88,7 @@ class TestValidator(unittest.TestCase):
         test_info.solPath = sol_path
         return test_info
 
+    @pytest.mark.order(8003)
     def test_absolute_comparison(self):
         test = self.create_test_info(os.path.join(self.PATH_FIXTURES, "FloatAbsolute.sol"))
 
@@ -105,6 +110,7 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
+    @pytest.mark.order(8004)
     def test_relative_comparison(self):
         test = self.create_test_info(os.path.join(self.PATH_FIXTURES, "FloatRelative.sol"))
 
@@ -126,6 +132,7 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
+    @pytest.mark.order(8005)
     def test_leading_zeroes(self):
         # Answers with missing leading zeroes are treated okay if floating point comparison is enabled
         test = self.create_test_info(os.path.join(self.PATH_FIXTURES, "FloatLeadingZeroes.sol"))
@@ -144,6 +151,7 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
+    @pytest.mark.order(8006)
     def test_very_large_integers(self):
         # Differences in the last digits of large numbers (> 2^53) are okay if abs/rel comparison is enabled
         test = self.create_test_info(os.path.join(self.PATH_FIXTURES, "FloatVeryLargeIntegers.sol"))
@@ -162,6 +170,7 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
+    @pytest.mark.order(8007)
     def test_ascii_text_comparison(self):
         test = self.create_test_info(os.path.join(self.PATH_FIXTURES, "TextAscii.sol"))
 
@@ -201,6 +210,7 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
+    @pytest.mark.order(8008)
     def test_unicode_text_comparison(self):
         test = self.create_test_info(os.path.join(self.PATH_FIXTURES, "TextUnicode.sol"))
 
@@ -240,6 +250,7 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
+    @pytest.mark.order(8009)
     def test_empty_output(self):
         test = self.create_test_info(os.path.join(self.PATH_FIXTURES, "TextEmpty.sol"))
 
@@ -270,6 +281,7 @@ class TestValidator(unittest.TestCase):
         self.assertEqual(0.0, validator_result.score)
         self.assertIs(TestStatus.WRONG_ANSWER, validator_result.status)
 
+    @pytest.mark.order(8010)
     def test_output_from_checker_or_tester(self):
         # Empty output is not okay
         validator_result = Validator.validate_output_from_checker_or_tester(42, b"")

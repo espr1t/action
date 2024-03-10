@@ -1,5 +1,5 @@
 n = int(input())
-target_size = n // 6  # Python 4-byte integers are slightly tiny bit larger
+target_size = n // 7  # Python 4-byte integers are slightly tiny bit larger (28 bytes)
 
 a = [42] * target_size
 for i in range(1, target_size):

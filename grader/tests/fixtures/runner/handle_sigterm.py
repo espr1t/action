@@ -1,7 +1,7 @@
 import sys
 import signal
 from threading import Thread
-from time import perf_counter, sleep
+from time import sleep
 
 
 def handle_sigterm(signum, frame):
@@ -9,9 +9,8 @@ def handle_sigterm(signum, frame):
 
 
 def dowork():
-    start_time = perf_counter()
-    sleep(0.3)
-    print("{:.3f}s".format(perf_counter() - start_time))
+    sleep(0.2)
+    print("The sleeper has awakened.")
 
 
 if __name__ == "__main__":

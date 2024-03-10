@@ -3,7 +3,7 @@ Tests whether the runner is behaving as expected.
 NOTE: Some of the tests in this file are heavily dependent on execution time
       and may give false positives or negatives if ran on different hardware.
 """
-
+import pytest
 import shutil
 import os
 from unittest import TestCase, mock
@@ -79,6 +79,7 @@ class TestExecuteProblem(TestCase):
                         break
                 self.assertTrue(found, msg="Status '{}' not among expected results.".format(result["status"]))
 
+    @pytest.mark.order(5000)
     def test_successful_execution_cpp(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -88,6 +89,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5001)
     def test_successful_execution_cpp2(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -97,6 +99,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5003)
     def test_unsuccessful_execution_cpp(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -106,6 +109,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.WRONG_ANSWER, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5004)
     def test_successful_execution_java(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -115,6 +119,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5005)
     def test_successful_execution_python(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -124,6 +129,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5006)
     def test_floating_point_comparison(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=False)
         self.exec_helper(
@@ -133,6 +139,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER]
         )
 
+    @pytest.mark.order(5007)
     def test_time_limit(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -142,6 +149,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.TIME_LIMIT, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5008)
     def test_printing_extra_output(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -151,6 +159,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.WRONG_ANSWER, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5009)
     def test_writing_to_file(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -160,6 +169,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5010)
     def test_exceeding_output_limit(self):
         run_config = RunConfig(time_limit=3.0, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -169,6 +179,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5011)
     def test_forking(self):
         run_config = RunConfig(time_limit=0.2, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -178,6 +189,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER, TestStatus.WRONG_ANSWER]
         )
 
+    @pytest.mark.order(5012)
     def test_spawning_fork_bomb(self):
         run_config = RunConfig(time_limit=1.0, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -187,6 +199,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.WRONG_ANSWER, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5013)
     def test_counting_total_time_of_all_threads(self):
         run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -196,6 +209,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.TIME_LIMIT, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5014)
     def test_counting_total_time_of_all_processes(self):
         run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -205,6 +219,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.TIME_LIMIT, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5015)
     def test_segfaults_10_elements(self):
         run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -214,6 +229,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR]
         )
 
+    @pytest.mark.order(5016)
     def test_segfaults_4K_elements(self):
         run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -223,6 +239,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR]
         )
 
+    @pytest.mark.order(5017)
     def test_segfaults_4M_elements(self):
         run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -232,6 +249,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.RUNTIME_ERROR]
         )
 
+    @pytest.mark.order(5018)
     def test_exec_from_program(self):
         run_config = RunConfig(time_limit=0.5, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(
@@ -242,6 +260,7 @@ class TestExecuteProblem(TestCase):
             expected_results=[TestStatus.ACCEPTED, TestStatus.ACCEPTED, TestStatus.ACCEPTED]
         )
 
+    @pytest.mark.order(5019)
     def test_out_of_memory(self):
         run_config = RunConfig(time_limit=3.0, memory_limit=67108864, executable_path="fake/path", compare_floats=True)
         self.exec_helper(

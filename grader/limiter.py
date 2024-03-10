@@ -44,8 +44,8 @@ def set_rdt_limits():
     # Mount the Intel RDT Linux control filesystem
     if not os.path.ismount("/sys/fs/resctrl"):
         logger.info("Mounting resctrl filesystem...")
-        if os.system("sudo mount -t resctrl resctrl /sys/fs/resctrl") != 0:
-            logger.warning("Couldn't mount resctrl filesystem. Abandoning resource limitation...")
+        if os.system("sudo mount -t resctrl resctrl /sys/fs/resctrl 2> /dev/null") != 0:
+            logger.warning("Couldn't mount resctrl filesystem. Skipping RDT limitation...")
             return
     else:
         logger.info("Filesystem resctrl already mounted.")

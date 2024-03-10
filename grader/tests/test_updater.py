@@ -1,6 +1,7 @@
 """
 Tests whether the updater is behaving as expected.
 """
+import pytest
 import unittest
 from unittest import mock
 
@@ -18,6 +19,7 @@ TESTS = [
 
 
 class TestUpdater(unittest.TestCase):
+    @pytest.mark.order(7000)
     def test_set_results(self):
         updater = Updater("localhost", 1337, TESTS)
         results = updater.set_results(TestStatus.RUNTIME_ERROR)
@@ -26,6 +28,7 @@ class TestUpdater(unittest.TestCase):
             self.assertEqual(results[i]["score"], 0)
             self.assertEqual(results[i]["status"], TestStatus.RUNTIME_ERROR.name)
 
+    @pytest.mark.order(7001)
     @mock.patch("network.send_request")
     def test_send_update(self, send_request_mock):
         updater = Updater("localhost", 1337, TESTS)
@@ -34,6 +37,7 @@ class TestUpdater(unittest.TestCase):
         sleep(0.1)
         self.assertTrue(send_request_mock.call_count == 1, "An update to the frontend is not being sent.")
 
+    @pytest.mark.order(7002)
     @mock.patch("network.send_request")
     def test_update_interval(self, send_request_mock):
         updater = Updater("localhost", 1337, TESTS)

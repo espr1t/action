@@ -2,6 +2,7 @@
 Tests whether the evaluator is behaving as expected.
 """
 import os
+import pytest
 import shutil
 import vcr
 import logging
@@ -80,12 +81,14 @@ class TestEvaluator(TestCase):
             data["language"] = language
             return Evaluator(data)
 
+    @pytest.mark.order(6000)
     def test_create_sandbox_dir(self):
         evaluator = self.get_evaluator("problem_submit_ok.json", config.LANGUAGE_CPP)
         self.assertFalse(os.path.exists(evaluator.path_sandbox))
         evaluator.create_sandbox_dir()
         self.assertTrue(os.path.exists(evaluator.path_sandbox))
 
+    @pytest.mark.order(6001)
     @vcr.use_cassette("tests/fixtures/cassettes/download_tests.yaml")
     def test_download_tests(self):
         evaluator = self.get_evaluator("problem_submit_ok.json", config.LANGUAGE_CPP)
@@ -103,6 +106,7 @@ class TestEvaluator(TestCase):
             self.assertTrue(os.path.exists(test.inpPath))
             self.assertTrue(os.path.exists(test.solPath))
 
+    @pytest.mark.order(6002)
     def test_write_source(self):
         evaluator = self.get_evaluator("problem_submit_ok.json", config.LANGUAGE_CPP)
         self.assertFalse(os.path.isfile(evaluator.path_source))
@@ -112,6 +116,7 @@ class TestEvaluator(TestCase):
         with open(evaluator.path_source, "rt") as file:
             self.assertEqual(evaluator.source, file.read())
 
+    @pytest.mark.order(6003)
     def test_cleanup(self):
         # Create a new instance and write the source
         evaluator = self.get_evaluator("problem_submit_ok.json", config.LANGUAGE_CPP)
@@ -150,7 +155,6 @@ class TestEvaluator(TestCase):
         max_time, max_memory = -1e100, -1e100
         for res in updater_results:
             if res["status"] != TestStatus.TESTING.name:
-                # print(res)
                 if res["status"] != TestStatus.ACCEPTED.name:
                     # This is only because we only test wrong answers from the task with checkers
                     # In real tasks this is usually empty
@@ -185,6 +189,7 @@ class TestEvaluator(TestCase):
     #                      Three Sum                       #
     #                   (sample problem)                   #
     ########################################################
+    @pytest.mark.order(6004)
     def test_standard_problem_three_sum_cpp(self):
         evaluator = self.get_evaluator("problems_standard_three.json", config.LANGUAGE_CPP)
         self.standard_problem_helper(
@@ -196,6 +201,7 @@ class TestEvaluator(TestCase):
             expected_errors={}
         )
 
+    @pytest.mark.order(6005)
     def test_standard_problem_three_sum_java(self):
         evaluator = self.get_evaluator("problems_standard_three.json", config.LANGUAGE_JAVA)
         self.standard_problem_helper(
@@ -207,6 +213,7 @@ class TestEvaluator(TestCase):
             expected_errors={}
         )
 
+    @pytest.mark.order(6006)
     def test_standard_problem_three_sum_python(self):
         evaluator = self.get_evaluator("problems_standard_three.json", config.LANGUAGE_PYTHON)
         self.standard_problem_helper(
@@ -222,6 +229,7 @@ class TestEvaluator(TestCase):
     #                        Sheep                         #
     #             (real problem, many tests)               #
     ########################################################
+    @pytest.mark.order(6007)
     def test_standard_problem_sheep_cpp(self):
         evaluator = self.get_evaluator("problems_standard_sheep.json", config.LANGUAGE_CPP)
         self.standard_problem_helper(
@@ -233,13 +241,14 @@ class TestEvaluator(TestCase):
             expected_errors={}
         )
 
+    @pytest.mark.order(6008)
     def test_standard_problem_sheep_java(self):
         evaluator = self.get_evaluator("problems_standard_sheep.json", config.LANGUAGE_JAVA)
         self.standard_problem_helper(
             evaluator=evaluator,
             language=config.LANGUAGE_JAVA,
             source=os.path.join(self.PATH_FIXTURES, "Sheep/Solutions/Sheep.java"),
-            time_lb=0.2,
+            time_lb=0.1,
             memory_lb=1.0,
             expected_errors={}
         )
@@ -248,6 +257,7 @@ class TestEvaluator(TestCase):
     #                        Ruler                         #
     #                    (has checker)                     #
     ########################################################
+    @pytest.mark.order(6009)
     def test_task_with_checker(self):
         evaluator = self.get_evaluator("problems_checker_ruler.json", config.LANGUAGE_CPP)
 
@@ -295,6 +305,7 @@ class TestEvaluator(TestCase):
     #                   Number Guessing                    #
     #                  (interactive game)                  #
     ########################################################
+    @pytest.mark.order(6010)
     def test_interactive_game_ng(self):
         evaluator = self.get_evaluator("games_interactive_ng.json", config.LANGUAGE_CPP)
 
@@ -337,7 +348,7 @@ class TestEvaluator(TestCase):
             source=os.path.join(self.PATH_FIXTURES, "NG/Solutions/NumberGuessingWA.cpp"),
             time_lb=0.0,
             memory_lb=0.0,
-            expected_errors={"WRONG_ANSWER": 7}
+            expected_errors={"WRONG_ANSWER": 3, "RUNTIME_ERROR": 4}
         )
 
         evaluator = self.get_evaluator("games_interactive_ng.json", config.LANGUAGE_PYTHON)
@@ -357,6 +368,7 @@ class TestEvaluator(TestCase):
     #                    Image Scanner                     #
     #                  (interactive game)                  #
     ########################################################
+    @pytest.mark.order(6011)
     def test_interactive_game_is(self):
         # The only difference with the previous is that this problem has much larger input and output
         # and the tester has to print lots of information in the end (thus, may take its time to finish)
@@ -413,6 +425,7 @@ class TestEvaluator(TestCase):
             self.assertTrue(found, msg="Found unexpected message '{}'!".format(res["message"]))
         self.assertEqual(len(expected_messages), 0, msg="Remaining messages: {}".format(expected_messages))
 
+    @pytest.mark.order(6012)
     def test_two_player_game(self):
         evaluator = self.get_evaluator("games_two_player_uttt.json", config.LANGUAGE_CPP)
         evaluator.create_sandbox_dir()

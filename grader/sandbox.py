@@ -9,11 +9,12 @@ stack size, file input/output, child processes, and others.
 """
 
 import os
+from typing import Optional
+
 import common
 import config
 import shutil
 import subprocess
-from time import sleep
 from sys import platform
 from workers import Workers
 from threading import Lock
@@ -47,7 +48,6 @@ else:
 
 
 class Sandbox:
-
     def __init__(self):
         # Get or wait for an available worker
         self._worker = Workers.get()
@@ -72,13 +72,19 @@ class Sandbox:
     def _check(self):
         # Test if the home directory exits
         if not os.path.exists(self._path):
-            logger.fatal("Sandbox {} check failed: directory '{}' does not exist!".format(
-                self._worker.name, self._path)
+            logger.fatal(
+                "Sandbox {} check failed: directory '{}' does not exist!".format(
+                    self._worker.name, self._path
+                )
             )
             exit(0)
         # Test that /bin exists and is mounted properly (other mount points should be there as well)
         if not common.is_mount(os.path.join(self._path, os.pardir, "bin")):
-            logger.fatal("Sandbox {} check failed: directory '/bin' is not mounted!".format(self._worker.name))
+            logger.fatal(
+                "Sandbox {} check failed: directory '/bin' is not mounted!".format(
+                    self._worker.name
+                )
+            )
             exit(0)
 
     def _clean(self):
@@ -121,7 +127,9 @@ class Sandbox:
         # A hard limit of 5 minutes for running anything in a sandbox
         # This is a very crude fail-safe mechanism if something really goes wrong
         # (shouldn't happen in practice if everything is working as intended)
-        cpu_limit = max(1, round(config.MAX_EXECUTION_TIME))  # Tests may set this to non-integers, thus fix it
+        cpu_limit = max(
+            1, round(config.MAX_EXECUTION_TIME)
+        )  # Tests may set this to non-integers, thus fix it
         setrlimit(RLIMIT_CPU, (cpu_limit, cpu_limit))
 
         # Increase the priority of the process (in case realtime scheduler is not available)
@@ -154,6 +162,9 @@ class Sandbox:
         os.chdir(self._path)
 
         if not privileged:
+            # Disable the network
+            os.unshare(os.CLONE_NEWNET)
+
             # Chroot the process in the current sandbox
             # (it's parent, actually, we are currently in /home)
             os.chroot(os.path.join(self._path, os.path.pardir))
@@ -168,7 +179,8 @@ class Sandbox:
         os.environ["MALLOC_ARENA_MAX"] = "4"
         # Another workaround for Java memory
         os.environ["JAVA_TOOL_OPTIONS"] = "-Xmx{}m -XX:MaxMetaspaceSize=256m".format(
-            config.MAX_EXECUTION_MEMORY // 1048576 // 2)
+            config.MAX_EXECUTION_MEMORY // 1048576 // 2
+        )
 
         # print("Current process: {}".format(os.getpid()))
 
@@ -179,7 +191,8 @@ class Sandbox:
     # Copies the file at <file_path> to the sandbox /home directory as <target_name>
     def put_file(self, file_path, target_name=None, mode=0o755):
         file_path_on_sandbox = os.path.join(
-                self._path, target_name if target_name is not None else os.path.basename(file_path))
+            self._path, target_name if target_name is not None else os.path.basename(file_path)
+        )
         shutil.copyfile(file_path, file_path_on_sandbox)
         os.chmod(file_path_on_sandbox, mode)
 
@@ -187,21 +200,27 @@ class Sandbox:
     def del_file(self, file_path):
         complete_path = os.path.join(self._path, file_path)
         if not os.path.exists(complete_path):
-            logger.error("Requested to delete file '{}' which does not exist on sandbox.".format(file_path))
+            logger.error(
+                "Requested to delete file '{}' which does not exist on sandbox.".format(file_path)
+            )
         else:
             os.remove(complete_path)
 
     # Copies a file named <file_name> from sandbox /home directory to <target_path>
     def get_file(self, file_name, target_path):
         if not self.has_file(file_name):
-            logger.error("Requested to get file '{}' which does not exist on sandbox.".format(file_name))
+            logger.error(
+                "Requested to get file '{}' which does not exist on sandbox.".format(file_name)
+            )
         else:
             shutil.copyfile(os.path.join(self._path, file_name), target_path)
 
     # Reads the file named <file_name> from sandbox /home directory and returns it as bytes
     def read_file(self, file_name):
         if not self.has_file(file_name):
-            logger.error("Requested to read file '{}' which does not exist on sandbox.".format(file_name))
+            logger.error(
+                "Requested to read file '{}' which does not exist on sandbox.".format(file_name)
+            )
             return None
         with open(os.path.join(self._path, file_name), "rb") as byte_stream:
             return byte_stream.read()
@@ -211,29 +230,35 @@ class Sandbox:
         # (Please note that the first line of output is table column names, thus check for > 1)
         return len(os.popen("ps -U {}".format(self._worker.name)).read().strip().splitlines()) > 1
 
-    def wait(self, timeout=None):
+    def wait(self, timeout=None) -> int:
+        exit_code = 0
         if self._process is not None and self._process.poll() is None:
             try:
-                self._process.wait(timeout)
+                exit_code = self._process.wait(timeout)
+                self._process = None
             except subprocess.TimeoutExpired:
                 pass
         # Force kill all left-over processes (children, grandchildren, etc.)
-        with self._lock:
+        with (self._lock):
             if self._process is not None:
                 if self.is_running():
                     self._process.kill()
+                    exit_code = 9
                 del self._process
             self._process = None
-            # As a fail-safe also invoke killall
-            os.system("killall -signal SIGKILL --user {}".format(self._worker.name))
-            # Wait until all children are actually killed
+            # Some detached threads may still exist at this point (e.g., a fork bomb).
+            # Run killall until all of them are gone.
             while self.is_running():
-                sleep(0.01)
+                os.system("killall --signal KILL --user {}".format(self._worker.name))
+                exit_code = 9
+        return exit_code
 
-    def execute(self, command, stdin_fd, stdout_fd, stderr_fd, blocking=True, privileged=False):
+    def execute(
+        self, command, stdin_fd, stdout_fd, stderr_fd, blocking=True, privileged=False
+    ) -> Optional[int]:
         if self._process is not None:
             logger.error("Trying to run a second process while previous still running")
-            return False
+            return None
 
         # Run the command in a new process, limiting its resource usage
         # print("Executing command: {}".format(command))
@@ -244,8 +269,10 @@ class Sandbox:
             stdin=stdin_fd,
             stdout=stdout_fd,
             stderr=stderr_fd,
-            preexec_fn=(lambda: self._set_restrictions(privileged))
+            preexec_fn=(lambda: self._set_restrictions(privileged)),
         )
 
         if blocking:
-            self.wait(config.MAX_EXECUTION_TIME)
+            return self.wait(config.MAX_EXECUTION_TIME)
+        else:
+            return None

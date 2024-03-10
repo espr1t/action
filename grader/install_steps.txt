@@ -5,14 +5,16 @@ Installation steps:
     >> sudo apt upgrade
     >> sudo apt full-upgrade
     >> sudo update-alternatives --config editor
+0.1. Install additional system libraries needed for the grader
+    >> sudo apt install util-linux
 1. (optional) Install Python and PyPy.
     Similarly to other languages, if you are not satisfied with the current version installed with
     your distribution (or there is none), proceed with the steps below.
 1.1. Install latest version of Python in a virtual environment
     >> curl https://pyenv.run | bash
     >> do what the scritp suggests doing (add things to ~/.bashrc and ~/.bash_profile or ~/.profile)
-    >> pyenv install 3.11.6
-    >> pyenv virtualenv 3.11.6 action-grader
+    >> pyenv install 3.12.2
+    >> pyenv virtualenv 3.12.2 action-grader
     >> pyenv local action-grader
     >> make install
 1.2. Install PyPy (used to actually run user's submissions written in Python):
@@ -21,9 +23,12 @@ Installation steps:
     >> tar xf pypy3.10-v7.3.13-linux64.tar.bz2
     >> rm pypy3.10-v7.3.13-linux64.tar.bz2
     >> sudo mv pypy3.10-v7.3.13-linux64 /usr/local/lib/
-    >> sudo ln -s /usr/local/lib/pypy3.7-v7.3.3-linux64/bin/pypy /usr/bin/pypy
+    >> sudo ln -s /usr/local/lib/pypy3.10-v7.3.13-linux64/bin/pypy /usr/bin/pypy
     Verify that the correct pypy is used (can be left-over from previous install):
     >> pypy --version
+    Note that since we will run the solutions with pypy, we also need to install in the
+    dependencies again using _pypy's pip_, which will make them available to the solutions
+    (most notably, we need numpy and pandas)
     >> pypy -m ensurepip
     >> pypy -m pip install --upgrade pip wheel
     >> pypy -m pip install .
@@ -50,6 +55,7 @@ Installation steps:
     >> cd <path_to_where_you_want_it>
     >> git clone https://github.com/espr1t/action.git
 5. Install the project's requirements (from the project's base directory, e.g. ~/action/grader)
+   You may have done that already in step 1.1.
     >> make install
 6. (Optional) Set the port on which the web server will run (default is 5000)
     open action/grader/server.py and change port='5000' to port='<whatever_you_want>'.

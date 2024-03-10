@@ -145,6 +145,8 @@ class Runner:
         # Generate the command which runs the executable (it is language-specific)
         executable_name = os.path.basename(executable_path)
         executable_language = common.get_language_by_exec_name(executable_name)
+        # Offset the memory limit depending on the language - should I be doing this?
+        memory_limit += common.get_memory_offset(executable_language)
         command = Runner.get_run_command(executable_language, executable_name, memory_limit)
 
         # Run the program and measure its time and memory consumption
@@ -158,7 +160,7 @@ class Runner:
             privileged=privileged
         )
 
-        # Calculate final time and memory (offset for VM start-up time)
+        # Calculate final time and memory (offset for VM start-up time and extra "baseline" memory)
         run_result.exec_time = max(0, run_result.exec_time - common.get_time_offset(executable_language))
         run_result.exec_memory = max(0, run_result.exec_memory - common.get_memory_offset(executable_language))
 

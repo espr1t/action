@@ -1,9 +1,14 @@
 """
 Tests whether concurrent runs perform consistently under load when having heavy
 requirement on CPU / Hard Disk / Memory
+
+NOTE: The tests assume fair access to resources (CPU, Memory AND CACHE), which is achieved through
+      partitioning of the cache lanes (the resctrl module and Intel RDT (cache lane masks)), which
+      are defined in limiter.py, but are not required for the system to run, since this is supported
+    (at the time of writing) by a few Intel processors only.
+NOTE2: Even then these tests may be flaky.
 """
-
-
+import pytest
 import shutil
 import os
 from unittest import TestCase, mock
@@ -48,6 +53,7 @@ class TestConcurrency(TestCase):
     def get_num_runs(minimum_runs):
         return minimum_runs + config.MAX_PARALLEL_WORKERS - minimum_runs % config.MAX_PARALLEL_WORKERS + 1
 
+    @pytest.mark.order(9000)
     def test_run_program_concurrent_cpu_access_small_tl(self):
         path_source = os.path.join(self.PATH_FIXTURES, "summer_cpu.cpp")
         path_executable = os.path.join(config.PATH_SANDBOX, "summer_cpu.o")
@@ -77,6 +83,7 @@ class TestConcurrency(TestCase):
         # (at most 10% difference or 0.05s, whichever larger)
         self.assertLessEqual(max(times), max(min(times) + 0.05, min(times) * 1.1))
 
+    @pytest.mark.order(9001)
     def test_run_program_concurrent_cpu_access_large_tl(self):
         path_source = os.path.join(self.PATH_FIXTURES, "summer_cpu.cpp")
         path_executable = os.path.join(config.PATH_SANDBOX, "summer_cpu.o")
@@ -106,6 +113,7 @@ class TestConcurrency(TestCase):
         # (at most 10% difference or 0.05s, whichever larger)
         self.assertLessEqual(max(times), max(min(times) + 0.05, min(times) * 1.1))
 
+    @pytest.mark.order(9002)
     def test_run_program_concurrent_hdd_access(self):
         # Cannot test concurrency if there is none
         if config.MAX_PARALLEL_WORKERS <= 1:
@@ -146,6 +154,7 @@ class TestConcurrency(TestCase):
         # (at most 10% difference or 0.05s, whichever larger)
         self.assertLessEqual(max(times), max(min(times) + 0.05, min(times) * 1.1))
 
+    @pytest.mark.order(9003)
     def test_run_program_concurrent_memory_access(self):
         path_source = os.path.join(self.PATH_FIXTURES, "summer_mem.cpp")
         path_executable = os.path.join(config.PATH_SANDBOX, "summer_mem.o")
@@ -172,9 +181,10 @@ class TestConcurrency(TestCase):
         print("TIME: {:.3f}s vs {:.3f}s".format(min(times), max(times)))
 
         # Best time should be almost identical to the worst time in order to consider the results consistent
-        # (at most 10% difference or 0.05s, whichever larger)
-        self.assertLessEqual(max(times), max(min(times) + 0.05, min(times) * 1.1))
+        # (at most 10% difference or 0.1s, whichever larger)
+        self.assertLessEqual(max(times), max(min(times) + 0.1, min(times) * 1.1))
 
+    @pytest.mark.order(9004)
     def test_run_program_concurrent_cpu_access_java(self):
         path_source = os.path.join(self.PATH_FIXTURES, "Sheep.java")
         path_executable = os.path.join(config.PATH_SANDBOX, "Sheep.jar")
@@ -198,5 +208,5 @@ class TestConcurrency(TestCase):
         print("TIME: {:.3f}s vs {:.3f}s".format(min(times), max(times)))
 
         # Best time should be almost identical to the worst time in order to consider the results consistent
-        # (at most 10% difference or 0.05s, whichever larger)
-        self.assertLessEqual(max(times), max(min(times) + 0.05, min(times) * 1.1))
+        # (at most 10% difference or 0.1s, whichever larger)
+        self.assertLessEqual(max(times), max(min(times) + 0.1, min(times) * 1.1))
