@@ -103,11 +103,15 @@ async function drawColorfulVisualisation(replayLog) {
         for (let c = 0; c < component.length; c++) {
             putPixel(imageData, component[c][1], component[c][0], image[y][x]);
         }
-        curQueryEl.innerHTML = '' + (i + 1) + '/' + maxQ;
-        ctx.putImageData(imageData, 0, 0);
-        await sleep(sleepTime);
-        sleepTime = Math.max(sleepTime - 1, 5);
+        if (i <= 500 || i % 10 == 9) {
+            curQueryEl.innerHTML = '' + (i + 1) + '/' + maxQ;
+            ctx.putImageData(imageData, 0, 0);
+            await sleep(sleepTime);
+            sleepTime = Math.max(sleepTime - 1, 5);
+        }
     }
+    ctx.putImageData(imageData, 0, 0);
+    curQueryEl.innerHTML = '' + usedQueries + '/' + maxQ;
 
     await sleep(2000);
 
@@ -130,21 +134,23 @@ async function drawColorfulVisualisation(replayLog) {
 
     await sleep(2000);
 
-    for (let i = 200; i >= 5; i--) {
-        canvas.style.opacity = String(i / 200.0);
-        await sleep(10);
-    }
-
-    for (let row = 0; row < numRows; row++) {
-        for (let col = 0; col < numCols; col++) {
-            putPixel(imageData, row, col, image[row][col]);
+    for (let col = 0; col <= numCols; col++) {
+        // "Sweep" line that reveals the actual image
+        if (col < numCols) {
+            for (let row = 0; row < numRows; row++) {
+                putPixel(imageData, row, col, [255, 255, 255]);
+            }
         }
-    }
-    ctx.putImageData(imageData, 0, 0);
-
-    for (let i = 5; i <= 200; i++) {
-        canvas.style.opacity = String(i / 200.0);
-        await sleep(10);
+        // The column of the actual image
+        if (col - 1 >= 0) {
+            for (let row = 0; row < numRows; row++) {
+                putPixel(imageData, row, col - 1, image[row][col]);
+            }
+        }
+        if (col % 3 == 1 || col == numCols) {
+            ctx.putImageData(imageData, 0, 0);
+            await sleep(1);
+        }
     }
 }
 
