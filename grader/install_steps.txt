@@ -19,19 +19,19 @@ Installation steps:
     >> make install
 1.2. Install PyPy (used to actually run user's submissions written in Python):
     (Note that newest pypy may be different; check here: https://www.pypy.org/download.html)
-    >> wget https://downloads.python.org/pypy/pypy3.10-v7.3.13-linux64.tar.bz2
-    >> tar xf pypy3.10-v7.3.13-linux64.tar.bz2
-    >> rm pypy3.10-v7.3.13-linux64.tar.bz2
-    >> sudo mv pypy3.10-v7.3.13-linux64 /usr/local/lib/
-    >> sudo ln -s /usr/local/lib/pypy3.10-v7.3.13-linux64/bin/pypy /usr/bin/pypy
+    >> wget https://downloads.python.org/pypy/pypy3.10-v7.3.17-linux64.tar.bz2
+    >> tar xf pypy3.10-v7.3.17-linux64.tar.bz2
+    >> rm pypy3.10-v7.3.17-linux64.tar.bz2
+    >> sudo mv pypy3.10-v7.3.17-linux64 /usr/local/lib/
+    >> sudo ln -s /usr/local/lib/pypy3.10-v7.3.17-linux64/bin/pypy /usr/bin/pypy
     Verify that the correct pypy is used (can be left-over from previous install):
     >> pypy --version
-    Note that since we will run the solutions with pypy, we also need to install in the
-    dependencies again using _pypy's pip_, which will make them available to the solutions
-    (most notably, we need numpy and pandas)
+    Note that since we will run the solutions with pypy, we want to install some libraries that will be
+    available to the contestants (e.g., numpy and pandas). We also install psutil as it is used by the
+    grader "interactors" for one-player and two-player games.
     >> pypy -m ensurepip
     >> pypy -m pip install --upgrade pip wheel
-    >> pypy -m pip install .
+    >> pypy -m pip install psutil numpy pandas pyflakes
 2. (optional) Install latest version of GCC/G++.
     Similarly to other languages, if you are not satisfied with the current version installed with
     your distribution (or there is none), proceed with the steps below.
@@ -80,5 +80,6 @@ Installation steps:
 11. (Optional) Run it automatically on OS load:
 11.1. Add it to the list of cronjobs on system start:
     >> sudo crontab -e
-    Add "@reboot python3 /home/grader/action/grader/server.py" (with correct path to server.py)
+    Add: "@reboot /home/grader/.pyenv/versions/action-grader/bin/python /home/grader/action/grader/server.py"
+    (with correct paths to virtual environment python binary and also server.py)
 #11.2. Run "update-rc.d cron defaults" (may not be needed)

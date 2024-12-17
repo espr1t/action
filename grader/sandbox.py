@@ -166,7 +166,7 @@ class Sandbox:
             os.unshare(os.CLONE_NEWNET)
 
             # Chroot the process in the current sandbox
-            # (it's parent, actually, we are currently in /home)
+            # (its parent, actually -- we are currently in /home)
             os.chroot(os.path.join(self._path, os.path.pardir))
 
             # Set the user to a more unprivileged one (workerXX)
@@ -181,8 +181,6 @@ class Sandbox:
         os.environ["JAVA_TOOL_OPTIONS"] = "-Xmx{}m -XX:MaxMetaspaceSize=256m".format(
             config.MAX_EXECUTION_MEMORY // 1048576 // 2
         )
-
-        # print("Current process: {}".format(os.getpid()))
 
     # Checks if specified file exists on the sandbox
     def has_file(self, file_name):
@@ -261,7 +259,6 @@ class Sandbox:
             return None
 
         # Run the command in a new process, limiting its resource usage
-        # print("Executing command: {}".format(command))
         self._process = subprocess.Popen(
             args=command,
             shell=True,
