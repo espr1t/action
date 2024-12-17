@@ -25,6 +25,7 @@ class GamesPage extends Page {
             "/scripts/games/connect.js",
             "/scripts/games/imagescanner.js",
             "/scripts/games/reconstruct.js",
+            "/scripts/games/colorful.js",
             "/scripts/jquery-3.7.1.min.js",
             "/scripts/jquery-jvectormap-2.0.3.min.js",
             "/scripts/jquery-jvectormap-world-mill.js"
@@ -149,7 +150,7 @@ class GamesPage extends Page {
             //       (whether the goal is to minimize or maximize the score)
             for ($i = 0; $i < count($submit->getResults()); $i++) {
                 if (count($bestScores) <= $i) {
-                    if ($problem->getName() == "ImageScanner") {
+                    if (in_array($problem->getName(), ["ImageScanner", "Colorful"])) {
                         array_push($bestScores, 1e100);
                     } else {
                         array_push($bestScores, 0.0);
@@ -157,7 +158,7 @@ class GamesPage extends Page {
                 }
                 $curScore = $submit->getResults()[$i];
                 if (is_numeric($curScore)) {
-                    if ($problem->getName() == "ImageScanner") {
+                    if (in_array($problem->getName(), ["ImageScanner", "Colorful"])) {
                         if ($bestScores[$i] > $curScore) {
                             $bestScores[$i] = $curScore;
                         }
@@ -170,10 +171,10 @@ class GamesPage extends Page {
             }
         }
 
-        // Hack to make Airports use the grader's score
+        // Hack to make Airports and GetRekt use the grader's score
         // This, in fact, makes the task just a standard problem, but, oh well, I needed it to be a game.
         // This will be fixed once we have a "scoring" field in the Problem structure.
-        if ($problem->getName() == "Airports") {
+        if (in_array($problem->getName(), array("Airports", "GetRekt"))) {
             for ($i = 0; $i < count($bestScores); $i++)
                 $bestScores[$i] = 1.0;
         }
@@ -183,7 +184,7 @@ class GamesPage extends Page {
         $fraction = 0.0;
         if (is_numeric($testScore)) {
             $testScore = toFloat($testScore);
-            if ($problemName == "ImageScanner") {
+            if (in_array($problemName, ["ImageScanner", "Colorful"])) {
                 $fraction = $testScore <= $bestScore ? 1.0 : pow($bestScore / $testScore, $scoringPower);
             } else {
                 $fraction = $testScore >= $bestScore ? 1.0 : pow($testScore / $bestScore, $scoringPower);
@@ -302,7 +303,7 @@ class GamesPage extends Page {
     }
 
     private function getVisualizerButton(Problem $problem): ?string {
-        if (in_array($problem->getName(), ["HyperWords", "Airports", "ImageScanner", "NumberGuessing", "Reconstruct"]))
+        if (in_array($problem->getName(), ["HyperWords", "Airports", "ImageScanner", "NumberGuessing", "Reconstruct", "Colorful"]))
             return null;
 
         $url = getGameUrl($problem->getName()) . "/visualizer";
@@ -771,7 +772,7 @@ class GamesPage extends Page {
             }
 
             $testCircle = "<div class='test-result tooltip--top background-{$background}' data-tooltip='{$tooltip}'>{$icon}</div>";
-            if ($problem->getName() == "ImageScanner" || $problem->getName() == "Reconstruct") {
+            if (in_array($problem->getName(), array("ImageScanner", "Reconstruct", "GetRekt", "Colorful"))) {
                 if (is_numeric($result)) {
                     $testCircle = str_replace("test-result", "test-result test-result-link", $testCircle);
                     $testResultUrl = getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$i}";
@@ -798,9 +799,9 @@ class GamesPage extends Page {
 
         // TODO: Make the formula to be configurable per problem
         $scoringPower = 1.0;
-        if ($problem->getName() == "HyperWords")
+        if (in_array($problem->getName(), array("HyperWords")))
             $scoringPower = 2.0;
-        if ($problem->getName() == "Reconstruct")
+        if (in_array($problem->getName(), array("Reconstruct")))
             $scoringPower = 3.0;
 
         $points = array();
@@ -864,7 +865,9 @@ class GamesPage extends Page {
         $airports = explode(",", trim($submit->getInfo()));
         $content = "var data = [";
         foreach ($airports as $airport) {
-            $content .= "{name: '{$airport}', latLng:[{$airportInfo[$airport][0]}, {$airportInfo[$airport][1]}]},";
+            if (array_key_exists($airport, $airportInfo)) {
+                $content .= "{name: '{$airport}', latLng:[{$airportInfo[$airport][0]}, {$airportInfo[$airport][1]}]},";
+            }
         }
         $content .= '];' . PHP_EOL;
         $content .= "      $(function() {
@@ -1011,6 +1014,7 @@ class GamesPage extends Page {
         if ($gameName == "connect") return "showConnectReplay";
         if ($gameName == "imagescanner") return "showImagescannerReplay";
         if ($gameName == "reconstruct") return "showReconstructReplay";
+        if ($gameName == "colorful") return "showColorfulReplay";
         return "undefinedFunction";
     }
 
@@ -1130,6 +1134,9 @@ class GamesPage extends Page {
             case "Ultimate TTT":
             case "Connect":
             case "Tetris":
+            case "Reconstruct":
+            case "GetRekt":
+            case "Colorful":
                 return ["espr1t", "ThinkCreative"];
             case "HyperSnakes":
                 return ["espr1t", "ThinkCreative", "IvayloS", "stuno", "ov32m1nd", "peterlevi"];
@@ -1139,8 +1146,6 @@ class GamesPage extends Page {
                 return ["espr1t", "ThinkCreative", "kopche", "emazing", "peterkazakov"];
             case "Airports":
                 return ["espr1t", "kiv"];
-            case "Reconstruct":
-                return ["espr1t"];
         }
         return [];
     }

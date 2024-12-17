@@ -10,7 +10,7 @@ class AdminDeleteUserPage extends Page {
 
 
     public function getContent(): string {
-        $user = Brain::getUser($_GET['userId']);
+        $user = Brain::getUserById($_GET['userId']);
         if ($user != null) {
             if (Brain::deleteUser($user['id'], $user['username'])) {
                 return 'Deleted user successfully.';

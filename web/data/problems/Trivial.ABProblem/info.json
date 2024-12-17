@@ -1,0 +1,22 @@
+{
+    "id": 1,
+    "name": "A * B Problem",
+    "author": "Александър Георгиев",
+    "folder": "Trivial.ABProblem",
+    "timeLimit": 0.2,
+    "memoryLimit": 64,
+    "type": "acm",
+    "difficulty": "trivial",
+    "description": "",
+    "tags": [
+        "math"
+    ],
+    "origin": "Act!on Training Problem",
+    "checker": "",
+    "floats": true,
+    "tester": "",
+    "waitPartial": 0,
+    "waitFull": 0,
+    "addedBy": "espr1t",
+    "visible": true
+}

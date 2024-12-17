@@ -3,6 +3,7 @@ require_once(__DIR__ . "/../config.php");
 require_once(__DIR__ . "/../common.php");
 require_once(__DIR__ . "/../db/brain.php");
 require_once(__DIR__ . "/problem.php");
+require_once(__DIR__ . "/match.php");
 require_once(__DIR__ . "/queue.php");
 require_once(__DIR__ . "/test.php");
 

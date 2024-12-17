@@ -1,0 +1,22 @@
+{
+    "id": 2,
+    "name": "IO",
+    "author": "Александър Георгиев",
+    "folder": "Trivial.InputOutput",
+    "timeLimit": 0.2,
+    "memoryLimit": 64,
+    "type": "ioi",
+    "difficulty": "trivial",
+    "description": "",
+    "tags": [
+        "implement"
+    ],
+    "origin": "Act!on Training Problem",
+    "checker": "",
+    "floats": false,
+    "tester": "",
+    "waitPartial": 0,
+    "waitFull": 0,
+    "addedBy": "espr1t",
+    "visible": true
+}

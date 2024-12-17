@@ -75,9 +75,9 @@ class HelpPage extends Page {
             <h2 id='compilation'><a href='#compilation'>Компилатори и командни флагове</a></h2>
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
-                <li><b>C++ (GCC 10.3.0):</b> <pre>g++ -O2 -std=c++20 -Werror=return-type -s -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
-                <li><b>Java (OpenJDK 17.0.7):</b> <pre>javac -nowarn &lt;source&gt;.java</pre></li>
-                <li><b>Python (Python 3.10.12):</b> <pre>pypy -m pyflakes &lt;source&gt;.py</pre></li>
+                <li><b>C++ (GCC 13.3.0):</b> <pre>g++ -O2 -std=c++20 -Werror=return-type -s -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
+                <li><b>Java (OpenJDK 17.0.13):</b> <pre>javac -nowarn &lt;source&gt;.java</pre></li>
+                <li><b>Python (Python 3.10.14):</b> <pre>pypy -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
             Максималното време за компилация е 10 секунди.<br>
             Максималният размер на стека е 64 мегабайта.
@@ -89,7 +89,7 @@ class HelpPage extends Page {
                 <li><b>Рам:</b> DDR3 32GB :: 2666MHz ECC</li>
                 <li><b>Харддиск:</b> Corsair Force SSD :: 520MB/s</li>
             </ul>
-            Ползваната операционна система на тестовата машина е Ubuntu 20.04.
+            Ползваната операционна система на тестовата машина е Ubuntu 24.04.1
         ") . inBox("
             <h2 id='system-status'><a href='#system-status'>Статус</a></h2>
             Чрез бутона \"Статус\" в главното меню можете да видите текущите решения, които системата все още не е
