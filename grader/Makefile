@@ -20,3 +20,6 @@ start run:
 test:
 	sudo --preserve-env=PATH env python -m pytest -rA -v --full-trace tests/
 	# sudo --preserve-env=PATH env python -m pytest -rA -v --full-trace tests/test_evaluator.py
+
+stop kill:
+	sudo kill -9 $(ps ax | grep server.py | awk '{print $1;}')
