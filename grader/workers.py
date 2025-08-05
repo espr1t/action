@@ -165,6 +165,9 @@ class Workers:
                 logger.fatal("Could not mount as rslave '{}'!".format(mount_source))
                 exit(-1)
 
+        # Unmount the sudo command
+        os.system("sudo umount /usr/bin/sudo")
+
         # Create a /home directory in which all user files are copied to
         # This is also the working directory in which commands are executed
         logger.info("  >> creating home directory...")
