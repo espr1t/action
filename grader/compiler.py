@@ -12,7 +12,7 @@ from sandbox import Sandbox
 
 
 class Compiler:
-    COMPILE_COMMAND_CPP = "g++ -O2 -std=c++20 -Werror=return-type -s -o {executable} {source}"
+    COMPILE_COMMAND_CPP = "g++ -O2 -std=c++20 -Werror=return-type -o {executable} {source}"
     COMPILE_COMMAND_PYTHON = "pypy -m pyflakes {source}"
     COMPILE_COMMAND_JAVA = "javac -nowarn {source}"
     COMPILE_COMMAND_JAVA_JAR = "jar --create --file=result.jar --main-class={class_name} *.class"
