@@ -201,7 +201,7 @@ class Workers:
 
             # Create a system group for managing sudo and other permissions if not already present
             # We only care about the exit code of the grep, not the actual result, so disregard it.
-            if os.system("sudo tail /etc/group | grep workers > /dev/null") != 0:
+            if os.system("sudo cat /etc/group | grep workers > /dev/null") != 0:
                 if os.system("sudo groupadd workers") != 0:
                     logger.fatal('Could not create system group "workers"!')
                     exit(-1)
