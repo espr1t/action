@@ -722,7 +722,7 @@ class GamesPage extends Page {
         // Otherwise get information for each test and print it as a colored circle with
         // additional roll-over information
         $testResults = "";
-        $testInfo = explode(",", $submit->getInfo());
+        $testInfo = explode("|", $submit->getInfo());
         if (count($testInfo) != count($points)) {
             $testInfo = null;
         }

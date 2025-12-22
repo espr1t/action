@@ -148,12 +148,12 @@ class Grader {
         }
         // Update the info fields for tests other than the sample
         if ($info) {
-            $submitInfo = explode(",", $submit->getInfo());
+            $submitInfo = explode("|", $submit->getInfo());
             if (count($submitInfo) != count($submit->getResults())) {
                 $submitInfo = array_fill(0, count($submit->getResults()), "");
             }
             $submitInfo[$position] = $info;
-            $submit->setInfo(implode(",", $submitInfo));
+            $submit->setInfo(implode("|", $submitInfo));
         }
         // Update the replayKey for the test (only for problems with testers)
         if ($replayKey) {
