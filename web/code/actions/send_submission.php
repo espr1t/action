@@ -60,6 +60,14 @@ if (!passSpamProtection($user, $GLOBALS["SPAM_SUBMIT_ID"], $GLOBALS["SPAM_SUBMIT
     ));
 }
 
+// The problem (or game) is currently hidden; temporarily disable submissions
+if (!canSeeProblem($user, $problem->getVisible())) {
+    printAjaxResponse(array(
+        "status" => "ERROR",
+        "message" => "Задачата е временно неактивна."
+    ));
+}
+
 // User has rights to submit and has not exceeded the limit for the day
 $submit = Submit::create($user, $problemId, $language, $source, $full);
 
