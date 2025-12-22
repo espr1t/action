@@ -26,6 +26,7 @@ class GamesPage extends Page {
             "/scripts/games/imagescanner.js",
             "/scripts/games/reconstruct.js",
             "/scripts/games/colorful.js",
+            "/scripts/games/splatter.js",
             "/scripts/jquery-3.7.1.min.js",
             "/scripts/jquery-jvectormap-2.0.3.min.js",
             "/scripts/jquery-jvectormap-world-mill.js"
@@ -150,7 +151,7 @@ class GamesPage extends Page {
             //       (whether the goal is to minimize or maximize the score)
             for ($i = 0; $i < count($submit->getResults()); $i++) {
                 if (count($bestScores) <= $i) {
-                    if (in_array($problem->getName(), ["ImageScanner", "Colorful"])) {
+                    if (in_array($problem->getName(), ["ImageScanner", "Colorful", "Splatter"])) {
                         array_push($bestScores, 1e100);
                     } else {
                         array_push($bestScores, 0.0);
@@ -158,7 +159,7 @@ class GamesPage extends Page {
                 }
                 $curScore = $submit->getResults()[$i];
                 if (is_numeric($curScore)) {
-                    if (in_array($problem->getName(), ["ImageScanner", "Colorful"])) {
+                    if (in_array($problem->getName(), ["ImageScanner", "Colorful", "Splatter"])) {
                         if ($bestScores[$i] > $curScore) {
                             $bestScores[$i] = $curScore;
                         }
@@ -184,7 +185,7 @@ class GamesPage extends Page {
         $fraction = 0.0;
         if (is_numeric($testScore)) {
             $testScore = toFloat($testScore);
-            if (in_array($problemName, ["ImageScanner", "Colorful"])) {
+            if (in_array($problemName, ["ImageScanner", "Colorful", "Splatter"])) {
                 $fraction = $testScore <= $bestScore ? 1.0 : pow($bestScore / $testScore, $scoringPower);
             } else {
                 $fraction = $testScore >= $bestScore ? 1.0 : pow($testScore / $bestScore, $scoringPower);
@@ -303,7 +304,7 @@ class GamesPage extends Page {
     }
 
     private function getVisualizerButton(Problem $problem): ?string {
-        if (in_array($problem->getName(), ["HyperWords", "Airports", "ImageScanner", "NumberGuessing", "Reconstruct", "Colorful"]))
+        if (in_array($problem->getName(), ["HyperWords", "Airports", "ImageScanner", "NumberGuessing", "Reconstruct", "Colorful", "Splatter"]))
             return null;
 
         $url = getGameUrl($problem->getName()) . "/visualizer";
@@ -772,7 +773,7 @@ class GamesPage extends Page {
             }
 
             $testCircle = "<div class='test-result tooltip--top background-{$background}' data-tooltip='{$tooltip}'>{$icon}</div>";
-            if (in_array($problem->getName(), array("ImageScanner", "Reconstruct", "GetRekt", "Colorful"))) {
+            if (in_array($problem->getName(), array("ImageScanner", "Reconstruct", "GetRekt", "Colorful", "Splatter"))) {
                 if (is_numeric($result)) {
                     $testCircle = str_replace("test-result", "test-result test-result-link", $testCircle);
                     $testResultUrl = getGameUrl($problem->getName()) . "/submits/{$submit->getId()}/replays/{$i}";
@@ -819,7 +820,7 @@ class GamesPage extends Page {
 
     private function getSubmitUpdates(Problem $problem, int $submitId): void {
         $UPDATE_DELAY = 500000; // 0.5s (in microseconds)
-        $MAX_UPDATES = 180 * 1000000 / $UPDATE_DELAY; // 180 seconds
+        $MAX_UPDATES = 175 * 1000000 / $UPDATE_DELAY; // 175 seconds
 
         $lastContent = "";
         for ($updateId = 0; $updateId < $MAX_UPDATES; $updateId++) {
@@ -1015,6 +1016,7 @@ class GamesPage extends Page {
         if ($gameName == "imagescanner") return "showImagescannerReplay";
         if ($gameName == "reconstruct") return "showReconstructReplay";
         if ($gameName == "colorful") return "showColorfulReplay";
+        if ($gameName == "splatter") return "showSplatterReplay";
         return "undefinedFunction";
     }
 
@@ -1137,6 +1139,8 @@ class GamesPage extends Page {
             case "Reconstruct":
             case "GetRekt":
             case "Colorful":
+                return ["espr1t", "ThinkCreative"];
+            case "Splatter":
                 return ["espr1t", "ThinkCreative"];
             case "HyperSnakes":
                 return ["espr1t", "ThinkCreative", "IvayloS", "stuno", "ov32m1nd", "peterlevi"];

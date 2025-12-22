@@ -5,49 +5,34 @@ function putPixel(imageData, row, col, pixel) {
     imageData.data[row * imageData.width * 4 + col * 4 + 3] = 255;
 }
 
-function colorDiff(c1, c2) {
-    return (c1[0] - c2[0]) * (c1[0] - c2[0]) +
-           (c1[1] - c2[1]) * (c1[1] - c2[1]) +
-           (c1[2] - c2[2]) * (c1[2] - c2[2]) ;
-}
-
-function getComponent(image, startRow, startCol, k) {
+function getSplatter(image, centerRow, centerCol, d, R, G, B) {
+    let pixels = [];
     let N = image.length, M = image[0].length;
-    let dir = [ [-1, 0], [0, 1], [1, 0], [0, -1] ];
-    let component = [[startRow, startCol]];
-    let visited = new Set([startRow * M + startCol]);
-    for (let idx = 0; idx < component.length; idx++) {
-        let row = component[idx][0];
-        let col = component[idx][1];
-        for (let d = 0; d < 4; d++) {
-            let nRow = row + dir[d][0]; if (nRow < 0 || nRow >= N) continue;
-            let nCol = col + dir[d][1]; if (nCol < 0 || nCol >= M) continue;
-            let key = nRow * M + nCol;
-            if (visited.has(key))
-                continue;
-            visited.add(key);
-            if (colorDiff(image[nRow][nCol], image[startRow][startCol]) <= k) {
-                component.push([nRow, nCol]);
+    for (let row = Math.max(0, centerRow - d); row <= Math.min(N - 1, centerRow + d); row++) {
+        for (let col = Math.max(0, centerCol - d); col <= Math.min(M - 1, centerCol + d); col++) {
+            let dist = Math.sqrt((row - centerRow) * (row - centerRow) + (col - centerCol) * (col - centerCol));
+            let chance = 1.0 - Math.pow(Math.min(1.0, Math.max(0.0, (dist - d * 0.6) / (d * 0.4))), 2);
+            if (Math.random() < chance) {
+                pixels.push([row, col]);
             }
         }
     }
-    return component;
+    return pixels;
 }
 
-async function drawColorfulVisualisation(replayLog) {
+async function drawSplatterVisualisation(replayLog) {
     const data = replayLog.split("\n");
 
     let numRows = Number(data[0].split(" ")[0]);
     let numCols = Number(data[0].split(" ")[1]);
-    let maxK = Number(data[0].split(" ")[2]);
-    let maxQ = Number(data[0].split(" ")[3]);
+    let seed = Number(data[0].split(" ")[2]);
     let usedQueries = Number(data[1]);
 
     let canvas = document.getElementById('imageCanvas');
-    canvas.height = numRows;
-    canvas.width = numCols;
+    canvas.height = numRows + 2;
+    canvas.width = numCols + 2;
     let ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'rgb(238, 238, 238)';
+    ctx.fillStyle = 'rgb(253, 253, 253)';
     ctx.fillRect(0, 0, numCols, numRows);
 
     let dataIdx = 2;
@@ -56,32 +41,11 @@ async function drawColorfulVisualisation(replayLog) {
         queries.push(data[dataIdx++].split(" ").map((el) => parseInt(el)));
     }
 
-    let result = [];
-    for (let row = 0; row < numRows; row++) {
-        let resultRow = [];
-        let values = data[dataIdx++].split(" ");
-        for (let col = 0; col < numCols; col++) {
-            let color = parseInt(values[col], 16);
-            resultRow.push([
-                Math.floor(color / 256 / 256),
-                Math.floor(color / 256) % 256,
-                color % 256
-            ])
-        }
-        result.push(resultRow);
-    }
-
     let image = [];
     for (let row = 0; row < numRows; row++) {
         let imageRow = [];
-        let values = data[dataIdx++].split(" ");
         for (let col = 0; col < numCols; col++) {
-            let color = parseInt(values[col], 16);
-            imageRow.push([
-                Math.floor(color / 256 / 256),
-                Math.floor(color / 256) % 256,
-                color % 256
-            ])
+            imageRow.push([255, 255, 255]);
         }
         image.push(imageRow);
     }
@@ -89,28 +53,29 @@ async function drawColorfulVisualisation(replayLog) {
     let sleepTime = 100;
     let imageData = ctx.getImageData(0, 0, numCols, numRows);
     let curQEl = document.getElementById('curQ');
-    let curKEl = document.getElementById('curK');
     for (let i = 0; i < usedQueries; i++) {
         let row = queries[i][0];
         let col = queries[i][1];
-        let k = queries[i][2];
-        
-        let component = getComponent(image, row, col, k);
-        for (let c = 0; c < component.length; c++) {
-            putPixel(imageData, component[c][0], component[c][1], image[row][col]);
+        let d = queries[i][2];
+        let R = queries[i][3];
+        let G = queries[i][4];
+        let B = queries[i][5];
+        let shot = getSplatter(image, row, col, d, R, G, B);
+        for (let c = 0; c < shot.length; c++) {
+            putPixel(imageData, shot[c][0], shot[c][1], [R, G, B]);
         }
-        curKEl.innerHTML = 'k = ' + k + '/' + maxK;
-        curQEl.innerHTML = 'q = ' + (i + 1) + '/' + maxQ;
+        curQEl.innerHTML = '' + (i + 1) + '/' + 10000;
     
-        if (i <= 500 || i % 10 == 9) {
+        if (i <= 500 || i % 10 === 9) {
             ctx.putImageData(imageData, 0, 0);
             await sleep(sleepTime);
             sleepTime = Math.max(sleepTime - 1, 5);
         }
     }
     ctx.putImageData(imageData, 0, 0);
-    curQEl.innerHTML = 'q = ' + usedQueries + '/' + maxQ;
+    curQEl.innerHTML = '' + usedQueries + '/' + 10000;
 
+    /*
     await sleep(2000);
 
     for (let i = 200; i >= 5; i--) {
@@ -150,17 +115,18 @@ async function drawColorfulVisualisation(replayLog) {
             await sleep(1);
         }
     }
+    */
 }
 
-function getColorfulContent(playerName) {
+function getSplatterContent(playerName) {
     // Now create the DOM content
     var content = document.createElement('div');
-    content.className = 'colorful-content';
+    content.className = 'splatter-content';
 
     // Header with the task name
     var header = document.createElement('div');
     header.style.textAlign = 'left';
-    header.innerHTML = '<h2><span class="blue">Colorful</span><br>Contestant ' + playerName + '</h2>';
+    header.innerHTML = '<h2><span class="blue">Splatter</span><br>Contestant ' + playerName + '</h2>';
     content.appendChild(header);
 
     // The image
@@ -183,19 +149,13 @@ function getColorfulContent(playerName) {
     qInfo.innerHTML += '<div style="text-align: center; font-weight: bold; font-size: 1rem;" id="curQ">&nbsp; </div>';
     content.appendChild(qInfo);
 
-    var kInfo = document.createElement('div');
-    kInfo.id = 'kInfo';
-    kInfo.style = 'vertical-align: middle;';
-    kInfo.innerHTML += '<div style="text-align: center; font-weight: bold; font-size: 1rem;" id="curK">&nbsp; </div>';
-    content.appendChild(kInfo);
-
     return content;
 }
 
-function showColorfulReplay(userName, replayLog) {
-    var content = getColorfulContent(userName);
+function showSplatterReplay(userName, replayLog) {
+    var content = getSplatterContent(userName);
     // Make pressing escape return back to the game
     var gameUrl = window.location.href.substr(0, window.location.href.lastIndexOf('/replays'));
     showActionForm(content.outerHTML, gameUrl);
-    drawColorfulVisualisation(replayLog);
+    drawSplatterVisualisation(replayLog);
 }
