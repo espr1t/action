@@ -186,9 +186,13 @@ class GamesPage extends Page {
         if (is_numeric($testScore)) {
             $testScore = toFloat($testScore);
             if (in_array($problemName, ["ImageScanner", "Colorful", "Splatter"])) {
-                $fraction = $testScore <= $bestScore ? 1.0 : pow($bestScore / $testScore, $scoringPower);
+                // Adding 1 to both best and test scores so we handle both cases where the answer can be 0.
+                // Otherwise, special tests that can be solved "perfectly" (with score 0) will punish too much
+                // imperfect scores, even if they are very close. For example, a score of 1 would be still graded
+                // as 0.0. Adding 1 to both will make it get half the points.
+                $fraction = $testScore <= $bestScore ? 1.0 : pow(($bestScore + 1) / ($testScore + 1), $scoringPower);
             } else {
-                $fraction = $testScore >= $bestScore ? 1.0 : pow($testScore / $bestScore, $scoringPower);
+                $fraction = $testScore >= $bestScore ? 1.0 : pow(($testScore + 1) / ($bestScore + 1), $scoringPower);
             }
         }
         return $fraction;
