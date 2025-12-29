@@ -464,6 +464,12 @@ function prettyPrintCompilationErrors(Submit $submit): string {
 }
 
 function getWaitingTimes(User $user, Problem $problem, &$remainPart, &$remainFull): void {
+    if ($user->getAccess() >= $GLOBALS["ACCESS_SUBMIT_ANYTIME"]) {
+        $remainPart = 0;
+        $remainFull = 0;
+        return;
+    }
+
     $submits = Submit::getAllSubmits($user->getId(), $problem->getId());
     $lastPart = 0; $lastFull = 0;
     foreach ($submits as $submit) {
