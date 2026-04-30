@@ -18,11 +18,11 @@ setup(
     install_requires=[
         "Flask~=3.0.2",
         "urllib3~=2.6.0",
-        "requests~=2.32.3",
+        "requests~=2.33.1",
         "vcrpy~=6.0.1",
         "pyflakes~=3.2.0",
         "psutil~=5.9.8",
-        "pytest~=8.1.1",
+        "pytest~=9.0.3",
         "markupsafe~=2.1.5",
         "pytest-order~=1.2.0",
     ],
