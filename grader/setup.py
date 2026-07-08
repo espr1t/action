@@ -19,7 +19,7 @@ setup(
         "Flask~=3.0.2",
         "urllib3~=2.7.0",
         "requests~=2.33.1",
-        "vcrpy~=6.0.1",
+        "vcrpy~=8.3.0",
         "pyflakes~=3.2.0",
         "psutil~=5.9.8",
         "pytest~=9.0.3",
