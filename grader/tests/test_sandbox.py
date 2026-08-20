@@ -170,6 +170,7 @@ class TestSandbox(TestCase):
         self.assertNotEqual(0, return_code)
         stdout, stderr, return_code = self.sandbox_helper(
             sandbox=Sandbox(), command="sudo chroot .."
+            # sandbox=Sandbox(), command = "sudo -S chroot .. <<< 'password'"
         )
         self.assertNotEqual(0, return_code)
 
