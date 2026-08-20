@@ -12,18 +12,19 @@ Installation steps:
     your distribution (or there is none), proceed with the steps below.
 1.1. Install latest version of Python in a virtual environment
     >> curl https://pyenv.run | bash
-    >> do what the scritp suggests doing (add things to ~/.bashrc and ~/.bash_profile or ~/.profile)
-    >> pyenv install 3.12.2
-    >> pyenv virtualenv 3.12.2 action-grader
+    >> do what the script suggests doing (add things to ~/.bashrc and ~/.bash_profile or ~/.profile)
+    >> pyenv update (optional, run if you didn't just install it)
+    >> pyenv install 3.14.7
+    >> pyenv virtualenv 3.14.7 action-grader
     >> pyenv local action-grader
     >> make install
 1.2. Install PyPy (used to actually run user's submissions written in Python):
     (Note that newest pypy may be different; check here: https://www.pypy.org/download.html)
-    >> wget https://downloads.python.org/pypy/pypy3.10-v7.3.17-linux64.tar.bz2
-    >> tar xf pypy3.10-v7.3.17-linux64.tar.bz2
-    >> rm pypy3.10-v7.3.17-linux64.tar.bz2
-    >> sudo mv pypy3.10-v7.3.17-linux64 /usr/local/lib/
-    >> sudo ln -s /usr/local/lib/pypy3.10-v7.3.17-linux64/bin/pypy /usr/bin/pypy
+    >> wget https://downloads.python.org/pypy/pypy3.11-v7.3.20-linux64.tar.bz2
+    >> tar xf pypy3.11-v7.3.20-linux64.tar.bz2
+    >> rm pypy3.11-v7.3.20-linux64.tar.bz2
+    >> sudo mv pypy3.11-v7.3.20-linux64 /usr/local/lib/
+    >> sudo ln -s /usr/local/lib/pypy3.11-v7.3.20-linux64/bin/pypy /usr/bin/pypy
     Verify that the correct pypy is used (can be left-over from previous install):
     >> pypy --version
     Note that since we will run the solutions with pypy, we want to install some libraries that will be
