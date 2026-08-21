@@ -150,7 +150,7 @@ class TestRunner(TestCase):
         sandbox.put_file(os.path.abspath("tests/fixtures/runner/handle_sigterm.py"))
 
         # With enough time the program completes successfully
-        command = "pypy handle_sigterm.py"
+        command = "python handle_sigterm.py"
         stdout_bytes, stderr_bytes = Runner.run(
             sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.3)
         )
@@ -160,7 +160,7 @@ class TestRunner(TestCase):
         self.assertTrue(0.0 <= exec_time <= 0.1)  # This is CPU time
 
         # If it runs longer than the timeout, it gets killed before printing anything
-        command = "pypy handle_sigterm.py"
+        command = "python handle_sigterm.py"
         stdout_bytes, stderr_bytes = Runner.run(
             sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.15)
         )
@@ -170,7 +170,7 @@ class TestRunner(TestCase):
         self.assertTrue(0.15 <= exec_time <= 0.17)  # This is clock time
 
         # Catching SIGTERM signal doesn't help
-        command = "pypy handle_sigterm.py --handle"
+        command = "python handle_sigterm.py --handle"
         stdout_bytes, stderr_bytes = Runner.run(
             sandbox=sandbox, command=COMMAND_WRAPPER.format(command=command, timeout=0.15)
         )

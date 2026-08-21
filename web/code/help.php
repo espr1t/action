@@ -76,8 +76,8 @@ class HelpPage extends Page {
             Изпратените решения се компилират ползвайки следните командни флагове:
             <ul>
                 <li><b>C++ (GCC 13.3.0):</b> <pre>g++ -O2 -std=c++20 -Werror=return-type -s -o &lt;executable&gt; &lt;source&gt;.cpp</pre></li>
-                <li><b>Java (OpenJDK 17.0.13):</b> <pre>javac -nowarn &lt;source&gt;.java</pre></li>
-                <li><b>Python (Python 3.11.13):</b> <pre>pypy -m pyflakes &lt;source&gt;.py</pre></li>
+                <li><b>Java (OpenJDK 25.0.3):</b> <pre>javac -nowarn &lt;source&gt;.java</pre></li>
+                <li><b>Python (Python 3.14.7):</b> <pre>python -m pyflakes &lt;source&gt;.py</pre></li>
             </ul>
             Максималното време за компилация е 10 секунди.<br>
             Максималният размер на стека е 64 мегабайта.

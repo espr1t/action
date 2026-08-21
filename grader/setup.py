@@ -9,7 +9,6 @@ setup(
     keywords="Competitive programming, Sandbox, Evaluation",
     url="https://action.informatika.bg",
     project_urls={
-        "Bug Tracker": "http://bugs.informatika.bg",
         "Source Code": "https://github.com/espr1t/action",
     },
 
@@ -25,5 +24,9 @@ setup(
         "pytest~=9.1.1",
         "markupsafe~=3.0.3",
         "pytest-order~=1.5.0",
+        "psutil~=7.2.2",
+        "numpy~=2.5.2",
+        "pandas~=3.0.5",
+        "pyflakes~=3.4.0",
     ],
 )

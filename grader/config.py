@@ -23,7 +23,7 @@ AUTH_PASSWORD = "password"
 
 # Parallelism
 NUM_PHYSICAL_CPUS = 1
-MAX_PARALLEL_WORKERS = 12
+MAX_PARALLEL_WORKERS = 3
 MAX_PARALLEL_SUBMITS = MAX_PARALLEL_WORKERS
 MAX_PARALLEL_JOBS = MAX_PARALLEL_WORKERS * 2
 
@@ -62,8 +62,8 @@ TIME_OFFSET_PYTHON = 0.02  # Seconds
 # Memory used by non-user code
 MEMORY_OFFSET_CPP = 2 * (1 << 20)  # Bytes = 2MB
 MEMORY_OFFSET_JAVA = 34 * (1 << 20)  # Bytes = 34MB
-MEMORY_OFFSET_PYTHON = 58 * (1 << 20)  # Bytes = 58MB (for PyPy/RPython)
-# MEMORY_OFFSET_PYTHON = 9 * (1 << 20)  # Bytes = 9MB (for Python/CPython)
+#MEMORY_OFFSET_PYTHON = 58 * (1 << 20)  # Bytes = 58MB (for PyPy/RPython)
+MEMORY_OFFSET_PYTHON = 9 * (1 << 20)  # Bytes = 9MB (for Python/CPython)
 
 # Output Validation
 FLOAT_PRECISION = 1e-9

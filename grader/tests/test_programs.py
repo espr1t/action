@@ -337,11 +337,6 @@ class TestPrograms(TestCase):
 
     @pytest.mark.order(4012)
     def test_run_program_memory_py(self):
-        """
-        This test is quite likely to be flaky, as it depends on the PyPy version / implementation.
-        The JIT memory usage is quite unpredictable. This was much better with CPython, when this
-        test was originally written.
-        """
         path_source = os.path.join(self.PATH_FIXTURES, "hello.py")
         path_executable = os.path.join(config.PATH_SANDBOX, "hello.py")
         status = Compiler.compile(config.LANGUAGE_PYTHON, path_source, path_executable)
@@ -357,11 +352,6 @@ class TestPrograms(TestCase):
 
     @pytest.mark.order(4013)
     def test_run_program_memory_py_with_imports(self):
-        """
-        This test is quite likely to be flaky, as it depends on the PyPy version / implementation.
-        The JIT memory usage is quite unpredictable. This was much better with CPython, when this
-        test was originally written.
-        """
         self.maxDiff = None
         path_source = os.path.join(self.PATH_FIXTURES, "hello_imports.py")
         path_executable = os.path.join(config.PATH_SANDBOX, "hello_imports.py")
@@ -378,11 +368,6 @@ class TestPrograms(TestCase):
 
     @pytest.mark.order(4014)
     def test_run_program_memory_py_little_array(self):
-        """
-        This test is quite likely to be flaky, as it depends on the PyPy version / implementation.
-        The JIT memory usage is quite unpredictable. This was much better with CPython, when this
-        test was originally written.
-        """
         self.maxDiff = None
         path_source = os.path.join(self.PATH_FIXTURES, "hello_little_array.py")
         path_executable = os.path.join(config.PATH_SANDBOX, "hello_little_array.py")
@@ -439,11 +424,6 @@ class TestPrograms(TestCase):
 
     @pytest.mark.order(4017)
     def test_run_program_memory_python_fifty(self):
-        """
-        This test is quite likely to be flaky, as it depends on the PyPy version / implementation.
-        The JIT memory usage is quite unpredictable. This was much better with CPython, when this
-        test was originally written.
-        """
         path_source = os.path.join(self.PATH_FIXTURES, "fifty.py")
         path_executable = os.path.join(config.PATH_SANDBOX, "fifty.py")
         status = Compiler.compile(config.LANGUAGE_PYTHON, path_source, path_executable)

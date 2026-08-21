@@ -9,6 +9,7 @@ clean:
 	sudo rm -rf tests/__pycache__
 
 install:
+	python -m pip install --upgrade pip
 	python -m pip install .
 
 init:

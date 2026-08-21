@@ -671,7 +671,7 @@ class TestSandbox(TestCase):
         self.sandbox = Sandbox()
         self.sandbox.put_file(os.path.join(self.PATH_FIXTURES, "factor.py"))
         stdout, stderr, return_code = self.sandbox_helper(
-            sandbox=self.sandbox, command="/usr/bin/time --format '%U %P' pypy factor.py"
+            sandbox=self.sandbox, command="/usr/bin/time --format '%U %P' python factor.py"
         )
         self.assertIn("1000000000000037", stdout)
         self.assertEqual(len(stderr.splitlines()), 1)
@@ -804,8 +804,8 @@ class TestSandbox(TestCase):
         stdout, stderr, return_code = self.sandbox_helper(sandbox=self.sandbox, command="jar --help")
         self.assertIn("Usage: jar [OPTION...]", stdout)
 
-        stdout, stderr, return_code = self.sandbox_helper(sandbox=self.sandbox, command="pypy --help")
-        self.assertIn("usage: /usr/bin/pypy [option]", stdout)
+        stdout, stderr, return_code = self.sandbox_helper(sandbox=self.sandbox, command="python --help")
+        self.assertIn("usage: /usr/bin/python [option]", stdout)
 
     @pytest.mark.order(1048)
     def test_time_command_available(self):
