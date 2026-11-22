@@ -19,8 +19,8 @@ class MessagesPage extends Page {
         $messageList = "";
         foreach ($messages as $message) {
             $preview = $message->getContent();
-            if (strlen($preview) > 250) {
-                $preview = mb_substr($preview, 0, 247) . "...";
+            if (strlen($preview) > 512) {
+                $preview = mb_substr($preview, 0, 509) . "...";
             }
             // TODO: Consider using date_create_immutable_from_format()
             $date = explode(" ", $message->getSent())[0];
