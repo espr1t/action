@@ -19,8 +19,13 @@ class MessagesPage extends Page {
         $messageList = "";
         foreach ($messages as $message) {
             $preview = $message->getContent();
-            if (strlen($preview) > 512) {
-                $preview = mb_substr($preview, 0, 509) . "...";
+            // This has a funny bug - if the cut happens between open HTML tags, they
+            // mess up everything else in the /admin/messages list afterwards. This
+            // happens rarely, especially after increasing the cut-over to 1024 chars
+            // (from 250 before) as now most messages are shown completely. Still,
+            // something to be cautious of.
+            if (strlen($preview) > 1024) {
+                $preview = mb_substr($preview, 0, 1021) . "...";
             }
             // TODO: Consider using date_create_immutable_from_format()
             $date = explode(" ", $message->getSent())[0];
